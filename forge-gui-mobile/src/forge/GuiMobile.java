@@ -39,7 +39,7 @@ public class GuiMobile implements IGuiBase {
     private List<Integer> integerChoices = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
     public GuiMobile(final String assetsDir0) {
-        assetsDir = assetsDir0;
+        assetsDir = assetsDir0.endsWith(File.separator) ? assetsDir0 : assetsDir0 + File.separator;
     }
 
     @Override
