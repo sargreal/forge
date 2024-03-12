@@ -112,8 +112,7 @@ public class Config {
         if (FModel.getPreferences() != null)
             Lang = FModel.getPreferences().getPref(ForgePreferences.FPref.UI_LANGUAGE);
         try {
-            configData = new Json().fromJson(ConfigData.class, new FileHandle(commonPrefix + "config.json"));
-
+            configData = new Json().fromJson(ConfigData.class, getFile("config.json"));
         } catch (Exception e) {
             e.printStackTrace();
             configData = new ConfigData();
@@ -178,6 +177,9 @@ public class Config {
             fullPath = (commonPrefix + path).replace("//", "/");
             fileName = fullPath.replaceFirst("[.][^.]+$", "");
             langFile = fileName + "-" + Lang + ext;
+        }
+        if (!Cache.containsKey(path)) {
+            System.out.println("Not found!");
         }
         return Cache.get(path);
     }
