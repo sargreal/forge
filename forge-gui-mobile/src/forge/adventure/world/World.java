@@ -325,10 +325,13 @@ public class World implements Disposable, SaveFileContent {
         currentTime[0] = measureGenerationTime("loading data", currentTime[0]);
         HashMap<BiomeStructureData, BiomeStructure> structureDataMap = new HashMap<>();
 
+        List<BiomeData> biomes = data.GetBiomes();
 //////////////////
 ///////// calculation structure position with wavefunctioncollapse
 //////////////////
-        for (BiomeData biome : data.GetBiomes()) {
+        System.out.println("initializing biomes ");
+        for (BiomeData biome : biomes) {
+            System.out.println("initializing biome "+biome.name);
             if (biome.structures != null) {
                 int biomeWidth = (int) Math.round(biome.width * (double) width);
                 int biomeHeight = (int) Math.round(biome.height * (double) height);
@@ -346,8 +349,9 @@ public class World implements Disposable, SaveFileContent {
 //////////////////
 ///////// calculation each biome position based on noise and radius
 //////////////////
+        System.out.println("positioning biomes ");
         for (BiomeData biome : data.GetBiomes()) {
-
+            System.out.println("positioning biomes "+biome.name);
             biomeIndex[0]++;
             int biomeXStart = (int) Math.round(biome.startPointX * (double) width);
             int biomeYStart = (int) Math.round(biome.startPointY * (double) height);
@@ -430,6 +434,7 @@ public class World implements Disposable, SaveFileContent {
 //////////////////
 ///////// set poi placement
 //////////////////
+
         List<PointOfInterest> towns = new ArrayList<>();
         List<PointOfInterest> notTowns = new ArrayList<>();
         List<Rectangle> otherPoints = new ArrayList<>();
@@ -444,11 +449,13 @@ public class World implements Disposable, SaveFileContent {
         boolean running = true;
         here:
         while (running) {
+            System.out.println("generating pois");
             mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
             int biomeIndex2 = -1;
             running = false;
-            for (BiomeData biome : data.GetBiomes()) {
+            for (BiomeData biome : biomes) {
                 biomeIndex2++;
+                System.out.println("generating pois " + (towns.size()+ notTowns.size()+otherPoints.size()));
                 for (PointOfInterestData poi : biome.getPointsOfInterest()) {
                     for (int i = 0; i < poi.count; i++) {
                         for (int counter = 0; counter < 500; counter++)//tries 500 times to find a free point
@@ -502,7 +509,7 @@ public class World implements Disposable, SaveFileContent {
                                 }
                                 if (!foundSolution) {
                                     if (counter == 499) {
-                                        System.err.print("Can not place POI " + poi.name + "...Rerunning..\n");
+                                        System.err.print("Can not place POI " + poi.name + " in biome " + biome.name + "...Rerunning..\n");
                                         running = true;
                                         towns.clear();
                                         notTowns.clear();
@@ -556,6 +563,7 @@ public class World implements Disposable, SaveFileContent {
 //////////////////
         List<Pair<PointOfInterest, PointOfInterest>> allSortedTowns = new ArrayList<>();
 
+        System.out.println("building roads - generating");
         HashSet<Long> usedEdges = new HashSet<>();//edge is first 32 bits id of first id and last 32 bits id of second
         for (int i = 0; i < towns.size() - 1; i++) {
 
@@ -589,6 +597,7 @@ public class World implements Disposable, SaveFileContent {
             usedEdges.add((long) i << 32 | ((long) secondSmallestIndex));
             //allSortedTowns.add(Pair.of(current, towns.get(secondSmallestIndex)));
         }
+        System.out.println("building roads - selecting");
         List<Pair<PointOfInterest, PointOfInterest>> allPOIPathsToNextTown = new ArrayList<>();
         for (int i = 0; i < notTowns.size() - 1; i++) {
 
@@ -610,6 +619,7 @@ public class World implements Disposable, SaveFileContent {
         }
         biomeIndex[0]++;
 
+        System.out.println("building roads - resetting terrain path");
         //reset terrain path to the next town
         for (Pair<PointOfInterest, PointOfInterest> poiToTown : allPOIPathsToNextTown) {
 
@@ -641,6 +651,7 @@ public class World implements Disposable, SaveFileContent {
             }
         }
 
+        System.out.println("building roads - placing tiles");
         for (Pair<PointOfInterest, PointOfInterest> townPair : allSortedTowns) {
 
             int startX = (int) townPair.getKey().getTilePosition(data.tileSize).x;
@@ -683,6 +694,7 @@ public class World implements Disposable, SaveFileContent {
 ///////// draw mini map
 //////////////////
 
+        System.out.println("creating mini map");
         Pixmap pix = new Pixmap(width * data.miniMapTileSize, height * data.miniMapTileSize, Pixmap.Format.RGBA8888);
         pix.setColor(1, 0, 0, 1);
         pix.fill();
@@ -746,6 +758,7 @@ public class World implements Disposable, SaveFileContent {
 //////////////////
 ///////// distribute small rocks and trees across the map
 //////////////////
+        System.out.println("placing clutter");
         mapObjectIds = new SpritesDataMap(getChunkSize(), data.tileSize, data.width / getChunkSize());
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
