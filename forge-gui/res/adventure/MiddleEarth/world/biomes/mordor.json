@@ -1,0 +1,84 @@
+{
+"startPointX": 0.827,
+"startPointY": 0.655,
+	"noiseWeight": 0.5,
+	"distWeight": 1,
+"name": "mordor",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Black",
+"terrain": [
+	{
+		"spriteName": "Black_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Black_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.346,
+"height": 0.19,
+"color": "110903",
+"spriteNames": [
+	"DarkGras",
+	"Skull",
+	"DarkWood",
+	"Reed",
+	"Waterlily",
+	"Shroom",
+	"Shroom2"
+],
+"enemies": [
+	"Adept Black Wizard",
+	"Apprentice Black Wizard",
+	"Bat",
+	"Beholder",
+	"Big Zombie",
+	"Black Sliver",
+	"Challenger 20",
+	"Challenger 21",
+	"Challenger 22",
+	"Curselord",
+	"Dark Knight",
+	"Death Knight",
+	"Demon",
+	"Dross Gladiator",
+	"Eye",
+	"Fallen Angel",
+	"Fungus",
+	"Frog",
+	"Ghoul",
+	"Ghost",
+	"Golgari Fungus",
+	"Harpy",
+	"Harpy 2",
+	"High Vampire",
+	"Horror",
+	"Giant Fly",
+	"Ibis",
+	"Lich",
+	"Master Black Wizard",
+	"Mindclaw Shaman",
+	"Mummy",
+	"Nezumi Ninja",
+	"Nightmare",
+	"Rakdos Devil",
+	"Shade",
+	"Skeleton",
+	"Skeleton Soldier",
+	"Vampire",
+	"Zombie",
+	"Zombie Lord",
+	"Walking Brain",
+	"Wild Rat"
+],
+"pointsOfInterest": [
+	"Black Castle",
+	"Swamp Town Generic"
+],
+"structures": [
+]
+}

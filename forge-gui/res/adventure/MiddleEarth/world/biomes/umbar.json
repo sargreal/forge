@@ -1,0 +1,87 @@
+{
+"startPointX": 0.453,
+"startPointY": 0.913,
+	"noiseWeight": 0.5,
+	"distWeight": 1,
+"name": "umbar",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Red",
+"terrain": [
+	{
+		"spriteName": "Red_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Red_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.206,
+"height": 0.175,
+"color": "b63729",
+"spriteNames": [
+	"Gravel"
+],
+"enemies": [
+	"Armadillo",
+	"Adept Red Wizard",
+	"Amonkhet Minotaur Warrior",
+	"Apprentice Red Wizard",
+	"Ashmouth Devil",
+	"Axgard Dwarf",
+	"Berserker",
+	"Boar",
+	"Boggart",
+	"Bull",
+	"Challenger 20",
+	"Challenger 21",
+	"Challenger 22",
+	"Cyclops",
+	"Devil",
+	"Dinosaur",
+	"Dragon",
+	"Dwarf",
+	"Earth Elemental",
+	"Efreet",
+	"Falcon",
+	"Fire Elemental",
+	"Flame Elemental",
+	"Furnace Goblin",
+	"Goblin",
+	"Goblin Chief",
+    "Goblin Fanatic",
+	"Goblin Warrior",
+	"Hedgehog",
+	"Heart-Piercer Manticore",
+	"Hellhound",
+	"Hellion",
+	"Immersturm Demon",
+	"Khenra Warrior",
+	"Kavu",
+	"Khan",
+	"Kobold",
+	"Master Red Wizard",
+	"Mindclaw Shaman",
+	"Minotaur",
+	"Minotaur Flayer",
+    "Naked Mole Rat",
+	"Raptor",
+	"Red Beast",
+	"Red Sliver",
+	"Scorpion",
+	"Shaman",
+	"Troll",
+	"Vampire Lord",
+	"Viashino",
+	"Wild-Magic Sorcerer",
+	"Yeti"
+],
+"pointsOfInterest": [
+	"Mountain Town Generic"
+],
+"structures": [
+]
+}

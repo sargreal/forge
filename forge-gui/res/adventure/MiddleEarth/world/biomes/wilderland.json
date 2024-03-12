@@ -1,0 +1,74 @@
+{
+"startPointX": 0.73,
+"startPointY": 0.38,
+	"noiseWeight": 0.5,
+	"distWeight": 1,
+"name": "wilderland",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Colorless",
+"terrain": [
+	{
+		"spriteName": "Colorless_1",
+		"max": 0.2,
+		"resolution": 5
+	},
+	{
+		"spriteName": "Colorless_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 5
+	}
+],
+"width": 0.54,
+"height": 0.4,
+"color": "aeaeae",
+"spriteNames": [
+	"Stone"
+],
+"enemies": [
+	"Adept Black Wizard",
+	"Adept Blue Wizard",
+	"Adept Green Wizard",
+	"Adept Red Wizard",
+	"Adept White Wizard",
+	"Apprentice Black Wizard",
+	"Apprentice Blue Wizard",
+	"Apprentice Green Wizard",
+    "Apprentice Red Wizard",
+	"Apprentice White Wizard",
+	"Bandit",
+	"Boar",
+	"Caracal",
+	"Challenger 20",
+	"Challenger 21",
+	"Challenger 22",
+	"Clay Golem",
+	"Construct",
+	"Corrupted Cleric",
+	"Corrupted Green Wizard",
+	"Corrupted Red Wizard",
+	"Corrupted Blue Wizard",
+	"Dog",
+	"Doppelganger",
+	"Eldrazi",
+	"Falcon",
+	"Fox",
+	"Gargoyle",
+	"Gargoyle 2",
+	"Geonid Death-Cap",
+	"Golem",
+	"Maelstrom Angel",
+	"Mummy",
+	"Ooze",
+	"Pirate",
+	"Raven",
+	"Sliver",
+	"Wandering Giant",
+	"Wild Rat"
+],
+"pointsOfInterest": [
+	"Waste Town Generic"
+],
+"structures": [
+]
+}

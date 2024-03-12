@@ -1,0 +1,87 @@
+{
+"startPointX": 0.227,
+"startPointY": 0.305,
+	"noiseWeight": 0.5,
+	"distWeight": 1,
+"name": "shire",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "White",
+"terrain": [
+	{
+		"spriteName": "White_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "White_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.08,
+"height": 0.05,
+"color": "efe697",
+"spriteNames": [
+	"DarkGras"
+],
+"enemies": [
+	"Adept White Wizard",
+	"Adventurer",
+	"Aether Channeler",
+	"Apprentice White Wizard",
+	"Archer",
+	"Armored Knight",
+	"Camel",
+	"Cathar",
+	"Cerodon",
+	"Challenger 20",
+	"Challenger 21",
+	"Challenger 22",
+	"Cleric",
+	"Criosphinx",
+	"Dawnhart Witch",
+	"Dog",
+	"Eldraine Knight",
+	"Elephant",
+	"Falcon",
+	"Falcon-headed Aven Warrior",
+	"Fox",
+	"Frost Titan",
+	"Griffin",
+	"Hellion",
+	"Horseman",
+	"Human",
+	"Human elite",
+	"Human guard",
+	"Ibis-headed Aven Warrior",
+	"Khenra Warrior",
+	"Leonin Warrior",
+	"Lion",
+	"Knight",
+	"Kor Warrior",
+	"Master White Wizard",
+	"Monk",
+	"Naga Warrior",
+	"Orthodoxy Duelist",
+	"Owl",
+	"Raven",
+	"Rhino",
+	"Runelord",
+	"Greater Sandwurm",
+	"Scorpion",
+	"Scarab",
+	"Sphinx",
+	"Stray Cat",
+	"Triceratops",
+	"Warrior",
+	"White Dwarf",
+	"White Sliver"
+],
+"pointsOfInterest": [
+	"Spawn",
+	"Plains Town Generic"
+],
+"structures": [
+]
+}
