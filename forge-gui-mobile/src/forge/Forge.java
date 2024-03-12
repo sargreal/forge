@@ -229,43 +229,48 @@ public class Forge implements ApplicationListener {
 
         //load model on background thread (using progress bar to report progress)
         FThreads.invokeInBackgroundThread(() -> {
-            //see if app or assets need updating
-            AssetsDownloader.checkForUpdates(splashScreen);
-            if (exited) {
-                return;
-            } //don't continue if user chose to exit or couldn't download required assets
+            try {
 
-            safeToClose = false;
-            ImageKeys.setIsLibGDXPort(GuiBase.getInterface().isLibgdxPort());
-            FModel.initialize(splashScreen.getProgressBar(), null);
+                //see if app or assets need updating
+                AssetsDownloader.checkForUpdates(splashScreen);
+                if (exited) {
+                    return;
+                } //don't continue if user chose to exit or couldn't download required assets
 
-            splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblLoadingFonts"));
-            FSkinFont.preloadAll(locale);
+                safeToClose = false;
+                ImageKeys.setIsLibGDXPort(GuiBase.getInterface().isLibgdxPort());
+                FModel.initialize(splashScreen.getProgressBar(), null);
 
-            splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblLoadingCardTranslations"));
-            CardTranslation.preloadTranslation(locale, ForgeConstants.LANG_DIR);
+                splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblLoadingFonts"));
+                FSkinFont.preloadAll(locale);
 
-            splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup"));
+                splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblLoadingCardTranslations"));
+                CardTranslation.preloadTranslation(locale, ForgeConstants.LANG_DIR);
 
-            //add reminder to preload
-            if (enablePreloadExtendedArt) {
-                if (autoCache)
-                    splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblPreloadExtendedArt") + "\nDetected RAM: " + totalDeviceRAM + "MB. Cache size: " + cacheSize);
-                else
-                    splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblPreloadExtendedArt"));
-            } else {
-                if (autoCache)
-                    splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup") + "\nDetected RAM: " + totalDeviceRAM + "MB. Cache size: " + cacheSize);
-                else
-                    splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup"));
+                splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup"));
+
+                //add reminder to preload
+                if (enablePreloadExtendedArt) {
+                    if (autoCache)
+                        splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblPreloadExtendedArt") + "\nDetected RAM: " + totalDeviceRAM + "MB. Cache size: " + cacheSize);
+                    else
+                        splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblPreloadExtendedArt"));
+                } else {
+                    if (autoCache)
+                        splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup") + "\nDetected RAM: " + totalDeviceRAM + "MB. Cache size: " + cacheSize);
+                    else
+                        splashScreen.getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup"));
+                }
+
+                Gdx.app.postRunnable(() -> {
+                    afterDbLoaded();
+                    /*  call preloadExtendedArt here, if we put it above we will  *
+                     *  get error: No OpenGL context found in the current thread. */
+                    preloadExtendedArt();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            Gdx.app.postRunnable(() -> {
-                afterDbLoaded();
-                /*  call preloadExtendedArt here, if we put it above we will  *
-                 *  get error: No OpenGL context found in the current thread. */
-                preloadExtendedArt();
-            });
         });
     }
     public static boolean hasGamepad() {
@@ -1029,7 +1034,7 @@ public class Forge implements ApplicationListener {
     /** Retrieve assets.
      */
     public static Assets getAssets() {
-        return ((Forge)Gdx.app.getApplicationListener()).assets;
+        return ((Forge)app).assets;
     }
     public static boolean switchScene(Scene newScene) {
         return switchScene(newScene, false);
