@@ -7,38 +7,8 @@
   "colorIds":["W","U","B","R","G"],  
   "colorIdNames":["tr(lblWhite) [+W]","tr(lblBlue) [+U]","tr(lblBlack) [+B]","tr(lblRed) [+R]","tr(lblGreen) [+G]"],
   "restrictedCards": [
-    "Black Lotus",
-    "Mox Emerald",
-    "Mox Pearl",
-    "Mox Ruby",
-    "Mox Sapphire",
-    "Mox Jet",
-    "Ancestral Recall",
-    "Timetwister",
-    "Time Walk",
-    "Command Tower",
-    "Arcane Signet",
-    "Opal Palace",
-    "Path of Ancestry",
-    "War Room",
-    "Commander's Plate",
-    "Campfire",
-    "Cloudkill",
-    "Command Beacon",
-    "Commander's Insignia",
-    "Forge of Heroes",
-    "Imposing Grandeur",
-    "Jeweled Lotus",
-    "Myth Unbound",
-    "Netherborn Altar",
-    "Sanctum of Eternity",
-    "Stinging Study",
-    "Study Hall",
-    "Witch's Clinic",
-    "Time Vault"
   ],
   "restrictedEditions": [
-    "(ALL)"
   ],
   "legalCards": {
     "editions": [
