@@ -284,7 +284,7 @@ public class CardUtil {
             {
                 keyWords.addAll(Arrays.asList(type.keyWords));
             }
-            if(type.rarity!=null&&type.rarity.length!=0)
+            if(type.rarity != null)
             {
                 for(String rarity:type.rarity)
                 {
@@ -300,12 +300,12 @@ public class CardUtil {
             {
                 editions.addAll(Arrays.asList(type.editions));
             }
-            if(type.superTypes!=null&&type.superTypes.length!=0)
+            if(type.superTypes != null)
             {
                 for(String string:type.superTypes)
                     superType.add(CardType.Supertype.getEnum(string));
             }
-            if(type.cardTypes!=null&&type.cardTypes.length!=0)
+            if(type.cardTypes != null)
             {
                 for(String string:type.cardTypes)
                     this.type.add(CardType.CoreType.getEnum(string));
@@ -351,16 +351,17 @@ public class CardUtil {
 
         final List<PaperCard> result = new ArrayList<>();
         List<PaperCard> pool = getPredicateResult(cards, data);
-        if (pool.size() > 0) {
+        if (!pool.isEmpty()) {
             for (int i = 0; i < count; i++) {
                 PaperCard candidate = pool.get(r.nextInt(pool.size()));
                 if (candidate != null) {
-                    if (allCardVariants) {
-                        PaperCard finalCandidate = CardUtil.getCardByName(candidate.getCardName()); // get a random set variant
-                        result.add(finalCandidate);
-                    } else {
-                        result.add(candidate);
+                    PaperCard finalCandidate;
+                    if (allCardVariants) { // get a random set variant
+                        finalCandidate = CardUtil.getCardByNameAndEditions(candidate.getCardName(), data.editions);
+                    } else { // get the first matching variant
+                        finalCandidate = CardUtil.getFirstCardByNameAndEditions(candidate.getCardName(), data.editions);
                     }
+                    result.add(finalCandidate);
                 }
             }
         }
@@ -810,6 +811,34 @@ public class CardUtil {
         }
 
         return validCards.get(Current.world().getRandom().nextInt(validCards.size()));
+    }
+
+    public static PaperCard getCardByNameAndEditions(String cardName, String[] editions) {
+        if (editions == null) {
+          return getCardByName(cardName);
+        }
+        System.out.println("Getting Card " + cardName + " from editions " + Arrays.toString(editions));
+        List<PaperCard> validCards = Arrays.asList(Iterables.toArray(Iterables.filter(getFullCardPool(Config.instance().getSettingData().useAllCardVariants),
+                input -> input.getCardName().equals(cardName) && Iterables.contains(Arrays.asList(editions), input.getEdition())), PaperCard.class));
+
+        if (validCards.isEmpty()) {
+            System.err.println("Unexpected behavior: tried to call getCardByNameAndEditions for card " + cardName + " from the editions " + editions + ", but didn't find it in the DB. A random existing instance will be returned.");
+            return getCardByName(cardName);
+        }
+
+        return validCards.get(Current.world().getRandom().nextInt(validCards.size()));
+    }
+
+    public static PaperCard getFirstCardByNameAndEditions(String cardName, String[] editions) {
+        if (editions != null) {
+            for (String edition : editions) {
+                PaperCard option = StaticData.instance().getCommonCards().getCard(cardName, edition);
+                if (option != null) {
+                    return option;
+                }
+            }
+        }
+        return StaticData.instance().getCommonCards().getCard(cardName);
     }
 
     public static Collection<PaperCard> getFullCardPool(boolean allCardVariants) {

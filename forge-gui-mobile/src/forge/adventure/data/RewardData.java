@@ -135,6 +135,11 @@ public class RewardData implements Serializable {
     }
 
     public Array<Reward> generate(boolean isForEnemy, Iterable<PaperCard> cards, boolean useSeedlessRandom, boolean isNoSell) {
+        // Initialize editions if they are set in the settings and are not set yet
+        ConfigData configData = Config.instance().getConfigData();
+        if (this.editions == null && configData.legalCards != null) {
+            this.editions = configData.legalCards.editions;
+        }
 
         boolean allCardVariants = Config.instance().getSettingData().useAllCardVariants;
         Random rewardRandom = useSeedlessRandom?new Random():WorldSave.getCurrentSave().getWorld().getRandom();
@@ -155,8 +160,8 @@ public class RewardData implements Serializable {
                     HashSet<PaperCard> pool = new HashSet<>();
                     for (RewardData r : cardUnion) {
                         if( r.cardName != null && !r.cardName.isEmpty() ) {
-                            PaperCard pc = allCardVariants ? CardUtil.getCardByName(r.cardName)
-                                    : StaticData.instance().getCommonCards().getCard(r.cardName);
+                            PaperCard pc = allCardVariants ? CardUtil.getCardByNameAndEditions(r.cardName, editions)
+                                    : CardUtil.getFirstCardByNameAndEditions(r.cardName, editions);
                             if (pc != null)
                                 pool.add(pc);
                         } else if( r.sourceDeck != null && ! r.sourceDeck.isEmpty() ) {
@@ -165,13 +170,13 @@ public class RewardData implements Serializable {
                             pool.addAll(CardUtil.getPredicateResult(allCards, r));
                         }
                     }
-                    ArrayList<PaperCard> finalPool = new ArrayList(pool);
+                    ArrayList<PaperCard> finalPool = new ArrayList<>(pool);
 
-                    if (finalPool.size() > 0){
+                    if (!finalPool.isEmpty()){
                         for (int i = 0; i < count; i++) {
                             if (allCardVariants) {
                                 PaperCard cardTemplate = finalPool.get(rewardRandom.nextInt(finalPool.size()));
-                                PaperCard finalCard = CardUtil.getCardByName(cardTemplate.getCardName());
+                                PaperCard finalCard = CardUtil.getCardByNameAndEditions(cardTemplate.getCardName(), editions);
                                 ret.add(new Reward(finalCard, isNoSell));
                             } else {
                                 ret.add(new Reward(finalPool.get(rewardRandom.nextInt(finalPool.size())), isNoSell));
@@ -183,13 +188,13 @@ public class RewardData implements Serializable {
                 case "randomCard":
                     if( cardName != null && !cardName.isEmpty() ) {
                         if (allCardVariants) {
-                            PaperCard card = CardUtil.getCardByName(cardName);
+                            PaperCard card = CardUtil.getCardByNameAndEditions(cardName, editions);
                             for (int i = 0; i < count + addedCount; i++) {
                                 ret.add(new Reward(CardUtil.getCardByNameAndEdition(cardName, card.getEdition()), isNoSell));
                             }
                         } else {
                             for (int i = 0; i < count + addedCount; i++) {
-                                ret.add(new Reward(StaticData.instance().getCommonCards().getCard(cardName), isNoSell));
+                                ret.add(new Reward(CardUtil.getFirstCardByNameAndEditions(cardName, editions), isNoSell));
                             }
                         }
                     } else if( sourceDeck != null && ! sourceDeck.isEmpty() ) {
