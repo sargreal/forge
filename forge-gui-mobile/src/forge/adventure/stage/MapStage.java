@@ -50,7 +50,7 @@ import java.util.Queue;
 public class MapStage extends GameStage {
     public static MapStage instance;
     final Array<MapActor> actors = new Array<>();
-    public com.badlogic.gdx.physics.box2d.World gdxWorld;
+    public World gdxWorld;
     public TiledMap tiledMap;
     public Array<Rectangle> collisionRect = new Array<>();
     public Map<Float, NavigationMap> navMaps = new HashMap<>();
