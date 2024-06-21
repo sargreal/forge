@@ -463,11 +463,11 @@ public final class CardPredicates {
         };
     }
 
-    public static final Comparator<Card> compareByTimestamp() {
+    public static final Comparator<Card> compareByGameTimestamp() {
         return new Comparator<Card>() {
             @Override
             public int compare(Card arg0, Card arg1) {
-                return Long.compare(arg0.getTimestamp(), arg1.getTimestamp());
+                return Long.compare(arg0.getGameTimestamp(), arg1.getGameTimestamp());
             }
         };
     }
@@ -565,6 +565,13 @@ public final class CardPredicates {
             @Override
             public boolean apply(Card c) {
                 return c.canTap();
+            }
+        };
+
+        public static final Predicate<Card> CAN_CREW = new Predicate<Card>() {
+            @Override
+            public boolean apply(Card c) {
+                return c.canCrew();
             }
         };
         /**

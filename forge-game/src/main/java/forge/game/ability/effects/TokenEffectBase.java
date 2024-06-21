@@ -119,7 +119,7 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                 if (creator != controller) {
                     tok.setController(controller, timestamp);
                 }
-                tok.setTimestamp(timestamp);
+                tok.setGameTimestamp(timestamp);
                 tok.setToken(true);
 
                 // do effect stuff with the token
@@ -154,7 +154,6 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                 Card lki = CardCopyService.getLKICopy(tok);
                 moveParams.put(AbilityKey.CardLKI, lki);
 
-                // Should this be catching the Card that's returned?
                 Card moved = game.getAction().moveToPlay(tok, sa, moveParams);
                 if (moved == null || moved.getZone() == null) {
                     // in case token can't enter the battlefield, it isn't created

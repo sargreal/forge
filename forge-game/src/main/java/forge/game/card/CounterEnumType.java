@@ -79,7 +79,7 @@ public enum CounterEnumType {
 
     CHORUS("CHRUS", 0, 192, 246),
 
-    COIN("COIN",255,215,0),
+    COIN("COIN", 255, 215, 0),
 
     COLLECTION("CLLCT", 255, 215, 0),
 
@@ -145,6 +145,8 @@ public enum CounterEnumType {
 
     EYESTALK("EYES", 184, 202, 201),
 
+    EVERYTHING("EVRY", 255, 255, 255),
+
     FADE("FADE", 159, 209, 192),
 
     FATE("FATE", 255, 164, 226),
@@ -163,7 +165,7 @@ public enum CounterEnumType {
 
     FLOOD("FLOOD", 0, 203, 255),
 
-    FORESHADOW("FRSHD",144,99, 207),
+    FORESHADOW("FRSHD", 144, 99, 207),
 
     FUNGUS("FNGUS", 121, 219, 151),
 
@@ -241,6 +243,8 @@ public enum CounterEnumType {
 
     LEVEL("LEVEL", 60, 222, 185),
 
+    LOOT("LOOT", 255, 215, 0),
+
     LORE("LORE", 209, 198, 161),
 
     LUCK("LUCK", 185, 174, 255),
@@ -266,6 +270,8 @@ public enum CounterEnumType {
     MANNEQUIN("MANQN", 206, 199, 162),
 
     MATRIX("MATRX", 183, 174, 255),
+
+    MEMORY("MEMRY", 174, 183, 255),
 
     MINE("MINE", 255, 100, 127),
 
@@ -445,6 +451,7 @@ public enum CounterEnumType {
     FIRSTSTRIKE("First Strike"),
     DOUBLESTRIKE("Double Strike"),
     DEATHTOUCH("Deathtouch"),
+    HASTE("Haste"),
     HEXPROOF("Hexproof"),
     INDESTRUCTIBLE("Indestructible"),
     LIFELINK("Lifelink"),
@@ -453,6 +460,7 @@ public enum CounterEnumType {
     TRAMPLE("Trample"),
     VIGILANCE("Vigilance")
     SHADOW("Shadow")
+    EXALTED("Exalted")
 //*/
     ;
 

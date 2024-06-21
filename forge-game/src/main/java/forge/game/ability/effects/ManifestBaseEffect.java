@@ -25,8 +25,7 @@ public abstract class ManifestBaseEffect extends SpellAbilityEffect {
         final Player activator = sa.getActivatingPlayer();
         final Game game = source.getGame();
         // Usually a number leaving possibility for X, Sacrifice X land: Manifest X creatures.
-        final int amount = sa.hasParam("Amount") ? AbilityUtils.calculateAmount(source,
-                sa.getParam("Amount"), sa) : 1;
+        final int amount = sa.hasParam("Amount") ? AbilityUtils.calculateAmount(source, sa.getParam("Amount"), sa) : 1;
 
         for (final Player p : getTargetPlayers(sa, "DefinedPlayer")) {
             CardCollection tgtCards;
@@ -37,7 +36,7 @@ public abstract class ManifestBaseEffect extends SpellAbilityEffect {
                     choiceZone = ZoneType.smartValueOf(sa.getParam("ChoiceZone"));
                     fromLibrary = choiceZone.equals(ZoneType.Library);
                 }
-                CardCollectionView choices = game.getCardsIn(choiceZone);
+                CardCollectionView choices = p.getCardsIn(choiceZone);
                 if (sa.hasParam("Choices")) {
                     choices = CardLists.getValidCards(choices, sa.getParam("Choices"), activator, source, sa);
                 }
@@ -47,7 +46,7 @@ public abstract class ManifestBaseEffect extends SpellAbilityEffect {
 
                 String title = sa.hasParam("ChoiceTitle") ? sa.getParam("ChoiceTitle") : getDefaultMessage() + " ";
 
-                tgtCards = new CardCollection(activator.getController().chooseCardsForEffect(choices, sa, title, amount, amount, false, null));
+                tgtCards = new CardCollection(p.getController().chooseCardsForEffect(choices, sa, title, amount, amount, false, null));
             } else if ("TopOfLibrary".equals(sa.getParamOrDefault("Defined", "TopOfLibrary"))) {
                 tgtCards = p.getTopXCardsFromLibrary(amount);
                 fromLibrary = true;

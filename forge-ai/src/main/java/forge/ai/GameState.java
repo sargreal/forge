@@ -406,9 +406,9 @@ public abstract class GameState {
             }
             if (c.isForetold()) {
                 newText.append("|Foretold");
-            }
-            if (c.isForetoldThisTurn()) {
-                newText.append("|ForetoldThisTurn");
+                if (c.enteredThisTurn()) {
+                    newText.append("|ForetoldThisTurn");
+                }
             }
         }
 
@@ -638,6 +638,9 @@ public abstract class GameState {
 
         // prevent interactions with objects from old state
         game.copyLastState();
+
+        // Store snapshot for restoring
+        game.stashGameState();
 
         // Set negative or zero life after state effects if need be, important for some puzzles that rely on
         // pre-setting negative life (e.g. PS_NEO4).
@@ -1267,6 +1270,8 @@ public abstract class GameState {
                     c.setRenowned(true);
                 } else if (info.startsWith("Solved")) {
                     c.setSolved(true);
+                } else if (info.startsWith("Saddled")) {
+                    c.setSaddled(true);
                 } else if (info.startsWith("Suspected")) {
                     c.setSuspected(true);
                 } else if (info.startsWith("Monstrous")) {

@@ -4,6 +4,8 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import forge.card.CardStateName;
 import forge.card.CardType;
 import forge.game.*;
 import forge.game.ability.AbilityKey;
@@ -112,8 +114,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
         }
         final String cardTag = type.contains("card") ? "" : " card";
 
-        final int num = sa.hasParam("ChangeNum") ? AbilityUtils.calculateAmount(host,
-                sa.getParam("ChangeNum"), sa) : 1;
+        final int num = sa.hasParam("ChangeNum") ? AbilityUtils.calculateAmount(host, sa.getParam("ChangeNum"), sa) : 1;
         boolean tapped = sa.hasParam("Tapped");
         boolean attacking = sa.hasParam("Attacking");
         if (sa.isNinjutsu()) {
@@ -451,9 +452,9 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
      */
     private void changeKnownOriginResolve(final SpellAbility sa) {
         CardCollectionView tgtCards = getTargetCards(sa);
-        final Player player = sa.getActivatingPlayer();
+        final Player activator = sa.getActivatingPlayer();
         final Card hostCard = sa.getHostCard();
-        final Game game = player.getGame();
+        final Game game = activator.getGame();
         final CardCollection commandCards = new CardCollection();
 
         ZoneType destination = ZoneType.smartValueOf(sa.getParam("Destination"));
@@ -465,7 +466,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
         int libraryPosition = sa.hasParam("LibraryPosition") ?
                 AbilityUtils.calculateAmount(hostCard, sa.getParam("LibraryPosition"), sa) : 0;
         if (sa.hasParam("DestinationAlternative")) {
-            Pair<ZoneType, Integer> pair = handleAltDest(sa, hostCard, destination, libraryPosition, player);
+            Pair<ZoneType, Integer> pair = handleAltDest(sa, hostCard, destination, libraryPosition, activator);
             destination = pair.getKey();
             libraryPosition = pair.getValue();
         }
@@ -504,7 +505,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
         final boolean shuffle = sa.hasParam("Shuffle") && "True".equals(sa.getParam("Shuffle"));
         boolean combatChanged = false;
 
-        Player chooser = player;
+        Player chooser = activator;
         if (sa.hasParam("Chooser")) {
             chooser = AbilityUtils.getDefinedPlayers(hostCard, sa.getParam("Chooser"), sa).get(0);
         }
@@ -527,7 +528,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
             // gameCard is LKI in that case, the card is not in game anymore
             // or the timestamp did change
             // this should check Self too
-            if (gameCard == null || !tgtC.equalsWithTimestamp(gameCard) || gameCard.isPhasedOut()) {
+            if (gameCard == null || !tgtC.equalsWithGameTimestamp(gameCard) || gameCard.isPhasedOut()) {
                 continue;
             }
 
@@ -589,11 +590,11 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                 if (sa.hasParam("WithCountersType")) {
                     CounterType cType = CounterType.getType(sa.getParam("WithCountersType"));
                     int cAmount = AbilityUtils.calculateAmount(hostCard, sa.getParamOrDefault("WithCountersAmount", "1"), sa);
-                    gameCard.addEtbCounter(cType, cAmount, player);
+                    gameCard.addEtbCounter(cType, cAmount, activator);
                 }
                 if (sa.hasParam("GainControl")) {
                     final String g = sa.getParam("GainControl");
-                    Player newController = g.equals("True") ? player :
+                    Player newController = g.equals("True") ? activator :
                         AbilityUtils.getDefinedPlayers(hostCard, g, sa).get(0);
                     if (newController != null) {
                         if (newController != gameCard.getController()) {
@@ -616,7 +617,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                     if (!list.isEmpty()) {
                         Map<String, Object> params = Maps.newHashMap();
                         params.put("Attach", gameCard);
-                        Card attachedTo = player.getController().chooseSingleEntityForEffect(list, sa, Localizer.getInstance().getMessage("lblSelectACardAttachSourceTo", gameCard.toString()), params);
+                        Card attachedTo = activator.getController().chooseSingleEntityForEffect(list, sa, Localizer.getInstance().getMessage("lblSelectACardAttachSourceTo", gameCard.toString()), params);
 
                         // TODO can't attach later or moveToPlay would attach indirectly
                         // bypass canBeAttached to skip Protection checks when trying to attach multiple auras that would grant protection
@@ -631,7 +632,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                     if (!list.isEmpty()) {
                         Map<String, Object> params = Maps.newHashMap();
                         params.put("Attach", gameCard);
-                        Player attachedTo = player.getController().chooseSingleEntityForEffect(list, sa, Localizer.getInstance().getMessage("lblSelectAPlayerAttachSourceTo", gameCard.toString()), params);
+                        Player attachedTo = activator.getController().chooseSingleEntityForEffect(list, sa, Localizer.getInstance().getMessage("lblSelectAPlayerAttachSourceTo", gameCard.toString()), params);
                         gameCard.attachToEntity(attachedTo, sa);
                     }
                     else { // When it should enter the battlefield attached to an illegal player it fails
@@ -716,7 +717,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
 
                 if (ZoneType.Hand.equals(destination) && ZoneType.Command.equals(originZone.getZoneType())) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(movedCard.getName()).append(" has moved from Command Zone to ").append(player).append("'s hand.");
+                    sb.append(movedCard.getName()).append(" has moved from Command Zone to ").append(activator).append("'s hand.");
                     game.getGameLog().add(GameLogEntryType.ZONE_CHANGE, sb.toString());
                     commandCards.add(movedCard); //add to list to reveal the commandzone cards
                 }
@@ -733,7 +734,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                 if (sa.hasParam("WithCountersType")) {
                     CounterType cType = CounterType.getType(sa.getParam("WithCountersType"));
                     int cAmount = AbilityUtils.calculateAmount(hostCard, sa.getParamOrDefault("WithCountersAmount", "1"), sa);
-                    movedCard.addCounter(cType, cAmount, player, counterTable);
+                    movedCard.addCounter(cType, cAmount, activator, counterTable);
                 }
 
                 if (sa.hasParam("ExileFaceDown") || sa.hasParam("FaceDown")) {
@@ -745,9 +746,10 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                         movedCard.setForetoldCostByEffect(true);
                     }
                     // look at the exiled card
-                    movedCard.addMayLookTemp(player);
+                    movedCard.addMayLookTemp(activator);
                 }
 
+                // CR 400.7k
                 if (sa.hasParam("TrackDiscarded")) {
                     movedCard.setDiscarded(true);
                 }
@@ -759,7 +761,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                     if (sa.hasParam("WithCountersType")) {
                         CounterType cType = CounterType.getType(sa.getParam("WithCountersType"));
                         int cAmount = AbilityUtils.calculateAmount(hostCard, sa.getParamOrDefault("WithCountersAmount", "1"), sa);
-                        meld.addCounter(cType, cAmount, player, counterTable);
+                        meld.addCounter(cType, cAmount, activator, counterTable);
                     }
                 }
                 if (gameCard.hasMergedCard()) {
@@ -768,7 +770,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                         if (sa.hasParam("WithCountersType")) {
                             CounterType cType = CounterType.getType(sa.getParam("WithCountersType"));
                             int cAmount = AbilityUtils.calculateAmount(hostCard, sa.getParamOrDefault("WithCountersAmount", "1"), sa);
-                            c.addCounter(cType, cAmount, player, counterTable);
+                            c.addCounter(cType, cAmount, activator, counterTable);
                         }
                     }
                 }
@@ -819,7 +821,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
 
         //reveal command cards that changes zone from command zone to player's hand
         if (!commandCards.isEmpty()) {
-            game.getAction().reveal(commandCards, player, true, "Revealed cards in ");
+            game.getAction().reveal(commandCards, activator, true, "Revealed cards in ");
         }
 
         triggerList.triggerChangesZoneAll(game, sa);
@@ -848,8 +850,10 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                     // FCollection already does use set.
                     pl.add(tgtC.getOwner());
                 }
+                if (pl.isEmpty()) {
+                    pl.add(activator);
+                }
             }
-
             for (final Player p : pl) {
                 p.shuffle(sa);
             }
@@ -875,14 +879,9 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
 
         Player chooser = null;
         if (sa.hasParam("Chooser")) {
-            final String choose = sa.getParam("Chooser");
-            if (choose.equals("Targeted") && sa.getTargets().isTargetingAnyPlayer()) {
-                chooser = sa.getTargets().getFirstTargetedPlayer();
-            } else {
-                final FCollectionView<Player> choosers = AbilityUtils.getDefinedPlayers(sa.getHostCard(), sa.getParam("Chooser"), sa);
-                if (!choosers.isEmpty()) {
-                    chooser = sa.getActivatingPlayer().getController().chooseSingleEntityForEffect(choosers, null, sa, Localizer.getInstance().getMessage("lblChooser") + ":", false, null, null);
-                }
+            final FCollectionView<Player> choosers = AbilityUtils.getDefinedPlayers(sa.getHostCard(), sa.getParam("Chooser"), sa);
+            if (!choosers.isEmpty()) {
+                chooser = sa.getActivatingPlayer().getController().chooseSingleEntityForEffect(choosers, null, sa, Localizer.getInstance().getMessage("lblChooser") + ":", false, null, null);
             }
         }
 
@@ -951,11 +950,6 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                 }
             }
 
-            // this needs to be zero indexed. Top = 0, Third = 2
-            int libraryPos = sa.hasParam("LibraryPosition") ? AbilityUtils.calculateAmount(source, sa.getParam("LibraryPosition"), sa) : 0;
-
-            int changeNum = sa.hasParam("ChangeNum") ? AbilityUtils.calculateAmount(source, sa.getParam("ChangeNum"), sa) : 1;
-
             if (sa.hasParam("Optional")) {
                 String prompt;
                 if (sa.hasParam("OptionalPrompt")) {
@@ -969,7 +963,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                 }
                 String message = MessageUtil.formatMessage(prompt , decider, player);
                 if (!decider.getController().confirmAction(sa, PlayerActionConfirmMode.ChangeZoneGeneral, message, null)) {
-                    return;
+                    continue;
                 }
             }
 
@@ -978,6 +972,11 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
             if (player.isControlled()) {
                 origin.remove(ZoneType.Sideboard);
             }
+
+            // this needs to be zero indexed. Top = 0, Third = 2
+            int libraryPos = sa.hasParam("LibraryPosition") ? AbilityUtils.calculateAmount(source, sa.getParam("LibraryPosition"), sa) : 0;
+
+            int changeNum = sa.hasParam("ChangeNum") ? AbilityUtils.calculateAmount(source, sa.getParam("ChangeNum"), sa) : 1;
 
             CardCollection fetchList;
             boolean shuffleMandatory = true;
@@ -1050,7 +1049,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
                             "While you're searching your library, you may cast CARDNAME from your library.");
                     decider.getController().tempShowCards(canCastWhileSearching);
                     for (final Card tgtCard : canCastWhileSearching) {
-                        List<SpellAbility> sas = AbilityUtils.getBasicSpellsFromPlayEffect(tgtCard, decider);
+                        List<SpellAbility> sas = AbilityUtils.getSpellsFromPlayEffect(tgtCard, decider, CardStateName.Original, true);
                         if (sas.isEmpty()) {
                             continue;
                         }
@@ -1077,6 +1076,7 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
             if (!defined && !changeType.equals("") && !changeType.startsWith("EACH")) {
                 fetchList = (CardCollection)AbilityUtils.filterListByType(fetchList, sa.getParam("ChangeType"), sa);
             }
+            fetchList.sort();
 
             if (sa.hasParam("NoShuffle") || "False".equals(sa.getParam("Shuffle"))) {
                 shuffleMandatory = false;
@@ -1094,8 +1094,6 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
             final String totalpower = sa.getParam("WithTotalPower");
             int totcmc = AbilityUtils.calculateAmount(source, totalcmc, sa);
             int totpower = AbilityUtils.calculateAmount(source, totalpower, sa);
-
-            fetchList.sort();
 
             CardCollection chosenCards = new CardCollection();
             if (changeType.startsWith("EACH")) {
@@ -1544,7 +1542,6 @@ public class ChangeZoneEffect extends SpellAbilityEffect {
 
         Map<AbilityKey,Object> params = AbilityKey.newMap();
         params.put(AbilityKey.StackSa, tgtSA);
-        params.put(AbilityKey.StackSi, si);
         AbilityKey.addCardZoneTableParams(params, triggerList);
 
         Card movedCard = null;

@@ -19,15 +19,17 @@ import forge.game.player.Player;
 import forge.game.spellability.SpellAbility;
 import forge.util.Aggregates;
 import forge.util.Lang;
+import forge.util.Localizer;
 
 public class ChooseGenericEffect extends SpellAbilityEffect {
 
     @Override
     protected String getStackDescription(SpellAbility sa) {
         final StringBuilder sb = new StringBuilder();
-
-        sb.append(Lang.joinHomogenous(getDefinedPlayersOrTargeted(sa)));
-        sb.append("chooses from a list.");
+        final List<Player> players = getDefinedPlayersOrTargeted(sa); 
+        
+        sb.append(Lang.joinHomogenous(players));
+        sb.append(players.size() == 1 ? " chooses" : " choose").append(" from a list.");
 
         return sb.toString();
     }
@@ -49,6 +51,8 @@ public class ChooseGenericEffect extends SpellAbilityEffect {
         final int amount = AbilityUtils.calculateAmount(host, sa.getParamOrDefault("ChoiceAmount", "1"), sa);
         
         final boolean tempRem = sa.hasParam("TempRemember");
+        final boolean secretly = sa.hasParam("Secretly");
+        final StringBuilder record = new StringBuilder();
         final boolean changeZoneTable = sa.hasParam("ChangeZoneTable");
         final boolean damageMap = sa.hasParam("DamageMap");
 
@@ -91,7 +95,7 @@ public class ChooseGenericEffect extends SpellAbilityEffect {
                 while (sa.getParam("AtRandom").equals("Urza") && i < chosenSAs.size()) {
                     if (!chosenSAs.get(i).usesTargeting()) {
                         i++;
-                    } else if (sa.getTargetRestrictions().hasCandidates(chosenSAs.get(i))) {
+                    } else if (chosenSAs.get(i).getTargetRestrictions().hasCandidates(chosenSAs.get(i))) {
                         p.getController().chooseTargetsFor(chosenSAs.get(i));
                         i++;
                     } else {
@@ -113,6 +117,10 @@ public class ChooseGenericEffect extends SpellAbilityEffect {
                     if (sa.hasParam("ShowChoice")) {
                         boolean dontNotifySelf = sa.getParam("ShowChoice").equals("ExceptSelf");
                         game.getAction().notifyOfValue(sa, p, chosenValue, dontNotifySelf ? p : null);
+                    } else if (secretly) {
+                        if (record.length() > 0) record.append("\r\n");
+                        record.append(Localizer.getInstance().getMessage("lblPlayerChooseValue", p, chosenValue));
+
                     }
                     if (sa.hasParam("SetChosenMode")) {
                         sa.getHostCard().setChosenMode(chosenValue);
@@ -137,11 +145,17 @@ public class ChooseGenericEffect extends SpellAbilityEffect {
                 host.addRemembered(oldRem);
             } 
         }
+        if (secretly) {
+            game.getAction().notifyOfValue(sa, host, record.toString(), null);
+        }
         if (damageMap) game.getAction().dealDamage(false, sa.getDamageMap(), sa.getPreventMap(), 
                     sa.getCounterTable(), sa);
         if (changeZoneTable) {
             sa.getChangeZoneTable().triggerChangesZoneAll(game, sa);
             sa.setChangeZoneTable(null);
+        }
+        if (sa.hasParam("Guess")) {
+            game.incPiledGuessedSA();
         }
     }
 

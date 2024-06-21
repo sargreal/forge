@@ -32,7 +32,6 @@ import forge.game.keyword.Keyword;
 import forge.game.phase.PhaseHandler;
 import forge.game.phase.PhaseType;
 import forge.game.player.Player;
-import forge.game.spellability.OptionalCost;
 import forge.game.spellability.SpellAbility;
 import forge.game.zone.CostPaymentStack;
 import forge.game.zone.ZoneType;
@@ -245,12 +244,6 @@ public abstract class Trigger extends TriggerReplacementBase {
             }
         }
 
-        if (hasParam("PreCombatMain")) {
-            if (!phaseHandler.isPreCombatMain()) {
-                return false;
-            }
-        }
-
         if (hasParam("PlayerTurn")) {
             if (!phaseHandler.isPlayerTurn(this.getHostCard().getController())) {
                 return false;
@@ -373,6 +366,10 @@ public abstract class Trigger extends TriggerReplacementBase {
                 getActivationsThisTurn() >= Integer.parseInt(getParam("ActivationLimit"))) {
             return false;
         }
+        if (hasParam("GameActivationLimit") && 
+            getActivationsThisGame() >= Integer.parseInt(getParam("GameActivationLimit"))) {
+                return false;
+        }
         return true;
     }
 
@@ -394,11 +391,7 @@ public abstract class Trigger extends TriggerReplacementBase {
             }
         }
 
-        if ("AltCost".equals(condition)) {
-            final Card moved = (Card) runParams.get(AbilityKey.Card);
-            if (null != moved && !moved.isOptionalCostPaid(OptionalCost.AltCost))
-                return false;
-        } else if ("LifePaid".equals(condition)) {
+        if ("LifePaid".equals(condition)) {
             final SpellAbility trigSA = (SpellAbility) runParams.get(AbilityKey.SpellAbility);
             if (trigSA != null && trigSA.getAmountLifePaid() <= 0) {
                 return false;
@@ -441,6 +434,11 @@ public abstract class Trigger extends TriggerReplacementBase {
             }
             if (attacked == null || !attacked.isValid("Player.withMostLife",
                     this.getHostCard().getController(), this.getHostCard(), null)) {
+                return false;
+            }
+        } else if ("AttackerHasUnattackedOpp".equals(condition)) {
+            Player attacker = (Player) runParams.get(AbilityKey.AttackingPlayer);
+            if (game.getCombat().getAttackersAndDefenders().values().containsAll(attacker.getOpponents())) {
                 return false;
             }
         }
@@ -572,6 +570,10 @@ public abstract class Trigger extends TriggerReplacementBase {
 
     public int getActivationsThisTurn() {
         return hostCard.getAbilityActivatedThisTurn(this.getOverridingAbility());
+    }
+
+    public int getActivationsThisGame() {
+        return hostCard.getAbilityActivatedThisGame(this.getOverridingAbility());
     }
 
     public void triggerRun() {

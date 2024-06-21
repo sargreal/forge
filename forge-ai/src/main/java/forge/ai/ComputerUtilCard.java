@@ -1379,6 +1379,10 @@ public class ComputerUtilCard {
             return false;
         }
 
+        if (sa.getHostCard().equals(c) && ComputerUtilCost.isSacrificeSelfCost(sa.getPayCosts())) {
+            return false;
+        }
+
         /* -- currently disabled until better conditions are devised and the spell prediction is made smarter --
         // Determine if some mana sources need to be held for the future spell to cast in Main 2 before determining whether to pump.
         AiController aic = ((PlayerControllerAi)ai.getController()).getAi();
@@ -1835,7 +1839,7 @@ public class ComputerUtilCard {
         for (final Card c : list) {
             // remove old boost that might be copied
             for (final StaticAbility stAb : c.getStaticAbilities()) {
-                vCard.removePTBoost(c.getTimestamp(), stAb.getId());
+                vCard.removePTBoost(c.getLayerTimestamp(), stAb.getId());
                 if (!stAb.checkMode("Continuous")) {
                     continue;
                 }
@@ -1858,7 +1862,7 @@ public class ComputerUtilCard {
                     String addT = stAb.getParam("AddToughness");
                     def = AbilityUtils.calculateAmount(addT.contains("Affected") ? vCard : c, addT, stAb, true);
                 }
-                vCard.addPTBoost(att, def, c.getTimestamp(), stAb.getId());
+                vCard.addPTBoost(att, def, c.getLayerTimestamp(), stAb.getId());
             }
         }
     }

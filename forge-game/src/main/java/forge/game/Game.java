@@ -38,6 +38,7 @@ import forge.game.player.*;
 import forge.game.replacement.ReplacementHandler;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.SpellAbilityStackInstance;
+import forge.game.staticability.StaticAbilityCantChangeDayTime;
 import forge.game.trigger.TriggerHandler;
 import forge.game.trigger.TriggerType;
 import forge.game.zone.CostPaymentStack;
@@ -49,6 +50,7 @@ import forge.util.Aggregates;
 import forge.util.MyRandom;
 import forge.util.Visitor;
 import forge.util.collect.FCollection;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -88,13 +90,18 @@ public class Game {
 
     private final Zone stackZone = new Zone(ZoneType.Stack, this);
 
+    public boolean EXPERIMENTAL_RESTORE_SNAPSHOT = false;
+    // While this is false here, its really set by the Match/Preferences
+
+    // If this merges with LKI In the future, it will need to change forms
+    private GameSnapshot previousGameState = null;
     private CardCollection lastStateBattlefield = new CardCollection();
     private CardCollection lastStateGraveyard = new CardCollection();
 
     private CardZoneTable untilHostLeavesPlayTriggerList = new CardZoneTable();
 
     private Table<CounterType, Player, List<Pair<Card, Integer>>> countersAddedThisTurn = HashBasedTable.create();
-    private Multimap<CounterType, Pair<Card, Integer>> countersRemovedThisTurn = ArrayListMultimap.create();
+    private Multimap<CounterType, Pair<GameEntity, Integer>> countersRemovedThisTurn = ArrayListMultimap.create();
 
     private List<Card> leftBattlefieldThisTurn = Lists.newArrayList();
     private List<Card> leftGraveyardThisTurn = Lists.newArrayList();
@@ -113,6 +120,8 @@ public class Game {
     private Direction turnOrder = Direction.getDefaultDirection();
 
     private Boolean daytime = null;
+
+    private int numPiledGuessedSA;
 
     private long timestamp = 0;
     public final GameAction action;
@@ -172,6 +181,24 @@ public class Game {
         return lastStateGraveyard;
     }
 
+    public void stashGameState() {
+        // Take a snapshot of the current state to restore to previous state
+        if (EXPERIMENTAL_RESTORE_SNAPSHOT) {
+            previousGameState = new GameSnapshot(this);
+            previousGameState.makeCopy();
+        }
+    }
+
+    public boolean restoreGameState() {
+        // Restore game state snapshot
+        if (previousGameState == null || !EXPERIMENTAL_RESTORE_SNAPSHOT) {
+            return false;
+        }
+
+        previousGameState.restoreGameState(this);
+        return true;
+    }
+
     public void copyLastState() {
         lastStateBattlefield.clear();
         lastStateGraveyard.clear();
@@ -220,23 +247,34 @@ public class Game {
     public Player getPlayer(PlayerView playerView) {
         return playerCache.get(playerView);
     }
+
+    public Player getPlayer(int id) {
+        for(Player p : allPlayers) {
+            if (p.getId() == id) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+
     public void addPlayer(int id, Player player) {
         playerCache.put(Integer.valueOf(id), player);
     }
 
     // methods that deal with saving, retrieving and clearing LKI information about cards on zone change
-    private final HashMap<Integer, Card> changeZoneLKIInfo = new HashMap<>();
+    private final Table<Integer, Long, Card> changeZoneLKIInfo = HashBasedTable.create();
     public final void addChangeZoneLKIInfo(Card lki) {
         if (lki == null) {
             return;
         }
-        changeZoneLKIInfo.put(lki.getId(), lki);
+        changeZoneLKIInfo.put(lki.getId(), lki.getGameTimestamp(), lki);
     }
     public final Card getChangeZoneLKIInfo(Card c) {
         if (c == null) {
             return null;
         }
-        return changeZoneLKIInfo.getOrDefault(c.getId(), c);
+        return ObjectUtils.defaultIfNull(changeZoneLKIInfo.get(c.getId(), c.getGameTimestamp()), c);
     }
     public final void clearChangeZoneLKIInfo() {
         changeZoneLKIInfo.clear();
@@ -288,7 +326,9 @@ public class Game {
         int plId = 0;
         for (RegisteredPlayer psc : players0) {
             IGameEntitiesFactory factory = (IGameEntitiesFactory)psc.getPlayer();
-            Player pl = factory.createIngamePlayer(this, plId++);
+            // If the Registered Player already has a pre-assigned ID, use that. Otherwise, assign a new one.
+            Integer id = psc.getId();
+            Player pl = factory.createIngamePlayer(this, id == null ? plId++ : id);
             allPlayers.add(pl);
             ingamePlayers.add(pl);
 
@@ -363,10 +403,10 @@ public class Game {
     }
 
     public final PlayerCollection getPlayersInTurnOrder(Player p) {
-        PlayerCollection players = getPlayersInTurnOrder();
+        final PlayerCollection players = new PlayerCollection(getPlayersInTurnOrder());
 
         int i = players.indexOf(p);
-        Collections.rotate(players, i);
+        Collections.rotate(players, -i);
         return players;
     }
 
@@ -1115,7 +1155,18 @@ public class Game {
         return result;
     }
 
+    public void incPiledGuessedSA() {
+        numPiledGuessedSA++;
+    }
+    public int getNumPiledGuessedSA() {
+        return numPiledGuessedSA;
+    }
+    public void resetNumPiledGuessedSA() {
+        numPiledGuessedSA = 0;
+    }
+
     public void onCleanupPhase() {
+        resetNumPiledGuessedSA();
         clearLeftBattlefieldThisTurn();
         clearLeftGraveyardThisTurn();
         clearCounterAddedThisTurn();
@@ -1162,7 +1213,7 @@ public class Game {
         }
         for (List<Pair<Card, Integer>> l : countersAddedThisTurn.row(cType).values()) {
             for (Pair<Card, Integer> p : l) {
-                if (p.getKey().equalsWithTimestamp(card)) {
+                if (p.getKey().equalsWithGameTimestamp(card)) {
                     result += p.getValue();
                 }
             }
@@ -1178,10 +1229,14 @@ public class Game {
         countersRemovedThisTurn.put(cType, Pair.of(CardCopyService.getLKICopy(card), value));
     }
 
-    public int getCounterRemovedThisTurn(CounterType cType, String validCard, Card source, Player sourceController, CardTraitBase ctb) {
+    public void addCounterRemovedThisTurn(CounterType cType, Player player, Integer value) {
+        countersRemovedThisTurn.put(cType, Pair.of(player, value));
+    }
+
+    public int getCounterRemovedThisTurn(CounterType cType, String valid, Card source, Player sourceController, CardTraitBase ctb) {
         int result = 0;
-        for (Pair<Card, Integer> p : countersRemovedThisTurn.get(cType)) {
-            if (p.getKey().isValid(validCard.split(","), sourceController, source, ctb)) {
+        for (Pair<GameEntity, Integer> p : countersRemovedThisTurn.get(cType)) {
+            if (p.getKey().isValid(valid.split(","), sourceController, source, ctb)) {
                 result += p.getValue();
             }
         }
@@ -1282,6 +1337,9 @@ public class Game {
         return this.daytime;
     }
     public void setDayTime(Boolean value) {
+        if (StaticAbilityCantChangeDayTime.cantChangeDay(this, value)) {
+            return;
+        }
         Boolean previous = this.daytime;
         this.daytime = value;
 

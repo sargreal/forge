@@ -77,7 +77,6 @@ public class HumanPlaySpellAbility {
                         game.clearTopLibsCast(ability);
                         return false;
                     }
-                    needX = false;
                 }
                 if (!CharmEffect.makeChoices(ability)) {
                     game.clearTopLibsCast(ability);
@@ -97,11 +96,8 @@ public class HumanPlaySpellAbility {
         final Card c = ability.getHostCard();
         final CardPlayOption option = c.mayPlay(ability.getMayPlay());
 
-        boolean manaColorConversion = false;
-
         // freeze Stack. No abilities should go onto the stack while I'm filling requirements.
         boolean refreeze = game.getStack().isFrozen();
-        game.getStack().freezeStack();
 
         if (ability.isSpell() && !c.isCopiedSpell()) {
             fromZone = game.getZoneOf(c);
@@ -119,11 +115,12 @@ public class HumanPlaySpellAbility {
 
         ability = GameActionUtil.addExtraKeywordCost(ability);
 
-        final boolean playerManaConversion = human.hasManaConversion()
-                && human.getController().confirmStaticApplication(c, null, "Do you want to spend mana as though it were mana of any type to pay the cost?", null);
-
         Cost abCost = ability.getPayCosts();
         CostPayment payment = new CostPayment(abCost, ability);
+
+        final boolean playerManaConversion = human.hasManaConversion()
+                && human.getController().confirmStaticApplication(c, null, "Do you want to spend mana as though it were mana of any type to pay the cost?", null);
+        boolean manaColorConversion = false;
 
         if (!ability.isCopied()) {
             if (ability.isSpell()) { // Apply by Option
@@ -144,6 +141,11 @@ public class HumanPlaySpellAbility {
             if (StaticAbilityManaConvert.manaConvert(payment, human, ability.getHostCard(), ability)) {
                 manaColorConversion = true;
             }
+
+            if (ability.hasParam("ManaConversion")) {
+                AbilityUtils.applyManaColorConversion(manapool, ability.getParam("ManaConversion"));
+                manaColorConversion = true;
+            }
         }
 
         if (playerManaConversion) {
@@ -158,19 +160,31 @@ public class HumanPlaySpellAbility {
         // This line makes use of short-circuit evaluation of boolean values, that is each subsequent argument
         // is only executed or evaluated if the first argument does not suffice to determine the value of the expression
         // because of Selective Snare do announceType first
-        final boolean prerequisitesMet = announceType()
-                && announceValuesLikeX()
-                && ability.checkRestrictions(human)
-                && (!mayChooseTargets || ability.setupTargets()) // if you can choose targets, then do choose them.
-                && ability.canCastTiming(human)
-                && ability.isLegalAfterStack()
-                && (isFree || payment.payCost(new HumanCostDecision(controller, human, ability, ability.isTrigger())));
+
+        boolean preCostRequisites = announceType() && announceValuesLikeX() &&
+            ability.checkRestrictions(human) &&
+            (!mayChooseTargets || ability.setupTargets()) &&
+            ability.canCastTiming(human) &&
+            ability.isLegalAfterStack();
+
+        // Freeze the stack just before we start paying costs but after the ability is fully set up
+        game.getStack().freezeStack(ability);
+        final boolean prerequisitesMet = preCostRequisites && (isFree || payment.payCost(new HumanCostDecision(controller, human, ability, ability.isTrigger())));
 
         game.clearTopLibsCast(ability);
 
         if (!prerequisitesMet) {
+            // Would love to restore game state when undoing a trigger rather than just declining all costs.
+            // Is there a way to tell the difference?
+
             if (ability.isTrigger()) {
-                payment.refundPayment();
+                // Only roll back triggers if they were not paid for
+                if (game.EXPERIMENTAL_RESTORE_SNAPSHOT && preCostRequisites) {
+                    GameActionUtil.rollbackAbility(ability, fromZone, zonePosition, payment, c);
+                } else {
+                    // If precost requsities failed, then there probably isn't anything to refund during experimental
+                    payment.refundPayment();
+                }
             } else {
                 GameActionUtil.rollbackAbility(ability, fromZone, zonePosition, payment, c);
             }
@@ -179,6 +193,7 @@ public class HumanPlaySpellAbility {
                 game.getStack().unfreezeStack();
             }
 
+            // These restores may not need to happen if we're restoring from snapshot
             if (manaColorConversion) {
                 manapool.restoreColorReplacements();
             }
@@ -220,7 +235,7 @@ public class HumanPlaySpellAbility {
         // Announcing Requirements like Choosing X or Multikicker
         // SA Params as comma delimited list
         final String announce = ability.getParam("Announce");
-        if (announce != null) {
+        if (announce != null && needX) {
             for (final String aVar : announce.split(",")) {
                 final String varName = aVar.trim();
 
@@ -236,8 +251,6 @@ public class HumanPlaySpellAbility {
                     ability.setSVar(varName, value.toString());
                     if ("Multikicker".equals(varName)) {
                         card.setKickerMagnitude(value);
-                    } else if ("Pseudo-multikicker".equals(varName)) {
-                        card.setPseudoMultiKickerMagnitude(value);
                     } else {
                         card.setSVar(varName, value.toString());
                     }
@@ -247,8 +260,10 @@ public class HumanPlaySpellAbility {
 
         if (needX) {
             if (cost.hasXInAnyCostPart()) {
-                final String sVar = ability.getSVar("X"); //only prompt for new X value if card doesn't determine it another way
-                if ("Count$xPaid".equals(sVar) || sVar.isEmpty()) {
+                final String sVar = ability.getParamOrDefault("XAlternative", ability.getSVar("X")); //only prompt for new X value if card doesn't determine it another way
+                // check if X != 0 is even allowed or the X shard got removed
+                boolean replacedXshard = ability.isSpell() && ability.getHostCard().getManaCost().countX() > 0 && !cost.hasXInAnyCostPart();
+                if (("Count$xPaid".equals(sVar) && !replacedXshard) || sVar.isEmpty()) {
                     final Integer value = controller.announceRequirements(ability, "X");
                     if (value == null) {
                         return false;

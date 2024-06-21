@@ -19,24 +19,22 @@ package forge.game;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-
 import forge.GameCommand;
 import forge.StaticData;
 import forge.card.CardStateName;
-import forge.card.MagicColor;
 import forge.card.CardType.Supertype;
+import forge.card.MagicColor;
 import forge.deck.DeckSection;
-import forge.game.ability.*;
+import forge.game.ability.AbilityFactory;
+import forge.game.ability.AbilityKey;
+import forge.game.ability.AbilityUtils;
+import forge.game.ability.ApiType;
 import forge.game.card.*;
 import forge.game.event.*;
 import forge.game.keyword.Keyword;
 import forge.game.keyword.KeywordInterface;
 import forge.game.mulligan.MulliganService;
-import forge.game.player.GameLossReason;
-import forge.game.player.Player;
-import forge.game.player.PlayerActionConfirmMode;
-import forge.game.player.PlayerCollection;
-import forge.game.player.PlayerPredicates;
+import forge.game.player.*;
 import forge.game.replacement.ReplacementEffect;
 import forge.game.replacement.ReplacementResult;
 import forge.game.replacement.ReplacementType;
@@ -56,7 +54,6 @@ import forge.item.PaperCard;
 import forge.util.*;
 import forge.util.collect.FCollection;
 import forge.util.collect.FCollectionView;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
@@ -117,7 +114,7 @@ public class GameAction {
 
         // Rule 111.8: A token that has left the battlefield can't move to another zone
         if (!c.isSpell() && c.isToken() && !fromBattlefield && zoneFrom != null && !zoneFrom.is(ZoneType.Stack)
-                && (cause == null || !(cause instanceof SpellPermanent) || !cause.isCastFromPlayEffect())) {
+                && (cause == null || !(cause instanceof SpellPermanent || cause.isCastFaceDown()) || !cause.isCastFromPlayEffect())) {
             return c;
         }
 
@@ -243,7 +240,7 @@ public class GameAction {
                 copied = new CardCopyService(c).copyCard(false);
             }
 
-            copied.setTimestamp(c.getTimestamp());
+            copied.setGameTimestamp(c.getGameTimestamp());
 
             if (zoneTo.is(ZoneType.Stack)) {
                 // try not to copy changed stats when moving to stack
@@ -379,7 +376,7 @@ public class GameAction {
 
         if (!zoneTo.is(ZoneType.Stack)) {
             // reset timestamp in changezone effects so they have same timestamp if ETB simultaneously
-            copied.setTimestamp(game.getNextTimestamp());
+            copied.setGameTimestamp(game.getNextTimestamp());
         }
 
         copied.getOwner().removeInboundToken(copied);
@@ -479,7 +476,7 @@ public class GameAction {
                 if (c.getCastSA() != null && !c.getCastSA().isIntrinsic() && c.getCastSA().getKeyword() != null) {
                     KeywordInterface ki = c.getCastSA().getKeyword();
                     ki.setHostCard(copied);
-                    copied.addChangedCardKeywordsInternal(ImmutableList.of(ki), null, false, copied.getTimestamp(), 0, true);
+                    copied.addChangedCardKeywordsInternal(ImmutableList.of(ki), null, false, copied.getGameTimestamp(), 0, true);
                 }
 
                 // 607.2q linked ability can find cards exiled as cost while it was a spell
@@ -618,7 +615,6 @@ public class GameAction {
         runParams.put(AbilityKey.Cause, cause);
         runParams.put(AbilityKey.Origin, zoneFrom != null ? zoneFrom.getZoneType().name() : null);
         runParams.put(AbilityKey.Destination, zoneTo.getZoneType().name());
-        runParams.put(AbilityKey.SpellAbilityStackInstance, game.stack.peek());
         runParams.put(AbilityKey.IndividualCostPaymentInstance, game.costPaymentStack.peek());
         runParams.put(AbilityKey.MergedCards, mergedCards);
 
@@ -1112,7 +1108,7 @@ public class GameAction {
             public int compare(final StaticAbility a, final StaticAbility b) {
                 return ComparisonChain.start()
                         .compareTrueFirst(a.hasParam("CharacteristicDefining"), b.hasParam("CharacteristicDefining"))
-                        .compare(a.getHostCard().getTimestamp(), b.getHostCard().getTimestamp())
+                        .compare(a.getHostCard().getLayerTimestamp(), b.getHostCard().getLayerTimestamp())
                         .result();
             }
         };
@@ -1319,7 +1315,7 @@ public class GameAction {
                 final CounterType dreamType = CounterType.get(CounterEnumType.DREAM);
 
                 if (c.getCounters(dreamType) > 7 && c.hasKeyword("CARDNAME can't have more than seven dream counters on it.")) {
-                    c.subtractCounter(dreamType,  c.getCounters(dreamType) - 7);
+                    c.subtractCounter(dreamType,  c.getCounters(dreamType) - 7, null);
                     checkAgainCard = true;
                 }
 
@@ -1331,7 +1327,7 @@ public class GameAction {
                         c.addCounter(CounterEnumType.LOYALTY, beeble - loyal, c.getController(), counterTable);
                         counterTable.replaceCounterEffect(game, null, false);
                     } else if (loyal > beeble) {
-                        c.subtractCounter(CounterEnumType.LOYALTY, loyal - beeble);
+                        c.subtractCounter(CounterEnumType.LOYALTY, loyal - beeble, null);
                     }
                     // Only check again if counters actually changed
                     if (c.getCounters(CounterEnumType.LOYALTY) != loyal) {
@@ -1528,7 +1524,7 @@ public class GameAction {
                 continue;
             }
             // sort by game timestamp
-            rolesByPlayer.sort(CardPredicates.compareByTimestamp());
+            rolesByPlayer.sort(CardPredicates.compareByGameTimestamp());
             removeList.addAll(rolesByPlayer.subList(0, rolesByPlayer.size() - 1));
             checkAgain = true;
         }
@@ -1634,8 +1630,8 @@ public class GameAction {
             // N +1/+1 and N -1/-1 counters are removed from it, where N is the
             // smaller of the number of +1/+1 and -1/-1 counters on it.
             // This should fire remove counters trigger
-            c.subtractCounter(p1p1, remove);
-            c.subtractCounter(m1m1, remove);
+            c.subtractCounter(p1p1, remove, null);
+            c.subtractCounter(m1m1, remove, null);
             checkAgain = true;
         }
         return checkAgain;
@@ -1847,7 +1843,7 @@ public class GameAction {
         long ts = 0;
 
         for (final Card crd : worlds) {
-            long crdTs = crd.getTimestamp();
+            long crdTs = crd.getGameTimestamp();
             if (crdTs > ts) {
                 ts = crdTs;
                 toKeep.clear();
@@ -1882,14 +1878,12 @@ public class GameAction {
             return false;
         }
 
-        // Replacement effects
         final Map<AbilityKey, Object> repRunParams = AbilityKey.mapFromAffected(c);
         repRunParams.put(AbilityKey.Cause, sa);
         repRunParams.put(AbilityKey.Regeneration, regenerate);
         if (params != null) {
             repRunParams.putAll(params);
         }
-
         if (game.getReplacementHandler().run(ReplacementType.Destroy, repRunParams) != ReplacementResult.NotReplaced) {
             return false;
         }
@@ -1904,15 +1898,12 @@ public class GameAction {
         // Play the Destroy sound
         game.fireEvent(new GameEventCardDestroyed());
 
-        // Run triggers
         final Map<AbilityKey, Object> runParams = AbilityKey.mapFromCard(c);
         runParams.put(AbilityKey.Causer, activator);
         if (params != null) {
             runParams.putAll(params);
         }
         game.getTriggerHandler().runTrigger(TriggerType.Destroyed, runParams, false);
-        // in case the destroyed card has such a trigger
-        game.getTriggerHandler().registerActiveLTBTrigger(c);
 
         final Card sacrificed = sacrificeDestroy(c, sa, params);
         return sacrificed != null;
@@ -2203,7 +2194,8 @@ public class GameAction {
 
             for (Card c : ploys) {
                 if (!cmc.isEmpty()) {
-                    chosen = takesAction.getController().chooseNumber(c.getSpellPermanent(), "Emissary's Ploy", cmc, c.getOwner());
+                    SpellAbility sa = new SpellAbility.EmptySa(ApiType.ChooseNumber, c, takesAction);
+                    chosen = takesAction.getController().chooseNumber(sa, "Emissary's Ploy", cmc, c.getOwner());
                     cmc.remove((Object)chosen);
                 }
 

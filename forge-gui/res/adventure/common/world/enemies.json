@@ -850,7 +850,8 @@
 		"Flying",
 		"IdentityWhite",
 		"Akroma"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Amphin Warrior",
@@ -4027,7 +4028,7 @@
 },
 {
 	"name": "Caracal",
-	"sprite": "sprites/enemy/beast/Caracal.atlas",
+	"sprite": "sprites/enemy/beast/caracal.atlas",
 	"deck": [
 		"decks/standard/caracal.dck"
 	],
@@ -4089,7 +4090,7 @@
 },
 {
 	"name": "Cathar",
-	"nameOverride": "Human Cathar",
+	"nameOverride": "Human Raider",
 	"sprite": "sprites/enemy/humanoid/human/soldier/cathar.atlas",
 	"deck": [
 		"decks/standard/cathar.dck"
@@ -4784,7 +4785,6 @@
 	"difficulty": 0.1,
 	"speed": 30,
 	"life": 70,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -4875,7 +4875,8 @@
 		"Chandra",
 		"Fire",
 		"IdentityRed"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Chandra's Acolyte",
@@ -7381,19 +7382,12 @@
 			]
 		},
 		{
-			"type": "deckCard",
-			"probability": 0.25,
+			"type": "card",
+			"probability": 1,
 			"count": 1,
-			"addMaxCount": 1,
-			"rarity": [
-				"rare"
-			],
-			"cardTypes": [
-				"Creature",
-				"Artifact",
-				"Enchantment",
-				"Instant",
-				"Sorcery"
+			"addMaxCount": 2,
+			"subTypes": [
+				"Spirit"
 			]
 		},
 		{
@@ -7411,7 +7405,10 @@
 			"type": "gold",
 			"probability": 0.3,
 			"count": 10,
-			"addMaxCount": 90
+			"addMaxCount": 90,
+			"subTypes": [
+				"Spirit"
+			]
 		}
 	],
 	"colors": "B",
@@ -9239,6 +9236,7 @@
 },
 {
 	"name": "Eldraine Faerie",
+	"nameOverride": "Faerie Trickster",
 	"sprite": "sprites/enemy/fey/pixie.atlas",
 	"deck": [
 		"decks/standard/eldraine_faerie.dck"
@@ -9324,6 +9322,7 @@
 },
 {
 	"name": "Eldraine Knight",
+	"nameOverride": "Fair Knight",
 	"sprite": "sprites/enemy/humanoid/paladin_2.atlas",
 	"deck": [
 		"decks/standard/eldraine_knight.dck"
@@ -9867,7 +9866,6 @@
 	"speed": 25,
 	"scale": 1.5,
 	"life": 100,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "gold",
@@ -9945,7 +9943,8 @@
 		"Eldrazi",
 		"Boss",
 		"IdentityColorless"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Esper Artificer",
@@ -11193,6 +11192,89 @@
 	]
 },
 {
+	"name": "Fog Trap",
+	"sprite": "sprites/enemy/aberration/mimic.atlas",
+	"deck": [
+		"decks/standard/turbofog.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 15,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"rarity": [
+				"uncommon"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.25,
+			"count": 1,
+			"addMaxCount": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.5,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "WG",
+	"questTags": [
+		"Sneaky",
+		"Ambush",
+		"Predator",
+		"Inhuman",
+		"IdentityWhite",
+		"IdentityGreen",
+		"IdentitySelesnya"
+	]
+},
+{
 	"name": "Forest Giant",
 	"sprite": "sprites/enemy/giant/forestgiant.atlas",
 	"deck": [
@@ -12007,7 +12089,6 @@
 	"speed": 1,
 	"scale": 1.5,
 	"life": 60,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -12063,7 +12144,8 @@
 		"Territorial",
 		"IdentityGreen",
 		"Ghalta"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Garruk",
@@ -12078,7 +12160,6 @@
 	"speed": 30,
 	"scale": 0.5,
 	"life": 25,
-	"gamesPerMatch": 1,
 	"rewards": [
 		{
 			"type": "card",
@@ -12154,7 +12235,93 @@
 		"IdentityGreen",
 		"IdentityBlack",
 		"IdentityGolgari"
-	]
+	],
+	"gamesPerMatch": 3
+},
+{
+	"name": "Sorin",
+	"sprite": "sprites/enemy/undead/sorin.atlas",
+	"deck": [
+		"decks/miniboss/sorin.dck"
+	],
+	"ai": "",
+	"boss": true,
+	"spawnRate": 1,
+	"difficulty": 1,
+	"speed": 30,
+	"scale": 0.5,
+	"life": 35,
+	"rewards": [
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Bazaar of Baghdad"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Mox Jet"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Sorin, Imperious Bloodlord"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Swords to Plowshares"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Anguished Unmaking"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Vampiric Tutor"
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"cardName": "Diabolic Intent"
+		},
+		{
+			"type": "gold",
+			"probability": 1,
+			"count": 1000,
+			"addMaxCount": 9000
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 20,
+			"addMaxCount": 10
+		},
+		{
+			"type": "life",
+			"probability": 1,
+			"count": 1
+		}
+	],
+	"colors": "GB",
+	"questTags": [
+		"Planeswalker",
+		"Sorin",
+		"Boss",
+		"IdentityWhite",
+		"IdentityBlack",
+		"IdentityOrzhov"
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Geist",
@@ -12180,19 +12347,12 @@
 			]
 		},
 		{
-			"type": "deckCard",
-			"probability": 0.5,
+			"type": "card",
+			"probability": 1,
 			"count": 1,
 			"addMaxCount": 2,
-			"rarity": [
-				"uncommon"
-			],
-			"cardTypes": [
-				"Creature",
-				"Artifact",
-				"Enchantment",
-				"Instant",
-				"Sorcery"
+			"subTypes": [
+				"Spirit"
 			]
 		},
 		{
@@ -12418,6 +12578,7 @@
 },
 {
 	"name": "Ghost",
+	"nameOverride": "Haunting Apparition",
 	"sprite": "sprites/enemy/undead/ghost_2.atlas",
 	"deck": [
 		"decks/standard/ghost.json"
@@ -12508,7 +12669,7 @@
 	],
 	"ai": "",
 	"flying": true,
-	"spawnRate": 0.8,
+	"spawnRate": 0.5,
 	"difficulty": 0.1,
 	"speed": 30,
 	"scale": 0.5,
@@ -12518,7 +12679,7 @@
 			"type": "deckCard",
 			"probability": 1,
 			"count": 2,
-			"addMaxCount": 4,
+			"addMaxCount": 2,
 			"rarity": [
 				"common",
 				"uncommon",
@@ -12948,6 +13109,7 @@
 	"deck": [
 		"decks/standard/zombie_greater.dck"
 	],
+	"ai": "",
 	"spawnRate": 1,
 	"difficulty": 0.2,
 	"speed": 15,
@@ -13098,7 +13260,6 @@
 	"speed": 1,
 	"scale": 1.5,
 	"life": 60,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -13154,11 +13315,12 @@
 		"Boss",
 		"IdentityBlack",
 		"Griselbrand"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Grolnok",
-	"sprite": "sprites/enemy/aberration/frogboss.atlas",
+	"sprite": "sprites/enemy/aberration/gianttoad.atlas",
 	"deck": [
 		"decks/miniboss/frogboss.dck"
 	],
@@ -13169,7 +13331,6 @@
 	"speed": 15,
 	"scale": 0.5,
 	"life": 50,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -13257,6 +13418,66 @@
 		"IdentityGreen",
 		"Giant",
 		"IdentitySultai"
+	],
+	"gamesPerMatch": 3
+},
+{
+	"name": "Froghemoth",
+	"sprite": "sprites/enemy/aberration/froghemoth.atlas",
+	"deck": [
+		"decks/standard/froghemoth.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.8,
+	"speed": 18,
+	"scale": 0.55,
+	"life": 25,
+	"rewards": [
+		{
+			"type": "gold",
+			"probability": 1,
+			"count": 200,
+			"addMaxCount": 100
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 2,
+			"rarity": [
+				"Rare",
+				"Mythic Rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 20,
+			"addMaxCount": 10
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 5,
+			"addMaxCount": 2,
+			"subTypes": [
+				"Frog"
+			]
+		}
+	],
+	"colors": "RG",
+	"questTags": [
+		"Humanoid",
+		"Simian",
+		"Territorial",
+		"Animal",
+		"Wild",
+		"IdentityGreen",
+		"IdentityRed",
+		"IdentityGruul"
 	]
 },
 {
@@ -13550,8 +13771,8 @@
 		{
 			"type": "deckCard",
 			"probability": 1,
-			"count": 2,
-			"addMaxCount": 4,
+			"count": 1,
+			"addMaxCount": 2,
 			"rarity": [
 				"common",
 				"uncommon"
@@ -13581,6 +13802,15 @@
 			],
 			"cardTypes": [
 				"land"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 1,
+			"addMaxCount": 6,
+			"cardTypes": [
+				"Artifact"
 			]
 		}
 	],
@@ -15484,7 +15714,6 @@
 			"probability": 1,
 			"count": 2,
 			"addMaxCount": 5,
-			
 			"rarity": [
 				"rare",
 				"Mythic Rare",
@@ -16187,7 +16416,6 @@
 	"difficulty": 0.1,
 	"speed": 15,
 	"life": 30,
-	"gamesPerMatch": 1,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -16296,7 +16524,7 @@
 	],
 	"ai": "",
 	"flying": true,
-	"spawnRate": 0.5,
+	"spawnRate": 0.3,
 	"difficulty": 0.1,
 	"speed": 25,
 	"scale": 1.3,
@@ -16673,7 +16901,6 @@
 	"speed": 30,
 	"scale": 0.5,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -16744,7 +16971,8 @@
 		"IdentityBlue",
 		"IdentityWhite",
 		"IdentityAzorius"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Jellyfish",
@@ -16997,7 +17225,6 @@
 	"speed": 31,
 	"scale": 0.35,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -17088,7 +17315,8 @@
 		"IdentityGreen",
 		"IdentityBlue",
 		"IdentitySimic"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Knight",
@@ -17900,7 +18128,6 @@
 	"speed": 1,
 	"scale": 1.5,
 	"life": 60,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -17955,7 +18182,8 @@
 		"Huge",
 		"Boss",
 		"Lathliss"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Leonin Weaponmaster",
@@ -18180,7 +18408,6 @@
 	"difficulty": 0.1,
 	"speed": 30,
 	"life": 70,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -18271,7 +18498,8 @@
 		"Liliana",
 		"Death",
 		"IdentityBlack"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Liliana's Alchemist",
@@ -18507,7 +18735,6 @@
 	"speed": 1,
 	"scale": 1.5,
 	"life": 60,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -18561,7 +18788,8 @@
 		"Octopus",
 		"IdentityBlue",
 		"Lorthos"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Mageripper",
@@ -20034,7 +20262,6 @@
 	"name": "Monk",
 	"sprite": "sprites/enemy/humanoid/human/cleric/monk.atlas",
 	"deck": [
-		"decks/standard/angel.json",
 		"decks/standard/monk.json"
 	],
 	"ai": "",
@@ -20266,7 +20493,6 @@
 	"speed": 20,
 	"scale": 2.5,
 	"life": 25,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -20305,7 +20531,8 @@
 		"Robot",
 		"Dungeon",
 		"Boss"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Naga Warrior",
@@ -21082,7 +21309,6 @@
 	"difficulty": 0.1,
 	"speed": 23,
 	"life": 50,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "item",
@@ -21168,7 +21394,8 @@
 		"IdentityGreen",
 		"IdentityBlack",
 		"IdentityGolgari"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Owl",
@@ -23251,6 +23478,7 @@
 },
 {
 	"name": "Red Beast",
+	"nameOverride": "Giant Red Basilisk",
 	"sprite": "sprites/enemy/monstrosity/basilisk_2.atlas",
 	"deck": [
 		"decks/standard/beast_red.json"
@@ -23343,7 +23571,7 @@
 	"spawnRate": 0.8,
 	"difficulty": 0.1,
 	"speed": 15,
-	"scale":1.1,
+	"scale": 1.1,
 	"life": 16,
 	"rewards": [
 		{
@@ -23892,7 +24120,6 @@
 	"difficulty": 0.1,
 	"speed": 15,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -23949,7 +24176,8 @@
 		"Territorial",
 		"Leader",
 		"IdentityAll"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Scorpion",
@@ -24480,15 +24708,19 @@
 	"life": 11,
 	"rewards": [
 		{
-			"type": "randomCard",
-			"count": 2,
-			"addMaxCount": 8
-		},
-		{
 			"type": "gold",
 			"probability": 0.6,
 			"count": 7,
 			"addMaxCount": 32
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"colors": [
+				"Black"
+			]
 		}
 	],
 	"colors": "B",
@@ -24514,15 +24746,19 @@
 	"life": 11,
 	"rewards": [
 		{
-			"type": "randomCard",
-			"count": 2,
-			"addMaxCount": 8
-		},
-		{
 			"type": "gold",
-			"probability": 0.6,
+			"probability": 1,
 			"count": 7,
 			"addMaxCount": 32
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"subTypes": [
+				"Skeleton"
+			]
 		}
 	],
 	"colors": "B",
@@ -24555,50 +24791,9 @@
 			"addMaxCount": 4,
 			"rarity": [
 				"common",
-				"rare"
-			]
-		},
-		{
-			"type": "deckCard",
-			"probability": 0.5,
-			"count": 1,
-			"addMaxCount": 2,
-			"rarity": [
-				"uncommon"
-			],
-			"cardTypes": [
-				"Creature",
-				"Artifact",
-				"Enchantment",
-				"Instant",
-				"Sorcery"
-			]
-		},
-		{
-			"type": "deckCard",
-			"probability": 0.25,
-			"count": 1,
-			"addMaxCount": 1,
-			"rarity": [
-				"rare"
-			],
-			"cardTypes": [
-				"Creature",
-				"Artifact",
-				"Enchantment",
-				"Instant",
-				"Sorcery"
-			]
-		},
-		{
-			"type": "deckCard",
-			"probability": 0.1,
-			"count": 1,
-			"rarity": [
-				"rare"
-			],
-			"cardTypes": [
-				"Land"
+				"rare",
+				"Mythic Rare",
+				"Uncommon"
 			]
 		},
 		{
@@ -24606,6 +24801,19 @@
 			"probability": 0.3,
 			"count": 10,
 			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 10
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 3,
+			"addMaxCount": 4,
+			"cardText": "Skeleton"
 		}
 	],
 	"colors": "B",
@@ -24632,7 +24840,6 @@
 	"speed": 31,
 	"scale": 0.7,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -24714,7 +24921,8 @@
 		"IdentityBlack",
 		"IdentityGreen",
 		"IdentityGolgari"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Slivdrazi Experiment",
@@ -25088,7 +25296,6 @@
 	"speed": 15,
 	"scale": 0.75,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "Card",
@@ -25170,7 +25377,8 @@
 		"Boss",
 		"Loner",
 		"IdentityRed"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Sliver Queen",
@@ -25182,7 +25390,6 @@
 	"boss": true,
 	"speed": 1,
 	"life": 50,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "gold",
@@ -25226,7 +25433,8 @@
 		"Territorial",
 		"Nesting",
 		"IdentityAll"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Snake",
@@ -25844,7 +26052,7 @@
 	"spawnRate": 1,
 	"difficulty": 0.1,
 	"speed": 23,
-	"scale":1.5,
+	"scale": 1.5,
 	"life": 20,
 	"rewards": [
 		{
@@ -26188,7 +26396,6 @@
 	"speed": 31,
 	"scale": 0.5,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "gold",
@@ -26261,7 +26468,8 @@
 		"IdentityBlue",
 		"IdentityWhite",
 		"IdentityAzorius"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "The Cheff",
@@ -26278,7 +26486,6 @@
 	"speed": 15,
 	"scale": 0.6,
 	"life": 50,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -26387,7 +26594,8 @@
 		"Cook",
 		"Human",
 		"Boss"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Tibalt",
@@ -26402,7 +26610,6 @@
 	"speed": 31,
 	"scale": 0.5,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -26491,7 +26698,8 @@
 		"Boss",
 		"Planeswalker",
 		"IdentityRed"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Tiger",
@@ -26566,7 +26774,6 @@
 	"speed": 20,
 	"scale": 0.7,
 	"life": 30,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -26615,7 +26822,8 @@
 		"Aggressive",
 		"IdentityBlack",
 		"Evil"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Turtle",
@@ -26973,7 +27181,6 @@
 	"difficulty": 0.1,
 	"speed": 31,
 	"life": 80,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -27024,7 +27231,8 @@
 		"Humanoid",
 		"Unholy",
 		"IdentityBlack"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Vampire",
@@ -28495,7 +28703,6 @@
 	"speed": 31,
 	"scale": 0.5,
 	"life": 50,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "deckCard",
@@ -28583,7 +28790,8 @@
 		"IdentityGreen",
 		"IdentityRed",
 		"IdentityJund"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Yeti",
@@ -28682,7 +28890,6 @@
 	"speed": 30,
 	"scale": 0.5,
 	"life": 40,
-	"gamesPerMatch": 3,
 	"rewards": [
 		{
 			"type": "card",
@@ -28754,7 +28961,8 @@
 		"Illusionist",
 		"Leader",
 		"Large"
-	]
+	],
+	"gamesPerMatch": 3
 },
 {
 	"name": "Zombie",
@@ -28849,6 +29057,1551 @@
 		"Leader",
 		"IdentityBlack",
 		"BiomeBlack"
+	]
+},
+{
+	"name": "Evil Wall",
+	"sprite": "sprites/enemy/construct/wall.atlas",
+	"deck": [
+		"decks/standard/hiddenwall.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"rarity": [
+				"uncommon"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "GW",
+	"questTags": [
+		"Stone",
+		"Wall",
+		"Construct",
+		"Artifact",
+		"Hidden"
+	]
+},
+{
+	"name": "Juggernaut",
+	"sprite": "sprites/enemy/construct/juggernaut.atlas",
+	"deck": [
+		"decks/standard/juggernaut.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"rarity": [
+				"uncommon"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"questTags": [
+		"Stone",
+		"Wall",
+		"Construct",
+		"Artifact",
+		"Hidden",
+		"Juggernaut"
+	]
+},
+{
+	"name": "Bone Golem",
+	"sprite": "sprites/enemy/undead/bonegolem.atlas",
+	"deck": [
+		"decks/standard/bonegolem.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Black"
+			],
+			"subTypes": [
+				"Skeleton"
+			],
+			"cardTypes": [
+				"Creature"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "GW",
+	"questTags": [
+		"Skeleton",
+		"IdentityBlack",
+		"Golem",
+		"Undead",
+		"Zombie",
+		"Aberration",
+		"Monster",
+		"Evil"
+	]
+},
+{
+	"name": "Hulking Brute",
+	"sprite": "sprites/enemy/undead/hulkingbrute.atlas",
+	"deck": [
+		"decks/standard/hulkingbrute.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"rarity": [
+				"uncommon"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Zombie",
+		"Evil"
+	]
+},
+{
+	"name": "Unholy Knight",
+	"sprite": "sprites/enemy/undead/deathknightidle.atlas",
+	"deck": [
+		"decks/standard/unholyknight.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"BiomeBlack",
+		"Aberration",
+		"Aggressive",
+		"IdentityBlack",
+		"Hostile",
+		"Unholy"
+	]
+},
+{
+	"name": "Undead Goblin",
+	"sprite": "sprites/enemy/undead/goblinzombie.atlas",
+	"deck": [
+		"decks/standard/monobgoblins.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"scale": 0.8,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"rarity": [
+				"uncommon"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "RB",
+	"questTags": [
+		"Goblin",
+		"Zombie",
+		"Undead",
+		"Evil",
+		"Aberration",
+		"IdentityRakdos"
+	]
+},
+{
+	"name": "Graven Revenant",
+	"sprite": "sprites/enemy/undead/graverevenant.atlas",
+	"deck": [
+		"decks/standard/giralfgisa.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Blue",
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"Necromancer",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir"
+	]
+},
+{
+	"name": "Plaguelord",
+	"sprite": "sprites/enemy/undead/zombiepoisoner.atlas",
+	"deck": [
+		"decks/standard/zombiepoisoner.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"cardText": "Infect"
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"cardText": "Poison"
+		}
+	],
+	"colors": "UB",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"Necromancer",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir"
+	]
+},
+{
+	"name": "Royal Sentinel",
+	"sprite": "sprites/enemy/undead/royalsentinel.atlas",
+	"deck": [
+		"decks/standard/trap.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Blue",
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "UB",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"Necromancer",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir",
+		"Guardian"
+	]
+},
+{
+	"name": "Lord Pestilence",
+	"sprite": "sprites/enemy/undead/pestilencelord.atlas",
+	"deck": [
+		"decks/standard/trap.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Blue",
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"Necromancer",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir"
+	]
+},
+{
+	"name": "Sand Ghoul",
+	"sprite": "sprites/enemy/undead/sandghoul.atlas",
+	"deck": [
+		"decks/standard/sandghoul.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Blue",
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "W",
+	"questTags": [
+		"Zombie",
+		"Giant",
+		"Golem",
+		"IdentityWhite",
+		"Aberration",
+		"Aggressive",
+		null
+	]
+},
+{
+	"name": "Tomb Guardian",
+	"sprite": "sprites/enemy/undead/tombguardian.atlas",
+	"deck": [
+		"decks/standard/tombguardian.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Blue",
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"cardTypes": [
+				"Creature",
+				"Artifact",
+				"Enchantment",
+				"Instant",
+				"Sorcery"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"Necromancer",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir"
+	]
+},
+{
+	"name": "Undead Roamer",
+	"sprite": "sprites/enemy/undead/undeadroamer.atlas",
+	"deck": [
+		"decks/standard/undeadroamer.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"BiomeBlack",
+		"IdentityBlack",
+		"Undead",
+		"Aberration",
+		null
+	]
+},
+{
+	"name": "Undead Shuffler",
+	"sprite": "sprites/enemy/undead/undeadshuffler.atlas",
+	"deck": [
+		"decks/standard/undeadshuffler.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"Black"
+			],
+			"rarity": [
+				"uncommon",
+				"Rare"
+			],
+			"subTypes": [
+				"Zombie"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "B",
+	"questTags": [
+		"Aberration",
+		"Aggressive",
+		"Undead",
+		"Unholy",
+		"IdentityBlack",
+		null,
+		null
+	]
+},
+{
+	"name": "Unholy Skull",
+	"sprite": "sprites/enemy/undead/unholyskull.atlas",
+	"deck": [
+		"decks/standard/unholyskull.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 2,
+			"colors": [
+				"Black"
+			],
+			"cardText": "Discard Opponent"
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "BU",
+	"questTags": [
+		"Evil",
+		"Zombie",
+		"BiomeBlack",
+		"Inhuman",
+		"Wizard",
+		"IdentityDimir",
+		"Skull"
+	]
+},
+{
+	"name": "Unraveling Crawler",
+	"sprite": "sprites/enemy/undead/unravelingcrawler.atlas",
+	"deck": [
+		"decks/standard/unravelingcrawler.dck"
+	],
+	"ai": "",
+	"spawnRate": 1,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 20,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"cardText": "return graveyard hand"
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 15
+		}
+	],
+	"colors": "GB",
+	"questTags": [
+		"Evil",
+		"Aberration",
+		"Aerie",
+		"Monster",
+		"Undead",
+		"Crawling",
+		"BiomeBlack",
+		"Skeleton"
+	]
+},
+{
+	"name": "Angelic Page",
+	"sprite": "sprites/enemy/celestial/angel_1.atlas",
+	"deck": [
+		"decks/standard/angel.json"
+	],
+	"ai": "",
+	"flying": true,
+	"spawnRate": 0.8,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 12,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "card",
+			"probability": 0.5,
+			"count": 1,
+			"addMaxCount": 2,
+			"colors": [
+				"White"
+			],
+			"subTypes": [
+				"Angel"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "W",
+	"questTags": [
+		"Angel",
+		"Celestial",
+		"Flying",
+		"BiomeColorless",
+		"Holy",
+		"IdentityWhite",
+		null,
+		null
+	]
+},
+{
+	"name": "Angel Overseer",
+	"sprite": "sprites/enemy/celestial/angel_2.atlas",
+	"deck": [
+		"decks/standard/azoriusangel.dck"
+	],
+	"ai": "",
+	"flying": true,
+	"spawnRate": 0.6,
+	"difficulty": 0.1,
+	"scale": 1.2,
+	"speed": 21,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "uw",
+	"questTags": [
+		"Angel",
+		"Celestial",
+		"Flying",
+		"IdentityAzorius",
+		"Holy",
+		"BiomeBlue",
+		"BiomeWhite",
+		null
+	]
+},
+{
+	"name": "Minor Demon",
+	"sprite": "sprites/enemy/fiend/demon_4.atlas",
+	"deck": [
+		"decks/standard/demon4.dck"
+	],
+	"ai": "",
+	"flying": true,
+	"spawnRate": 0.6,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "b",
+	"questTags": [
+		"BiomeBlack",
+		"BiomeColorless",
+		"IdentityBlack",
+		"Demon",
+		"Evil",
+		"Unholy",
+		null,
+		null
+	]
+},
+{
+	"name": "Ancient Demon",
+	"sprite": "sprites/enemy/fiend/demon_5.atlas",
+	"deck": [
+		"decks/standard/demon5.dck"
+	],
+	"ai": "",
+	"spawnRate": 0.6,
+	"scale": 1.2,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "UB",
+	"questTags": [
+		"IdentityDimir",
+		"Demon",
+		"BiomeColorless",
+		"BiomeBlack",
+		"Unholy",
+		"Aggressive",
+		"Aberration",
+		null
+	]
+},
+{
+	"name": "Bloodgift Demon",
+	"sprite": "sprites/enemy/fiend/demon_2.atlas",
+	"deck": [
+		"decks/standard/demonwander.dck"
+	],
+	"ai": "",
+	"spawnRate": 0.6,
+	"scale": 1.2,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 5
+		}
+	],
+	"colors": "brw",
+	"questTags": [
+		"IdentityMardu",
+		"Aberration",
+		"Aggressive",
+		"Evil",
+		"Unholy",
+		"BiomeRed",
+		null,
+		null
+	]
+},
+{
+	"name": "Human Looter",
+	"sprite": "sprites/enemy/humanoid/human/peasant/peasant2.atlas",
+	"deck": [
+		"decks/standard/peasantrole.dck"
+	],
+	"ai": "",
+	"spawnRate": 0.6,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 15,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		}
+	],
+	"colors": "GW",
+	"questTags": [
+		"Human",
+		"Peasant",
+		"BiomeWhite",
+		"BiomeColorless",
+		"Looter",
+		"Farm",
+		null,
+		null
+	]
+},
+{
+	"name": "Supreme Elemental",
+	"sprite": "sprites/enemy/elemental/magicelemental.atlas",
+	"deck": [
+		"decks/standard/supremeelemental.dck"
+	],
+	"ai": "",
+	"flying": true,
+	"spawnRate": 0.6,
+	"scale": 1.2,
+	"difficulty": 0.1,
+	"speed": 21,
+	"life": 18,
+	"rewards": [
+		{
+			"type": "deckCard",
+			"probability": 1,
+			"count": 2,
+			"addMaxCount": 4,
+			"rarity": [
+				"common",
+				"uncommon",
+				"Rare"
+			]
+		},
+		{
+			"type": "deckCard",
+			"probability": 0.1,
+			"count": 1,
+			"rarity": [
+				"rare"
+			],
+			"cardTypes": [
+				"Land"
+			]
+		},
+		{
+			"type": "gold",
+			"probability": 0.3,
+			"count": 10,
+			"addMaxCount": 90
+		},
+		{
+			"type": "shards",
+			"probability": 1,
+			"count": 10,
+			"addMaxCount": 10
+		}
+	],
+	"colors": "WUBRG",
+	"questTags": [
+		"Elemental",
+		"Aberration",
+		"Aggressive",
+		"Arcane",
+		"Beast",
+		"IdentityWUBRG",
+		null,
+		null
 	]
 },
 {

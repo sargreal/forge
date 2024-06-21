@@ -24,6 +24,8 @@ import forge.game.player.actions.SelectCardAction;
 import forge.game.player.actions.SelectPlayerAction;
 import forge.game.trigger.TriggerType;
 
+import forge.game.mana.ManaCostBeingPaid;
+import forge.gamemodes.match.input.*;
 import forge.trackable.TrackableCollection;
 import forge.util.ImageUtil;
 import org.apache.commons.lang3.ObjectUtils;
@@ -47,6 +49,7 @@ import forge.StaticData;
 import forge.ai.GameState;
 import forge.ai.PlayerControllerAi;
 import forge.card.CardDb;
+import forge.card.CardSplitType;
 import forge.card.CardStateName;
 import forge.card.ColorSet;
 import forge.card.ICardFace;
@@ -112,19 +115,6 @@ import forge.game.zone.PlayerZone;
 import forge.game.zone.Zone;
 import forge.game.zone.ZoneType;
 import forge.gamemodes.match.NextGameDecision;
-import forge.gamemodes.match.input.Input;
-import forge.gamemodes.match.input.InputAttack;
-import forge.gamemodes.match.input.InputBlock;
-import forge.gamemodes.match.input.InputConfirm;
-import forge.gamemodes.match.input.InputConfirmMulligan;
-import forge.gamemodes.match.input.InputLondonMulligan;
-import forge.gamemodes.match.input.InputPassPriority;
-import forge.gamemodes.match.input.InputPayMana;
-import forge.gamemodes.match.input.InputProxy;
-import forge.gamemodes.match.input.InputQueue;
-import forge.gamemodes.match.input.InputSelectCardsForConvokeOrImprovise;
-import forge.gamemodes.match.input.InputSelectCardsFromList;
-import forge.gamemodes.match.input.InputSelectEntitiesFromList;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
 import forge.gui.control.FControlGamePlayback;
@@ -536,6 +526,13 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         return new CardCollection(inp.getSelected());
     }
 
+    private boolean useSelectCardsInput(final FCollectionView<? extends GameEntity> sourceList, final SpellAbility sa) {
+        //this can be used to stop zone select GUI when certain APIs would reveal illegal zone information
+        //initially created for HeistEffect which showed library placement
+        if (ApiType.Heist.equals(sa.getApi())) return false;
+        return useSelectCardsInput(sourceList);
+    }
+
     private boolean useSelectCardsInput(final FCollectionView<? extends GameEntity> sourceList) {
         // can't use InputSelect from GUI thread (e.g., DevMode Tutor)
         if (FThreads.isGuiThread()) {
@@ -608,6 +605,45 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         return choices;
     }
 
+
+    @Override
+    public boolean helpPayForAssistSpell(ManaCostBeingPaid cost, SpellAbility sa, int max, int requested) {
+        // This is like a mini-announce X
+        String title = String.format("%s trying to cast (%s) How much would you like to help pay for Assist? (Max: %s)", sa.getActivatingPlayer(), sa, max);
+        int willPay = chooseNumber(sa, title, 0, max);
+
+        if (willPay <= 0) {
+            // Just because you choose not to help, doesn't mean we should cancel the spell
+            return true;
+        }
+
+        ManaCost manaCost = ManaCost.get(willPay);
+        ManaCostBeingPaid assistCost = new ManaCostBeingPaid(manaCost);
+
+        InputPayMana inpPayment = new InputPayManaOfCostPayment(this, assistCost, sa, this.getPlayer(), null, true);
+        inpPayment.setMessagePrefix("Paying for assist - ");
+        inpPayment.showAndWait();
+
+        if (inpPayment.isPaid()) {
+            // Apply payments from assistCost to cost
+            // If cost is canceled, how do we make sure mana gets undone?
+
+            cost.decreaseGenericMana(willPay);
+            return true;
+        } else if (sa.getHostCard().getGame().EXPERIMENTAL_RESTORE_SNAPSHOT) {
+            // Let's roll it back!
+            return false;
+        } else {
+            System.out.println("Assist rollback may not work well without experimental restore snapshot enabled");
+            return false;
+        }
+    }
+
+    @Override
+    public Player choosePlayerToAssistPayment(FCollectionView<Player> optionList, SpellAbility sa, String title, int max) {
+        return chooseSingleEntityForEffect(optionList, null, sa, title, true, null, null);
+    }
+
     @Override
     public <T extends GameEntity> T chooseSingleEntityForEffect(final FCollectionView<T> optionList,
                                                                 final DelayedReveal delayedReveal, final SpellAbility sa, final String title, final boolean isOptional,
@@ -633,7 +669,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
             tempShow(delayedReveal.getCards());
         }
 
-        if (useSelectCardsInput(optionList)) {
+        if (useSelectCardsInput(optionList, sa)) {
             final InputSelectEntitiesFromList<T> input = new InputSelectEntitiesFromList<>(this, isOptional ? 0 : 1, 1,
                     optionList, sa);
             input.setCancelAllowed(isOptional);
@@ -1407,7 +1443,10 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public Object vote(final SpellAbility sa, final String prompt, final List<Object> options,
-                       final ListMultimap<Object, Player> votes, Player forPlayer) {
+                       final ListMultimap<Object, Player> votes, Player forPlayer, boolean optional) {
+        if (optional) {
+            return getGui().oneOrNone(prompt, options);
+        }
         return getGui().one(prompt, options);
     }
 
@@ -1859,11 +1898,12 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     }
 
     @Override
-    public ReplacementEffect chooseSingleReplacementEffect(final String prompt, final List<ReplacementEffect> possibleReplacers) {
+    public ReplacementEffect chooseSingleReplacementEffect(final List<ReplacementEffect> possibleReplacers) {
         final ReplacementEffect first = possibleReplacers.get(0);
         if (possibleReplacers.size() == 1) {
             return first;
         }
+        String prompt = localizer.getMessage("lblChooseFirstApplyReplacementEffect");
         final String firstStr = first.toString();
         for (int i = 1; i < possibleReplacers.size(); i++) {
             // prompt user if there are multiple different options
@@ -1924,12 +1964,14 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
                 String saStr = currentSa.toString();
 
                 // if current SA isn't a trigger and it uses Targeting, try to show prompt
-                if (!currentSa.isTrigger() && currentSa.usesTargeting()) {
+                if (currentSa.isTrigger()) {
+                    needPrompt |= currentSa.getTrigger().hasParam("OrderDuplicates");
+                } else if (currentSa.usesTargeting()) {
                     needPrompt = true;
                 }
-                if (!needPrompt && !saStr.equals(firstStr) && !currentSa.hasParam("OrderDuplicates")) {
-                    needPrompt = true; // prompt by default unless all abilities
-                    // are the same
+                if (!needPrompt && !saStr.equals(firstStr)) {
+                    // prompt by default unless all abilities are the same
+                    needPrompt = true;
                 }
 
                 saLookupKey.append(delim).append(saStr);
@@ -2604,7 +2646,7 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
             }
 
             if (subtract) {
-                card.subtractCounter(counter, count);
+                card.subtractCounter(counter, count, null);
             } else {
                 card.addCounterInternal(counter, count, card.getController(), false, null, null);
             }
@@ -2840,16 +2882,25 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
             PaperCard c = carddb.getUniqueByName(f.getOracleName());
             final Card forgeCard = Card.fromPaperCard(c, p);
-            forgeCard.setTimestamp(getGame().getNextTimestamp());
+            forgeCard.setGameTimestamp(getGame().getNextTimestamp());
 
             PaperCard finalC = c;
             getGame().getAction().invoke(() -> {
                 if (targetZone == ZoneType.Battlefield) {
                     if (!forgeCard.getName().equals(f.getName())) {
-                        forgeCard.changeToState(forgeCard.getRules().getSplitType().getChangedStateName());
-                        if (forgeCard.getCurrentStateName().equals(CardStateName.Transformed) ||
-                                forgeCard.getCurrentStateName().equals(CardStateName.Modal)) {
-                            forgeCard.setBackSide(true);
+                        if (forgeCard.getRules().getSplitType().equals(CardSplitType.Specialize)) {
+                            for (Map.Entry<CardStateName, ICardFace> e : forgeCard.getRules().getSpecializeParts().entrySet()) {
+                                if (f.getName().equals(e.getValue().getName())) {
+                                    forgeCard.changeToState(e.getKey());
+                                    break;
+                                }
+                            }
+                        } else {
+                            forgeCard.changeToState(forgeCard.getRules().getSplitType().getChangedStateName());
+                            if (forgeCard.getCurrentStateName().equals(CardStateName.Transformed) ||
+                                    forgeCard.getCurrentStateName().equals(CardStateName.Modal)) {
+                                forgeCard.setBackSide(true);
+                            }
                         }
                     }
 
@@ -3145,6 +3196,10 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
 
     @Override
     public void autoPassCancel() {
+        if (getGui() == null) {
+            return;
+        }
+
         getGui().autoPassCancel(getLocalPlayerView());
     }
 
@@ -3156,6 +3211,14 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
     @Override
     public void cancelAwaitNextInput() {
         getGui().cancelAwaitNextInput();
+    }
+
+    @Override
+    public void resetInputs() {
+        final Input inp = inputProxy.getInput();
+        if (inp != null) {
+            inp.selectButtonCancel();
+        }
     }
 
     @Override

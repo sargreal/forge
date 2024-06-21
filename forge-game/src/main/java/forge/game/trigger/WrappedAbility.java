@@ -21,6 +21,7 @@ import forge.game.card.CardDamageMap;
 import forge.game.card.CardState;
 import forge.game.card.CardZoneTable;
 import forge.game.cost.Cost;
+import forge.game.keyword.Keyword;
 import forge.game.player.Player;
 import forge.game.spellability.Ability;
 import forge.game.spellability.AbilitySub;
@@ -67,8 +68,9 @@ public class WrappedAbility extends Ability {
             ApiType.SacrificeAll,
             ApiType.Pump,
 
+            ApiType.DealDamage, // checked
+
             ApiType.Regenerate, // Updated
-            ApiType.RegenerateAll, // No Triggered
             ApiType.Regeneration, // Replacement Effect only
 
             ApiType.DelayedTrigger
@@ -287,8 +289,8 @@ public class WrappedAbility extends Ability {
     }
 
     @Override
-    public boolean isBuyBackAbility() {
-        return sa.isBuyBackAbility();
+    public boolean isBuyback() {
+        return sa.isBuyback();
     }
 
     @Override
@@ -307,8 +309,8 @@ public class WrappedAbility extends Ability {
     }
 
     @Override
-    public boolean isFlashBackAbility() {
-        return sa.isFlashBackAbility();
+    public boolean isFlashback() {
+        return sa.isFlashback();
     }
 
     @Override
@@ -490,9 +492,7 @@ public class WrappedAbility extends Ability {
             }
         }
 
-        if (!regtrig.hasParam("NoTimestampCheck")) {
-            timestampCheck();
-        }
+        timestampCheck();
 
         getActivatingPlayer().getController().playSpellAbilityNoStack(sa, false);
     }
@@ -512,7 +512,7 @@ public class WrappedAbility extends Ability {
             if (ev.getValue() instanceof Card) {
                 Card card = (Card) ev.getValue();
                 Card current = game.getCardState(card);
-                if (card.isInPlay() && current.isInPlay() && current.getTimestamp() != card.getTimestamp()) {
+                if (card.isInPlay() && current.isInPlay() && !current.equalsWithGameTimestamp(card)) {
                     // TODO: figure out if NoTimestampCheck should be the default for ChangesZone triggers
                     sa.getTriggeringObjects().remove(ev.getKey());
                 }
@@ -589,5 +589,9 @@ public class WrappedAbility extends Ability {
 
     public boolean isIntrinsic() {
         return sa.isIntrinsic();
+    }
+
+    public boolean isKeyword(Keyword kw) {
+        return sa.isKeyword(kw);
     }
 }

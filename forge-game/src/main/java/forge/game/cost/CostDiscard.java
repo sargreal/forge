@@ -17,9 +17,11 @@
  */
 package forge.game.cost;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import forge.game.ability.AbilityKey;
@@ -42,7 +44,7 @@ public class CostDiscard extends CostPartWithList {
 
     // Inputs
 
-    protected boolean firstTime = false;
+    protected List<Card> discardedBefore;
 
     private static final long serialVersionUID = 1L;
 
@@ -151,7 +153,9 @@ public class CostDiscard extends CostPartWithList {
         else if (type.equals("DifferentNames")) {
             Set<String> cardNames = Sets.newHashSet();
             for (Card c : handList) {
-                cardNames.add(c.getName());
+                if (!c.hasNoName()) {
+                    cardNames.add(c.getName());
+                }
             }
             return cardNames.size() >= amount;
         }
@@ -225,7 +229,7 @@ public class CostDiscard extends CostPartWithList {
     }
 
     protected void handleBeforePayment(Player ai, SpellAbility ability, CardCollectionView targetCards) {
-        firstTime = ai.getNumDiscardedThisTurn() == 0;
+        discardedBefore = Lists.newArrayList(ai.getDiscardedThisTurn());
     }
 
     @Override
@@ -236,7 +240,7 @@ public class CostDiscard extends CostPartWithList {
             final Map<AbilityKey, Object> runParams = AbilityKey.mapFromPlayer(payer);
             runParams.put(AbilityKey.Cards, new CardCollection(cardList));
             runParams.put(AbilityKey.Cause, ability);
-            runParams.put(AbilityKey.FirstTime, firstTime);
+            runParams.put(AbilityKey.DiscardedBefore, discardedBefore);
             payer.getGame().getTriggerHandler().runTrigger(TriggerType.DiscardedAll, runParams, false);
         }
     }

@@ -99,7 +99,13 @@ public class CostExile extends CostPartWithList {
     }
 
     @Override
-    public int paymentOrder() { return 15; }
+    public int paymentOrder() {
+        if (this.from.contains(ZoneType.Library)) {
+            // In a world where costs are fully undoable, revealing unknown information should be done last.
+            return 20;
+        }
+        return 15;
+    }
 
     @Override
     public final String toString() {
@@ -196,12 +202,23 @@ public class CostExile extends CostPartWithList {
             type = TextUtil.fastReplace(type, "+withSharedCardType", "");
         }
 
+        int nTypes = -1;
+        if (type.contains("+withTypesGE")) {
+            String num = type.split("withTypesGE")[1];
+            type = TextUtil.fastReplace(type, TextUtil.concatNoSpace("+withTypesGE", num), "");
+            nTypes = Integer.parseInt(num);
+        }
+
         if (!type.contains("X") || ability.getXManaCostPaid() != null) {
             list = CardLists.getValidCards(list, type.split(";"), payer, source, ability);
         }
 
         int amount = this.getAbilityAmount(ability);
 
+        if (nTypes > -1) {
+            if (CardFactoryUtil.getCardTypesFromList(list) < nTypes) return false;
+        }
+        
         if (sharedType) { // will need more logic if cost ever wants more than 2 that share a type
             if (list.size() < amount) return false;
             for (int i = 0; i < list.size(); i++) {

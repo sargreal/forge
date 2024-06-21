@@ -35,6 +35,9 @@ public class AlterAttributeEffect extends SpellAbilityEffect {
                 boolean altered = false;
 
                 switch (attr.trim()) {
+                    case "Plotted":
+                        altered = c.setPlotted(activate);
+                        break;
                     case "Solve":
                     case "Solved":
                         altered = c.setSolved(activate);
@@ -47,6 +50,18 @@ public class AlterAttributeEffect extends SpellAbilityEffect {
                     case "Suspect":
                     case "Suspected":
                         altered = c.setSuspected(activate);
+                        break;
+                    case "Saddle":
+                    case "Saddled":
+                        // currently clean up in Card manually
+                        altered = c.setSaddled(activate);
+                        if (altered) {
+                            CardCollection saddlers = (CardCollection) sa.getPaidList("TappedCards", true);
+                            c.addSaddledByThisTurn(saddlers);
+                            Map<AbilityKey, Object> runParams = AbilityKey.mapFromCard(c);
+                            runParams.put(AbilityKey.Crew, saddlers);
+                            c.getGame().getTriggerHandler().runTrigger(TriggerType.BecomesSaddled, runParams, false);
+                        }
                         break;
 
                         // Other attributes: renown, monstrous, suspected, etc

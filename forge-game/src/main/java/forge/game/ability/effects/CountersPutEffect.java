@@ -90,7 +90,7 @@ public class CountersPutEffect extends SpellAbilityEffect {
         }
         // skip the StringBuilder if no targets are chosen ("up to" scenario)
         if (sa.usesTargeting()) {
-            final List<Card> targetCards = SpellAbilityEffect.getTargetCards(sa);
+            final List<Card> targetCards = getTargetCards(sa);
             if (targetCards.size() == 0) {
                 return stringBuilder.toString();
             }
@@ -132,7 +132,7 @@ public class CountersPutEffect extends SpellAbilityEffect {
             }
             // if use targeting we show all targets and corresponding counters
         } else if (sa.usesTargeting()) {
-            final List<Card> targetCards = SpellAbilityEffect.getTargetCards(sa);
+            final List<Card> targetCards = getTargetCards(sa);
             for (int i = 0; i < targetCards.size(); i++) {
                 Card targetCard = targetCards.get(i);
                 stringBuilder.append(targetCard);
@@ -151,7 +151,7 @@ public class CountersPutEffect extends SpellAbilityEffect {
             String what = sa.getParamOrDefault("ChoicesDesc", sa.getParam("Choices"));
             stringBuilder.append(Lang.nounWithNumeralExceptOne(n, what));
         } else {
-            final List<Card> targetCards = SpellAbilityEffect.getTargetCards(sa);
+            final List<Card> targetCards = getTargetCards(sa);
             final Iterator<Card> it = targetCards.iterator();
             while (it.hasNext()) {
                 final Card targetCard = it.next();
@@ -261,7 +261,7 @@ public class CountersPutEffect extends SpellAbilityEffect {
                 if (obj instanceof Card) {
                     Card tgtCard = (Card) obj;
                     Card gameCard = game.getCardState(tgtCard, null);
-                    if (gameCard == null || !tgtCard.equalsWithTimestamp(gameCard)) {
+                    if (gameCard == null || !tgtCard.equalsWithGameTimestamp(gameCard)) {
                         tgtObjects.remove(obj);
                     } else {
                         targets.add(gameCard);
@@ -296,7 +296,7 @@ public class CountersPutEffect extends SpellAbilityEffect {
                     // gameCard is LKI in that case, the card is not in game anymore
                     // or the timestamp did change
                     // this should check Self too
-                    if (gameCard == null || !tgtCard.equalsWithTimestamp(gameCard)) {
+                    if (gameCard == null || !tgtCard.equalsWithGameTimestamp(gameCard)) {
                         continue;
                     }
                 }
@@ -631,14 +631,13 @@ public class CountersPutEffect extends SpellAbilityEffect {
             resolvePerType(sa, placer, counterType, counterAmount, table, true);
         }
 
-        int totalAdded = table.totalValues();
+        table.replaceCounterEffect(game, sa, true);
 
+        int totalAdded = table.totalValues();
         if (totalAdded > 0 && rememberAmount) {
             // TODO use SpellAbility Remember later
             card.addRemembered(Integer.valueOf(totalAdded));
         }
-
-        table.replaceCounterEffect(game, sa, true);
 
         if (sa.hasParam("RemovePhase")) {
             for (Map.Entry<GameEntity, Map<CounterType, Integer>> e : table.row(Optional.of(placer)).entrySet()) {

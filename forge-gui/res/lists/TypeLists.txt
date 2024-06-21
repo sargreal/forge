@@ -24,6 +24,7 @@ Antelope:Antelopes
 Ape:Apes
 Archer:Archers
 Archon:Archons
+Armadillo:Armadillos
 Artificer:Artificers
 Army:Armies
 Assassin:Assassins
@@ -40,6 +41,7 @@ Basilisk:Basilisks
 Bat:Bats
 Bear:Bears
 Beast:Beasts
+Beaver:Beavers
 Beeble:Beebles
 Beholder:Beholders
 Berserker:Berserkers
@@ -57,7 +59,6 @@ Caribou:Caribous
 Carrier:Carriers
 Cat:Cats
 Centaur:Centaurs
-Cephalid:Cephalids
 Chimera:Chimeras
 Citizen:Citizens
 Clamfolk:Clamfolk
@@ -67,6 +68,7 @@ Cockatrice:Cockatrices
 Construct:Constructs
 Cow:Cows
 Coward:Cowards
+Coyote:Coyotes
 Crab:Crabs
 Crocodile:Crocodiles
 Cyberman:Cybermen
@@ -181,11 +183,11 @@ Mongoose:Mongooses
 Monk:Monks
 Monkey:Monkeys
 Moonfolk:Moonfolks
+Mount:Mounts
 Mouse:Mice
 Mutant:Mutants
 Myr:Myrs
 Mystic:Mystics
-Naga:Nagas
 Nautilus:Nautili
 Necron:Necrons
 Nephilim:Nephilims
@@ -218,6 +220,8 @@ Pilot:Pilots
 Pincher:Pinchers
 Pirate:Pirates
 Plant:Plants
+Porcupine:Porcupines
+Possum:Possums
 Praetor:Praetors
 Primarch:Primarchs
 Prism:Prisms
@@ -291,8 +295,8 @@ Turtle:Turtles
 Tyranid:Tyranids
 Unicorn:Unicorns
 Vampire:Vampires
+Varmint:Varmints
 Vedalken:Vedalkens
-Viashino:Viashinos
 Volver:Volvers
 Wall:Walls
 Warlock:Warlocks
@@ -361,6 +365,7 @@ Dack
 Dakkon
 Daretti
 Davriel
+Deb
 Dihada
 Domri
 Dovin
@@ -378,6 +383,7 @@ Guff
 Huatli
 Inzerva
 Jace
+Jared
 Jaya
 Jeska
 Kaito
@@ -408,6 +414,7 @@ Sorin
 Stone
 Szat
 Tamiyo
+Tasha
 Teferi
 Teyo
 Tezzeret

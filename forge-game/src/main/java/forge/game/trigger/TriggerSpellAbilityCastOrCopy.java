@@ -70,7 +70,8 @@ public class TriggerSpellAbilityCastOrCopy extends Trigger {
     }
 
     /** {@inheritDoc}
-     * @param runParams*/
+     * @param runParams
+     **/
     @Override
     public final boolean performTest(final Map<AbilityKey, Object> runParams) {
         final SpellAbility spellAbility = (SpellAbility) runParams.get(AbilityKey.SpellAbility);
@@ -127,7 +128,7 @@ public class TriggerSpellAbilityCastOrCopy extends Trigger {
             boolean validTgtFound = false;
             while (sa != null && !validTgtFound) {
                 for (final GameEntity ge : sa.getTargets().getTargetEntities()) {
-                    if (matchesValid(ge, getParam("TargetsValid").split(","))) {
+                    if (matchesValidParam("TargetsValid", ge)) {
                         validTgtFound = true;
                         break;
                     }
@@ -186,18 +187,6 @@ public class TriggerSpellAbilityCastOrCopy extends Trigger {
                 numX = cast.getManaCost().countX();
             }
             if (numX == 0) {
-                return false;
-            }
-        }
-
-        if (hasParam("Outlast")) {
-            if (!spellAbility.isOutlast()) {
-                return false;
-            }
-        }
-
-        if (hasParam("EternalizeOrEmbalm")) {
-            if (!spellAbility.hasParam("Eternalize") && !spellAbility.hasParam("Embalm")) {
                 return false;
             }
         }

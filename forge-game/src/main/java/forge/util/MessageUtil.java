@@ -45,7 +45,7 @@ public class MessageUtil {
                         ? Localizer.getInstance().getMessage("lblRandomColorChosen", value)
                         : Localizer.getInstance().getMessage("lblPlayerPickedChosen", choser, value);
             case ChooseNumber:
-                if (sa.hasParam("SecretlyChoose")) {
+                if (sa.hasParam("Secretly")) {
                     return value;
                 }
                 return sa.hasParam("Random")
@@ -63,7 +63,8 @@ public class MessageUtil {
                         ? Localizer.getInstance().getMessage("lblPlayerFlipComesUpValue", Lang.getInstance().getPossesive(flipper), value)
                         : Localizer.getInstance().getMessage("lblPlayerActionFlip", flipper, Lang.joinVerb(flipper, value));
             case GenericChoice:
-                if (sa.hasParam("ShowChoice") && sa.getParam("ShowChoice").equals("Description")) {
+                if ((sa.hasParam("Secretly")) || 
+                    (sa.hasParam("ShowChoice") && sa.getParam("ShowChoice").equals("Description"))) {
                     return value;
                 }
             case Protection:
@@ -73,7 +74,7 @@ public class MessageUtil {
             case PutCounter:// For Clay Golem cost text
                 return value;
             case Vote:
-                if (sa.hasParam("Secret")) {
+                if (sa.hasParam("Secretly")) {
                     return value;
                 } else {
                     String chooser = StringUtils.capitalize(mayBeYou(player, target));

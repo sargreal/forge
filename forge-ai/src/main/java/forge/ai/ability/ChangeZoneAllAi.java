@@ -3,7 +3,6 @@ package forge.ai.ability;
 import java.util.Collections;
 import java.util.Map;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 
 import forge.ai.AiController;
@@ -74,11 +73,6 @@ public class ChangeZoneAllAi extends SpellAbilityAi {
         CardCollectionView oppType = ai.getOpponents().getCardsIn(origin);
         CardCollectionView computerType = ai.getCardsIn(origin);
 
-        // remove cards that won't be seen in AI's own library if it can't be searched
-        if (!ai.canSearchLibraryWith(sa, ai)) {
-            computerType = CardLists.filter(computerType, Predicates.not(CardPredicates.inZone(ZoneType.Library)));
-        }
-
         // Ugin AI: always try to sweep before considering +1
         if (sourceName.equals("Ugin, the Spirit Dragon")) {
             return SpecialCardAi.UginTheSpiritDragon.considerPWAbilityPriority(ai, sa, origin, oppType, computerType);
@@ -95,7 +89,7 @@ public class ChangeZoneAllAi extends SpellAbilityAi {
             return SpecialCardAi.Timetwister.consider(ai, sa);
         } else if ("RetDiscardedThisTurn".equals(aiLogic)) {
             // e.g. Shadow of the Grave
-            return ai.getNumDiscardedThisTurn() > 0 && ai.getGame().getPhaseHandler().is(PhaseType.END_OF_TURN);
+            return ai.getDiscardedThisTurn().size() > 0 && ai.getGame().getPhaseHandler().is(PhaseType.END_OF_TURN);
         } else if ("ExileGraveyards".equals(aiLogic)) {
             for (Player opp : ai.getOpponents()) {
                 CardCollectionView cardsGY = opp.getCardsIn(ZoneType.Graveyard);

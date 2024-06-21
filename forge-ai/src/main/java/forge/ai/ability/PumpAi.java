@@ -21,7 +21,6 @@ import forge.game.player.Player;
 import forge.game.player.PlayerActionConfirmMode;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.TargetRestrictions;
-import forge.game.staticability.StaticAbility;
 import forge.game.zone.ZoneType;
 import org.apache.commons.lang3.StringUtils;
 
@@ -320,23 +319,6 @@ public class PumpAi extends PumpAiBase {
             }
         }
 
-        if ("ContinuousBonus".equals(aiLogic)) {
-            // P/T bonus in a continuous static ability
-            for (StaticAbility stAb : source.getStaticAbilities()) {
-                if ("Continuous".equals(stAb.getParam("Mode"))) {
-                    if (stAb.hasParam("AddPower")) {
-                        attack += AbilityUtils.calculateAmount(source, stAb.getParam("AddPower"), stAb);
-                    }
-                    if (stAb.hasParam("AddToughness")) {
-                        defense += AbilityUtils.calculateAmount(source, stAb.getParam("AddToughness"), stAb);
-                    }
-                    if (stAb.hasParam("AddKeyword")) {
-                        keywords.addAll(Lists.newArrayList(stAb.getParam("AddKeyword").split(" & ")));
-                    }
-                }
-            }
-        }
-
         if ((numDefense.contains("X") && defense == 0) || (numAttack.contains("X") && attack == 0 && !isBerserk)) {
             return false;
         }
@@ -366,7 +348,7 @@ public class PumpAi extends PumpAiBase {
                     if (ComputerUtilCard.shouldPumpCard(ai, sa, card, defense, attack, keywords, false)) {
                         return true;
                     } else if (containsUsefulKeyword(ai, keywords, card, sa, attack)) {
-                        if (game.getPhaseHandler().isPreCombatMain() && isSorcerySpeed(sa, ai) ||
+                        if (game.getPhaseHandler().is(PhaseType.MAIN1) && isSorcerySpeed(sa, ai) ||
                                 game.getPhaseHandler().is(PhaseType.COMBAT_DECLARE_ATTACKERS, ai) ||
                                 game.getPhaseHandler().is(PhaseType.COMBAT_BEGIN, ai)) {
                             Card pumped = ComputerUtilCard.getPumpedCreature(ai, sa, card, 0, 0, keywords);
@@ -442,6 +424,10 @@ public class PumpAi extends PumpAiBase {
                 for (Card c : list) {
                     if (c.isCreature() && c.getController() == ai
                             && c.getNetToughness() - c.getTempToughnessBoost() + defense <= 0) {
+                        canDieToPump.add(c);
+                    }
+                    // Also, don't pump itself if the SA involves a sacrifice self cost
+                    if (sa.getHostCard().equals(c) && ComputerUtilCost.isSacrificeSelfCost(sa.getPayCosts())) {
                         canDieToPump.add(c);
                     }
                 }

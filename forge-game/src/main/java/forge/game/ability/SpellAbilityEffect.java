@@ -84,9 +84,11 @@ public abstract class SpellAbilityEffect {
                     String spellDesc = CardTranslation.translateSingleDescriptionText(rawSDesc,
                             sa.getHostCard().getName());
 
-                    int idx = spellDesc.indexOf("(");
-                    if (idx > 0) { //trim reminder text from StackDesc
-                        spellDesc = spellDesc.substring(0, spellDesc.indexOf("(") - 1);
+                    //trim reminder text from StackDesc
+                    int idxL = spellDesc.indexOf(" (");
+                    int idxR = spellDesc.indexOf(")");
+                    if (idxL > 0 && idxR > idxL) {
+                        spellDesc = spellDesc.replace(spellDesc.substring(idxL, idxR + 1), "");
                     }
 
                     if (reps != null) {
@@ -471,8 +473,8 @@ public abstract class SpellAbilityEffect {
         card.addTrigger(parsedTrigger2);
     }
 
-    protected static void addForgetOnCastTrigger(final Card card) {
-        String trig = "Mode$ SpellCast | ValidCard$ Card.IsRemembered | TriggerZones$ Command | Static$ True";
+    protected static void addForgetOnCastTrigger(final Card card, String valid) {
+        String trig = "Mode$ SpellCast | TriggerZones$ Command | Static$ True | ValidCard$ " + valid;
 
         final Trigger parsedTrigger = TriggerHandler.parseTrigger(trig, card, true);
         parsedTrigger.setOverridingAbility(getForgetSpellAbility(card));
@@ -560,7 +562,7 @@ public abstract class SpellAbilityEffect {
         final Game game = hostCard.getGame();
         final Card eff = new Card(game.nextCardId(), game);
 
-        eff.setTimestamp(game.getNextTimestamp());
+        eff.setGameTimestamp(game.getNextTimestamp());
         eff.setName(name);
         eff.setColor(hostCard.getColor().getColor());
         // if name includes emblem then it should be one
@@ -761,7 +763,7 @@ public abstract class SpellAbilityEffect {
                         }
                         // better check if card didn't changed zones again?
                         Card newCard = game.getCardState(c, null);
-                        if (newCard == null || !newCard.equalsWithTimestamp(c)) {
+                        if (newCard == null || !newCard.equalsWithGameTimestamp(c)) {
                             continue;
                         }
                         if (sa.hasAdditionalAbility("ReturnAbility")) {
@@ -798,12 +800,15 @@ public abstract class SpellAbilityEffect {
 
     protected static void discard(SpellAbility sa, final boolean effect, Map<Player, CardCollectionView> discardedMap, Map<AbilityKey, Object> params) {
         Set<Player> discarders = discardedMap.keySet();
+        Map<Player, List<Card>> discardedBefore = Maps.newHashMap();
         for (Player p : discarders) {
+            discardedBefore.put(p, Lists.newArrayList(p.getDiscardedThisTurn()));
             final CardCollection discardedByPlayer = new CardCollection();
             for (Card card : Lists.newArrayList(discardedMap.get(p))) { // without copying will get concurrent modification exception
                 if (card == null) { continue; }
-                if (p.discard(card, sa, effect, params) != null) {
-                    discardedByPlayer.add(card);
+                Card moved = p.discard(card, sa, effect, params);
+                if (moved != null) {
+                    discardedByPlayer.add(moved);
                 }
             }
             discardedMap.put(p, discardedByPlayer);
@@ -812,11 +817,10 @@ public abstract class SpellAbilityEffect {
         for (Player p : discarders) {
             CardCollectionView discardedByPlayer = discardedMap.get(p);
             if (!discardedByPlayer.isEmpty()) {
-                boolean firstDiscard = p.getNumDiscardedThisTurn() - discardedByPlayer.size() == 0;
                 final Map<AbilityKey, Object> runParams = AbilityKey.mapFromPlayer(p);
                 runParams.put(AbilityKey.Cards, discardedByPlayer);
                 runParams.put(AbilityKey.Cause, sa);
-                runParams.put(AbilityKey.FirstTime, firstDiscard);
+                runParams.put(AbilityKey.DiscardedBefore, discardedBefore.get(p));
                 p.getGame().getTriggerHandler().runTrigger(TriggerType.DiscardedAll, runParams, false);
 
                 if (sa.hasParam("RememberDiscardingPlayers")) {
@@ -890,9 +894,17 @@ public abstract class SpellAbilityEffect {
         } else if ("UntilLoseControlOfHost".equals(duration)) {
             host.addLeavesPlayCommand(until);
             host.addChangeControllerCommand(until);
+        } else if ("AsLongAsControl".equals(duration)) {
+            host.addLeavesPlayCommand(until);
+            host.addChangeControllerCommand(until);
+            host.addPhaseOutCommand(until);
+        } else if ("AsLongAsInPlay".equals(duration)) {
+            host.addLeavesPlayCommand(until);
+            host.addPhaseOutCommand(until);
         } else if ("UntilUntaps".equals(duration)) {
             host.addLeavesPlayCommand(until);
             host.addUntapCommand(until);
+            host.addPhaseOutCommand(until);
         } else if ("UntilTargetedUntaps".equals(duration)) {
             Card tgt = sa.getSATargetingCard().getTargetCard();
             tgt.addLeavesPlayCommand(until);
@@ -900,6 +912,7 @@ public abstract class SpellAbilityEffect {
         } else if ("UntilUnattached".equals(duration)) {
             host.addLeavesPlayCommand(until); //if it leaves play, it's unattached
             host.addUnattachCommand(until);
+            host.addPhaseOutCommand(until);
         } else if ("UntilFacedown".equals(duration)) {
             host.addFacedownCommand(until);
         } else {
@@ -915,15 +928,25 @@ public abstract class SpellAbilityEffect {
 
         //if host is not on the battlefield don't apply
         // Suspend should does Affect the Stack
-        if ((duration.startsWith("UntilHostLeavesPlay") || "UntilLoseControlOfHost".equals(duration) || "UntilUntaps".equals(duration))
+        if ((duration.startsWith("UntilHostLeavesPlay") || "UntilLoseControlOfHost".equals(duration) || "UntilUntaps".equals(duration)
+                || "AsLongAsControl".equals(duration) || "AsLongAsInPlay".equals(duration))
                 && !(hostCard.isInPlay() || hostCard.isInZone(ZoneType.Stack))) {
             return false;
         }
-        if ("UntilLoseControlOfHost".equals(duration) && hostCard.getController() != sa.getActivatingPlayer()) {
+        if (("AsLongAsControl".equals(duration) || "AsLongAsInPlay".equals(duration)) && hostCard.isPhasedOut()) {
+            return false;
+        }
+        if (("UntilLoseControlOfHost".equals(duration) || "ForAsLongAsControl".equals(duration)) && hostCard.getController() != sa.getActivatingPlayer()) {
             return false;
         }
         if ("UntilUntaps".equals(duration) && !hostCard.isTapped()) {
             return false;
+        }
+        if ("UntilTargetedUntaps".equals(sa.getParam("Duration"))) {
+            Card tgt = sa.getSATargetingCard().getTargetCard();
+            if (!tgt.isTapped() || tgt.isPhasedOut()) {
+                return false;
+            }
         }
         return true;
     }
