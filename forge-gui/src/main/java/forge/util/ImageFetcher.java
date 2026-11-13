@@ -99,6 +99,28 @@ public abstract class ImageFetcher {
         return true;
     }
 
+    /**
+     * Fork (Middle-earth reprint set, see docs/MiddleEarth/notes/wp2-reprint-set.md): an edition entry
+     * may name the printing whose image it shows, e.g.
+     * {@code 15 C Giant Spider @Randy Gallegos ${"artSet": "M10", "artNum": "185"}}.
+     * Returns that printing if it exists in the card DB, otherwise the card itself.
+     */
+    public static PaperCard getArtSourcePrinting(PaperCard card) {
+        CardEdition edition = StaticData.instance().getEditions().get(card.getEdition());
+        if (edition == null)
+            return card;
+        for (CardEdition.EditionEntry entry : edition.getCardInSet(card.getName())) {
+            if (!entry.hasArtSource() || !card.getCollectorNumber().equalsIgnoreCase(entry.collectorNumber()))
+                continue;
+            PaperCard source = StaticData.instance().getCommonCards().getCard(card.getName(), entry.getArtSourceSet(), entry.getArtSourceNumber());
+            // getCard falls back to any printing when the exact one is missing; only accept the exact one
+            boolean exact = source != null && source.getEdition().equalsIgnoreCase(entry.getArtSourceSet())
+                    && source.getCollectorNumber().equalsIgnoreCase(entry.getArtSourceNumber());
+            return exact ? source : card;
+        }
+        return card;
+    }
+
     public static String getPlanechaseFilename(final String cardName) {
         return cardName.replace(" ", "_").replace("'", "")
                 .replace("-", "").replace("!", "").replace(":", "") + ".jpg";
@@ -197,6 +219,9 @@ public abstract class ImageFetcher {
             // Skip fetching if artist info is not available for art crop
             if (useArtCrop && paperCard.getArtist().isEmpty())
                 return;
+            // Fork: a reprint may borrow another printing's image (see getArtSourcePrinting).
+            // The file is still cached under this card's own key, only the URLs come from the source.
+            final PaperCard urlCard = getArtSourcePrinting(paperCard);
             String imagePath = ImageUtil.getImageRelativePath(paperCard, "", true, false);
             final boolean hasSetLookup = ImageKeys.hasSetLookup(imagePath);
             if (imageKey.endsWith(ImageKeys.BACKFACE_POSTFIX)) {
@@ -241,9 +266,9 @@ public abstract class ImageFetcher {
                 StringBuilder setDownload = new StringBuilder(ForgeConstants.URL_PIC_DOWNLOAD);
                 if (!hasSetLookup) {
                     if (!updateLink) {
-                        setDownload.append(ImageUtil.getDownloadUrl(paperCard, face));
+                        setDownload.append(ImageUtil.getDownloadUrl(urlCard, face));
                     } else {
-                        String url = ImageUtil.getDownloadUrl(paperCard, face);
+                        String url = ImageUtil.getDownloadUrl(urlCard, face);
                         setDownload.append(TextUtil.fastReplace(url, "1.full", imageKey.substring(imageKey.lastIndexOf('|') + 1, imageKey.indexOf('$')) + ".full"));
                     }
                     downloadUrls.add(setDownload.toString());
@@ -260,7 +285,7 @@ public abstract class ImageFetcher {
                     }
                 }
             }
-            final String cardCollectorNumber = paperCard.getCollectorNumber();
+            final String cardCollectorNumber = urlCard.getCollectorNumber();
  
             if (cardCollectorNumber.equals(IPaperCard.NO_COLLECTOR_NUMBER)) {
                 if (!ImageKeys.missingCards.contains(filename)) {
@@ -271,7 +296,7 @@ public abstract class ImageFetcher {
                 return;
             }
 
-            this.getScryfallDownloadURL(paperCard, face, useArtCrop, hasSetLookup, filename, downloadUrls);
+            this.getScryfallDownloadURL(urlCard, face, useArtCrop, hasSetLookup, filename, downloadUrls);
         } else if (ImageKeys.getTokenKey(ImageKeys.HIDDEN_CARD).equals(imageKey)) {
             // Extra logic for hidden card to not clog the other logic
             final String filename = "hidden.png";
@@ -419,7 +444,7 @@ public abstract class ImageFetcher {
         final ArrayList<String> downloadUrls = new ArrayList<>();
         final String imagePath = ImageUtil.getImageRelativePath(paperCard, "", true, false);
         final boolean hasSetLookup = ImageKeys.hasSetLookup(imagePath);
-        getScryfallDownloadURL(paperCard, "", true, hasSetLookup, null, downloadUrls);
+        getScryfallDownloadURL(getArtSourcePrinting(paperCard), "", true, hasSetLookup, null, downloadUrls);
         if (downloadUrls.isEmpty()) {
             return;
         }

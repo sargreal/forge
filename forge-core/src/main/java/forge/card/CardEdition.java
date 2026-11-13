@@ -271,6 +271,19 @@ public final class CardEdition implements Comparable<CardEdition> {
                 return null;
             return extraParams.get("variant");
         }
+
+        /** Fork: optional art source of a reprint, ${"artSet": "<set code>", "artNum": "<collector number>"}. */
+        public boolean hasArtSource() {
+            return extraParams != null && extraParams.containsKey("artset") && extraParams.containsKey("artnum");
+        }
+
+        public String getArtSourceSet() {
+            return extraParams == null ? null : extraParams.get("artset");
+        }
+
+        public String getArtSourceNumber() {
+            return extraParams == null ? null : extraParams.get("artnum");
+        }
     }
 
     private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
