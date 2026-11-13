@@ -68,6 +68,15 @@ tools/middleearth/check.sh Innistrad # check another plane for comparison
 
 The exit code is non-zero on errors. Warnings are the content backlog. Track their count in PLAN.md.
 
+### 3.1b Offline layout simulator (seconds)
+
+```bash
+J=forge-gui-mobile-dev/target/forge-gui-mobile-dev-2.0.17-SNAPSHOT-jar-with-dependencies.jar
+java -cp $J tools/middleearth/WorldSim.java forge-gui/res/adventure/MiddleEarth 0 .me-test/sim.png 20
+```
+
+This is a replica of `World.generateNew`'s biome painting and POI placement, using the engine's own noise class. It runs N seeds and reports the following: placement reruns, POIs that were dropped or are unreachable from the start, and biome coverage in percent. Use it before `smoke` when you change biomes or POIs. It is a replica, so confirm the final result with `smoke`.
+
 ### 3.2 GUI smoke test (about 1 min)
 
 ```bash
@@ -113,7 +122,8 @@ Read the upstream format docs in `docs/Adventure/` first (`Configure-Planes.md`,
 - **Card pool**: `config.json` → `allowedEditions` (currently `LTR, LTC, PLTC, HOB, HOC`) restricts rewards, shops and printings. Fixed deck lists (`.dck` / `.json`) are *not* filtered. Only their printings are swapped, so every hand-made deck must use in-pool cards (check with `check.sh -v`). Secret Lair LotR cards live in the shared `SLD` set and can't be allowed without allowing all of SLD.
 - **Overrides**: to replace a common file, create the same relative path under `MiddleEarth/`. Common enemies, items and decks stay reachable for anything we don't override, so prefer plane-local copies with ME names.
 - **Enemies**: `world/enemies.json` (plane-local once created). Biomes reference enemies by `getName()`, which is `nameOverride` if set, otherwise `name`. Decks go under `MiddleEarth/decks/...`. Sprites are `.atlas` + `.png` under `sprites/` (see `Create-Enemies.md`).
-- **Biomes**: `world/biomes/*.json`, listed in `world/world.json` → `biomesNames`. `startPointX/Y` and `width/height` are fractions of the world. Y = 0 is the **bottom** (south). The biome `name` must be unique.
+- **Biomes**: `world/biomes/*.json`, listed in `world/world.json` → `biomesNames`. `startPointX/Y` and `width/height` are fractions of the world. **Careful, the axes differ:** for biome `startPointY`, Y = 0 is **north** (top). For `world.json` `playerStartPosY` and POI `offsetY`, Y = 0 is **south**. The biome `name` must be unique, and it also selects the town name list (`world/town_names_<biome name>.txt`).
+- **Biome shapes:** keep biomes with `structures` square (`width == height`). The engine's `BiomeStructure` loops forever otherwise (see PLAN backlog). Long ranges are chains of round blobs.
 - **POIs and towns**: `world/points_of_interest.json` gives the name, type, `map` (`.tmx`), sprite and count. Town names come from `world/town_names_<color>.txt`.
 - **Validating JSON**: always run `check.sh`. The game itself often swallows parse errors (it falls back to defaults or skips entries).
 
