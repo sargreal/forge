@@ -89,7 +89,7 @@ To look at screenshots, downscale them first:
 
 ```bash
 G=tools/middleearth/game.sh
-$G start [plane]          # Xvfb :99 + game; sets the plane in ~/.forge/adventure/settings.json
+$G start [plane]          # Xvfb :$DISPLAY_NUM + game; isolated game home in $OUT_DIR/home (settings, saves)
 $G wait-menu              # waits for splash, clicks "Adventure Mode", waits for the title menu
 $G click 533 87           # New Game   (title menu)
 $G click 1115 447         # Start      (character creation)
@@ -104,7 +104,7 @@ $G stop
 
 Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `sanitize editions`.
 
-**Save data:** `~/.forge/adventure/` holds `settings.json` and the saves. `check.sh` uses an isolated home under `.me-test/check-home`.
+**Save data:** the game runs with `user.home=$OUT_DIR/home`, so settings and saves are in `.me-test/home/.forge/adventure/`. `check.sh` uses `.me-test/check-home`. Neither touches the real `~/.forge`.
 
 ## 4. Plane data: how-to
 
@@ -132,4 +132,5 @@ git merge upstream/master
 
 - Branch: `claude/happy-heisenberg-moqu93` (current dev branch) and `middleearth` (older base).
 - Every change: update PLAN.md (status and change log), run `check.sh`, and run `game.sh smoke` if the change touches world generation or engine code.
+- Parallel agents: each one works in its own git worktree or branch and uses its own `DISPLAY_NUM` (for example 101, 102…). Data-only agents can skip the build: `export FORGE_JAR=/home/user/forge/forge-gui-mobile-dev/target/forge-gui-mobile-dev-2.0.17-SNAPSHOT-jar-with-dependencies.jar` (the main checkout's jar). It still reads the game data from the agent's own tree. Agents write their report to `docs/MiddleEarth/notes/<wp>.md` and don't edit PLAN.md.
 - Parallel agents: split work by **disjoint files**, for example one agent per region's enemies or one on `World.java` for Phase 2. Shared files (`world.json`, `enemies.json`, PLAN.md) are edited by one agent at a time, or merged afterwards by the coordinator.
