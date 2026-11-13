@@ -2,8 +2,10 @@ package forge.adventure.data;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import forge.Forge;
 import forge.adventure.character.EnemySprite;
 import forge.adventure.pointofintrest.PointOfInterest;
+import forge.adventure.pointofintrest.PointOfInterestChanges;
 import forge.adventure.scene.GameScene;
 import forge.adventure.scene.TileMapScene;
 import forge.adventure.stage.GameHUD;
@@ -11,7 +13,6 @@ import forge.adventure.stage.MapStage;
 import forge.adventure.util.AdventureQuestController;
 import forge.adventure.util.AdventureQuestEvent;
 import forge.adventure.util.Current;
-import forge.adventure.world.WorldSave;
 import forge.util.Aggregates;
 
 import java.io.Serializable;
@@ -35,8 +36,6 @@ public class AdventureQuestData implements Serializable {
     public String synopsis =""; //Intended for Dev Mode only at most
     public transient boolean completed = false;
     public transient boolean failed = false;
-    private transient boolean prologueDisplayed = false;
-    private transient boolean epilogueDisplayed = false;
 
     public DialogData offerDialog;
     public DialogData prologue;
@@ -107,7 +106,7 @@ public class AdventureQuestData implements Serializable {
     public AdventureQuestData()
     {
         declinedDialog = new DialogData();
-        declinedDialog.text = "Come back tomorrow and perhaps I'll have something that you'll actually be willing to do.";
+        declinedDialog.text = Forge.getLocalizer().getMessage("advDefaultDeclinedDialog");
         DialogData dismiss = new DialogData();
         dismiss.name = "(Catching the not so subtle hint, you leave.)";
         declinedDialog.options = new DialogData[1];
@@ -232,11 +231,11 @@ public class AdventureQuestData implements Serializable {
                 stage.setTargetPOI(poiTokens, this.name);
         }
 
-        if (stage.getTargetPOI() != null
-                && ("cave".equalsIgnoreCase( stage.getTargetPOI().getData().type)
-                || "dungeon".equalsIgnoreCase( stage.getTargetPOI().getData().type))){
+        if (stage.getTargetPOI() != null && stage.getTargetPOI().getData().isDungeon()) {
             //todo: decide how to handle this in "anyPOI" scenarios
-            WorldSave.getCurrentSave().getPointOfInterestChanges(stage.getTargetPOI().getID()).clearDeletedObjects();
+            // Reset root and all connected floors so previously cleared dungeons respawn for the quest
+            PointOfInterest target = stage.getTargetPOI();
+            PointOfInterestChanges.resetDeletedObjectsRecursive(target.getID(), target.getData().map);
         }
 
         PointOfInterest temp = stage.getTargetPOI();
@@ -246,8 +245,9 @@ public class AdventureQuestData implements Serializable {
         }
 
         EnemyData target = stage.getTargetEnemyData();
-        if (target != null)
-            enemyTokens.put("$(enemy_" + stage.id +")", target);
+        if (target != null) {
+            enemyTokens.put("$(enemy_" + stage.id + ")", target);
+        }
 
         otherTokens.put("$(playername)", Current.player().getName());
         otherTokens.put("$(currentbiome)", GameScene.instance().getAdventurePlayerLocation(false,true));
@@ -290,7 +290,7 @@ public class AdventureQuestData implements Serializable {
         }
         for (Enumeration<String> enemy = enemyTokens.keys(); enemy.hasMoreElements();){
             String enemyKey = enemy.nextElement();
-            data = data.replace(enemyKey, enemyTokens.get(enemyKey).getName());
+            data = data.replace(enemyKey, enemyTokens.get(enemyKey).getDisplayName());
         }
         for (Enumeration<String> other = otherTokens.keys(); other.hasMoreElements();){
             String key = other.nextElement();
@@ -317,8 +317,8 @@ public class AdventureQuestData implements Serializable {
 
         for (Enumeration<String> e = enemyTokens.keys(); e.hasMoreElements();){
             String key = e.nextElement();
-            data.text = data.text.replace(key, enemyTokens.get(key).getName());
-            data.name = data.name.replace(key, enemyTokens.get(key).getName());
+            data.text = data.text.replace(key, enemyTokens.get(key).getDisplayName());
+            data.name = data.name.replace(key, enemyTokens.get(key).getDisplayName());
         }
 
         for (Enumeration<String> other = otherTokens.keys(); other.hasMoreElements();){
@@ -339,8 +339,18 @@ public class AdventureQuestData implements Serializable {
     }
 
     private EnemySprite generateTargetEnemySprite(AdventureQuestStage stage){
+        return generateTargetEnemySprite(stage, true);
+    }
+
+    private EnemySprite generateTargetEnemySprite(AdventureQuestStage stage, boolean genNewData){
         if (stage.objective == AdventureQuestController.ObjectiveTypes.Hunt){
-            EnemyData toUse = generateTargetEnemyData(stage);
+            EnemyData toUse = null;
+            if (genNewData) {
+                toUse = generateTargetEnemyData(stage);
+            } else {
+                toUse = enemyTokens.get("$(enemy_" + stage.id +")");
+            }
+
             toUse.lifetime = stage.count3;
             EnemySprite toReturn =  new EnemySprite(toUse);
             toReturn.questStageID = stage.stageID.toString();
@@ -401,16 +411,16 @@ public class AdventureQuestData implements Serializable {
     }
 
     public DialogData getPrologue() {
-        if (!prologueDisplayed) {
-            prologueDisplayed = true;
+        if (prologue != null && !prologue.isDisplayed()) {
+            prologue.markDisplayed();
             return prologue;
         }
         return null;
     }
 
     public DialogData getEpilogue() {
-        if (!epilogueDisplayed) {
-            epilogueDisplayed = true;
+        if (epilogue != null && !epilogue.isDisplayed()) {
+            epilogue.markDisplayed();
             return epilogue;
         }
         return null;
@@ -428,6 +438,9 @@ public class AdventureQuestData implements Serializable {
             if (s.getStatus() == INACTIVE){
                 s.checkPrerequisites(getCompletedStageIDs());
                 if (s.getStatus() == ACTIVE) {
+                    if (s.hasRequiredFetchItems()) {
+                        s.handleEvent(new AdventureQuestEvent());
+                    }
                     AdventureQuestController.instance().addQuestSprites(s);
                     showNotification = true;
                 }
@@ -445,7 +458,6 @@ public class AdventureQuestData implements Serializable {
             }
             GameHUD.getInstance().addNotification(description.toString());
         }
-
     }
 
     public PointOfInterest getClosestValidPOI(Vector2 pos) {
@@ -457,7 +469,25 @@ public class AdventureQuestData implements Serializable {
             return null;
         validPOIs.sort(Comparator.comparingInt(a -> (int) a.getPosition().dst(pos)));
         return validPOIs.get(0);
+    }
 
+    /* Check if the player created an On the Hunt quest, left the city,
+     * saved, and then reloaded, such that the sprite for the enemy was never generated or failed to
+     * be added to save data properly
+     * @param AdventureQuestStage stage The specific step to check if it meets the criteria that defines this use case
+     * @param boolean Whether the quest meets the detach criteria
+     */
+    public boolean qualifiesForDetachedQuest(AdventureQuestStage stage) {
+        return (stage.objective == AdventureQuestController.ObjectiveTypes.Hunt
+        && enemyTokens.size() > 0
+        && targetEnemySprite == null);
+    }
+
+    /* If the player is in fact detached, fix that specific case
+     * @param AdventureQuestStage stage The stage whose state should be fixed
+     */
+    public void fixOrphanedHuntQuest(AdventureQuestStage stage) {
+        EnemySprite toSet = generateTargetEnemySprite(stage, false);
+        stage.setTargetSprite(toSet);
     }
 }
-

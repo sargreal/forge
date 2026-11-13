@@ -1,14 +1,15 @@
 package forge.deck.generation;
 
+import forge.StaticData;
+import forge.card.CardDb;
+import forge.card.CardEdition;
+import forge.item.PaperCard;
+import forge.item.PaperCardPredicates;
+import forge.util.IterableUtil;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-
-import forge.item.IPaperCard;
-import forge.item.PaperCard;
+import java.util.function.Predicate;
 
 public class DeckGenPool implements IDeckGenPool {
     private final Map<String, PaperCard> cards = new HashMap<>();
@@ -19,8 +20,43 @@ public class DeckGenPool implements IDeckGenPool {
         addAll(cc);
     }
 
+    /**
+     * Keeps ONE print per card name: the one the Card Art Preference ranks first (instead of whichever print
+     * happens to be iterated last, which used to give promos and special frames in generated decks).
+     */
     public void add(PaperCard c) {
-        cards.put(c.getName(), c);
+        PaperCard current = cards.get(c.getName());
+        if (current == null || isPreferred(c, current))
+            cards.put(c.getName(), c);
+    }
+
+    /** Only used for its edition ranking (Core/Expansion first, promos and compilations last), which does not depend on the border. */
+    private static final CardDb.CardArtPreference RANKER = CardDb.CardArtPreference.ORIGINAL_ART_BLACK_BORDER_ALL_EDITIONS;
+
+    private static boolean isPreferred(PaperCard candidate, PaperCard current) {
+        StaticData data = StaticData.instance();
+        if (data == null || candidate.getEdition().equals(current.getEdition()) && candidate.getCollectorNumber().equals(current.getCollectorNumber()))
+            return false;
+        CardEdition candidateEdition = data.getCardEdition(candidate.getEdition());
+        CardEdition currentEdition = data.getCardEdition(current.getEdition());
+        if (candidateEdition == null || currentEdition == null)
+            return candidateEdition != null;
+        int cmp = data.getCardArtPreference().compare(candidateEdition, currentEdition);
+        if (cmp != 0)
+            return cmp < 0;
+        // Same release date (e.g. a set and its promo set): original releases before promos and compilations.
+        int rankCmp = Integer.compare(RANKER.getEditionRank(candidateEdition), RANKER.getEditionRank(currentEdition));
+        if (rankCmp != 0)
+            return rankCmp < 0;
+        CardDb db = data.getCommonCards();
+        boolean candidateTraditional = db.isTraditionalFramePrint(candidate);
+        boolean currentTraditional = db.isTraditionalFramePrint(current);
+        if (candidateTraditional != currentTraditional)
+            return candidateTraditional;
+        int numberCmp = candidate.getCollectorNumber().compareToIgnoreCase(current.getCollectorNumber());
+        if (numberCmp != 0)
+            return numberCmp < 0;
+        return candidate.getEdition().compareToIgnoreCase(current.getEdition()) < 0; // deterministic last resort
     }
     public void addAll(Iterable<PaperCard> cc) {
         for (PaperCard c : cc) {
@@ -39,12 +75,10 @@ public class DeckGenPool implements IDeckGenPool {
 
     @Override
     public PaperCard getCard(String name, String edition) {
-        Predicate<PaperCard> filter = Predicates.and(IPaperCard.Predicates.printedInSet(edition),IPaperCard.Predicates.name(name));
-        Iterable<PaperCard> editionCards=Iterables.filter(cards.values(), filter);
-        if (editionCards.iterator().hasNext()){
-            return editionCards.iterator().next();
-        }
-        return getCard(name);
+        Predicate<PaperCard> filter = PaperCardPredicates.printedInSet(edition).and(PaperCardPredicates.name(name));
+        return cards.values().stream()
+                .filter(filter)
+                .findFirst().orElseGet(() -> getCard(name));
     }
 
     @Override
@@ -68,6 +102,6 @@ public class DeckGenPool implements IDeckGenPool {
 
     @Override
     public Iterable<PaperCard> getAllCards(Predicate<PaperCard> filter) {
-        return Iterables.filter(getAllCards(), filter);
+        return IterableUtil.filter(getAllCards(), filter);
     }
 }

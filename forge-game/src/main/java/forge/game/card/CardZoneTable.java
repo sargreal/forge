@@ -3,12 +3,10 @@
  */
 package forge.game.card;
 
-import java.util.Map;
-
-import org.apache.commons.lang3.ObjectUtils;
-
-import com.google.common.collect.*;
-
+import com.google.common.collect.ForwardingTable;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Table;
 import forge.game.CardTraitBase;
 import forge.game.Game;
 import forge.game.GameAction;
@@ -18,6 +16,9 @@ import forge.game.replacement.ReplacementType;
 import forge.game.spellability.SpellAbility;
 import forge.game.trigger.TriggerType;
 import forge.game.zone.ZoneType;
+import forge.util.IterableUtil;
+
+import java.util.Map;
 
 public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardCollection> {
     // TODO use EnumBasedTable if exist
@@ -34,8 +35,8 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
     }
 
     public CardZoneTable(CardCollectionView lastStateBattlefield, CardCollectionView lastStateGraveyard) {
-        setLastStateBattlefield(ObjectUtils.firstNonNull(lastStateBattlefield, CardCollection.EMPTY));
-        setLastStateGraveyard(ObjectUtils.firstNonNull(lastStateGraveyard, CardCollection.EMPTY));
+        setLastStateBattlefield(lastStateBattlefield);
+        setLastStateGraveyard(lastStateGraveyard);
     }
 
     public CardZoneTable(CardZoneTable cardZoneTable) {
@@ -64,10 +65,10 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
     }
     public void setLastStateBattlefield(CardCollectionView lastState) {
         // store it in a new object, it might be from Game which can also refresh itself
-        this.lastStateBattlefield = new CardCollection(lastState);
+        lastStateBattlefield = lastState == null ? CardCollection.EMPTY : new CardCollection(lastState);
     }
     public void setLastStateGraveyard(CardCollectionView lastState) {
-        this.lastStateGraveyard = new CardCollection(lastState);
+        lastStateGraveyard = lastState == null ? CardCollection.EMPTY : new CardCollection(lastState);
     }
 
     /**
@@ -103,6 +104,30 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
             return;
         }
         if (!isEmpty()) {
+            for (Card c : allCards()) {
+                if (c.isInPlay()) {
+                    c.updateWorldTimestamp(game.getTimestamp());
+                }
+            }
+
+            // CR 603.6a newcomers see each other
+            if (containsColumn(ZoneType.Battlefield)) {
+                for (Card c : Iterables.concat(column(ZoneType.Battlefield).values())) {
+                    if (c.isInPlay()) {
+                        c.getZone().updateLKI(c);
+                    }
+                }
+            }
+
+            // this should still refresh for empty battlefield
+            if (lastStateBattlefield != CardCollection.EMPTY) {
+                game.getTriggerHandler().resetActiveTriggers(false, lastStateBattlefield);
+                // register all LTB trigger from last state battlefield
+                for (Card lki : lastStateBattlefield) {
+                    game.getTriggerHandler().registerActiveLTBTrigger(lki);
+                }
+            }
+
             final Map<AbilityKey, Object> runParams = AbilityKey.newMap();
             runParams.put(AbilityKey.Cards, new CardZoneTable(this));
             runParams.put(AbilityKey.Cause, cause);
@@ -124,9 +149,9 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
         }
     }
 
-    public CardCollection filterCards(Iterable<ZoneType> origin, ZoneType destination, String valid, Card host, CardTraitBase sa) {
+    public CardCollection filterCards(Iterable<ZoneType> origin, Iterable<ZoneType> destination, String valid, Card host, CardTraitBase sa) {
         CardCollection allCards = new CardCollection();
-        if (destination != null && !containsColumn(destination)) {
+        if (destination != null && !IterableUtil.any(destination, d -> columnKeySet().contains(d))) {
             return allCards;
         }
         if (origin != null) {
@@ -141,14 +166,23 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
                         lkiLookup = lastStateGraveyard;
                     }
                     if (destination != null) {
-                        if (row(z).containsKey(destination)) {
-                            for (Card c : row(z).get(destination)) {
-                                allCards.add(lkiLookup.get(c));
+                        for (ZoneType zt : destination) {
+                            if (row(z).containsKey(zt)) {
+                                for (Card c : row(z).get(zt)) {
+                                    if (lkiLookup != CardCollection.EMPTY && !lkiLookup.contains(c)) {
+                                        // this can happen if e.g. a mutated permanent dies
+                                        continue;
+                                    }
+                                    allCards.add(lkiLookup.get(c));
+                                }
                             }
                         }
                     } else {
                         for (CardCollection cc : row(z).values()) {
                             for (Card c : cc) {
+                                if (lkiLookup != CardCollection.EMPTY && !lkiLookup.contains(c)) {
+                                    continue;
+                                }
                                 allCards.add(lkiLookup.get(c));
                             }
                         }
@@ -156,8 +190,10 @@ public class CardZoneTable extends ForwardingTable<ZoneType, ZoneType, CardColle
                 }
             }
         } else if (destination != null) {
-            for (CardCollection c : column(destination).values()) {
-                allCards.addAll(c);
+            for (ZoneType zt : destination) {
+                for (CardCollection c : column(zt).values()) {
+                    allCards.addAll(c);
+                }
             }
         } else {
             for (CardCollection c : values()) {

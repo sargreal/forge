@@ -18,7 +18,6 @@ public enum AbilityKey {
     Affected("Affected"),
     AllVotes("AllVotes"),
     Amount("Amount"),
-    Attach("Attach"),
     AttachSource("AttachSource"),
     AttachTarget("AttachTarget"),
     Attacked("Attacked"),
@@ -26,10 +25,12 @@ public enum AbilityKey {
     Attackers("Attackers"),
     AttackingPlayer("AttackingPlayer"),
     AttackedTarget("AttackedTarget"),
+    OneOfAttackingTeam("OneOfAttackingTeam"),
     Blocker("Blocker"),
     Blockers("Blockers"),
     CanReveal("CanReveal"),
     Card("Card"),
+    CardState("CardState"),
     Cards("Cards"),
     CardsFiltered("CardsFiltered"),
     CardLKI("CardLKI"),
@@ -37,12 +38,11 @@ public enum AbilityKey {
     Causer("Causer"),
     Championed("Championed"),
     ClassLevel("ClassLevel"),
-    Cost("Cost"),
     CostStack("CostStack"),
     CounterAmount("CounterAmount"),
-    CounteredSA("CounteredSA"),
     CounterNum("CounterNum"),
     CounterMap("CounterMap"),
+    CounterTable("CounterTable"),
     CounterType("CounterType"),
     Crew("Crew"),
     CumulativeUpkeepPaid("CumulativeUpkeepPaid"),
@@ -60,6 +60,7 @@ public enum AbilityKey {
     DefendingPlayer("DefendingPlayer"),
     Destination("Destination"),
     Devoured("Devoured"),
+    DicePTExchanges("DicePTExchanges"),
     Discard("Discard"),
     DiscardedBefore("DiscardedBefore"),
     DividedShieldAmount("DividedShieldAmount"),
@@ -69,9 +70,8 @@ public enum AbilityKey {
     Exploited("Exploited"),
     Explored("Explored"),
     Explorer("Explorer"),
+    ExtraDraws("ExtraDraws"),
     ExtraTurn("ExtraTurn"),
-    Event("Event"),
-    ETB("ETB"),
     Fighter("Fighter"),
     Fighters("Fighters"),
     FirstTime("FirstTime"),
@@ -87,12 +87,12 @@ public enum AbilityKey {
     LastStateGraveyard("LastStateGraveyard"),
     LifeAmount("LifeAmount"), //TODO confirm that this and LifeGained can be merged
     LifeGained("LifeGained"),
+    LoseReason("LoseReason"),
     Map("Map"),
     Mana("Mana"),
     MergedCards("MergedCards"),
     Mode("Mode"),
-    Modifier("Modifier"),
-    MonstrosityAmount("MonstrosityAmount"),
+    NaturalResult("NaturalResult"),
     NewCard("NewCard"),
     NewCounterAmount("NewCounterAmount"),
     NoPreventDamage("NoPreventDamage"),
@@ -112,11 +112,13 @@ public enum AbilityKey {
     Player("Player"),
     PreventedAmount("PreventedAmount"),
     Produced("Produced"),
+    Random("Random"),
     Regeneration("Regeneration"),
     ReplacementEffect("ReplacementEffect"),
     ReplacementResult("ReplacementResult"),
     ReplacementResultMap("ReplacementResultMap"),
     Result("Result"),
+    RolledToVisitAttractions("RolledToVisitAttractions"),
     RoomName("RoomName"),
     Scheme("Scheme"),
     ScryBottom("ScryBottom"),
@@ -127,17 +129,17 @@ public enum AbilityKey {
     SourceSA("SourceSA"),
     SpellAbility("SpellAbility"),
     SpellAbilityTargets("SpellAbilityTargets"),
-    StackInstance("StackInstance"),
     StackSa("StackSa"),
+    StickerKind("StickerKind"),
     SurveilNum("SurveilNum"),
     Target("Target"),
     Targets("Targets"),
     Token("Token"),
     TokenNum("TokenNum"),
-    Vehicle("Vehicle"),
+    Valiant("Valiant"),
     Won("Won"),
 
-    // below used across different Replacements, don't reuse
+    // below shared across different Replacements, don't reuse
     InternalTriggerTable("InternalTriggerTable"),
     SimultaneousETB("SimultaneousETB"); // for CR 614.13c
 
@@ -175,6 +177,15 @@ public enum AbilityKey {
             return newMap();
         }
         return new EnumMap<>(map);
+    }
+
+    /** Copies the given keys that are present in from */
+    public static void copyKeys(final Map<AbilityKey, Object> from, final Map<AbilityKey, Object> to, final AbilityKey... keys) {
+        for (AbilityKey key : keys) {
+            if (from.containsKey(key)) {
+                to.put(key, from.get(key));
+            }
+        }
     }
 
     public static Map<AbilityKey, Object> mapFromCard(Card card) {

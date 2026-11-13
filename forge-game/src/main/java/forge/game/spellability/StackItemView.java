@@ -3,10 +3,15 @@ package forge.game.spellability;
 import forge.game.card.CardView;
 import forge.game.card.IHasCardView;
 import forge.game.player.PlayerView;
+import forge.game.zone.MagicStack;
 import forge.trackable.TrackableCollection;
 import forge.trackable.TrackableObject;
+import forge.trackable.Tracker;
 import forge.trackable.TrackableProperty;
 import forge.util.collect.FCollectionView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StackItemView extends TrackableObject implements IHasCardView {
     private static final long serialVersionUID = 6733415646691356052L;
@@ -35,10 +40,19 @@ public class StackItemView extends TrackableObject implements IHasCardView {
         updateActivatingPlayer(si);
         updateTargetCards(si);
         updateTargetPlayers(si);
+        updateTargetStackItems(si);
         updateAbility(si);
         updateOptionalTrigger(si);
         updateSubInstance(si);
         updateOptionalCost(si);
+    }
+
+    /**
+     * Constructor for network deserialization.
+     * Creates an empty StackItemView that will be populated via property deserialization.
+     */
+    public StackItemView(final int id0, final Tracker tracker) {
+        super(id0, tracker);
     }
 
     public String getKey() {
@@ -84,17 +98,21 @@ public class StackItemView extends TrackableObject implements IHasCardView {
             if (kicked && !generic)
                 OptionalCostString += "Kicked";
             if (entwined)
-                OptionalCostString += OptionalCostString.equals("") ? "Entwined" : ", Entwined";
+                OptionalCostString += OptionalCostString.isEmpty() ? "Entwined" : ", Entwined";
             if (buyback)
-                OptionalCostString += OptionalCostString.equals("") ? "Buyback" : ", Buyback";
+                OptionalCostString += OptionalCostString.isEmpty() ? "Buyback" : ", Buyback";
             if (retraced)
-                OptionalCostString += OptionalCostString.equals("") ? "Retraced" : ", Retraced";
+                OptionalCostString += OptionalCostString.isEmpty() ? "Retraced" : ", Retraced";
             if (jumpstart)
-                OptionalCostString += OptionalCostString.equals("") ? "Jumpstart" : ", Jumpstart";
+                OptionalCostString += OptionalCostString.isEmpty() ? "Jumpstart" : ", Jumpstart";
             if (additional || generic)
-                OptionalCostString += OptionalCostString.equals("") ? "Additional" : ", Additional";
+                OptionalCostString += OptionalCostString.isEmpty() ? "Additional" : ", Additional";
         }
         set(TrackableProperty.OptionalCosts, OptionalCostString);
+    }
+
+    public boolean isTrigger() {
+        return getSourceTrigger() > 0;
     }
 
     public int getSourceTrigger() {
@@ -105,10 +123,10 @@ public class StackItemView extends TrackableObject implements IHasCardView {
     }
 
     public String getText() {
-        return get(TrackableProperty.Text);
+        return get(TrackableProperty.Description);
     }
     void updateText(SpellAbilityStackInstance si) {
-        set(TrackableProperty.Text, si.getStackDescription());
+        set(TrackableProperty.Description, si.getStackDescription());
     }
 
     public CardView getSourceCard() {
@@ -137,6 +155,26 @@ public class StackItemView extends TrackableObject implements IHasCardView {
     }
     void updateTargetPlayers(SpellAbilityStackInstance si) {
         set(TrackableProperty.TargetPlayers, PlayerView.getCollection(si.getTargetChoices().getTargetPlayers()));
+    }
+
+    /** Other stack items (e.g. a spell a counterspell is aimed at) this item targets; null when it targets none. */
+    public FCollectionView<StackItemView> getTargetStackItems() {
+        return get(TrackableProperty.TargetStackItems);
+    }
+    void updateTargetStackItems(SpellAbilityStackInstance si) {
+        if (!si.getTargetChoices().isTargetingAnySpell()) {
+            set(TrackableProperty.TargetStackItems, null); // nearly every item: nothing to look up, nothing to sync
+            return;
+        }
+        final MagicStack stack = si.getSourceCard().getGame().getStack();
+        final List<SpellAbilityStackInstance> targeted = new ArrayList<>();
+        for (final SpellAbility sa : si.getTargetChoices().getTargetSpells()) {
+            final SpellAbilityStackInstance other = stack.getInstanceMatchingSpellAbilityID(sa);
+            if (other != null && other != si) {
+                targeted.add(other);
+            }
+        }
+        set(TrackableProperty.TargetStackItems, getCollection(targeted));
     }
 
     public boolean isAbility() {

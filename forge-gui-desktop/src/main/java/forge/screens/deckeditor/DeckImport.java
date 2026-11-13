@@ -19,6 +19,7 @@ package forge.screens.deckeditor;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -28,7 +29,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import forge.ImageCache;
 import forge.Singletons;
@@ -39,6 +39,7 @@ import forge.deck.DeckRecognizer.Token.TokenKey;
 import forge.game.GameFormat;
 import forge.game.GameType;
 import forge.gui.CardPicturePanel;
+import forge.gui.FThreads;
 import forge.item.PaperCard;
 import forge.screens.deckeditor.controllers.CDeckEditor;
 import forge.screens.deckeditor.controllers.CStatisticsImporter;
@@ -47,7 +48,6 @@ import forge.toolbox.*;
 import forge.util.Localizer;
 import forge.view.FDialog;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang3.StringUtils;
 
 import static forge.deck.DeckRecognizer.TokenType.*;
 
@@ -174,6 +174,13 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
     );
     private static final int PADDING_TOKEN_MSG_LENGTH = 45;
 
+    private final FLabel deckUrlLabel = new FLabel.Builder()
+            .text(Localizer.getInstance().getMessage("lblDeckUrlLabel"))
+            .fontSize(14).build();
+    private final FTextField txtDeckUrl = new FTextField.Builder()
+            .ghostText(Localizer.getInstance().getMessage("nlDeckUrlGhostText")).build();
+    private final FButton btnLoadUrl = new FButton(Localizer.getInstance().getMessage("lblLoad"));
+
     private final FHtmlViewer htmlOutput = new FHtmlViewer();
     private final FScrollPane scrollInput = new FScrollPane(this.txtInput, false);
     private final FScrollPane scrollOutput = new FScrollPane(this.htmlOutput, false);
@@ -212,6 +219,10 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
             .getMessage("lblUseFormatFilter"), false);
     private final FComboBox<GameFormat> formatDropdown = new FComboBox<>();
 
+    private JPanel optionsPanel;
+    private JPanel closedOptsPanel;
+    private boolean formatAutoSelected = false;
+
     private final DeckImportController controller;
     private final CDeckEditor<TModel> host;
 
@@ -233,7 +244,7 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
             this.controller.setCurrentDeckInEditor(this.host.getDeckController().getCurrentDeckInEditor());
         // Get the list of allowed Sections
         List<DeckSection> supportedSections = new ArrayList<>();
-        for (DeckSection section : EnumSet.allOf(DeckSection.class)) {
+        for (DeckSection section : DeckSection.values()) {
             if (this.host.isSectionImportable(section))
                 supportedSections.add(section);
         }
@@ -245,6 +256,12 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         this.statsView = new VStatisticsImporter(this.controller.currentGameFormatAllowsCommander());
         this.cStatsView = new CStatisticsImporter(this.statsView);
         initUIComponents(g, currentDeckIsNotEmpty);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                txtInput.requestFocusInWindow();
+            }
+        });
     }
 
     private void initUIComponents(CDeckEditor<TModel> g, boolean currentDeckIsNotEmpty) {
@@ -277,18 +294,17 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         // ----------------
         this.txtInput.getDocument().addDocumentListener(new OnChangeTextUpdate());
 
+        // == A.1 Deck URL toolbar (above the Card List)
+        this.btnLoadUrl.addActionListener(e -> loadFromUrl());
+        this.txtDeckUrl.addActionListener(e -> loadFromUrl());
+
         // == B. Scroll Output (Decklist)
         this.scrollOutput.setBorder(new FSkin.TitledSkinBorder(BorderFactory.createEtchedBorder(),
                 Localizer.getInstance().getMessage("lblDecklistTitle"), foreColor));
         this.scrollOutput.setViewportBorder(BorderFactory.createLoweredBevelBorder());
         // Action Listeners
         // ----------------
-        this.htmlOutput.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                activateCardPreview(e);
-            }
-        });
+        this.htmlOutput.addHyperlinkListener(this::activateCardPreview);
 
         // == C.1 Stats Panel
         FPanel statsPanel = new FPanel(new BorderLayout());
@@ -308,7 +324,7 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
 
         // == A. (Closed) Option Panel
         // This component will be used as a Placeholder panel to simulate Show/Hide animation
-        JPanel closedOptsPanel = new JPanel(new MigLayout("insets 10, gap 5, left, w 100%"));
+        this.closedOptsPanel = new JPanel(new MigLayout("insets 10, gap 5, left, w 100%"));
         closedOptsPanel.setVisible(true);
         closedOptsPanel.setOpaque(false);
         final TitledBorder showOptsBorder = new TitledBorder(BorderFactory.createEtchedBorder(),
@@ -318,7 +334,7 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         closedOptsPanel.add(new JSeparator(JSeparator.HORIZONTAL), "w 100%, hidemode 2");
 
         // == B. (Actual) Options Panel
-        JPanel optionsPanel = new JPanel(new MigLayout("insets 10, gap 5, left, h 150!"));
+        this.optionsPanel = new JPanel(new MigLayout("insets 10, gap 5, left, h 150!"));
         final TitledBorder border = new TitledBorder(BorderFactory.createEtchedBorder(),
                 String.format("\u25BC %s", Localizer.getInstance().getMessage("lblHideOptions")));
         border.setTitleColor(foreColor.getColor());
@@ -367,20 +383,13 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
 
         // Action Listeners
         // ----------------
-        this.dateTimeCheck.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final boolean isSel = dateTimeCheck.isSelected();
-                monthDropdown.setEnabled(isSel);
-                yearDropdown.setEnabled(isSel);
-                parseAndDisplay();
-            }
+        this.dateTimeCheck.addActionListener(e -> {
+            final boolean isSel = dateTimeCheck.isSelected();
+            monthDropdown.setEnabled(isSel);
+            yearDropdown.setEnabled(isSel);
+            parseAndDisplay();
         });
-        final ActionListener reparseAction = new ActionListener() {
-            @Override public void actionPerformed(final ActionEvent e) {
-                parseAndDisplay();
-            }
-        };
+        final ActionListener reparseAction = e -> parseAndDisplay();
         this.yearDropdown.addActionListener(reparseAction);
         this.monthDropdown.addActionListener(reparseAction);
 
@@ -434,28 +443,22 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
 
         // Action Listeners
         // ----------------
-        ItemListener updateCardArtPreference = new ItemListener() {
-            @Override
-            public void itemStateChanged(final ItemEvent e) {
-                String artPreference = cardArtPrefsComboBox.getSelectedItem();
-                if (artPreference == null)
-                    artPreference = latestOpt;  // default, just in case
-                final boolean latestArt = artPreference.equalsIgnoreCase(latestOpt);
-                final boolean coreExpFilter = cardArtPrefHasFilterCheckBox.isSelected();
-                controller.setCardArtPreference(latestArt, coreExpFilter);
-                parseAndDisplay();
-            }
+        ItemListener updateCardArtPreference = e -> {
+            String artPreference = cardArtPrefsComboBox.getSelectedItem();
+            if (artPreference == null)
+                artPreference = latestOpt;  // default, just in case
+            final boolean latestArt = artPreference.equalsIgnoreCase(latestOpt);
+            final boolean coreExpFilter = cardArtPrefHasFilterCheckBox.isSelected();
+            controller.setCardArtPreference(latestArt, coreExpFilter);
+            parseAndDisplay();
         };
         this.cardArtPrefsComboBox.addItemListener(updateCardArtPreference);
         this.cardArtPrefHasFilterCheckBox.addItemListener(updateCardArtPreference);
 
-        this.smartCardArtCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean enableSmartCardArt = smartCardArtCheckBox.isSelected();
-                controller.setSmartCardArtOptimisation(enableSmartCardArt);
-                parseAndDisplay();
-            }
+        this.smartCardArtCheckBox.addActionListener(e -> {
+            boolean enableSmartCardArt = smartCardArtCheckBox.isSelected();
+            controller.setSmartCardArtOptimisation(enableSmartCardArt);
+            parseAndDisplay();
         });
 
         optionsPanel.add(cardArtPanel,     "cell 1 0, w 100%, left");
@@ -491,31 +494,25 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         // Action Listeners
         // ----------------
         if (controller.hasNoDefaultGameFormat()) {
-            final ActionListener updateFormatSelectionCheck = new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    final boolean isSel = formatSelectionCheck.isSelected();
-                    formatDropdown.setEnabled(isSel);
-                    if (!isSel)
-                        controller.setCurrentGameFormat(null);  // reset any game format
-                    else {
-                        GameFormat gameFormat = formatDropdown.getSelectedItem();
-                        controller.setCurrentGameFormat(gameFormat);
-                    }
-                    parseAndDisplay();
+            final ActionListener updateFormatSelectionCheck = e -> {
+                final boolean isSel = formatSelectionCheck.isSelected();
+                formatDropdown.setEnabled(isSel);
+                if (!isSel)
+                    controller.setCurrentGameFormat(null);  // reset any game format
+                else {
+                    GameFormat gameFormat = formatDropdown.getSelectedItem();
+                    controller.setCurrentGameFormat(gameFormat);
                 }
+                parseAndDisplay();
             };
             this.formatSelectionCheck.addActionListener(updateFormatSelectionCheck);
             this.formatDropdown.addActionListener(updateFormatSelectionCheck);
         }
 
-        this.includeBnRCheck.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final boolean includeBnR = includeBnRCheck.isSelected();
-                controller.importBannedAndRestrictedCards(includeBnR);
-                parseAndDisplay();
-            }
+        this.includeBnRCheck.addActionListener(e -> {
+            final boolean includeBnR = includeBnRCheck.isSelected();
+            controller.importBannedAndRestrictedCards(includeBnR);
+            parseAndDisplay();
         });
 
         // == C Command buttons
@@ -533,59 +530,108 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
 
         // ActionListeners
         // ---------------
-        this.cmdCancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                DeckImport.this.processWindowEvent(new WindowEvent(DeckImport.this, WindowEvent.WINDOW_CLOSING));
-            }
-        });
+        this.cmdCancelButton.addActionListener(e -> DeckImport.this.processWindowEvent(new WindowEvent(DeckImport.this, WindowEvent.WINDOW_CLOSING)));
 
-        this.cmdAcceptButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                String currentDeckName = g.getDeckController().getModelName();
-                final Deck deck = controller.accept(currentDeckName);
-                if (deck == null) { return; }
-                // If the soon-to-import card list hasn't got any name specified in the list
-                // we set it to the current one (if any) or set a new one.
-                // In this way, if this deck will replace the current one, the name will be kept the same!
-                if (!deck.hasName()){
-                    if (currentDeckName.equals(""))
-                        deck.setName(Localizer.getInstance().getMessage("lblNewDeckName"));
-                    else
-                        deck.setName(currentDeckName);
-                }
-                host.getDeckController().loadDeck(deck, controller.getCreateNewDeck());
-                processWindowEvent(new WindowEvent(DeckImport.this, WindowEvent.WINDOW_CLOSING));
+        this.cmdAcceptButton.addActionListener(e -> {
+            String currentDeckName = g.getDeckController().getModelName();
+            final Deck deck = controller.accept(currentDeckName);
+            if (deck == null) { return; }
+            // If the soon-to-import card list hasn't got any name specified in the list
+            // we set it to the current one (if any) or set a new one.
+            // In this way, if this deck will replace the current one, the name will be kept the same!
+            if (!deck.hasName()){
+                if (currentDeckName.isEmpty())
+                    deck.setName(Localizer.getInstance().getMessage("lblNewDeckName"));
+                else
+                    deck.setName(currentDeckName);
             }
+            final boolean substituteCurrentDeck = controller.getImportBehavior() != DeckImportController.ImportBehavior.MERGE;
+            // Route to the commander editor implied by the selected format; otherwise load into the host editor
+            final GameType targetGameType = getSelectedFormatGameType();
+            if (targetGameType != null && targetGameType != host.getGameType()) {
+                CDeckEditorUI.SINGLETON_INSTANCE.changeFormat(targetGameType);
+                CDeckEditorUI.SINGLETON_INSTANCE.getCurrentEditorController()
+                        .getDeckController().loadDeck(deck, substituteCurrentDeck);
+            } else {
+                // loadDeck drops sections the host can't show, so keep a detected commander in Main
+                if (!host.isSectionImportable(DeckSection.Commander) && deck.has(DeckSection.Commander)) {
+                    deck.getMain().addAll(deck.get(DeckSection.Commander));
+                }
+                host.getDeckController().loadDeck(deck, substituteCurrentDeck);
+            }
+            processWindowEvent(new WindowEvent(DeckImport.this, WindowEvent.WINDOW_CLOSING));
         });
 
         if (currentDeckIsNotEmpty){
             this.createNewDeckCheckbox.setSelected(false);
-            this.createNewDeckCheckbox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    boolean createNewDeck = createNewDeckCheckbox.isSelected();
-                    controller.setCreateNewDeck(createNewDeck);
-                    String cmdAcceptLabel = createNewDeck ? CREATE_NEW_DECK_CMD_LABEL : IMPORT_CARDS_CMD_LABEL;
-                    cmdAcceptButton.setText(cmdAcceptLabel);
-                    String smartCardArtChboxTooltip = createNewDeck ? SMART_CARDART_TT_NO_DECK : SMART_CARDART_TT_WITH_DECK;
-                    smartCardArtCheckBox.setToolTipText(smartCardArtChboxTooltip);
-                    parseAndDisplay();
-                }
+            this.createNewDeckCheckbox.addActionListener(e -> {
+                boolean createNewDeck = createNewDeckCheckbox.isSelected();
+                controller.setImportBehavior(createNewDeck ? DeckImportController.ImportBehavior.CREATE_NEW : DeckImportController.ImportBehavior.MERGE);
+                String cmdAcceptLabel = createNewDeck ? CREATE_NEW_DECK_CMD_LABEL : IMPORT_CARDS_CMD_LABEL;
+                cmdAcceptButton.setText(cmdAcceptLabel);
+                String smartCardArtChboxTooltip = createNewDeck ? SMART_CARDART_TT_NO_DECK : SMART_CARDART_TT_WITH_DECK;
+                smartCardArtCheckBox.setToolTipText(smartCardArtChboxTooltip);
+                parseAndDisplay();
             });
         }
 
-
         // === ASSEMBLING ALL PANELS TOGETHER
         // ==================================
-        this.add(this.scrollInput, "cell 0 0, w 40%, growy, pushy, spany 2");
+        JPanel urlPanel = new JPanel(new MigLayout("insets 0 0 0 5, gap 5, fillx"));
+        urlPanel.setOpaque(false);
+        urlPanel.add(this.deckUrlLabel, "ax left");
+        urlPanel.add(this.txtDeckUrl, "growx, pushx, h 28!");
+        urlPanel.add(this.btnLoadUrl, "w 80!, h 28!, ax right");
+
+        JPanel inputColumn = new JPanel(new MigLayout("insets 0, gap 5, fill, wrap 1"));
+        inputColumn.setOpaque(false);
+        inputColumn.add(urlPanel, "growx, h 32!");
+        inputColumn.add(this.scrollInput, "grow, push");
+
+        this.add(inputColumn, "cell 0 0, w 40%, growy, pushy, spany 2");
         this.add(this.scrollOutput, "cell 1 0, w 60%, growy, pushy, spany 2");
         this.add(statsPanel, "cell 2 0, w 480:510:550, growy, pushy, ax c");
         this.add(cardPreview, "cell 2 1, w 480:510:550, h 65%, growy, pushy, ax c");
         this.add(closedOptsPanel, "cell 0 2, left, w 100%, h 25!, spanx 3, hidemode 3");
         this.add(optionsPanel, "cell 0 2, left, w 100%, spanx 3, hidemode 3");
         this.add(cmdPanel, "cell 0 3, w 100%, spanx 3");
+    }
+
+    private void loadFromUrl() {
+        final String url = this.txtDeckUrl.getText().trim();
+        if (url.isEmpty()) {
+            return;
+        }
+        if (!this.txtInput.getText().trim().isEmpty()
+                && !FOptionPane.showConfirmDialog(Localizer.getInstance().getMessage("nlConfirmReplaceCardList"))) {
+            return;
+        }
+        setUrlControlsEnabled(false, Localizer.getInstance().getMessage("lblLoadingEllipsis"));
+        FThreads.invokeInBackgroundThread(() -> {
+            String deckText = null;
+            String error = null;
+            try {
+                deckText = DeckUrlLoader.loadImportText(url);
+            } catch (IOException ex) {
+                error = ex.getMessage();
+            }
+            final String resultText = deckText;
+            final String errorMsg = error;
+            FThreads.invokeInEdtLater(() -> {
+                setUrlControlsEnabled(true, Localizer.getInstance().getMessage("lblLoad"));
+                if (errorMsg != null) {
+                    FOptionPane.showErrorDialog(errorMsg, Localizer.getInstance().getMessage("lblUnableToLoadDeckUrl"));
+                } else {
+                    txtInput.setText(resultText);
+                }
+            });
+        });
+    }
+
+    private void setUrlControlsEnabled(final boolean enabled, final String buttonText) {
+        this.txtDeckUrl.setEnabled(enabled);
+        this.btnLoadUrl.setEnabled(enabled);
+        this.btnLoadUrl.setText(buttonText);
     }
 
     private void activateCardPreview(HyperlinkEvent e) {
@@ -636,7 +682,7 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
             if (token.getType() == LIMITED_CARD)
                 cssClass = WARN_MSG_CLASS;
             String statusMsg = String.format("<span class=\"%s\" style=\"font-size: 9px;\">%s</span>", cssClass,
-                                                                                        getTokenStatusMessage(token));
+                    controller.getTokenStatusMessage(token));
             statusLbl.append(statusMsg);
         }
 
@@ -659,7 +705,7 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         cardPreviewLabel.setText(String.format("<html>%s %s<br>%s</html>", STYLESHEET, editionLbl, statusLbl));
 
         // set tooltip
-        String tooltip = String.format("%s [%s] #%s", card.getName(), card.getEdition(),
+        String tooltip = String.format("%s [%s] #%s", card.getDisplayName(), card.getEdition(),
                 card.getCollectorNumber());
         cardImagePreview.setToolTipText(tooltip);
     }
@@ -699,6 +745,44 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
             tokens = controller.optimiseCardArtInTokens();
         displayTokens(tokens);
         updateSummaries(tokens);
+
+        // Fires once per detection so user overrides aren't clobbered on every keystroke
+        if (controller.wasCommanderAutoDetected() && controller.hasNoDefaultGameFormat()
+                && !formatAutoSelected) {
+            formatAutoSelected = true;
+            selectCommanderFormat();
+        } else if (!controller.wasCommanderAutoDetected()) {
+            formatAutoSelected = false;
+        }
+    }
+
+    private void selectCommanderFormat() {
+        // Ticked first so the dropdown's listener applies the format and reparses
+        formatSelectionCheck.setSelected(true);
+        for (int i = 0; i < formatDropdown.getItemCount(); i++) {
+            GameFormat format = formatDropdown.getItemAt(i);
+            if (format != null && "Commander".equalsIgnoreCase(format.getName())) {
+                formatDropdown.setSelectedIndex(i);
+                break;
+            }
+        }
+        if (optionsPanel != null && closedOptsPanel != null) {
+            optionsPanel.setVisible(true);
+            closedOptsPanel.setVisible(false);
+        }
+    }
+
+    /** Returns the commander game type to route the import to, or null to load into the host editor */
+    private GameType getSelectedFormatGameType() {
+        if (!formatSelectionCheck.isSelected() || !CDeckEditorUI.isFormatDropdownGameType(host.getGameType())) {
+            return null;
+        }
+        GameFormat selected = formatDropdown.getSelectedItem();
+        if (selected == null) {
+            return null;
+        }
+        GameType gt = GameType.smartValueOf(selected.getName());
+        return (gt != null && gt.getDeckFormat().hasCommander()) ? gt : null;
     }
 
     private void displayTokens(final List<DeckRecognizer.Token> tokens) {
@@ -776,12 +860,12 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
     private String toHTML(final DeckRecognizer.Token token) {
         if (token == null)
             return "";
-        String tokenMsg = getTokenMessage(token);
+        String tokenMsg = controller.getTokenMessage(token);
         if (tokenMsg == null)
             return "";
-        String tokenStatus = getTokenStatusMessage(token);
+        String tokenStatus = controller.getTokenStatusMessage(token);
         String cssClass = getTokenCSSClass(token.getType());
-        if (tokenStatus.length() == 0)
+        if (tokenStatus.isEmpty())
             tokenMsg = padEndWithHTMLSpaces(tokenMsg, 2*PADDING_TOKEN_MSG_LENGTH+10);
         else {
             tokenMsg = padEndWithHTMLSpaces(tokenMsg, PADDING_TOKEN_MSG_LENGTH);
@@ -790,11 +874,6 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         if (token.isCardToken())
             tokenMsg = String.format("<a class=\"%s\" href=\"%s\">%s</a>", cssClass,
                     token.getKey().toString(), tokenMsg);
-
-        if (tokenStatus == null) {
-            String tokenTag = String.format("<td colspan=\"2\" class=\"%s\">%s</td>", cssClass, tokenMsg);
-            return String.format("<tr>%s</tr>", tokenTag);
-        }
 
         String tokenTag = "<td class=\"%s\">%s</td>";
         String tokenMsgTag = String.format(tokenTag, cssClass, tokenMsg);
@@ -810,97 +889,6 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
         for (int i = targetMsg.length(); i < limit; i++)
             spacer.append("&nbsp;");
         return String.format("%s%s", targetMsg, spacer);
-    }
-
-    private String getTokenMessage(DeckRecognizer.Token token) {
-        switch (token.getType()) {
-            case LEGAL_CARD:
-            case LIMITED_CARD:
-            case CARD_FROM_NOT_ALLOWED_SET:
-            case CARD_FROM_INVALID_SET:
-                return String.format("%s x %s %s", token.getQuantity(), token.getText(), getTokenFoilLabel(token));
-            // Card Warning Msgs
-            case UNKNOWN_CARD:
-            case UNSUPPORTED_CARD:
-                return token.getQuantity() > 0 ? String.format("%s x %s", token.getQuantity(), token.getText())
-                        : token.getText();
-
-            case UNSUPPORTED_DECK_SECTION:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblWarningMsgPrefix"),
-                                        Localizer.getInstance()
-                                                .getMessage("lblWarnDeckSectionNotAllowedInEditor", token.getText(),
-                                                        this.currentGameType));
-
-            // Special Case of Card moved into another section (e.g. Commander from Sideboard)
-            case WARNING_MESSAGE:
-                return String.format("%s: %s", Localizer.getInstance()
-                                .getMessage("lblWarningMsgPrefix"), token.getText());
-
-            // Placeholders
-            case DECK_SECTION_NAME:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblDeckSection"),
-                                        token.getText());
-
-            case CARD_RARITY:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblRarity"),
-                                        token.getText());
-
-            case CARD_TYPE:
-            case CARD_CMC:
-            case MANA_COLOUR:
-            case COMMENT:
-                return token.getText();
-
-            case DECK_NAME:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblDeckName"),
-                        token.getText());
-
-            case UNKNOWN_TEXT:
-            default:
-                return null;
-
-        }
-    }
-
-    private String getTokenStatusMessage(DeckRecognizer.Token token){
-        if (token == null)
-            return "";
-
-        switch (token.getType()) {
-            case LIMITED_CARD:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblWarningMsgPrefix"),
-                        Localizer.getInstance().getMessage("lblWarnLimitedCard",
-                        StringUtils.capitalize(token.getLimitedCardType().name()), getGameFormatLabel()));
-
-            case CARD_FROM_NOT_ALLOWED_SET:
-                return Localizer.getInstance().getMessage("lblErrNotAllowedCard", getGameFormatLabel());
-
-            case CARD_FROM_INVALID_SET:
-                return Localizer.getInstance().getMessage("lblErrCardEditionDate");
-
-            case UNSUPPORTED_CARD:
-                return Localizer.getInstance().getMessage("lblErrUnsupportedCard", this.currentGameType);
-
-            case UNKNOWN_CARD:
-                return String.format("%s: %s", Localizer.getInstance().getMessage("lblWarningMsgPrefix"),
-                        Localizer.getInstance().getMessage("lblWarnUnknownCardMsg"));
-
-            case UNSUPPORTED_DECK_SECTION:
-            case WARNING_MESSAGE:
-            case COMMENT:
-            case CARD_CMC:
-            case MANA_COLOUR:
-            case CARD_TYPE:
-            case DECK_SECTION_NAME:
-            case CARD_RARITY:
-            case DECK_NAME:
-            case LEGAL_CARD:
-            case UNKNOWN_TEXT:
-            default:
-                return "";
-
-        }
-
     }
 
     private String getTokenCSSClass(DeckRecognizer.TokenType tokenType){
@@ -934,17 +922,6 @@ public class DeckImport<TModel extends DeckBase> extends FDialog {
             default:
                 return "";
         }
-    }
-
-    private String getTokenFoilLabel(DeckRecognizer.Token token) {
-        if (!token.isCardToken())
-            return "";
-        final String foilMarker = "- (Foil)";
-        return token.getCard().isFoil() ? foilMarker : "";
-    }
-
-    private String getGameFormatLabel() {
-         return String.format("\"%s\"", this.controller.getCurrentGameFormatName());
     }
 }
 

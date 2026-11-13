@@ -55,18 +55,10 @@ public class TriggerBecomesTarget extends Trigger {
      * @param runParams*/
     @Override
     public final boolean performTest(final Map<AbilityKey, Object> runParams) {
-        if (hasParam("ValidSource")) {
-            SpellAbility source = (SpellAbility) runParams.get(AbilityKey.SourceSA);
-            if (source == null) {
-                return false;
-            }
-            String valid[] = getParam("ValidSource").split(",");
-            if (!matchesValid(source, valid)) {
-                if (!matchesValid(source.getHostCard(), valid)) {
-                    return false;
-                }
-            }
+        if (!matchesValidParam("ValidSource", runParams.get(AbilityKey.SourceSA))) {
+            return false;
         }
+
         if (!matchesValidParam("ValidTarget", runParams.get(AbilityKey.Target))) {
             return false;
         }
@@ -77,15 +69,20 @@ public class TriggerBecomesTarget extends Trigger {
             }
         }
 
+        if (hasParam("Valiant")) {
+            if (!runParams.containsKey(AbilityKey.Valiant)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
     /** {@inheritDoc} */
     @Override
-    public final void setTriggeringObjects(final SpellAbility sa, Map<AbilityKey, Object> runParams) {
-        sa.setTriggeringObject(AbilityKey.Source, ((SpellAbility) runParams.get(AbilityKey.SourceSA)).getHostCard());
-        sa.setTriggeringObjectsFrom(runParams, AbilityKey.SourceSA, AbilityKey.Target);
-        sa.setTriggeringObject(AbilityKey.StackInstance, sa.getHostCard().getGame().getStack().getInstanceMatchingSpellAbilityID((SpellAbility) runParams.get(AbilityKey.SourceSA)));
+    public final void setTriggeringObjects(final Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
+        objects.put(AbilityKey.Source, ((SpellAbility) runParams.get(AbilityKey.SourceSA)).getHostCard());
+        AbilityKey.copyKeys(runParams, objects, AbilityKey.SourceSA, AbilityKey.Target);
     }
 
     @Override

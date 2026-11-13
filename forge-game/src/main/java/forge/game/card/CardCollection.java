@@ -2,6 +2,9 @@ package forge.game.card;
 
 import forge.util.collect.FCollection;
 
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 public class CardCollection extends FCollection<Card> implements CardCollectionView {
     private static final long serialVersionUID = -8133537013727100275L;
 
@@ -10,6 +13,12 @@ public class CardCollection extends FCollection<Card> implements CardCollectionV
      */
     public static final CardCollectionView EMPTY = new EmptyCardCollection();
 
+    public CardCollection(int estimatedSize) {
+        super(estimatedSize);
+    }
+    public void ensureCapacity(final int minCapacity) {
+        super.ensureCapacity(minCapacity);
+    }
     /**
      * Get the view corresponding to an {@link Iterable} of {@link Card}
      * objects.
@@ -115,12 +124,26 @@ public class CardCollection extends FCollection<Card> implements CardCollectionV
         super(cards);
     }
 
+    public CardCollection(final Stream<Card> cards) {
+        this(cards::iterator);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public CardCollection subList(final int fromIndex, final int toIndex) {
         return new CardCollection(super.subList(fromIndex, toIndex));
+    }
+
+    /**
+     * Creates a new CardCollection containing the elements from this collection which match
+     * the given predicate.
+     */
+    public CardCollection filter(Predicate<? super Card> test) {
+        CardCollection out = new CardCollection();
+        this.stream().filter(test).forEach(out::add);
+        return out;
     }
 
     /**

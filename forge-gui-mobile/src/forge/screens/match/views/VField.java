@@ -1,35 +1,47 @@
 package forge.screens.match.views;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import forge.game.card.CardView;
 import forge.game.card.CardView.CardStateView;
 import forge.game.player.PlayerView;
 import forge.gui.FThreads;
+import forge.localinstance.properties.ForgePreferences;
+import forge.model.FModel;
+import forge.screens.match.MatchController;
 import forge.screens.match.MatchScreen;
 import forge.screens.match.views.VCardDisplayArea.CardAreaPanel;
 import forge.toolbox.FCardPanel;
 import forge.toolbox.FContainer;
 import forge.toolbox.FDisplayObject;
+import forge.util.collect.FCollectionView;
 
 public class VField extends FContainer {
     private final PlayerView player;
     private final FieldRow row1, row2;
     private boolean flipped;
     private float commandZoneWidth;
+    private float innerCover; //compact zone tabs: width at the end of the inner row that the command zone box covers
     private float fieldModifier;
+    private float endPadding;
+    private float contentAlignment; //0 cards start on the left, 0.5 they are centered, 1 they end on the right
+    private final boolean stackNonTokenCreatures;
+    private final List<CardView> creatures = new ArrayList<>();
+    private final List<CardView> lands = new ArrayList<>();
+    private final List<CardView> otherPermanents = new ArrayList<>();
 
     public VField(PlayerView player0) {
         player = player0;
         row1 = add(new FieldRow());
         row2 = add(new FieldRow());
+
+        stackNonTokenCreatures = FModel.getPreferences().getPrefBoolean(ForgePreferences.FPref.UI_STACK_CREATURES);
     }
 
     public boolean isFlipped() {
         return flipped;
     }
+
     public void setFlipped(boolean flipped0) {
         flipped = flipped0;
     }
@@ -56,9 +68,16 @@ public class VField extends FContainer {
         @Override
         public void run() {
             clear();
+            creatures.clear();
+            lands.clear();
+            otherPermanents.clear();
 
-            Iterable<CardView> model = player.getBattlefield();
-            if (model == null) { return; }
+            FCollectionView<CardView> battlefield = player.getBattlefield();
+            if (battlefield.isEmpty()) {
+                return;
+            }
+            Iterable<CardView> model = MatchController.instance.isNetGame()
+                    ? battlefield.threadSafeIterable() : battlefield;
 
             for (CardView card : model) {
                 CardAreaPanel cardPanel = CardAreaPanel.get(card);
@@ -68,9 +87,7 @@ public class VField extends FContainer {
                 cardPanel.setPrevPanelInStack(null);
             }
 
-            List<CardView> creatures = new ArrayList<>();
-            List<CardView> lands = new ArrayList<>();
-            List<CardView> otherPermanents = new ArrayList<>();
+            List<CardView> contraptions = null; //Usually not used; create on demand.
 
             for (CardView card : model) {
                 CardAreaPanel cardPanel = CardAreaPanel.get(card);
@@ -80,13 +97,15 @@ public class VField extends FContainer {
                         if (!tryStackCard(card, creatures)) {
                             creatures.add(card);
                         }
-                    }
-                    else if (details.isLand()) {
+                    } else if (details.isLand()) {
                         if (!tryStackCard(card, lands)) {
                             lands.add(card);
                         }
-                    }
-                    else {
+                    } else if (details.isArtifact() && (details.isContraption() || details.isAttraction())) {
+                        if (contraptions == null)
+                            contraptions = new ArrayList<>();
+                        contraptions.add(card); //Arrange these later.
+                    } else {
                         if (!tryStackCard(card, otherPermanents)) {
                             otherPermanents.add(card);
                         }
@@ -94,11 +113,15 @@ public class VField extends FContainer {
                 }
             }
 
+            if (contraptions != null) {
+                contraptions = arrangeContraptions(contraptions);
+                otherPermanents.addAll(contraptions);
+            }
+
             if (creatures.isEmpty()) {
                 row1.refreshCardPanels(otherPermanents);
                 row2.refreshCardPanels(lands);
-            }
-            else {
+            } else {
                 row1.refreshCardPanels(creatures);
                 lands.addAll(otherPermanents);
                 row2.refreshCardPanels(lands);
@@ -110,49 +133,92 @@ public class VField extends FContainer {
         if (card.hasCardAttachments()) {
             return false; //can stack with enchanted or equipped card
         }
-        if (card.getCurrentState().isCreature() && !card.isToken()) {
-            return false; //don't stack non-token creatures
+        CardStateView cardState = card.getCurrentState();
+        if (!this.stackNonTokenCreatures && cardState.isCreature() && !card.isToken()) {
+            return false;
         }
-        final String cardName = card.getCurrentState().getName();
+        final String cardName = cardState.getOracleName();
         for (CardView c : cardsOfType) {
-            if (c.getCurrentState().isCreature()) {
+            CardStateView cState = c.getCurrentState();
+            if (cState.isCreature()) {
                 if (!c.hasCardAttachments() &&
-                        cardName.equals(c.getCurrentState().getName()) &&
+                        cardName.equals(cState.getOracleName()) &&
                         card.hasSameCounters(c) &&
                         card.hasSamePT(c) && //don't stack token with different PT
-                        card.getCurrentState().getKeywordKey().equals(c.getCurrentState().getKeywordKey()) &&
+                        cardState.getKeywords().equals(cState.getKeywords()) &&
                         card.isTapped() == c.isTapped() && // don't stack tapped tokens on untapped tokens
                         card.isSick() == c.isSick() && //don't stack sick tokens on non sick
                         card.isToken() == c.isToken()) { //don't stack tokens on top of non-tokens
-                    CardAreaPanel cPanel = CardAreaPanel.get(c);
-                    while (cPanel.getNextPanelInStack() != null) {
-                        cPanel = cPanel.getNextPanelInStack();
-                    }
-                    CardAreaPanel cardPanel = CardAreaPanel.get(card);
-                    cPanel.setNextPanelInStack(cardPanel);
-                    cardPanel.setPrevPanelInStack(cPanel);
+                    stackOnto(card, c);
                     return true;
                 }
             } else {
                 if (!c.hasCardAttachments() &&
-                        cardName.equals(c.getCurrentState().getName()) &&
+                        cardName.equals(cState.getOracleName()) &&
                         card.hasSameCounters(c) &&
-                        card.getCurrentState().getKeywordKey().equals(c.getCurrentState().getKeywordKey()) &&
-                        card.getCurrentState().getColors() == c.getCurrentState().getColors() &&
+                        cardState.getKeywords().equals(cState.getKeywords()) &&
+                        cardState.getColors() == cState.getColors() &&
                         card.isSick() == c.isSick() && //don't stack sick tokens on non sick
                         card.isToken() == c.isToken()) { //don't stack tokens on top of non-tokens
-                    CardAreaPanel cPanel = CardAreaPanel.get(c);
-                    while (cPanel.getNextPanelInStack() != null) {
-                        cPanel = cPanel.getNextPanelInStack();
-                    }
-                    CardAreaPanel cardPanel = CardAreaPanel.get(card);
-                    cPanel.setNextPanelInStack(cardPanel);
-                    cardPanel.setPrevPanelInStack(cPanel);
+                    stackOnto(card, c);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private static void stackOnto(CardView card, CardView topOfStack) {
+        CardAreaPanel cPanel = CardAreaPanel.get(topOfStack);
+        while (cPanel.getNextPanelInStack() != null) {
+            cPanel = cPanel.getNextPanelInStack();
+        }
+        CardAreaPanel cardPanel = CardAreaPanel.get(card);
+        cPanel.setNextPanelInStack(cardPanel);
+        cardPanel.setPrevPanelInStack(cPanel);
+    }
+
+    private List<CardView> arrangeContraptions(List<CardView> contraptions) {
+        TreeSet<CardView> row = new TreeSet<>((c1, c2) -> {
+            //Order is sprocket-less cards, then sprocket 1, sprocket 2, sprocket 3, and finally attractions.
+            int sprocket1 = c1.getSprocket(), sprocket2 = c2.getSprocket();
+            if (sprocket1 == 0 && c1.getCurrentState().isAttraction())
+                sprocket1 = 4;
+            if (sprocket2 == 0 && c2.getCurrentState().isAttraction())
+                sprocket2 = 4;
+            return sprocket1 - sprocket2;
+        });
+        outer:
+        for (CardView card : contraptions) {
+            if (card.hasCardAttachments()) {
+                row.add(card); //Don't stack contraptions or attractions with attachments.
+                continue;
+            }
+            if (card.getCurrentState().isAttraction()) {
+                //Stack attractions with other attractions.
+                for (CardView c : row) {
+                    if (c.getCurrentState().isAttraction() && !c.hasCardAttachments()) {
+                        stackOnto(card, c);
+                        continue outer;
+                    }
+                }
+                row.add(card);
+                continue;
+            }
+            if (card.getSprocket() <= 0) {
+                //Sprocket-less contraptions don't stack. They're probably awaiting an SBA that assembles them onto one.
+                row.add(card);
+                continue;
+            }
+            for (CardView c : row) {
+                if (c.getSprocket() == card.getSprocket() && !c.hasCardAttachments()) {
+                    stackOnto(card, c);
+                    continue outer;
+                }
+            }
+            row.add(card);
+        }
+        return List.copyOf(row);
     }
 
     public FieldRow getRow1() {
@@ -165,6 +231,41 @@ public class VField extends FContainer {
 
     void setCommandZoneWidth(float commandZoneWidth0) {
         commandZoneWidth = commandZoneWidth0;
+        innerCover = 0f; //only the compact zone tabs layout covers the inner row
+    }
+
+    //Compact zone tabs: the zone boxes float over the right end of the field, so each row ends where the box over it begins instead
+    //of its cards running under the box. The card zone box is over the outer row, the command zone box over the inner one.
+    void setZoneCovers(float outer, float inner) {
+        outer = Math.round(Math.max(0f, outer));
+        inner = Math.round(Math.max(0f, inner));
+        if (commandZoneWidth == outer && innerCover == inner) { return; }
+        final boolean outerWas = commandZoneWidth > 0, innerWas = innerCover > 0;
+        commandZoneWidth = outer;
+        innerCover = inner;
+        row2.followEndPadding(outerWas, outer > 0); //the rows scroll their cards clear of the box when it opens, and back when it closes
+        row1.followEndPadding(innerWas, inner > 0);
+        revalidate();
+    }
+
+    void setContentAlignment(float alignment) {
+        if (contentAlignment == alignment) { return; }
+        contentAlignment = alignment;
+        row1.revalidate(true);
+        row2.revalidate(true);
+    }
+
+    //compact zone tabs: the zone box covers the field's right end, so the rows keep (or can scroll) their cards clear of it
+    void setEndPadding(float padding) {
+        padding = Math.round(Math.max(0f, padding));
+        if (endPadding == padding) { return; }
+        final boolean wasOpen = endPadding > 0;
+        endPadding = padding;
+        //the rows scroll their cards out from under the box when it opens, and back when it closes
+        row1.followEndPadding(wasOpen, padding > 0);
+        row2.followEndPadding(wasOpen, padding > 0);
+        row1.revalidate(true);
+        row2.revalidate(true);
     }
 
     void setFieldModifier(float fieldModifierWidth) {
@@ -184,21 +285,72 @@ public class VField extends FContainer {
         if (flipped) {
             y1 = cardSize;
             y2 = 0;
-        }
-        else {
+        } else {
             y1 = 0;
             y2 = cardSize;
         }
-        row1.setBounds(0, y1, width-fieldModifier, cardSize);
-        row2.setBounds(0, y2, (width - commandZoneWidth)-fieldModifier, cardSize);
+        row1.setBounds(0, y1, (width - innerCover) - fieldModifier, cardSize);
+        row2.setBounds(0, y2, (width - commandZoneWidth) - fieldModifier, cardSize);
     }
 
     public class FieldRow extends VCardDisplayArea {
         private int selected = -1;
         private FDisplayObject selectedChild;
+        private float savedScrollLeft = -1f, revealedScrollLeft = -1f; //where the row was before a zone box covered it, and where it was moved to
+        private boolean pendingReveal, pendingRestore;
 
         private FieldRow() {
             setVisible(true); //make visible by default unlike other display areas
+        }
+
+        //a zone box opened, changed size or closed over the end of the row: keep the cards clear of it
+        private void followEndPadding(boolean wasOpen, boolean isOpen) {
+            final boolean atRevealed = revealedScrollLeft >= 0 && Math.abs(getScrollLeft() - revealedScrollLeft) < 2f; //not moved by hand since
+            if (isOpen) {
+                if (!wasOpen) {
+                    savedScrollLeft = getScrollLeft();
+                    pendingReveal = true;
+                } else if (atRevealed) {
+                    pendingReveal = true; //it was at the end, so it stays at the end
+                }
+            } else if (wasOpen) {
+                pendingReveal = false;
+                if (atRevealed) {
+                    pendingRestore = true;
+                } else {
+                    revealedScrollLeft = -1f;
+                }
+            }
+        }
+
+        @Override
+        protected void setScrollPositionsAfterLayout(float scrollLeft0, float scrollTop0) {
+            super.setScrollPositionsAfterLayout(scrollLeft0, scrollTop0);
+            if (pendingReveal) {
+                pendingReveal = false;
+                revealedScrollLeft = getMaxScrollLeft();
+                setScrollLeft(revealedScrollLeft);
+            } else if (pendingRestore) {
+                pendingRestore = false;
+                setScrollLeft(savedScrollLeft);
+                revealedScrollLeft = -1f;
+            }
+        }
+
+        @Override
+        protected void drawBackground(forge.Graphics g) { } //battlefield rows never get the zone backing
+
+        @Override
+        protected boolean animateEntry() { return true; }
+
+        @Override
+        protected float getContentAlignment() {
+            return contentAlignment;
+        }
+
+        @Override
+        protected float getEndPadding() {
+            return endPadding;
         }
 
         @Override
@@ -214,13 +366,14 @@ public class VField extends FContainer {
         public void setNextSelected(int val) {
             this.selected++;
             if (this.selected >= this.getChildCount())
-                this.selected = this.getChildCount()-1;
+                this.selected = this.getChildCount() - 1;
             if (this.selectedChild != null)
                 this.selectedChild.setHovered(false);
             this.selectedChild = getChildAt(this.selected);
             this.selectedChild.setHovered(true);
             MatchScreen.setPotentialListener(Arrays.asList(this.selectedChild));
         }
+
         public void selectCurrent() {
             if (this.selectedChild != null) {
                 this.selectedChild.setHovered(true);
@@ -229,6 +382,7 @@ public class VField extends FContainer {
                 this.setNextSelected(1);
             }
         }
+
         public void unselectCurrent() {
             if (this.selectedChild != null) {
                 this.selectedChild.setHovered(false);

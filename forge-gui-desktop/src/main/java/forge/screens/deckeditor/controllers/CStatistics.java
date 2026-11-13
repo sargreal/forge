@@ -1,19 +1,20 @@
 package forge.screens.deckeditor.controllers;
 
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import javax.swing.JLabel;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
 import forge.card.CardRules;
 import forge.card.CardRulesPredicates;
 import forge.card.MagicColor;
+import forge.deck.Deck;
 import forge.deck.DeckBase;
+import forge.deck.DeckStatistics;
 import forge.gui.framework.ICDoc;
 import forge.item.InventoryItem;
 import forge.item.PaperCard;
+import forge.item.PaperCardPredicates;
 import forge.itemmanager.SItemManagerUtil.StatTypes;
 import forge.screens.deckeditor.CDeckEditorUI;
 import forge.screens.deckeditor.views.VStatistics;
@@ -52,7 +53,7 @@ public enum CStatistics implements ICDoc {
     }
 
     private void setLabelValue(final JLabel label, final ItemPool<PaperCard> deck, final Predicate<CardRules> predicate, final int total) {
-        final int tmp = deck.countAll(Predicates.compose(predicate, PaperCard.FN_GET_RULES));
+        final int tmp = deck.countAll(PaperCardPredicates.fromRules(predicate));
         label.setText(tmp + " (" + calculatePercentage(tmp, total) + "%)");
     }
 
@@ -77,16 +78,16 @@ public enum CStatistics implements ICDoc {
         // Hack-ish: avoid /0 cases, but still populate labels :)
         if (total == 0) { total = 1; }
 
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblCreature(), deck, CardRulesPredicates.Presets.IS_CREATURE, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblLand(), deck, CardRulesPredicates.Presets.IS_LAND, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblEnchantment(), deck, CardRulesPredicates.Presets.IS_ENCHANTMENT, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblArtifact(), deck, CardRulesPredicates.Presets.IS_ARTIFACT, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblInstant(), deck, CardRulesPredicates.Presets.IS_INSTANT, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblSorcery(), deck, CardRulesPredicates.Presets.IS_SORCERY, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblPlaneswalker(), deck, CardRulesPredicates.Presets.IS_PLANESWALKER, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblCreature(), deck, CardRulesPredicates.IS_CREATURE, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblLand(), deck, CardRulesPredicates.IS_LAND, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblEnchantment(), deck, CardRulesPredicates.IS_ENCHANTMENT, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblArtifact(), deck, CardRulesPredicates.IS_ARTIFACT, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblInstant(), deck, CardRulesPredicates.IS_INSTANT, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblSorcery(), deck, CardRulesPredicates.IS_SORCERY, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblPlaneswalker(), deck, CardRulesPredicates.IS_PLANESWALKER, total);
 
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblMulti(), deck, CardRulesPredicates.Presets.IS_MULTICOLOR, total);
-        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblColorless(), deck, CardRulesPredicates.Presets.IS_COLORLESS, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblMulti(), deck, CardRulesPredicates.IS_MULTICOLOR, total);
+        setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblColorless(), deck, CardRulesPredicates.IS_COLORLESS, total);
         setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblBlack(), deck, CardRulesPredicates.isMonoColor(MagicColor.BLACK), total);
         setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblBlue(), deck, CardRulesPredicates.isMonoColor(MagicColor.BLUE), total);
         setLabelValue(VStatistics.SINGLETON_INSTANCE.getLblGreen(), deck, CardRulesPredicates.isMonoColor(MagicColor.GREEN), total);
@@ -121,6 +122,12 @@ public enum CStatistics implements ICDoc {
                 String.format("%s: %d", Localizer.getInstance().getMessage("lblTotalManaCost").toUpperCase(), tmc));
         VStatistics.SINGLETON_INSTANCE.getLblAMC().setText(String.format("%s: %.2f",
                 Localizer.getInstance().getMessage("lblAverageManaCost").toUpperCase(), amc));
+        final DeckController<TModel> controller = ed.getDeckController();
+        final DeckBase model = controller == null ? null : controller.getModel();
+        final Deck wholeDeck = model == null ? null : model.getHumanDeck();
+        final String points = wholeDeck == null ? null : DeckStatistics.pointsSummary(wholeDeck);
+        VStatistics.SINGLETON_INSTANCE.getLblPoints().setText(points == null ? "" : points.toUpperCase());
+        VStatistics.SINGLETON_INSTANCE.getLblPoints().setVisible(points != null);
     }
 
     /**

@@ -25,11 +25,11 @@ import forge.screens.deckeditor.CDeckEditorUI;
 import forge.screens.deckeditor.controllers.CEditorDraftingProcess;
 import forge.screens.deckeditor.views.VProbabilities;
 import forge.screens.deckeditor.views.VStatistics;
+import forge.screens.home.DraftPicksSelector;
 import forge.toolbox.FOptionPane;
 import forge.util.Localizer;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,20 +45,12 @@ import java.util.Map;
 public enum CSubmenuDraft implements ICDoc {
     SINGLETON_INSTANCE;
 
-    private final UiCommand cmdDeckSelect = new UiCommand() {
-        @Override
-        public void run() {
-            VSubmenuDraft.SINGLETON_INSTANCE.getBtnStart().setEnabled(true);
-            fillOpponentComboBox();
-        }
+    private final UiCommand cmdDeckSelect = () -> {
+        VSubmenuDraft.SINGLETON_INSTANCE.getBtnStart().setEnabled(true);
+        fillOpponentComboBox();
     };
 
-    private final ActionListener radioAction = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            fillOpponentComboBox();
-        }
-    };
+    private final ActionListener radioAction = e -> fillOpponentComboBox();
 
     @Override
     public void register() {
@@ -73,19 +65,9 @@ public enum CSubmenuDraft implements ICDoc {
 
         view.getLstDecks().setSelectCommand(cmdDeckSelect);
 
-        view.getBtnBuildDeck().setCommand(new UiCommand() {
-            @Override
-            public void run() {
-                setupDraft();
-            }
-        });
+        view.getBtnBuildDeck().setCommand((UiCommand) this::setupDraft);
 
-        view.getBtnStart().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                startGame(GameType.Draft);
-            }
-        });
+        view.getBtnStart().addActionListener(e -> startGame(GameType.Draft));
 
         view.getRadSingle().addActionListener(radioAction);
 
@@ -109,29 +91,34 @@ public enum CSubmenuDraft implements ICDoc {
             fillOpponentComboBox();
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override public void run() {
-                if (btnStart.isEnabled()) {
-                    view.getBtnStart().requestFocusInWindow();
-                } else {
-                    view.getBtnBuildDeck().requestFocusInWindow();
-                }
+        SwingUtilities.invokeLater(() -> {
+            if (btnStart.isEnabled()) {
+                view.getBtnStart().requestFocusInWindow();
+            } else {
+                view.getBtnBuildDeck().requestFocusInWindow();
             }
         });
+
+        view.getGamesInMatchBinder().load();
     }
 
     private void startGame(final GameType gameType) {
         final Localizer localizer = Localizer.getInstance();
-        final boolean gauntlet = VSubmenuDraft.SINGLETON_INSTANCE.isGauntlet();
-        final DeckProxy humanDeck = VSubmenuDraft.SINGLETON_INSTANCE.getLstDecks().getSelectedItem();
+        final VSubmenuDraft view = VSubmenuDraft.SINGLETON_INSTANCE;
+        final boolean gauntlet = view.isGauntlet();
+        final DeckProxy humanDeck = view.getLstDecks().getSelectedItem();
 
         if (humanDeck == null) {
             FOptionPane.showErrorDialog(localizer.getMessage("lblNoDeckSelected"), localizer.getMessage("lblNoDeck"));
             return;
         }
 
+        // Detect commander draft: human deck has a Commander section with cards
+        final boolean isCommanderDraft = humanDeck.getDeck().getTags().contains("CommanderDraft");
+        final GameType effectiveGameType = isCommanderDraft ? GameType.CommanderDraft : gameType;
+
         if (FModel.getPreferences().getPrefBoolean(FPref.ENFORCE_DECK_LEGALITY)) {
-            final String errorMessage = gameType.getDeckFormat().getDeckConformanceProblem(humanDeck.getDeck());
+            final String errorMessage = effectiveGameType.getDeckFormat().getDeckConformanceProblem(humanDeck.getDeck());
             if (null != errorMessage) {
                 FOptionPane.showErrorDialog("Your deck " + errorMessage + " Please edit or choose a different deck.", "Invalid Deck");
                 return;
@@ -150,19 +137,18 @@ public enum CSubmenuDraft implements ICDoc {
         if (gauntlet) {
             if ("Gauntlet".equals(duelType)) {
                 final int rounds = opponentDecks.getAiDecks().size();
-                FModel.getGauntletMini().launch(rounds, humanDeck.getDeck(), gameType);
+                FModel.getGauntletMini().launch(rounds, humanDeck.getDeck(), effectiveGameType);
             } else if ("Tournament".equals(duelType)) {
                 // TODO Allow for tournament style draft, instead of always a gauntlet
+                // Most of the time this will be a single elimination bracket
+                // But for Commander and Conspiracy its two 4 player matches, into a head to head finals
             }
             return;
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                SOverlayUtils.startGameOverlay();
-                SOverlayUtils.showOverlay();
-            }
+        SwingUtilities.invokeLater(() -> {
+            SOverlayUtils.startGameOverlay();
+            SOverlayUtils.showOverlay();
         });
 
         Map<Integer, Deck> aiMap = Maps.newHashMap();
@@ -174,7 +160,7 @@ public enum CSubmenuDraft implements ICDoc {
                 throw new IllegalStateException("Draft: Computer deck is null!");
             }
 
-            aiMap.put(aiIndex, aiDeck);
+            aiMap.put(aiIndex + 1, aiDeck);
         } else {
             final int numOpponents = Integer.parseInt(duelType);
 
@@ -202,25 +188,31 @@ public enum CSubmenuDraft implements ICDoc {
 
         final List<RegisteredPlayer> starter = new ArrayList<>();
         // Human is 0
-        final RegisteredPlayer human = new RegisteredPlayer(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer());
+        final RegisteredPlayer human = isCommanderDraft
+                ? RegisteredPlayer.forCommander(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer())
+                : new RegisteredPlayer(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer());
         starter.add(human);
         human.setId(0);
+        human.assignConspiracies();
         for(Map.Entry<Integer, Deck> aiDeck : aiMap.entrySet()) {
-            RegisteredPlayer aiPlayer = new RegisteredPlayer(aiDeck.getValue()).setPlayer(GamePlayerUtil.createAiPlayer());
+            final RegisteredPlayer aiPlayer = isCommanderDraft
+                    ? RegisteredPlayer.forCommander(aiDeck.getValue()).setPlayer(GamePlayerUtil.createAiPlayer())
+                    : new RegisteredPlayer(aiDeck.getValue()).setPlayer(GamePlayerUtil.createAiPlayer());
             aiPlayer.setId(aiDeck.getKey());
             starter.add(aiPlayer);
             aiPlayer.assignConspiracies();
         }
 
         final HostedMatch hostedMatch = GuiBase.getInterface().hostMatch();
-        hostedMatch.startMatch(GameType.Draft, null, starter, human, GuiBase.getInterface().getNewGuiGame());
+        if (isCommanderDraft) {
+            hostedMatch.startMatch(GameType.CommanderDraft,
+                    java.util.EnumSet.of(GameType.Commander),
+                    starter, human, GuiBase.getInterface().getNewGuiGame());
+        } else {
+            hostedMatch.startMatch(GameType.Draft, null, starter, human, GuiBase.getInterface().getNewGuiGame());
+        }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                SOverlayUtils.hideOverlay();
-            }
-        });
+        SwingUtilities.invokeLater(SOverlayUtils::hideOverlay);
     }
 
     /** */
@@ -231,7 +223,7 @@ public enum CSubmenuDraft implements ICDoc {
         if (poolType == null) { return; }
 
         final BoosterDraft draft = BoosterDraft.createDraft(poolType);
-        if (draft == null) { return; }
+        if (draft == null || !DraftPicksSelector.showDialog(draft)) { return; }
 
         final CEditorDraftingProcess draftController = new CEditorDraftingProcess(CDeckEditorUI.SINGLETON_INSTANCE.getCDetailPicture());
         draftController.showGui(draft);
@@ -253,9 +245,9 @@ public enum CSubmenuDraft implements ICDoc {
             return;
         }
 
+        final DeckGroup opponentDecks = FModel.getDecks().getDraft().get(humanDeck.getName());
         if (VSubmenuDraft.SINGLETON_INSTANCE.isSingleSelected()) {
             // Single opponent
-            final DeckGroup opponentDecks = FModel.getDecks().getDraft().get(humanDeck.getName());
             int indx = 0;
             for (@SuppressWarnings("unused") Deck d : opponentDecks.getAiDecks()) {
                 indx++;
@@ -267,11 +259,16 @@ public enum CSubmenuDraft implements ICDoc {
             combo.addItem("Gauntlet");
             //combo.addItem("Tournament");
         } else {
+            int size = opponentDecks.getAiDecks().size();
             combo.addItem("2");
-            combo.addItem("3");
-            combo.addItem("4");
-            combo.addItem("5");
+            if (size > 2) {
+                combo.addItem("3");
+            }
+
+            if (size >= 4) {
+                combo.addItem("4");
+                combo.addItem("5");
+            }
         }
     }
-
 }

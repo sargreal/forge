@@ -1,8 +1,9 @@
 package forge.deckchooser;
 
 import java.awt.Cursor;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -10,6 +11,7 @@ import javax.swing.DefaultComboBoxModel;
 import com.google.common.collect.Lists;
 
 import forge.deck.DeckType;
+import forge.game.GameType;
 import forge.gui.MouseUtil;
 import forge.toolbox.FComboBox.TextAlignment;
 import forge.toolbox.FComboBoxWrapper;
@@ -26,7 +28,15 @@ public class DecksComboBox extends FComboBoxWrapper<DeckType> {
     }
 
     public void refresh(final DeckType deckType, final boolean isForCommander) {
-        if(isForCommander){
+        refresh(deckType, isForCommander, null);
+    }
+
+    public void refresh(final DeckType deckType, final boolean isForCommander, final GameType gameType) {
+        if (isForCommander && (gameType == GameType.Commander || gameType == GameType.CommanderGauntlet)) {
+            final List<DeckType> options = new ArrayList<>(Arrays.asList(DeckType.CommanderOptions));
+            options.add(options.indexOf(DeckType.NET_COMMANDER_DECK) + 1, DeckType.NET_ARCHIVE_COMMANDER_DECK);
+            setModel(new DefaultComboBoxModel<>(options.toArray(new DeckType[0])));
+        } else if(isForCommander){
             setModel(new DefaultComboBoxModel<>(DeckType.CommanderOptions));
         }else {
             setModel(new DefaultComboBoxModel<>(DeckType.ConstructedOptions));
@@ -35,18 +45,16 @@ public class DecksComboBox extends FComboBoxWrapper<DeckType> {
     }
 
     private ActionListener getDeckTypeComboListener() {
-        return new ActionListener() {
-            @Override public void actionPerformed(final ActionEvent e) {
-                final Object selectedItem = getSelectedItem();
-                if (selectedItem instanceof DeckType) {
-                    MouseUtil.setCursor(Cursor.WAIT_CURSOR);
-                    final DeckType newDeckType = (DeckType)selectedItem;
-                    if (newDeckType != selectedDeckType) {
-                        selectedDeckType = newDeckType;
-                        notifyDeckTypeSelected(newDeckType);
-                    }
-                    MouseUtil.resetCursor();
+        return e -> {
+            final Object selectedItem = getSelectedItem();
+            if (selectedItem instanceof DeckType) {
+                MouseUtil.setCursor(Cursor.WAIT_CURSOR);
+                final DeckType newDeckType = (DeckType)selectedItem;
+                if (newDeckType != selectedDeckType) {
+                    selectedDeckType = newDeckType;
+                    notifyDeckTypeSelected(newDeckType);
                 }
+                MouseUtil.resetCursor();
             }
         };
     }

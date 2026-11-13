@@ -1,5 +1,6 @@
 package forge.adventure.data;
 
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * Data class that will be used to read Json configuration files
@@ -13,14 +14,33 @@ public class ConfigData {
     public String font;
     public String fontColor;
     public int minDeckSize;
+    public int maxNumberOfDecks;
     public float playerBaseSpeed;
     public String[] colorIds;
     public String[] colorIdNames;
     public String[] starterEditions;
     public String[] starterEditionNames;
+    public ObjectMap<String, ObjectMap<String, String>> starterDecksByEdition;
     public DifficultyData[] difficulties;
     public RewardData legalCards;
     public String[] restrictedCards;
     public String[] restrictedEditions;
+    public String[] restrictedBlocks;
+    public String[] restrictedTokens;
     public String[] allowedEditions;
+    public boolean vintageOnlyEditions = false;
+    public String[] restrictedEvents;
+    public String[] allowedEvents;
+    public String[] allowedJumpstart;
+    public String defaultBasicLandSet = "JMP";
+    public boolean enableGeneticAI = true;
+    public String chaosDeckFormat;
+    public boolean usePriceListPrices = true;
+    // Shards to reroll an offered inn event before joining it. 0 disables rerolls.
+    public int eventRerollPrice;
+    // Desktop default only; saved player choices take precedence on every platform.
+    public boolean enableExtraBattleBackgroundsByDefault;
+    public EffectData globalEffect;
+    public ModifierData[] modifiers; //Optional rules the player can turn on at new game.
+
 }

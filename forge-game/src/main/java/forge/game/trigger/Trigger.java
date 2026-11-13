@@ -17,7 +17,6 @@
  */
 package forge.game.trigger;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import forge.game.*;
@@ -27,7 +26,6 @@ import forge.game.ability.ApiType;
 import forge.game.ability.effects.CharmEffect;
 import forge.game.card.Card;
 import forge.game.card.CardState;
-import forge.game.cost.IndividualCostPaymentInstance;
 import forge.game.keyword.Keyword;
 import forge.game.phase.PhaseHandler;
 import forge.game.phase.PhaseType;
@@ -36,10 +34,15 @@ import forge.game.spellability.SpellAbility;
 import forge.game.zone.CostPaymentStack;
 import forge.game.zone.ZoneType;
 import forge.util.CardTranslation;
+import forge.util.ITranslatable;
 import forge.util.Lang;
 import forge.util.TextUtil;
 
+import org.apache.commons.lang3.Strings;
+
 import java.util.*;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * <p>
@@ -72,6 +75,10 @@ public abstract class Trigger extends TriggerReplacementBase {
     private Set<PhaseType> validPhases;
 
     private SpellAbility spawningAbility;
+
+    // the event being checked, so its conditions can name the triggering objects
+    private TriggerWaiting checkedEvent;
+    private Map<AbilityKey, Object> checkedObjects;
 
     /**
      * <p>
@@ -117,37 +124,29 @@ public abstract class Trigger extends TriggerReplacementBase {
     }
 
     public String toString(boolean active) {
-        if (hasParam("TriggerDescription") && !this.isSuppressed()) {
-            StringBuilder sb = new StringBuilder();
-            String currentName;
-            if (this.isIntrinsic() && cardState != null && cardState.getCard() == getHostCard()) {
-                currentName = cardState.getName();
-            } else {
-                currentName = getHostCard().getName();
-            }
-            String desc = getParam("TriggerDescription");
-            if (!desc.contains("ABILITY")) {
-                desc = CardTranslation.translateSingleDescriptionText(getParam("TriggerDescription"), currentName);
-                desc = TextUtil.fastReplace(desc,"CARDNAME", CardTranslation.getTranslatedName(currentName));
-                desc = TextUtil.fastReplace(desc,"NICKNAME", Lang.getInstance().getNickName(CardTranslation.getTranslatedName(currentName)));
-                if (desc.contains("ORIGINALHOST") && this.getOriginalHost() != null) {
-                    desc = TextUtil.fastReplace(desc, "ORIGINALHOST", this.getOriginalHost().getName());
-                }
-            }
-            if (getHostCard().getEffectSource() != null) {
-                if (active)
-                    desc = TextUtil.fastReplace(desc, "EFFECTSOURCE", getHostCard().getEffectSource().toString());
-                else
-                    desc = TextUtil.fastReplace(desc, "EFFECTSOURCE", getHostCard().getEffectSource().getName());
-            }
-            sb.append(desc);
-            if (!this.triggerRemembered.isEmpty()) {
-                sb.append(" (").append(this.triggerRemembered).append(")");
-            }
-            return sb.toString();
-        } else {
+        if (!hasParam("TriggerDescription") || isSuppressed()) {
             return "";
         }
+        StringBuilder sb = new StringBuilder();
+        ITranslatable nameSource = getHostName(this);
+        String desc = getParam("TriggerDescription");
+        if (!desc.contains("ABILITY")) {
+            desc = CardTranslation.translateSingleDescriptionText(getParam("TriggerDescription"), nameSource);
+            String translatedName = nameSource.getTranslatedName();
+            desc = TextUtil.fastReplace(desc,"CARDNAME", translatedName);
+            desc = TextUtil.fastReplace(desc,"NICKNAME", Lang.getInstance().getNickName(translatedName));
+            if (desc.contains("ORIGINALHOST") && this.getOriginalHost() != null) {
+                desc = TextUtil.fastReplace(desc, "ORIGINALHOST", this.getOriginalHost().getDisplayName());
+            }
+        }
+        if (getHostCard().getEffectSource() != null) {
+            if (active)
+                desc = TextUtil.fastReplace(desc, "EFFECTSOURCE", getHostCard().getEffectSource().toString());
+            else
+                desc = TextUtil.fastReplace(desc, "EFFECTSOURCE", getHostCard().getEffectSource().getDisplayName());
+        }
+        sb.append(desc);
+        return sb.toString();
     }
 
     public final String replaceAbilityText(final String desc, final CardState state) {
@@ -202,7 +201,7 @@ public abstract class Trigger extends TriggerReplacementBase {
                     }
                 }
             }
-            if (saDesc.equals("")) { // in case we haven't found anything better
+            if (saDesc.isEmpty()) { // in case we haven't found anything better
                 saDesc = sa.toString();
             }
             // string might have leading whitespace
@@ -213,17 +212,17 @@ public abstract class Trigger extends TriggerReplacementBase {
                     saDesc = saDesc.substring(0, 1).toLowerCase() + saDesc.substring(1);
                 }
                 if (saDesc.contains("ORIGINALHOST") && sa.getOriginalHost() != null) {
-                    saDesc = TextUtil.fastReplace(saDesc, "ORIGINALHOST", sa.getOriginalHost().getName());
+                    saDesc = TextUtil.fastReplace(saDesc, "ORIGINALHOST", sa.getOriginalHost().getDisplayName());
                 }
             } else {
                 saDesc = "<take no action>"; // printed in case nothing is chosen for the ability (e.g. Charm with Up to X)
             }
             result = TextUtil.fastReplace(result, "ABILITY", saDesc);
 
-            String currentName = sa.getHostCard().getName();
-            result = CardTranslation.translateMultipleDescriptionText(result, currentName);
-            result = TextUtil.fastReplace(result,"CARDNAME", CardTranslation.getTranslatedName(currentName));
-            result = TextUtil.fastReplace(result,"NICKNAME", Lang.getInstance().getNickName(CardTranslation.getTranslatedName(currentName)));
+            result = CardTranslation.translateMultipleDescriptionText(result, sa.getHostCard());
+            String translatedName = sa.getHostCard().getTranslatedName();
+            result = TextUtil.fastReplace(result,"CARDNAME", translatedName);
+            result = TextUtil.fastReplace(result,"NICKNAME", Lang.getInstance().getNickName(translatedName));
         }
 
         return result;
@@ -240,6 +239,10 @@ public abstract class Trigger extends TriggerReplacementBase {
         PhaseHandler phaseHandler = game.getPhaseHandler();
         if (null != validPhases) {
             if (!validPhases.contains(phaseHandler.getPhase())) {
+                return false;
+            }
+            // add support for calculation if needed
+            if (hasParam("PhaseCount") && phaseHandler.getNumMain() + 1 != 2) {
                 return false;
             }
         }
@@ -289,6 +292,22 @@ public abstract class Trigger extends TriggerReplacementBase {
 
         return true;
     }
+
+    /** True if the trigger's condition or effect names this triggering object, as in "that player", so it applies to each one separately (CR 805.4d, 805.10c). */
+    protected final boolean refersToTriggering(final AbilityKey key) {
+        final String name = "Triggered" + key;
+        final Predicate<String> names = v -> v.contains(name) || getHostCard().hasSVar(v) && getHostCard().getSVar(v).contains(name);
+        if (getMapParams().values().stream().anyMatch(names)) {
+            return true;
+        }
+        for (SpellAbility sa = ensureAbility(); sa != null; sa = sa.getSubAbility()) {
+            if (sa.getMapParams().values().stream().anyMatch(names)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * <p>
      * requirementsCheck.
@@ -339,7 +358,7 @@ public abstract class Trigger extends TriggerReplacementBase {
         }
 
         // host controller will be null when adding card in a simulation game
-        if (this.getHostCard().getController() == null || (game.getAge() != GameStage.Play && game.getAge() != GameStage.RestartedByKarn) || !meetsCommonRequirements(this.mapParams)) {
+        if (this.getHostCard().getController() == null || (game.getAge() != GameStage.Play && game.getAge() != GameStage.RestartedByKarn) || !meetsCommonRequirements(checkedEvent == null && checkedObjects == null ? paramsWithoutEvent() : mapParams)) {
             return false;
         }
 
@@ -353,7 +372,7 @@ public abstract class Trigger extends TriggerReplacementBase {
     public boolean checkResolvedLimit(Player activator) {
         // CR 603.2i
         if (hasParam("ResolvedLimit")) {
-            if (Collections.frequency(getHostCard().getAbilityResolvedThisTurnActivators(getOverridingAbility()), activator)
+            if (getHostCard().getAbilityResolvedThisTurnActivators(getOverridingAbility()).count(activator)
                     >= Integer.parseInt(getParam("ResolvedLimit"))) {
                 return false;
             }
@@ -361,16 +380,17 @@ public abstract class Trigger extends TriggerReplacementBase {
         return true;
     }
 
-    public boolean checkActivationLimit() {
-        if (hasParam("ActivationLimit") &&
-                getActivationsThisTurn() >= Integer.parseInt(getParam("ActivationLimit"))) {
-            return false;
+    /**
+     * It can't trigger more times than the limit allows
+     */
+    public int limitByActivations(int activations) {
+        if (hasParam("GameActivationLimit")) {
+            activations = Math.min(activations, Integer.parseInt(getParam("GameActivationLimit")) - getActivationsThisGame());
         }
-        if (hasParam("GameActivationLimit") && 
-            getActivationsThisGame() >= Integer.parseInt(getParam("GameActivationLimit"))) {
-                return false;
+        if (hasParam("ActivationLimit")) {
+            activations = Math.min(activations, Integer.parseInt(getParam("ActivationLimit")) - getActivationsThisTurn());
         }
-        return true;
+        return Math.max(activations, 0);
     }
 
     public boolean meetsRequirementsOnTriggeredObjects(Game game, final Map<AbilityKey, Object> runParams) {
@@ -382,67 +402,71 @@ public abstract class Trigger extends TriggerReplacementBase {
                 return false;
             }
             // CR 702.100c
-            if (!moved.isCreature() || !this.getHostCard().isCreature()) {
+            if (!moved.isCreature() || !getHostCard().isCreature()) {
                 return false;
             }
-            if (moved.getNetPower() <= this.getHostCard().getNetPower()
-                    && moved.getNetToughness() <= this.getHostCard().getNetToughness()) {
+            if (moved.getNetPower() <= getHostCard().getNetPower()
+                    && moved.getNetToughness() <= getHostCard().getNetToughness()) {
+                return false;
+            }
+        }
+        if (isKeyword(Keyword.INCREMENT)) {
+            if (!getHostCard().isCreature()) {
+                return false;
+            }
+            final SpellAbility sp = (SpellAbility) runParams.get(AbilityKey.SpellAbility);
+            final Player p = getHostCard().getController();
+            int v = (int) sp.getPayingMana().stream().filter(m ->  m.getPlayer().equals(p)).count();
+            if (v <= getHostCard().getNetPower()
+                    && v <= getHostCard().getNetToughness()) {
                 return false;
             }
         }
 
-        if ("LifePaid".equals(condition)) {
-            final SpellAbility trigSA = (SpellAbility) runParams.get(AbilityKey.SpellAbility);
-            if (trigSA != null && trigSA.getAmountLifePaid() <= 0) {
-                return false;
-            }
-        } else if ("NoOpponentHasMoreLifeThanAttacked".equals(condition)) {
-            GameEntity attacked = (GameEntity) runParams.get(AbilityKey.Attacked);
-            if (attacked == null) {
-                attacked = (GameEntity) runParams.get(AbilityKey.Defender);
-            }
-            // we should not have gotten this far if planeswalker was attacked, but just to be safe
-            if (!(attacked instanceof Player)) {
-                return false;
-            }
-            final Player attackedP = (Player) attacked;
-            int life = attackedP.getLife();
-            boolean found = false;
-            for (Player opp : this.getHostCard().getController().getOpponents()) {
-                if (opp.equals(attackedP)) {
-                    continue;
+        return true;
+    }
+
+    // without an event the conditions on its triggering objects can't be checked, so they are left out
+    private Map<String, String> paramsWithoutEvent() {
+        Map<String, String> params = mapParams;
+        for (String key : List.of("CheckSVar", "CheckDefinedPlayer")) {
+            String value = mapParams.get(key);
+            if (value != null && (value.contains("Trigger") || hasSVar(value) && getSVar(value).contains("Trigger"))) {
+                if (params == mapParams) {
+                    params = new HashMap<>(mapParams);
                 }
-                if (opp.getLife() > life) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                return false;
-            }
-        } else if ("Sacrificed".equals(condition)) {
-            final SpellAbility trigSA = (SpellAbility) runParams.get(AbilityKey.SpellAbility);
-            if (trigSA != null && Iterables.isEmpty(trigSA.getPaidList("Sacrificed"))) {
-                return false;
-            }
-        } else if ("AttackedPlayerWithMostLife".equals(condition)) {
-            GameEntity attacked = (GameEntity) runParams.get(AbilityKey.Attacked);
-            if (attacked == null) {
-                // Check "Defender" too because once triggering objects are set on TriggerAttacks, the value of Attacked
-                // ends up being in Defender at that point.
-                attacked = (GameEntity) runParams.get(AbilityKey.Defender);
-            }
-            if (attacked == null || !attacked.isValid("Player.withMostLife",
-                    this.getHostCard().getController(), this.getHostCard(), null)) {
-                return false;
-            }
-        } else if ("AttackerHasUnattackedOpp".equals(condition)) {
-            Player attacker = (Player) runParams.get(AbilityKey.AttackingPlayer);
-            if (game.getCombat().getAttackersAndDefenders().values().containsAll(attacker.getOpponents())) {
-                return false;
+                params.remove(key);
             }
         }
-        return true;
+        return params;
+    }
+
+    /** Runs a check against this event, so conditions can name its triggering objects, as in "that player" (CR 603.4) */
+    public final boolean checkWith(final TriggerWaiting event, final BooleanSupplier check) {
+        checkedEvent = event;
+        try {
+            return check.getAsBoolean();
+        } finally {
+            checkedEvent = null;
+        }
+    }
+
+    /** Runs a check against the triggering objects of the fired ability */
+    public final boolean checkWith(final SpellAbility fired, final BooleanSupplier check) {
+        checkedObjects = fired.getTriggeringObjects();
+        try {
+            return check.getAsBoolean();
+        } finally {
+            checkedObjects = null;
+        }
+    }
+
+    @Override
+    public Object getTriggeringObject(final AbilityKey type) {
+        if (checkedObjects != null) {
+            return checkedObjects.get(type);
+        }
+        return checkedEvent == null ? null : checkedEvent.getTriggeringObjects(this).get(type);
     }
 
     /** {@inheritDoc} */
@@ -472,15 +496,15 @@ public abstract class Trigger extends TriggerReplacementBase {
      */
     public abstract boolean performTest(Map<AbilityKey, Object> runParams);
 
-    /**
-     * <p>
-     * setTriggeringObjects.
-     * </p>
-     *
-     * @param sa
-     *            a {@link forge.game.spellability.SpellAbility} object.
-     */
-    public abstract void setTriggeringObjects(SpellAbility sa, final Map<AbilityKey, Object> runParams);
+    /** Fills in the triggering objects its ability gets from this event */
+    public abstract void setTriggeringObjects(Map<AbilityKey, Object> objects, final Map<AbilityKey, Object> runParams);
+
+    /** The triggering objects its ability would get for this event */
+    public final Map<AbilityKey, Object> buildTriggeringObjects(final Map<AbilityKey, Object> runParams) {
+        final Map<AbilityKey, Object> objects = AbilityKey.newMap();
+        setTriggeringObjects(objects, runParams);
+        return objects;
+    }
 
     /**
      * Gets the id.
@@ -503,8 +527,11 @@ public abstract class Trigger extends TriggerReplacementBase {
         this.id = id;
     }
 
-    public void addRemembered(Object o) {
+    public <T> void addRemembered(T o) {
         this.triggerRemembered.add(o);
+    }
+    public <T> void addRemembered(Collection<T> o) {
+        this.triggerRemembered.addAll(o);
     }
 
     @Override
@@ -531,11 +558,19 @@ public abstract class Trigger extends TriggerReplacementBase {
     }
 
     public final Trigger copy(Card newHost, boolean lki) {
+        return copy(newHost, lki, false, null);
+    }
+    public final Trigger copy(Card newHost, boolean lki, boolean keepTextChanges) {
+        return copy(newHost, lki, keepTextChanges, null);
+    }
+    public final Trigger copy(Card newHost, boolean lki, boolean keepTextChanges, SpellAbility spellAbility) {
         final Trigger copy = (Trigger) clone();
 
-        copyHelper(copy, newHost);
+        copyHelper(copy, newHost, lki || keepTextChanges);
 
-        if (getOverridingAbility() != null) {
+        if (spellAbility != null) {
+            copy.setOverridingAbility(spellAbility);
+        } else if (getOverridingAbility() != null) {
             copy.setOverridingAbility(getOverridingAbility().copy(newHost, lki));
         }
 
@@ -558,7 +593,6 @@ public abstract class Trigger extends TriggerReplacementBase {
         validPhases = phases;
     }
 
-    //public String getImportantStackObjects(SpellAbility sa) { return ""; };
     abstract public String getImportantStackObjects(SpellAbility sa);
 
     public SpellAbility getSpawningAbility() {
@@ -592,41 +626,14 @@ public abstract class Trigger extends TriggerReplacementBase {
         }
     }
 
-    /* (non-Javadoc)
-     * @see forge.game.CardTraitBase#changeText()
-     */
-    @Override
-    public void changeText() {
-        if (!isIntrinsic()) {
-            return;
-        }
-        super.changeText();
-
-        SpellAbility sa = ensureAbility();
-
-        if (sa != null) {
-            sa.changeText();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see forge.game.CardTraitBase#changeTextIntrinsic(java.util.Map, java.util.Map)
-     */
-    @Override
-    public void changeTextIntrinsic(Map<String, String> colorMap, Map<String, String> typeMap) {
-        super.changeTextIntrinsic(colorMap, typeMap);
-
-        SpellAbility sa = ensureAbility();
-
-        if (sa != null) {
-            sa.changeTextIntrinsic(colorMap, typeMap);
-        }
-    }
-
     public SpellAbility ensureAbility(final IHasSVars sVarHolder) {
         SpellAbility sa = getOverridingAbility();
         if (sa == null && hasParam("Execute")) {
-            sa = AbilityFactory.getAbility(getHostCard(), getParam("Execute"), sVarHolder);
+            if (this.isIntrinsic() && sVarHolder instanceof CardState state) {
+                sa = state.getAbilityForTrigger(getParam("Execute"));
+            } else {
+                sa = AbilityFactory.getAbility(getHostCard(), getParam("Execute"), sVarHolder);
+            }
             setOverridingAbility(sa);
         }
         return sa;
@@ -643,14 +650,14 @@ public abstract class Trigger extends TriggerReplacementBase {
     }
 
     boolean whileKeywordCheck(final String param, final Map<AbilityKey, Object> runParams) {
-        IndividualCostPaymentInstance currentPayment = (IndividualCostPaymentInstance) runParams.get(AbilityKey.IndividualCostPaymentInstance);
+        CostPaymentStack.Entry currentPayment = (CostPaymentStack.Entry) runParams.get(AbilityKey.IndividualCostPaymentInstance);
         if (currentPayment != null) {
-            if (matchesValidParam(param, currentPayment.getPayment().getAbility())) return true;
+            if (matchesValidParam(param, currentPayment.payment().getAbility())) return true;
         }
 
         CostPaymentStack stack = (CostPaymentStack) runParams.get(AbilityKey.CostStack);
-        for (IndividualCostPaymentInstance individual : stack) {
-            if (matchesValidParam(param, individual.getPayment().getAbility())) return true;
+        for (CostPaymentStack.Entry individual : stack) {
+            if (matchesValidParam(param, individual.payment().getAbility())) return true;
         }
 
         return false;
@@ -666,5 +673,35 @@ public abstract class Trigger extends TriggerReplacementBase {
     }
     public boolean isLastChapter() {
         return isChapter() && getChapter() == getCardState().getFinalChapterNr();
+    }
+
+    @Override
+    public boolean isManaAbility() {
+        if (!TriggerType.TapsForMana.equals(getMode()) && !TriggerType.ManaAdded.equals(getMode())) {
+            return false;
+        }
+        return ensureAbility().isManaAbility();
+    }
+
+    public boolean looksBackInTime() {
+        // only contains the types that matter for performance
+        switch (getMode()) {
+            case Exploited:
+            case Destroyed:
+            case Sacrificed:
+            case SacrificedOnce:
+                return true;
+            case ChangesZone:
+            case ChangesZoneAll:
+                if (Strings.CS.contains(getParam("Origin"), "Battlefield")) {
+                    return true;
+                }
+                if (Strings.CS.contains(getParam("Origin"), "Graveyard") && !"Battlefield".equals(getParam("Destination"))) {
+                    return true;
+                }
+                return Strings.CS.containsAny(getParam("Destination"), "Library", "Hand");
+            default:
+                return false;
+        }
     }
 }

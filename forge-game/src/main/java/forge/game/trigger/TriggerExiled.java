@@ -18,6 +18,7 @@
 package forge.game.trigger;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -84,8 +85,11 @@ public class TriggerExiled extends Trigger {
             return false;
         }
 
-        if (hasParam("Madness")) {
+        if (isKeyword(Keyword.MADNESS)) {
             if (cause == null || !cause.isKeyword(Keyword.MADNESS)) {
+                return false;
+            }
+            if (!Objects.equals(getKeyword().getStatic(), cause.getKeyword().getStatic())) {
                 return false;
             }
         }
@@ -95,8 +99,8 @@ public class TriggerExiled extends Trigger {
 
     /** {@inheritDoc} */
     @Override
-    public final void setTriggeringObjects(final SpellAbility sa, Map<AbilityKey, Object> runParams) {
-        sa.setTriggeringObjectsFrom(runParams, AbilityKey.Card);
+    public final void setTriggeringObjects(final Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
+        AbilityKey.copyKeys(runParams, objects, AbilityKey.Card);
     }
 
     @Override

@@ -1,17 +1,16 @@
 package forge.adventure.data;
 
-import forge.util.Callback;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Dialog Data JSON loader class.
  * Carries all text, branches and effects of dialogs.
  */
 public class DialogData implements Serializable {
-    //private static final long SerialVersionUID = 1; // TODO: set to current value
+    private static final long serialVersionUID = 1L;
 
     public ActionData[] action = new ActionData[0];       //List of effects to cause when the dialog shows.
     public ConditionData[] condition = new ConditionData[0]; //List of conditions for the action to show.
@@ -21,8 +20,10 @@ public class DialogData implements Serializable {
     public String loctext= "";            //References a localized string for the text body.
     public DialogData[] options = new DialogData[0];      //List of sub-dialogs. Show up as options in the current one.
     public boolean isDisabled = false;
+    // Persist quest dialog state here because this class already has a stable cross-platform serialization UID.
+    private boolean displayed = false;
 
-    public transient Callback callback;
+    public transient Consumer callback;
 
     public DialogData(){}
     public DialogData(DialogData other){
@@ -42,6 +43,15 @@ public class DialogData implements Serializable {
         this.options = clonedOptions.toArray(new DialogData[0]);
         this.voiceFile = other.voiceFile;
         this.isDisabled = other.isDisabled;
+        this.displayed = other.displayed;
+    }
+
+    public boolean isDisplayed() {
+        return displayed;
+    }
+
+    public void markDisplayed() {
+        displayed = true;
     }
 
     @Override
@@ -77,6 +87,7 @@ public class DialogData implements Serializable {
         public QuestFlag setMapFlag;      //Set map flag.
 
         public RewardData[] grantRewards = new RewardData[0];   //launch a RewardScene with the provided data.
+        public RewardData[] grantRewardsChoice = new RewardData[0];   //launch a RewardScene choice with the provided data.
         public String issueQuest; //Add quest with this ID to the player's questlog.
 
         public int addMapReputation = 0;  //Gives the player X reputation points in this POI. Negative to take.
@@ -86,7 +97,7 @@ public class DialogData implements Serializable {
 
         public ActionData(ActionData other){
             removeItem = other.removeItem;
-            addItem = other.removeItem;
+            addItem = other.addItem;
             addLife = other.addLife;
             addGold = other.addGold;
             addShards = other.addShards;
@@ -109,6 +120,7 @@ public class DialogData implements Serializable {
                 setMapFlag.val = other.setMapFlag.val;
             }
             grantRewards = other.grantRewards.clone();
+            grantRewardsChoice = other.grantRewardsChoice.clone();
             issueQuest = other.issueQuest;
             addMapReputation = other.addMapReputation;
             POIReference = other.POIReference;
@@ -116,8 +128,9 @@ public class DialogData implements Serializable {
     }
 
     static public class ConditionData implements Serializable {
-        private static final long SerialVersionUID = 1L;
-        static public class QueryQuestFlag{
+        private static final long serialVersionUID = 1L;
+        static public class QueryQuestFlag implements Serializable {
+            private static final long serialVersionUID = 1L;
             public String key;
             public String op;
             public int val;

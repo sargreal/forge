@@ -3,8 +3,6 @@ package forge.game.trigger;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Iterables;
-
 import forge.game.ability.AbilityKey;
 import forge.game.ability.AbilityUtils;
 import forge.game.card.Card;
@@ -27,7 +25,7 @@ public class TriggerChangesZoneAll extends Trigger {
         final CardZoneTable table = (CardZoneTable) runParams.get(AbilityKey.Cards);
 
         // leaves the GY trigger look back in time
-        if (Iterables.contains(getActiveZone(), ZoneType.Battlefield) && "Graveyard".equals(getParam("Origin"))
+        if (getActiveZone().contains(ZoneType.Battlefield) && "Graveyard".equals(getParam("Origin"))
                 && !table.getLastStateBattlefield().contains(getHostCard())) {
             return false;
         }
@@ -56,14 +54,14 @@ public class TriggerChangesZoneAll extends Trigger {
     }
 
     @Override
-    public void setTriggeringObjects(SpellAbility sa, Map<AbilityKey, Object> runParams) {
+    public void setTriggeringObjects(Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
         final CardZoneTable table = (CardZoneTable) runParams.get(AbilityKey.Cards);
 
         CardCollection allCards = this.filterCards(table);
 
-        sa.setTriggeringObject(AbilityKey.Cards, allCards);
-        sa.setTriggeringObject(AbilityKey.Amount, allCards.size());
-        sa.setTriggeringObjectsFrom(runParams, AbilityKey.Cause);
+        objects.put(AbilityKey.Cards, allCards);
+        objects.put(AbilityKey.Amount, allCards.size());
+        AbilityKey.copyKeys(runParams, objects, AbilityKey.Cause);
     }
 
     @Override
@@ -74,11 +72,11 @@ public class TriggerChangesZoneAll extends Trigger {
     }
 
     private CardCollection filterCards(CardZoneTable table) {
-        ZoneType destination = null;
+        List<ZoneType> destination = null;
         List<ZoneType> origin = null;
 
         if (hasParam("Destination") && !getParam("Destination").equals("Any")) {
-            destination = ZoneType.valueOf(getParam("Destination"));
+            destination = ZoneType.listValueOf(getParam("Destination"));
         }
 
         if (hasParam("Origin") && !getParam("Origin").equals("Any")) {

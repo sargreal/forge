@@ -18,17 +18,19 @@
 package forge.screens.match.views;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.BasicStroke;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -37,13 +39,17 @@ import javax.swing.border.EmptyBorder;
 import forge.CachedCardImage;
 import forge.game.GameView;
 import forge.game.card.CardView.CardStateView;
+import forge.game.player.PlayerView;
 import forge.game.spellability.StackItemView;
+import forge.gamemodes.match.YieldUpdate;
 import forge.gui.card.CardDetailUtil;
 import forge.gui.card.CardDetailUtil.DetailColors;
 import forge.gui.framework.DragCell;
 import forge.gui.framework.DragTab;
 import forge.gui.framework.EDocID;
 import forge.gui.framework.IVDoc;
+import forge.interfaces.IGameController;
+import forge.player.AutoYieldStore.TriggerDecision;
 import forge.screens.match.controllers.CDock.ArcState;
 import forge.screens.match.controllers.CStack;
 import forge.toolbox.FMouseAdapter;
@@ -71,6 +77,9 @@ public class VStack implements IVDoc<CStack> {
 
     // Other fields
     private final AbilityMenu abilityMenu = new AbilityMenu();
+
+    // dashed outline of a stack entry that can be picked as a target; a picked entry gets a solid red one
+    private static final Color SELECTABLE_COLOR = new Color(255, 215, 0);
 
     private StackInstanceTextArea hoveredItem;
 
@@ -125,13 +134,15 @@ public class VStack implements IVDoc<CStack> {
         tab.setText(Localizer.getInstance().getMessage("lblStack") + " : " + items.size());
 
         // No need to update the rest unless it's showing
-        if (!parentCell.getSelected().equals(this)) { return; }
+        if (parentCell == null || !parentCell.getSelected().equals(this)) { return; }
 
         hoveredItem = null;
         scroller.removeAll();
 
+        final Iterable<StackItemView> safeItems = controller.getMatchUI().isNetGame()
+                ? items.threadSafeIterable() : items;
         boolean isFirst = true;
-        for (final StackItemView item : items) {
+        for (final StackItemView item : safeItems) {
             final StackInstanceTextArea tar = new StackInstanceTextArea(item);
 
             scroller.add(tar, "pushx, growx" + (isFirst ? "" : ", gaptop 2px"));
@@ -146,12 +157,12 @@ public class VStack implements IVDoc<CStack> {
         scroller.revalidate();
         scroller.repaint();
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                scroller.scrollToTop();
-            }
-        });
+        SwingUtilities.invokeLater(scroller::scrollToTop);
+    }
+
+    /** Repaints the entries, for when a stack target was marked, picked or unmarked (the outline is painted per entry). */
+    public void repaintSelection() {
+        scroller.repaint();
     }
 
     @SuppressWarnings("serial")
@@ -238,22 +249,34 @@ public class VStack implements IVDoc<CStack> {
                 }
             });
 
-            if (item.isAbility()) {
-                addMouseListener(new FMouseAdapter() {
-                    @Override
-                    public void onLeftClick(final MouseEvent e) {
-                        onClick(e);
+            addMouseListener(new FMouseAdapter() {
+                @Override
+                public void onLeftClick(final MouseEvent e) {
+                    if (controller.getMatchUI().isSelectable(item)) { // a stack target is being chosen: a click picks (or unpicks) it
+                        controller.getMatchUI().pickStackItem(item);
+                        return;
                     }
-                    @Override
-                    public void onRightClick(final MouseEvent e) {
-                        onClick(e);
+                    onClick(e);
+                }
+                @Override
+                public void onRightClick(final MouseEvent e) {
+                    onClick(e);
+                }
+                private void onClick(final MouseEvent e) {
+                    abilityMenu.setStackInstance(item);
+                    boolean hasVisibleItem = false;
+                    for (Component c : abilityMenu.getComponents()) {
+                        if (c.isVisible()) {
+                            hasVisibleItem = true;
+                            break;
+                        }
                     }
-                    private void onClick(final MouseEvent e) {
-                        abilityMenu.setStackInstance(item);
-                        abilityMenu.show(e.getComponent(), e.getX(), e.getY());
+                    if (!hasVisibleItem) {
+                        return;
                     }
-                });
-            }
+                    abilityMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            });
 
             // TODO: A hacky workaround is currently used to make the game not leak the color information for Morph cards.
             final CardStateView curState = item.getSourceCard().getCurrentState();
@@ -281,6 +304,17 @@ public class VStack implements IVDoc<CStack> {
             if (img != null) {
                 g2d.drawImage(img, null, PADDING, PADDING);
             }
+
+            //outline the entry while it can be picked as a target, and once it is picked
+            final boolean picked = controller.getMatchUI().isHighlighted(item);
+            if (picked || controller.getMatchUI().isSelectable(item)) {
+                final Stroke oldStroke = g2d.getStroke();
+                g2d.setColor(picked ? Color.RED : SELECTABLE_COLOR);
+                g2d.setStroke(picked ? new BasicStroke(3f)
+                        : new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, new float[] {8f, 6f}, 0f));
+                g2d.drawRect(1, 1, getWidth() - 3, getHeight() - 3);
+                g2d.setStroke(oldStroke);
+            }
         }
     }
 
@@ -291,64 +325,66 @@ public class VStack implements IVDoc<CStack> {
         private final JCheckBoxMenuItem jmiAutoYield;
         private final JCheckBoxMenuItem jmiAlwaysYes;
         private final JCheckBoxMenuItem jmiAlwaysNo;
-        private StackItemView item;
-
-        private Integer triggerID = 0;
+        private final JMenuItem jmiYieldToStack;
+        private final JMenuItem jmiYieldToEntireStack;
+        private String yieldKey = "";
+        private boolean abilityScope;
 
         public AbilityMenu(){
             jmiAutoYield = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("cbpAutoYieldMode"));
-            jmiAutoYield.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent arg0) {
-                    final String key = item.getKey();
-                    final boolean autoYield = controller.getMatchUI().shouldAutoYield(key);
-                    controller.getMatchUI().setShouldAutoYield(key, !autoYield);
-                    if (!autoYield && controller.getMatchUI().getGameView().peekStack() == item) {
-                        //auto-pass priority if ability is on top of stack
-                        controller.getMatchUI().getGameController().passPriority();
-                    }
-                }
+            jmiAutoYield.addActionListener(arg0 -> {
+                final boolean autoYield = controller.getMatchUI().getGameController().shouldAutoYield(yieldKey);
+                controller.getMatchUI().getGameController().setShouldAutoYield(yieldKey, !autoYield, abilityScope);
             });
             add(jmiAutoYield);
 
             jmiAlwaysYes = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("lblAlwaysYes"));
-            jmiAlwaysYes.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent arg0) {
-                    if (controller.getMatchUI().shouldAlwaysAcceptTrigger(triggerID)) {
-                        controller.getMatchUI().setShouldAlwaysAskTrigger(triggerID);
-                    }
-                    else {
-                        controller.getMatchUI().setShouldAlwaysAcceptTrigger(triggerID);
-                    }
-                }
+            jmiAlwaysYes.addActionListener(arg0 -> {
+                if (yieldKey.isEmpty()) return;
+                IGameController gc = controller.getMatchUI().getGameController();
+                TriggerDecision next = gc.getTriggerDecision(yieldKey) == TriggerDecision.ACCEPT ? TriggerDecision.ASK : TriggerDecision.ACCEPT;
+                gc.setTriggerDecision(yieldKey, next, abilityScope);
             });
             add(jmiAlwaysYes);
 
             jmiAlwaysNo = new JCheckBoxMenuItem(Localizer.getInstance().getMessage("lblAlwaysNo"));
-            jmiAlwaysNo.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent arg0) {
-                    if (controller.getMatchUI().shouldAlwaysDeclineTrigger(triggerID)) {
-                        controller.getMatchUI().setShouldAlwaysAskTrigger(triggerID);
-                    }
-                    else {
-                        controller.getMatchUI().setShouldAlwaysDeclineTrigger(triggerID);
-                    }
-                }
+            jmiAlwaysNo.addActionListener(arg0 -> {
+                if (yieldKey.isEmpty()) return;
+                IGameController gc = controller.getMatchUI().getGameController();
+                TriggerDecision next = gc.getTriggerDecision(yieldKey) == TriggerDecision.DECLINE ? TriggerDecision.ASK : TriggerDecision.DECLINE;
+                gc.setTriggerDecision(yieldKey, next, abilityScope);
             });
             add(jmiAlwaysNo);
+
+            jmiYieldToStack = new JMenuItem(Localizer.getInstance().getMessage("lblYieldToStack"));
+            jmiYieldToStack.addActionListener(arg0 -> {
+                final PlayerView local = controller.getMatchUI().getCurrentPlayer();
+                if (local == null) return;
+                controller.getMatchUI().getGameController().sendYieldUpdate(new YieldUpdate.StackYield(local, true, true));
+            });
+            add(jmiYieldToStack);
+
+            jmiYieldToEntireStack = new JMenuItem(Localizer.getInstance().getMessage("lblYieldToEntireStack"));
+            jmiYieldToEntireStack.addActionListener(arg0 -> {
+                final PlayerView local = controller.getMatchUI().getCurrentPlayer();
+                if (local == null) return;
+                controller.getMatchUI().getGameController().sendYieldUpdate(new YieldUpdate.StackYield(local, true, false));
+            });
+            add(jmiYieldToEntireStack);
         }
 
         public void setStackInstance(final StackItemView item0) {
-            item = item0;
-            triggerID = Integer.valueOf(item.getSourceTrigger());
+            yieldKey = item0.getKey();
+            abilityScope = controller.getMatchUI().getGameController().getYieldController().isAbilityScope();
 
-            jmiAutoYield.setSelected(controller.getMatchUI().shouldAutoYield(item.getKey()));
+            jmiAutoYield.setVisible(item0.isAbility());
+            jmiAutoYield.setSelected(item0.isAbility()
+                    && controller.getMatchUI().getGameController().shouldAutoYield(yieldKey));
 
-            if (item.isOptionalTrigger() && controller.getMatchUI().isLocalPlayer(item.getActivatingPlayer())) {
-                jmiAlwaysYes.setSelected(controller.getMatchUI().shouldAlwaysAcceptTrigger(triggerID));
-                jmiAlwaysNo.setSelected(controller.getMatchUI().shouldAlwaysDeclineTrigger(triggerID));
+            if (item0.isOptionalTrigger() && controller.getMatchUI().isLocalPlayer(item0.getActivatingPlayer()) && !yieldKey.isEmpty()) {
+                TriggerDecision decision = controller.getMatchUI().getGameController().getTriggerDecision(yieldKey);
+                jmiAlwaysYes.setSelected(decision == TriggerDecision.ACCEPT);
+                jmiAlwaysNo.setSelected(decision == TriggerDecision.DECLINE);
                 jmiAlwaysYes.setVisible(true);
                 jmiAlwaysNo.setVisible(true);
             } else {

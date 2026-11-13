@@ -1,7 +1,8 @@
 package forge.menus;
 
-import java.awt.event.ActionEvent;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
@@ -12,13 +13,14 @@ import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.JTextComponent;
 
 import forge.Singletons;
+import forge.gamemodes.replay.ReplayLauncher;
 import forge.gui.GuiUtils;
 import forge.screens.home.online.OnlineMenu;
+import forge.screens.match.menus.DisplayMenu;
 import forge.util.Localizer;
-import forge.util.ReflectionUtil;
-
 
 public final class ForgeMenu {
 
@@ -33,7 +35,6 @@ public final class ForgeMenu {
     public void show() {
         show(false);
     }
-
     public void show(boolean hideIfAlreadyShown) {
         Singletons.getView().getNavigationBar().showForgeMenu(hideIfAlreadyShown);
     }
@@ -74,9 +75,12 @@ public final class ForgeMenu {
             }
         }
         add(new LayoutMenu().getMenu());
+        MenuUtil.withMatchUI(vmu -> add(new DisplayMenu(vmu.getControl()).getMenu()));
+        add(new AudioMenu().getMenu());
         add(HelpMenu.getMenu());
         addSeparator();
         add(OnlineMenu.getMenu());
+        add(getMenuItem_Replays());
         addSeparator();
         add(getMenuItem_Restart());
         add(getMenuItem_Exit());
@@ -107,14 +111,13 @@ public final class ForgeMenu {
             activeShortcuts.put(shortcut, item);
         }
 
-        JMenu subMenu = ReflectionUtil.safeCast(item, JMenu.class);
-        if (subMenu != null) {
-            setupMenu(subMenu);
+        if (item instanceof JMenu sub) {
+            setupMenu(sub);
         }
     }
-    
+
     public boolean handleKeyEvent(KeyEvent e) {
-        if (popupMenu.isEnabled()) {
+        if (popupMenu.isEnabled() && !isTypingText(e)) {
             JMenuItem item = activeShortcuts.get(KeyStroke.getKeyStrokeForEvent(e));
             if (item != null) {
                 hide(); //ensure menu doesn't stay open if currently open
@@ -123,6 +126,17 @@ public final class ForgeMenu {
             }
         }
         return false;
+    }
+
+    private static boolean isTypingText(KeyEvent e) {
+        return (e.getModifiersEx() & ~InputEvent.SHIFT_DOWN_MASK) == 0 && !e.isActionKey()
+                && KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner() instanceof JTextComponent;
+    }
+
+    private static JMenuItem getMenuItem_Replays() {
+        final JMenuItem menuItem = new JMenuItem("Replays...");
+        menuItem.addActionListener(e -> ReplayLauncher.chooseAndPlay());
+        return menuItem;
     }
 
     private static JMenuItem getMenuItem_Restart() {
@@ -134,12 +148,7 @@ public final class ForgeMenu {
     }
 
     private static ActionListener getRestartAction() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Singletons.getControl().restartForge();
-            }
-        };
+        return e -> Singletons.getControl().restartForge();
     }
 
     private static JMenuItem getMenuItem_Exit() {
@@ -151,11 +160,6 @@ public final class ForgeMenu {
     }
 
     private static ActionListener getExitAction() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Singletons.getControl().exitForge();
-            }
-        };
+        return e -> Singletons.getControl().exitForge();
     }
 }

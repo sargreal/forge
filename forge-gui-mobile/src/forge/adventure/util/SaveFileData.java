@@ -5,197 +5,209 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import forge.Forge;
+import io.sentry.Hint;
+import io.sentry.Sentry;
+import org.tinylog.Logger;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SaveFileData extends HashMap<String,byte[]>
-{
-    public void store(String key,SaveFileData subData)
-    {
+public class SaveFileData extends HashMap<String, byte[]> {
+    public void store(String key, SaveFileData subData) {
         try {
-
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeObject(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
-
+            put(key, stream.toByteArray());
         } catch (IOException e) {
-            e.printStackTrace();
+            put("IOException", e.toString().getBytes());
+            captureException(e, key, subData);
         }
     }
 
 
-    public void store(String key,float subData)
-    {
+    public void store(String key, float subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeFloat(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key,double subData)
-    {
+
+    public void store(String key, double subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeDouble(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key,int subData)
-    {
+
+    public void store(String key, int subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeInt(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key,long subData)
-    {
+
+    public void store(String key, long subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeLong(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key,boolean subData)
-    {
+
+    public void store(String key, boolean subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeBoolean(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key, Pixmap pixmap)
-    {
+
+    public void store(String key, Pixmap pixmap) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
             PixmapIO.PNG png = new PixmapIO.PNG();
             png.setFlipY(false);
             png.write(stream, pixmap);
             stream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void storeObject(String key,Object subData)
-    {
+
+    public void storeObject(String key, Object subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeObject(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
-            e.printStackTrace();
+            put("IOException", e.toString().getBytes());
+            captureException(e, key, subData);
         }
     }
-    public void store(String key,String subData)
-    {
+
+    public void store(String key, String subData) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeUTF(subData);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
-            e.printStackTrace();
+            put("IOException", e.toString().getBytes());
+            captureException(e, key, subData);
         }
     }
 
     public void store(String key, Vector2 vector) {
-
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeFloat(vector.x);
             objStream.writeFloat(vector.y);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
-    public void store(String key, Rectangle rectangle) {
 
+    public void store(String key, Rectangle rectangle) {
         try {
-            ByteArrayOutputStream stream=new ByteArrayOutputStream();
-            ObjectOutputStream objStream=new ObjectOutputStream(stream);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ObjectOutputStream objStream = new ObjectOutputStream(stream);
             objStream.writeFloat(rectangle.x);
             objStream.writeFloat(rectangle.y);
             objStream.writeFloat(rectangle.width);
             objStream.writeFloat(rectangle.height);
             objStream.flush();
-            put(key,stream.toByteArray());
+            put(key, stream.toByteArray());
         } catch (IOException e) {
+            put("IOException", e.toString().getBytes());
             e.printStackTrace();
         }
     }
 
-    public SaveFileData readSubData(String key)
-    {
-        if(!containsKey(key))
+    public SaveFileData readSubData(String key) {
+        if (!containsKey(key))
             return null;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
-            return (SaveFileData)objStream.readObject();
-
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
+            return (SaveFileData) objStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;
     }
-    public Object readObject(String key)
-    {
-        if(!containsKey(key))
+
+    public Object readObject(String key) {
+        if (!containsKey(key))
             return null;
+        byte[] data = get(key);
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
-            return objStream.readObject();
-
+            try {
+                return new DecompressibleInputStream(new ByteArrayInputStream(data)).readObject();
+            } catch (InvalidClassException e) {
+                byte[] adopted = DecompressibleInputStream.adoptPinnedUids(data);
+                if (adopted == data)
+                    throw e;
+                return new DecompressibleInputStream(new ByteArrayInputStream(adopted)).readObject();
+            }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-            Forge.delayedSwitchBack();
+            Forge.delayedSwitchBack("", "SaveFileData Error\nPress Resume on the Main Menu to try with missing " + key);
         } catch (ClassCastException e) { //this allows loading
             System.err.println("Encountered problem loading object: " + key);
         }
         return null;
     }
-    public String readString(String key)
-    {
-        if(!containsKey(key))
+
+    public String readString(String key) {
+        if (!containsKey(key))
             return null;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readUTF();
 
         } catch (IOException e) {
@@ -205,12 +217,11 @@ public class SaveFileData extends HashMap<String,byte[]>
     }
 
     public long readLong(String key) {
-        if(!containsKey(key))
+        if (!containsKey(key))
             return 0;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readLong();
 
         } catch (IOException e) {
@@ -218,14 +229,13 @@ public class SaveFileData extends HashMap<String,byte[]>
         }
         return 0;
     }
-    public float readFloat(String key)
-    {
-        if(!containsKey(key))
+
+    public float readFloat(String key) {
+        if (!containsKey(key))
             return 0.0f;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readFloat();
 
         } catch (IOException e) {
@@ -234,14 +244,12 @@ public class SaveFileData extends HashMap<String,byte[]>
         return 0.0f;
     }
 
-    public double readDouble(String key)
-    {
-        if(!containsKey(key))
+    public double readDouble(String key) {
+        if (!containsKey(key))
             return 0.0;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readDouble();
 
         } catch (IOException e) {
@@ -249,37 +257,34 @@ public class SaveFileData extends HashMap<String,byte[]>
         }
         return 0.0;
     }
-    public Vector2 readVector2(String key)
-    {
-        if(!containsKey(key))
+
+    public Vector2 readVector2(String key) {
+        if (!containsKey(key))
             return new Vector2();
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
-            float x= objStream.readFloat();
-            float y= objStream.readFloat();
-            return new Vector2(x,y);
-
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
+            float x = objStream.readFloat();
+            float y = objStream.readFloat();
+            return new Vector2(x, y);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return new Vector2();
     }
-    public Rectangle readRectangle(String key)
-    {
-        if(!containsKey(key))
+
+    public Rectangle readRectangle(String key) {
+        if (!containsKey(key))
             return new Rectangle();
         try {
 
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
-            float x= objStream.readFloat();
-            float y= objStream.readFloat();
-            float width= objStream.readFloat();
-            float height= objStream.readFloat();
-            return new Rectangle(x,y,width,height);
-
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
+            float x = objStream.readFloat();
+            float y = objStream.readFloat();
+            float width = objStream.readFloat();
+            float height = objStream.readFloat();
+            return new Rectangle(x, y, width, height);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -287,21 +292,18 @@ public class SaveFileData extends HashMap<String,byte[]>
     }
 
 
-
-    public Pixmap readPixmap(String key)
-    {
-        if(!containsKey(key))
+    public Pixmap readPixmap(String key) {
+        if (!containsKey(key))
             return null;
         return new Pixmap(get(key), 0, get(key).length);
     }
-    public int readInt(String key)
-    {
-        if(!containsKey(key))
+
+    public int readInt(String key) {
+        if (!containsKey(key))
             return 0;
         try {
-
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readInt();
 
         } catch (IOException e) {
@@ -309,14 +311,14 @@ public class SaveFileData extends HashMap<String,byte[]>
         }
         return 0;
     }
-    public boolean readBool(String key)
-    {
-        if(!containsKey(key))
+
+    public boolean readBool(String key) {
+        if (!containsKey(key))
             return false;
         try {
 
-            ByteArrayInputStream stream=new ByteArrayInputStream(get(key));
-            ObjectInputStream objStream= new DecompressibleInputStream(stream);
+            ByteArrayInputStream stream = new ByteArrayInputStream(get(key));
+            ObjectInputStream objStream = new DecompressibleInputStream(stream);
             return objStream.readBoolean();
 
         } catch (IOException e) {
@@ -325,8 +327,12 @@ public class SaveFileData extends HashMap<String,byte[]>
         return false;
     }
 
-
-
+    private void captureException(Exception e, String key, Object object) {
+        Hint hint = new Hint();
+        hint.set(key, object);
+        Sentry.captureException(e, hint);
+        e.printStackTrace();
+    }
 
     static class DecompressibleInputStream extends ObjectInputStream {
 
@@ -334,19 +340,72 @@ public class SaveFileData extends HashMap<String,byte[]>
 
         //private static Logger logger = LoggerFactory.getLogger(DecompressibleInputStream.class);
 
+        private static final byte[] FORGE_PACKAGE = "forge.".getBytes(StandardCharsets.UTF_8);
+        private static final Map<String, Optional<Long>> pinnedUids = new ConcurrentHashMap<>();
+
         public DecompressibleInputStream(InputStream in) throws IOException {
             super(in);
+        }
+
+        // Rewrites pre-pin stream UIDs to the pinned one, since desktop and Android computed different defaults.
+        static byte[] adoptPinnedUids(byte[] data) {
+            byte[] result = data;
+            for (int i = 0; i + 3 < data.length; i++) {
+                if (data[i] != ObjectStreamConstants.TC_CLASSDESC)
+                    continue;
+                int nameStart = i + 3;
+                int uidStart = nameStart + (((data[i + 1] & 0xFF) << 8) | (data[i + 2] & 0xFF));
+                if (uidStart + 8 > data.length || !startsWith(data, nameStart, FORGE_PACKAGE))
+                    continue;
+                Long pinned = pinnedUid(new String(data, nameStart, uidStart - nameStart, StandardCharsets.UTF_8));
+                if (pinned == null || readLong(data, uidStart) == pinned)
+                    continue;
+                if (result == data)
+                    result = data.clone();
+                for (int b = 0; b < 8; b++)
+                    result[uidStart + b] = (byte) (pinned >>> (56 - 8 * b));
+            }
+            return result;
+        }
+
+        private static Long pinnedUid(String className) {
+            return pinnedUids.computeIfAbsent(className, name -> {
+                try {
+                    Class<?> cls = Class.forName(name, false, SaveFileData.class.getClassLoader());
+                    cls.getDeclaredField("serialVersionUID");
+                    ObjectStreamClass desc = ObjectStreamClass.lookup(cls);
+                    return desc == null ? Optional.empty() : Optional.of(desc.getSerialVersionUID());
+                } catch (ClassNotFoundException | NoSuchFieldException | LinkageError e) {
+                    return Optional.empty();
+                }
+            }).orElse(null);
+        }
+
+        private static boolean startsWith(byte[] data, int offset, byte[] prefix) {
+            if (offset + prefix.length > data.length)
+                return false;
+            for (int j = 0; j < prefix.length; j++) {
+                if (data[offset + j] != prefix[j])
+                    return false;
+            }
+            return true;
+        }
+
+        private static long readLong(byte[] data, int offset) {
+            long value = 0;
+            for (int b = 0; b < 8; b++)
+                value = (value << 8) | (data[offset + b] & 0xFF);
+            return value;
         }
 
         @Override
         protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
             ObjectStreamClass resultClassDescriptor = super.readClassDescriptor(); // initially streams descriptor
-            Class localClass; // the class in the local JVM that this descriptor represents.
+            Class<?> localClass; // the class in the local JVM that this descriptor represents.
             try {
                 localClass = Class.forName(resultClassDescriptor.getName());
             } catch (ClassNotFoundException e) {
-                //logger.error("No local class for " + resultClassDescriptor.getName(), e);
-                System.err.println("[Class Not Found Exception]\nNo local class for " + resultClassDescriptor.getName());
+                Logger.error(e, "No local class for " + resultClassDescriptor.getName());
                 return resultClassDescriptor;
             }
             ObjectStreamClass localClassDescriptor = ObjectStreamClass.lookup(localClass);
@@ -354,14 +413,37 @@ public class SaveFileData extends HashMap<String,byte[]>
                 final long localSUID = localClassDescriptor.getSerialVersionUID();
                 final long streamSUID = resultClassDescriptor.getSerialVersionUID();
                 if (streamSUID != localSUID) { // check for serialVersionUID mismatch.
-                    String s = "Overriding serialized class version mismatch: " + "local serialVersionUID = " + localSUID +
-                            " stream serialVersionUID = " + streamSUID;
-
-                    System.err.println("[Invalid Class Exception]\n"+ s);
-                    resultClassDescriptor = localClassDescriptor; // Use local class descriptor for deserialization
+                    if (hasSameFields(resultClassDescriptor, localClassDescriptor)) {
+                        Logger.warn("Accepting serialVersionUID mismatch for compatible class "
+                                + resultClassDescriptor.getName() + ": stream=" + streamSUID
+                                + ", local=" + localSUID);
+                        resultClassDescriptor = localClassDescriptor;
+                    } else {
+                        Logger.warn("Keeping serialized descriptor for incompatible class "
+                                + resultClassDescriptor.getName() + ": stream=" + streamSUID
+                                + ", local=" + localSUID);
+                    }
                 }
             }
             return resultClassDescriptor;
+        }
+
+        private static boolean hasSameFields(ObjectStreamClass stream, ObjectStreamClass local) {
+            ObjectStreamField[] streamFields = stream.getFields();
+            ObjectStreamField[] localFields = local.getFields();
+            if (streamFields.length != localFields.length) {
+                return false;
+            }
+            for (int i = 0; i < streamFields.length; i++) {
+                ObjectStreamField streamField = streamFields[i];
+                ObjectStreamField localField = localFields[i];
+                if (!streamField.getName().equals(localField.getName())
+                        || streamField.getTypeCode() != localField.getTypeCode()
+                        || !java.util.Objects.equals(streamField.getTypeString(), localField.getTypeString())) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

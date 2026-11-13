@@ -17,7 +17,6 @@
  */
 package forge.deck;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
@@ -26,18 +25,17 @@ import forge.card.CardDb;
 import forge.card.CardEdition;
 import forge.item.IPaperCard;
 import forge.item.PaperCard;
-import forge.util.CollectionSuppliers;
 import forge.util.ItemPool;
-import forge.util.ItemPoolSorter;
 import forge.util.MyRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 
 public class CardPool extends ItemPool<PaperCard> {
     private static final long serialVersionUID = -5379091255613968393L;
@@ -53,7 +51,10 @@ public class CardPool extends ItemPool<PaperCard> {
 
     public void add(final String cardRequest, final int amount) {
         CardDb.CardRequest request = CardDb.CardRequest.fromString(cardRequest);
-        this.add(CardDb.CardRequest.compose(request.cardName, request.isFoil), request.edition, request.artIndex, amount);
+        if(request.collectorNumber != null && !request.collectorNumber.equals(IPaperCard.NO_COLLECTOR_NUMBER))
+            this.add(CardDb.CardRequest.compose(request.cardName, request.isFoil), request.edition, request.collectorNumber, amount, false, request.flags);
+        else
+            this.add(CardDb.CardRequest.compose(request.cardName, request.isFoil), request.edition, request.artIndex, amount, false, request.flags);
     }
 
     public void add(final String cardName, final String setCode) {
@@ -65,14 +66,35 @@ public class CardPool extends ItemPool<PaperCard> {
     }
 
     public void add(final String cardName, final String setCode, final int amount, boolean addAny) {
-        this.add(cardName, setCode, IPaperCard.NO_ART_INDEX, amount, addAny);
+        this.add(cardName, setCode, IPaperCard.NO_ART_INDEX, amount, addAny, null);
     }
 
     // NOTE: ART indices are "1" -based
     public void add(String cardName, String setCode, int artIndex, final int amount) {
-        this.add(cardName, setCode, artIndex, amount, false);
+        this.add(cardName, setCode, artIndex, amount, false, null);
     }
-    public void add(String cardName, String setCode, int artIndex, final int amount, boolean addAny) {
+    private void add(String cardName, String setCode, String collectorNumber, final int amount, boolean addAny, Map<String, String> flags) {
+        Map<String, CardDb> dbs = StaticData.instance().getAvailableDatabases();
+        for (Map.Entry<String, CardDb> entry: dbs.entrySet()){
+            CardDb db = entry.getValue();
+
+            PaperCard paperCard = db.getCard(cardName, setCode, collectorNumber, flags);
+            if (paperCard != null) {
+                this.add(paperCard, amount);
+                return;
+            }
+        }
+
+        // Try to get non-Alchemy version if it cannot find it.
+        if (cardName.startsWith("A-")) {
+            System.out.println("Alchemy card not found for '" + cardName + "'. Trying to get its non-Alchemy equivalent.");
+            cardName = cardName.replaceFirst("A-", "");
+        }
+
+        //Failed to find it. Fall back accordingly?
+        this.add(cardName, setCode, IPaperCard.NO_ART_INDEX, amount, addAny, flags);
+    }
+    private void add(String cardName, String setCode, int artIndex, final int amount, boolean addAny, Map<String, String> flags) {
         Map<String, CardDb> dbs = StaticData.instance().getAvailableDatabases();
         PaperCard paperCard = null;
         String selectedDbName = "";
@@ -82,7 +104,7 @@ public class CardPool extends ItemPool<PaperCard> {
             for (Map.Entry<String, CardDb> entry: dbs.entrySet()){
                 String dbName = entry.getKey();
                 CardDb db = entry.getValue();
-                paperCard = db.getCard(cardName, setCode, artIndex);
+                paperCard = db.getCard(cardName, setCode, artIndex, flags);
                 if (paperCard != null) {
                     selectedDbName = dbName;
                     break;
@@ -110,12 +132,18 @@ public class CardPool extends ItemPool<PaperCard> {
         // Determine Art Index
         setCode = paperCard.getEdition();
         cardName = paperCard.getName();
-        int artCount = cardDb.getArtCount(cardName, setCode);
         boolean artIndexExplicitlySet = (artIndex > IPaperCard.DEFAULT_ART_INDEX) ||
                 (CardDb.CardRequest.fromString(cardName).artIndex > IPaperCard.NO_ART_INDEX);
+        // When the art is not specified only the traditional frame arts are used (not the borderless, extended
+        // art, showcase, etched... ones). Editions with no traditional print for the card keep all of their arts.
+        List<PaperCard> traditionalArts = artIndexExplicitlySet ? Collections.emptyList()
+                : cardDb.getTraditionalFramePrints(paperCard);
+        int artCount = traditionalArts.isEmpty() ? cardDb.getArtCount(cardName, setCode) : traditionalArts.size();
 
         if ((artIndexExplicitlySet || artCount == 1) && !addAny) {
             // either a specific art index is specified, or there is only one art, so just add the card
+            if (traditionalArts.size() == 1 && !cardDb.isTraditionalFramePrint(paperCard))
+                paperCard = cardDb.getCard(cardName, setCode, traditionalArts.get(0).getArtIndex(), flags);
             this.add(paperCard, amount);
         } else {
             // random art index specified, make sure we get different groups of cards with different art
@@ -124,7 +152,8 @@ public class CardPool extends ItemPool<PaperCard> {
                 int cnt = artGroups[i - 1];
                 if (cnt <= 0)
                     continue;
-                PaperCard randomCard = cardDb.getCard(cardName, setCode, i);
+                int artIndexToAdd = traditionalArts.isEmpty() ? i : traditionalArts.get(i - 1).getArtIndex();
+                PaperCard randomCard = cardDb.getCard(cardName, setCode, artIndexToAdd, flags);
                 this.add(randomCard, cnt);
             }
         }
@@ -155,12 +184,12 @@ public class CardPool extends ItemPool<PaperCard> {
         return null;
     }
 
-    public int countByName(String cardName, boolean isCommonCard) {
-        PaperCard pc = isCommonCard
-                ? StaticData.instance().getCommonCards().getCard(cardName)
-                : StaticData.instance().getVariantCards().getCard(cardName);
+    public int countByName(String cardName) {
+        return this.countAll((c) -> c.getName().equals(cardName));
+    }
 
-        return this.count(pc);
+    public int countByName(PaperCard card) {
+        return this.countAll((c) -> c.getName().equals(card.getName()));
     }
 
     /**
@@ -205,7 +234,7 @@ public class CardPool extends ItemPool<PaperCard> {
      */
     public ListMultimap<Integer, CardEdition> getCardEditionsGroupedByNumberOfCards(boolean includeBasicLands){
         Map<CardEdition, Integer> editionsFrequencyMap = this.getCardEditionStatistics(includeBasicLands);
-        ListMultimap<Integer, CardEdition> reverseMap = Multimaps.newListMultimap(new HashMap<>(), CollectionSuppliers.arrayLists());
+        ListMultimap<Integer, CardEdition> reverseMap = Multimaps.newListMultimap(new HashMap<>(), Lists::newArrayList);
         for (Map.Entry<CardEdition, Integer> entry : editionsFrequencyMap.entrySet())
             reverseMap.put(entry.getValue(), entry.getKey());
         return reverseMap;
@@ -287,6 +316,26 @@ public class CardPool extends ItemPool<PaperCard> {
     }
 
     /**
+     * Determines the dominant card border (Black or White) among the (non-basic land) cards in the Pool.
+     *
+     * @return <code>BLACK</code> or <code>WHITE</code> if that border is on at least half of the cards
+     * having either of the two, or null when the pool has no such cards. A tie resolves to BLACK.
+     */
+    public CardEdition.BorderColor getDominantBorderColor() {
+        int black = 0, white = 0;
+        for (Map.Entry<CardEdition, Integer> entry : this.getCardEditionStatistics(false).entrySet()) {
+            CardEdition.BorderColor border = entry.getKey().getBorderColor();
+            if (border == CardEdition.BorderColor.BLACK)
+                black += entry.getValue();
+            else if (border == CardEdition.BorderColor.WHITE)
+                white += entry.getValue();
+        }
+        if (black == 0 && white == 0)
+            return null;
+        return black >= white ? CardEdition.BorderColor.BLACK : CardEdition.BorderColor.WHITE;
+    }
+
+    /**
      * Determines the Pivot Edition for cards in the Pool.
      * <p>
      * The Pivot Edition refers to the <code>CardEdition</code> for cards in the pool that sets the
@@ -315,15 +364,30 @@ public class CardPool extends ItemPool<PaperCard> {
      * @see #isModern()
      */
     public CardEdition getPivotCardEdition(boolean isLatestCardArtPreference) {
-        ListMultimap<Integer, CardEdition> editionsStatistics = this.getCardEditionsGroupedByNumberOfCards(false);
+        Map<CardEdition, Integer> editionsFrequencyMap = this.getCardEditionStatistics(false);
+        CardDb.CardArtPreference artPreference = StaticData.instance().getCardArtPreference();
+        if (artPreference.filterSets) {
+            /* Core/Expansion preferences: promos, Masters sets, Commander decks... are not eligible prints, so
+               they must not become the pivot (base) edition of the deck, unless the deck has nothing else. */
+            Map<CardEdition, Integer> eligibleEditions = new HashMap<>(editionsFrequencyMap);
+            eligibleEditions.keySet().removeIf(ed -> !artPreference.acceptsSetType(ed));
+            if (!eligibleEditions.isEmpty())
+                editionsFrequencyMap = eligibleEditions;
+        }
+        if (artPreference.blackBorderOnly) {
+            /* Promos and compilation sets (The List, Masters sets, MTGO promos...) are not original releases:
+               they must not define the era of the deck, unless the deck has nothing else. */
+            Map<CardEdition, Integer> regularEditions = new HashMap<>(editionsFrequencyMap);
+            regularEditions.keySet().removeIf(ed -> artPreference.getEditionRank(ed) == CardDb.CardArtPreference.RANK_COMPILATION);
+            if (!regularEditions.isEmpty())
+                editionsFrequencyMap = regularEditions;
+        }
+        ListMultimap<Integer, CardEdition> editionsStatistics = Multimaps.newListMultimap(new HashMap<>(), Lists::newArrayList);
+        for (Map.Entry<CardEdition, Integer> entry : editionsFrequencyMap.entrySet())
+            editionsStatistics.put(entry.getValue(), entry.getKey());
         List<Integer> frequencyValues = new ArrayList<>(editionsStatistics.keySet());
         // Sort in descending order
-        frequencyValues.sort(new Comparator<Integer>() {
-            @Override
-            public int compare(Integer f1, Integer f2) {
-                return (f1.compareTo(f2)) * -1;
-            }
-        });
+        frequencyValues.sort(Comparator.reverseOrder());
         float weightedMean = 0;
         int sumWeights = 0;
         for (Integer freq : frequencyValues) {
@@ -341,26 +405,44 @@ public class CardPool extends ItemPool<PaperCard> {
 
         int topFrequency = frequencyValues.get(0);
         float ratio = ((float) topFrequency) / totalNoCards;
+        if (ratio < 0.33) {
+            /* No edition stands out: the cards are scattered across many editions (this is typical
+               of Net Decks resolved with Original Art, and of decks with no edition at all).
+               Picking by frequency would be arbitrary (most editions tie at 1 card), and used to
+               drag the whole deck towards the newest tied edition. Use the (weighted) median
+               edition along the timeline instead, so the pivot sits in the middle of the deck. */
+            return getMedianEditionByDate(editionsFrequencyMap);
+        }
         // determine the Pivot Frequency
-        int pivotFrequency;
-        if (ratio >= 0.33)  // 1 over 3 cards are from the most frequent edition(s)
-            pivotFrequency = topFrequency;
-        else
-            pivotFrequency = getMedianFrequency(frequencyValues, weightedMean);
+        int pivotFrequency = topFrequency;
 
         // Now Get editions corresponding to pivot frequency
         List<CardEdition> pivotCandidates = new ArrayList<>(editionsStatistics.get(pivotFrequency));
         // Now Sort candidates chronologically
-        pivotCandidates.sort(new Comparator<CardEdition>() {
-            @Override
-            public int compare(CardEdition ed1, CardEdition ed2) {
-                return ed1.compareTo(ed2);
-            }
-        });
+        pivotCandidates.sort(CardEdition::compareTo);
         boolean searchPolicyAndPoolAreCompliant = isLatestCardArtPreference == this.isModern();
         if (!searchPolicyAndPoolAreCompliant)
             Collections.reverse(pivotCandidates);  // reverse to have latest-first.
         return pivotCandidates.get(0);
+    }
+
+    /* Utility (static) method to return the edition at the (card-count weighted) median of the timeline. */
+    private static CardEdition getMedianEditionByDate(Map<CardEdition, Integer> editionStats) {
+        if (editionStats.isEmpty())
+            return null;
+        List<Map.Entry<CardEdition, Integer>> sorted = new ArrayList<>(editionStats.entrySet());
+        sorted.sort(Map.Entry.comparingByKey(CardEdition::compareTo));
+        int total = 0;
+        for (Map.Entry<CardEdition, Integer> e : sorted)
+            total += e.getValue();
+        int half = (total + 1) / 2;
+        int cumulative = 0;
+        for (Map.Entry<CardEdition, Integer> e : sorted) {
+            cumulative += e.getValue();
+            if (cumulative >= half)
+                return e.getKey();
+        }
+        return sorted.get(sorted.size() - 1).getKey();
     }
 
     /* Utility (static) method to return the median value given a target mean.  */
@@ -414,6 +496,12 @@ public class CardPool extends ItemPool<PaperCard> {
         return pool;
     }
 
+    public static CardPool fromSingleCardRequest(String cardRequest) {
+        if(StringUtils.isBlank(cardRequest))
+            return new CardPool();
+        return fromCardList(List.of(cardRequest));
+    }
+
     public static List<Pair<String, Integer>> processCardList(final Iterable<String> lines) {
         List<Pair<String, Integer>> cardRequests = new ArrayList<>();
         if (lines == null)
@@ -440,24 +528,9 @@ public class CardPool extends ItemPool<PaperCard> {
 
     public String toCardList(String separator) {
         List<Entry<PaperCard, Integer>> main2sort = Lists.newArrayList(this);
-        main2sort.sort(ItemPoolSorter.BY_NAME_THEN_SET);
-        final CardDb commonDb = StaticData.instance().getCommonCards();
-        StringBuilder sb = new StringBuilder();
+        main2sort.sort(Entry.comparingByKey());
 
-        boolean isFirst = true;
-
-        for (final Entry<PaperCard, Integer> e : main2sort) {
-            if (!isFirst)
-                sb.append(separator);
-            else
-                isFirst = false;
-
-            CardDb db = !e.getKey().getRules().isVariant() ? commonDb : StaticData.instance().getVariantCards();
-            sb.append(e.getValue()).append(" ");
-            db.appendCardToStringBuilder(e.getKey(), sb);
-
-        }
-        return sb.toString();
+        return main2sort.stream().map(e -> e.getValue() + " " + CardDb.CardRequest.compose(e.getKey())).collect(Collectors.joining(separator));
     }
 
     /**
@@ -466,29 +539,12 @@ public class CardPool extends ItemPool<PaperCard> {
      * @param predicate the Predicate to apply to this CardPool
      * @return a new CardPool made from this CardPool with only the cards that agree with the provided Predicate
      */
+    @Override
     public CardPool getFilteredPool(Predicate<PaperCard> predicate) {
         CardPool filteredPool = new CardPool();
-        Iterator<PaperCard> cardsInPool = this.items.keySet().iterator();
-        while (cardsInPool.hasNext()) {
-            PaperCard c = cardsInPool.next();
-            if (predicate.apply(c))
+        for (PaperCard c : this.items.keySet()) {
+            if (predicate.test(c))
                 filteredPool.add(c, this.items.get(c));
-        }
-        return filteredPool;
-    }
-
-    /**
-     * Applies a predicate to this CardPool's cards.
-     * @param predicate the Predicate to apply to this CardPool
-     * @return a new CardPool made from this CardPool with only the cards that agree with the provided Predicate
-     */
-    public CardPool getFilteredPoolWithCardsCount(Predicate<PaperCard> predicate) {
-        CardPool filteredPool = new CardPool();
-        for (Entry<PaperCard, Integer> entry : this.items.entrySet()) {
-            PaperCard pc = entry.getKey();
-            int count = entry.getValue();
-            if (predicate.apply(pc))
-                filteredPool.add(pc, count);
         }
         return filteredPool;
     }

@@ -8,8 +8,6 @@ public interface IDevModeCheats {
 
     void generateMana();
 
-    void rollbackPhase();
-
     void dumpGameState();
 
     void setupGameState();
@@ -31,6 +29,8 @@ public interface IDevModeCheats {
     void addCardToHand();
 
     void addCardToBattlefield();
+
+    void addTokenToBattlefield();
 
     void addCardToLibrary();
 
@@ -101,10 +101,6 @@ public interface IDevModeCheats {
         }
 
         @Override
-        public void rollbackPhase() {
-        }
-
-        @Override
         public void dumpGameState() {
         }
         @Override
@@ -124,6 +120,9 @@ public interface IDevModeCheats {
         }
         @Override
         public void addCardToBattlefield() {
+        }
+        @Override
+        public void addTokenToBattlefield() {
         }
         @Override
         public void addCardToLibrary() {

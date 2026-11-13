@@ -14,8 +14,8 @@ import forge.assets.FSkinImageInterface;
 import forge.card.MagicColor;
 import forge.card.mana.ManaAtom;
 import forge.game.player.PlayerView;
+import forge.interfaces.IGameController;
 import forge.localinstance.skin.FSkinProp;
-import forge.player.GamePlayerUtil;
 import forge.screens.match.MatchController;
 import forge.toolbox.FDisplayObject;
 
@@ -25,6 +25,7 @@ public class VManaPool extends VDisplayArea {
             return FSkinColor.get(Colors.ADV_CLR_TEXT);
         return FSkinColor.get(Colors.CLR_TEXT);
     }
+
     private static final FSkinFont FONT = FSkinFont.get(16);
 
     private final PlayerView player;
@@ -34,7 +35,7 @@ public class VManaPool extends VDisplayArea {
     public VManaPool(PlayerView player0) {
         player = player0;
 
-        addManaLabel(FSkinProp.IMG_MANA_COLORLESS, (byte)ManaAtom.COLORLESS);
+        addManaLabel(FSkinProp.IMG_MANA_COLORLESS, (byte) ManaAtom.COLORLESS);
         addManaLabel(FSkinProp.IMG_MANA_W, MagicColor.WHITE);
         addManaLabel(FSkinProp.IMG_MANA_U, MagicColor.BLUE);
         addManaLabel(FSkinProp.IMG_MANA_B, MagicColor.BLACK);
@@ -49,6 +50,11 @@ public class VManaPool extends VDisplayArea {
     @Override
     public int getCount() {
         return totalMana;
+    }
+
+    /** @return how many mana icons the pool shows, so the alternate layout can size its row */
+    public int getLabelCount() {
+        return manaLabels.size();
     }
 
     @Override
@@ -66,7 +72,17 @@ public class VManaPool extends VDisplayArea {
         float x = 0;
         float y = 0;
 
-        if (Forge.isLandscapeMode()) {
+        if (Forge.isLandscapeMode() && VPlayerPanel.isAltZoneLayout()) {
+            //alternate landscape layout: one horizontal row of icons, each with its count underneath
+            float labelWidth = visibleWidth / manaLabels.size();
+            if (VPlayerPanel.isCompactLayout()) { labelWidth = Math.min(labelWidth, visibleHeight); } //the compact box spans the panel, keep the icons together
+            float mod = labelWidth * 0.2f;
+            if (VPlayerPanel.isCompactLayout()) { x = Math.max(0f, (visibleWidth - labelWidth * manaLabels.size()) / 2); } //centered in the box
+            for (ManaLabel label : manaLabels) {
+                label.setBounds(x + mod, y + mod, labelWidth - mod, visibleHeight - mod);
+                x += labelWidth;
+            }
+        } else if (Forge.isLandscapeMode()) {
             float labelWidth = visibleWidth / 2;
             float labelHeight = visibleHeight / 3;
 
@@ -76,13 +92,11 @@ public class VManaPool extends VDisplayArea {
                 if (++count % 2 == 0) {
                     x = 0;
                     y += labelHeight;
-                }
-                else {
+                } else {
                     x += labelWidth;
                 }
             }
-        }
-        else {
+        } else {
             float labelWidth = visibleWidth / manaLabels.size();
             float labelHeight = visibleHeight;
 
@@ -110,23 +124,30 @@ public class VManaPool extends VDisplayArea {
             activate();
             return true;
         }
+
         public void activate() {
-            if (player.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
-                MatchController.instance.getGameController().useMana(colorCode);
+            IGameController controller = MatchController.instance.getGameController(player);
+            // not a local human
+            if (controller == null) {
+                return;
             }
+            controller.useMana(colorCode);
         }
+
         @Override
         public boolean flick(float x, float y) {
-            if (player.isLobbyPlayer(GamePlayerUtil.getGuiPlayer())) {
-                //on two finger tap, keep using mana until it runs out or no longer can be put towards the cost
-                int oldMana, newMana = player.getMana(colorCode);
-                do {
-                    oldMana = newMana;
-                    MatchController.instance.getGameController().useMana(colorCode);
-                    newMana = player.getMana(colorCode);
-                }
-                while (oldMana != newMana);
+            IGameController controller = MatchController.instance.getGameController(player);
+            if (controller == null) {
+                return false;
             }
+            //on two finger tap, keep using mana until it runs out or no longer can be put towards the cost
+            int oldMana, newMana = player.getMana(colorCode);
+            do {
+                oldMana = newMana;
+                controller.useMana(colorCode);
+                newMana = player.getMana(colorCode);
+            }
+            while (oldMana != newMana);
             return true;
         }
 

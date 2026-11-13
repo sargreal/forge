@@ -1,5 +1,6 @@
 package forge.adventure.scene;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.github.tommyettinger.textra.TextraButton;
 import com.github.tommyettinger.textra.TextraLabel;
@@ -11,6 +12,7 @@ import forge.adventure.stage.GameHUD;
 import forge.adventure.util.AdventureEventController;
 import forge.adventure.util.Controls;
 import forge.adventure.util.Current;
+import forge.model.CardBlock;
 
 /**
  * Scene for the Inn in towns
@@ -34,7 +36,9 @@ public class InnScene extends UIScene {
         localObjectId = objectId;
         if (lastGameScene != null)
             object.lastGameScene=lastGameScene;
-        getLocalEvent();
+        //Only pick up an event that already exists. Generating a new one (boosters, opponents) is slow, so it
+        //happens after the inn is on screen, see refreshStatus().
+        localEvent = findExistingLocalEvent();
 
         return object;
     }
@@ -97,19 +101,44 @@ public class InnScene extends UIScene {
     public void enter() {
         super.enter();
         refreshStatus();
-        GameHUD.getInstance().switchAudio();
+        GameHUD.getInstance().updateBGM();
     }
 
     private void refreshStatus(){
-
-        tempHealthCost = Math.round(Current.player().falseLifeCost() * changes.getTownPriceModifier());
+        float townPriceModifier = changes == null ? 1f : changes.getTownPriceModifier();
+        tempHealthCost = Math.round(Current.player().falseLifeCost() * townPriceModifier);
         boolean purchaseable = Current.player().getMaxLife() == Current.player().getLife() &&
                 tempHealthCost <= Current.player().getGold();
 
         tempHitPointCost.setDisabled(!purchaseable);
         tempHitPointCost.setText("[+GoldCoin] " + tempHealthCost);
 
-        getLocalEvent();
+        localEvent = findExistingLocalEvent();
+        if (localEvent == null && !AdventureEventController.instance().isEventOnCooldown(localPointOfInterestId)) {
+            //A new event has to be generated. Show the inn right away and fill the event in once it's ready.
+            eventDescription.setText("[GREY]Loading events...");
+            event.setDisabled(true);
+            scheduleEventCreation();
+        } else {
+            updateEventStatus();
+        }
+    }
+
+    private void scheduleEventCreation() {
+        if (eventCreationPending)
+            return;
+        eventCreationPending = true;
+        //Posted twice so at least one frame with the loading text is drawn before the blocking generation starts.
+        Gdx.app.postRunnable(() -> Gdx.app.postRunnable(() -> {
+            eventCreationPending = false;
+            if (Forge.getCurrentScene() != this)
+                return; //Left the inn in the meantime, the event is created on the next visit.
+            initLocalEvent();
+            updateEventStatus();
+        }));
+    }
+
+    private void updateEventStatus() {
         if (localEvent == null){
             eventDescription.setText("[GREY]No events at this time");
             event.setDisabled(true);
@@ -144,21 +173,38 @@ public class InnScene extends UIScene {
     }
 
     private void sell() {
-        ShopScene.instance().loadChanges(changes);
-        Forge.switchScene(ShopScene.instance());
+        ShopScene scene = ShopScene.instance(getUIBackground());
+        scene.loadChanges(changes);
+        Forge.switchScene(scene);
     }
 
+    private boolean eventCreationPending = false;
 
-
-    private static void getLocalEvent() {
-        localEvent = null;
+    private static AdventureEventData findExistingLocalEvent() {
         for (AdventureEventData data :  AdventurePlayer.current().getEvents()){
             if (data.sourceID.equals(localPointOfInterestId) && data.eventOrigin == localObjectId){
-                localEvent = data;
-                return;
+                return data;
             }
         }
-        localEvent = AdventureEventController.instance().createEvent(AdventureEventController.EventStyle.Bracket, localPointOfInterestId, localObjectId, changes);
+        return null;
+    }
+
+    private static void initLocalEvent() {
+        localEvent = findExistingLocalEvent();
+        if (localEvent != null)
+            return;
+        AdventureEventController controller = AdventureEventController.instance();
+        localEvent = controller.createEvent(localPointOfInterestId);
+        if(localEvent != null)
+            controller.initializeEvent(localEvent, localPointOfInterestId, localObjectId, changes);
+    }
+
+    public static void replaceLocalEvent(AdventureEventController.EventFormat format, CardBlock cardBlock) {
+        AdventurePlayer.current().getEvents().removeIf((data) -> data.sourceID.equals(localPointOfInterestId) && data.eventOrigin == localObjectId);
+        AdventureEventController controller = AdventureEventController.instance();
+        localEvent = controller.createEvent(format, cardBlock, localPointOfInterestId);
+        if(localEvent != null)
+            controller.initializeEvent(localEvent, localPointOfInterestId, localObjectId, changes);
     }
 
     private void startEvent(){

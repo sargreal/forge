@@ -1,34 +1,32 @@
 package forge.gamemodes.match.input;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import forge.game.GameEntity;
 import forge.game.GameObject;
 import forge.game.ability.ApiType;
 import forge.game.card.Card;
-import forge.game.card.CardPredicates;
 import forge.game.card.CardView;
 import forge.game.player.Player;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbility;
+import forge.game.spellability.SpellAbilityStackInstance;
 import forge.game.spellability.TargetRestrictions;
-import forge.gui.FThreads;
+import forge.gamemodes.match.Selection;
 import forge.localinstance.properties.ForgeConstants;
 import forge.localinstance.properties.ForgePreferences;
 import forge.model.FModel;
 import forge.player.PlayerControllerHuman;
-import forge.player.PlayerZoneUpdate;
-import forge.player.PlayerZoneUpdates;
+import forge.trackable.TrackableObject;
 import forge.util.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 public final class InputSelectTargets extends InputSyncronizedBase {
     private final List<Card> choices;
@@ -36,6 +34,9 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     private final Set<GameEntity> targets = Sets.newHashSet();
     private final TargetRestrictions tgt;
     private final SpellAbility sa;
+    private final Integer numTargets;
+    private final int initialMin;
+    private final int initialMax;
     private final Collection<Integer> divisionValues;
     private Card lastTarget = null;
     private boolean bCancel = false;
@@ -45,15 +46,16 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     private boolean mustTargetFiltered;
     private static final long serialVersionUID = -1091595663541356356L;
 
-    public final boolean hasCancelled() { return bCancel; }
-    public final boolean hasPressedOk() { return bOk; }
+    public boolean hasCancelled() { return bCancel; }
+    public boolean hasPressedOk() { return bOk; }
 
-    public InputSelectTargets(final PlayerControllerHuman controller, final List<Card> choices, final SpellAbility sa, final boolean mandatory, Collection<Integer> divisionValues, Predicate<GameObject> filter, boolean mustTargetFiltered) {
+    public InputSelectTargets(final PlayerControllerHuman controller, final List<Card> choices, final SpellAbility sa, final boolean mandatory, Integer numTargets, Collection<Integer> divisionValues, Predicate<GameObject> filter, boolean mustTargetFiltered) {
         super(controller);
         this.choices = choices;
         this.tgt = sa.getTargetRestrictions();
         this.sa = sa;
         this.mandatory = mandatory;
+        this.numTargets = numTargets;
         this.divisionValues = divisionValues;
         this.filter = filter;
 
@@ -63,22 +65,35 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             lastTarget = card;
         }
 
-        controller.getGui().setSelectables(CardView.getCollection(choices));
-        final PlayerZoneUpdates zonesToUpdate = new PlayerZoneUpdates();
-        for (final Card c : choices) {
-            zonesToUpdate.add(new PlayerZoneUpdate(c.getZone().getPlayer().getView(), c.getZone().getZoneType()));
-        }
-        FThreads.invokeInEdtNowOrLater(new Runnable() {
-            @Override
-            public void run() {
-                for (final GameEntity c : targets) {
-                    if (c instanceof Card) {
-                        controller.getGui().setUsedToPay(CardView.get((Card) c), true);
-                    }
-                }
-                controller.getGui().updateZones(zonesToUpdate);
+        initialMin = numTargets != null ? numTargets : sa.getMinTargets();
+        initialMax = numTargets != null ? numTargets : sa.getMaxTargets();
+    }
+
+    /** The valid cards, the players that can still be picked, and what this spell's steps have chosen so far. */
+    @Override
+    protected Selection getSelection() {
+        final List<Player> valid = new ArrayList<>();
+        if (!mustTargetFiltered) { // same checks as onPlayerSelected
+            for (final Player p : getController().getGame().getPlayers()) {
+                if (targets.contains(p) || p.hasLost() || !sa.canTarget(p)) { continue; }
+                if (sa.isSpell() && sa.getHostCard().isAura() && !p.canBeAttached(sa.getHostCard(), sa)) { continue; }
+                if (filter != null && !filter.test(p)) { continue; }
+                valid.add(p);
             }
-        });
+        }
+        final List<TrackableObject> offered = new ArrayList<>(PlayerView.getCollection(valid));
+        final List<TrackableObject> chosen = TargetingProgress.chosenTargets(sa);
+        // spells on the stack that are valid Card targets: make their stack entries tappable
+        for (final SpellAbilityStackInstance si : getController().getGame().getStack()) {
+            final SpellAbility onStack = si.getSpellAbility();
+            final Card host = onStack.getHostCard();
+            if (!onStack.isSpell() || host == null || !choices.contains(host)) { continue; }
+            offered.add(si.getView());
+            if (targets.contains(host)) {
+                chosen.add(si.getView());
+            }
+        }
+        return new Selection(new ArrayList<>(CardView.getCollection(choices)), initialMin, initialMax, offered, chosen, List.of());
     }
 
     @Override
@@ -90,7 +105,10 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             // sb.append(sa.getStackDescription().replace("(Targeting ERROR)", "")).append("\n").append(tgt.getVTSelection());
             // Apparently <b>...</b> tags do not work in mobile Forge, so don't include them (for now)
             sb.append(sa.getHostCard().toString()).append(" - ");
-            sb.append(sa.toString()).append("\n");
+            String abilityDescript = sa.toString();
+            if(abilityDescript.isEmpty()) //If this is a sub-ability with no description, inherit from the parent.
+                abilityDescript = sa.getRootAbility().toString();
+            sb.append(abilityDescript).append("\n");
             if(!ForgeConstants.isGdxPortLandscape)
                 sb.append("\n");
             sb.append(tgt.getVTSelection());
@@ -114,13 +132,13 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             sb.append(sa.getUniqueTargets());
         }
 
-        final int maxTargets = sa.getMaxTargets();
+        final int maxTargets = Objects.requireNonNullElse(numTargets, sa.getMaxTargets());
         final int targeted = sa.getTargets().size();
         if (maxTargets > 1) {
             sb.append(TextUtil.concatNoSpace("\n(", String.valueOf(maxTargets - targeted), " more can be targeted)"));
         }
 
-        String name = CardTranslation.getTranslatedName(sa.getHostCard().getName());
+        String name = sa.getHostCard().getTranslatedName();
         String message = TextUtil.fastReplace(TextUtil.fastReplace(sb.toString(),
                 "CARDNAME", name), "(Targeting ERROR)", "");
         message = TextUtil.fastReplace(message, "NICKNAME", Lang.getInstance().getNickName(name));
@@ -129,7 +147,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         if (divisionValues != null && !divisionValues.isEmpty() && sa.getMinTargets() == 0 && sa.getTargets().size() == 0) {
             // extra logic for Divided with min targets = 0, should only work if num targets are 0 too
             getController().getGui().updateButtons(getOwner(), true, true, false);
-        } else if (!sa.isMinTargetChosen() || (divisionValues != null && !divisionValues.isEmpty())) {
+        } else if (!sa.isMinTargetChosen() || (numTargets != null && targets.size() != numTargets) || (divisionValues != null && !divisionValues.isEmpty())) {
             // If reached Minimum targets, enable OK button
             if (mandatory && tgt.hasCandidates(sa)) {
                 // Player has to click on a target
@@ -148,19 +166,19 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     }
 
     @Override
-    protected final void onCancel() {
+    protected void onCancel() {
         bCancel = true;
         this.done();
     }
 
     @Override
-    protected final void onOk() {
+    protected void onOk() {
         bOk = true;
         this.done();
     }
 
     @Override
-    protected final boolean onCardSelected(final Card card, final List<Card> otherCardsToSelect, final ITriggerEvent triggerEvent) {
+    protected boolean onCardSelected(final Card card, final List<Card> otherCardsToSelect, final ITriggerEvent triggerEvent) {
         if (targets.contains(card)) {
             removeTarget(card);
             return false;
@@ -169,14 +187,16 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         // TODO should use sa.canTarget(card) instead?
         // it doesn't have messages
 
+        if (sa.isSpell() && sa.getHostCard().isAura()) {
+            String msg = card.cantBeAttachedMsg(sa.getHostCard(), sa);
+            if (msg != null) {
+                showMessage(sa.getHostCard() + " - " + msg);
+                return false;
+            }
+        }
         //If the card is not a valid target
         if (!card.canBeTargetedBy(sa)) {
             showMessage(sa.getHostCard() + " - Cannot target this card (Shroud? Protection? Restrictions).");
-            return false;
-        }
-        // If all cards must be from the same zone
-        if (tgt.isSingleZone() && lastTarget != null && !card.getController().equals(lastTarget.getController())) {
-            showMessage(sa.getHostCard() + " - Cannot target this card (not in the same zone)");
             return false;
         }
 
@@ -200,7 +220,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         if (sa.hasParam("MaxTotalTargetCMC")) {
             int maxTotalCMC = tgt.getMaxTotalCMC(sa.getHostCard(), sa);
             if (maxTotalCMC > 0) {
-                int soFar = Aggregates.sum(sa.getTargets().getTargetCards(), CardPredicates.Accessors.fnGetCmc);
+                int soFar = Aggregates.sum(sa.getTargets().getTargetCards(), Card::getCMC);
                 if (!sa.isTargeting(card)) {
                     soFar += card.getCMC();
                 }
@@ -214,7 +234,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         if (sa.hasParam("MaxTotalTargetPower")) {
             int maxTotalPower = tgt.getMaxTotalPower(sa.getHostCard(), sa);
             if (maxTotalPower > 0) {
-                int soFar = Aggregates.sum(sa.getTargets().getTargetCards(), CardPredicates.Accessors.fnGetNetPower);
+                int soFar = Aggregates.sum(sa.getTargets().getTargetCards(), Card::getNetPower);
                 if (!sa.isTargeting(card)) {
                     soFar += card.getNetPower();
                 }
@@ -268,7 +288,6 @@ public final class InputSelectTargets extends InputSyncronizedBase {
                 showMessage(sa.getHostCard() + " - Cannot target this card (must have equal toughness)");
                 return false;
             }
-
         }
 
         // If all cards must have different mana values
@@ -286,8 +305,17 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             }
         }
 
+        if (tgt.isDifferentNames()) {
+            for (final GameObject o : targets) {
+                if (o instanceof Card c && c.sharesNameWith(card)) {
+                    showMessage(sa.getHostCard() + " - Cannot target this card (must have different names)");
+                    return false;
+                }
+            }
+        }
+
         if (!choices.contains(card)) {
-            showMessage(sa.getHostCard() + " - The selected card is not a valid choice to be targeted.");
+            showMessage(sa.getHostCard() + " - The selected card is not " + Lang.nounWithAmount(1, tgt.getValidDesc()) + ".");
             return false;
         }
 
@@ -298,7 +326,21 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             }
         }
         addTarget(card);
+        if (otherCardsToSelect != null) {
+            for (final Card other : otherCardsToSelect) {
+                if (isFinished() || hasAllTargets()) break;
+                onCardSelected(other, null, triggerEvent);
+            }
+        }
         return true;
+    }
+
+    @Override
+    public boolean selectAbility(final SpellAbility ab) {
+        final Card host = ab == null ? null : ab.getHostCard();
+        if (isFinished() || ab == null || !ab.isSpell()) { return false; }
+        if (host == null || !choices.contains(host)) { return false; }
+        return onCardSelected(host, null, null);
     }
 
     @Override
@@ -313,7 +355,7 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     }
 
     @Override
-    protected final void onPlayerSelected(final Player player, final ITriggerEvent triggerEvent) {
+    protected void onPlayerSelected(final Player player, final ITriggerEvent triggerEvent) {
         if (targets.contains(player)) {
             removeTarget(player);
             return;
@@ -325,11 +367,15 @@ public final class InputSelectTargets extends InputSyncronizedBase {
         }
 
         //TODO return the correct reason to display
+        if (sa.isSpell() && sa.getHostCard().isAura() && !player.canBeAttached(sa.getHostCard(), sa)) {
+            showMessage(sa.getHostCard() + " - Cannot enchant this player (Hexproof? Protection? Restrictions?).");
+            return;
+        }
         if (!sa.canTarget(player) || mustTargetFiltered) {
             showMessage(sa.getHostCard() + " - Cannot target this player (Hexproof? Protection? Restrictions?).");
             return;
         }
-        if (filter != null && !filter.apply(player)) {
+        if (filter != null && !filter.test(player)) {
             showMessage(sa.getHostCard() + " - Cannot target this player (Hexproof? Protection? Restrictions?).");
             return;
         }
@@ -341,6 +387,18 @@ public final class InputSelectTargets extends InputSyncronizedBase {
             }
         }
         addTarget(player);
+    }
+
+    public boolean selectPlayerForMacro(final Player player, final ITriggerEvent triggerEvent) {
+        final int oldTargetCount = targets.size();
+        onPlayerSelected(player, triggerEvent);
+        return targets.contains(player) && targets.size() > oldTargetCount;
+    }
+
+    public boolean selectCardForMacro(final Card card, final ITriggerEvent triggerEvent) {
+        final int oldTargetCount = targets.size();
+        onCardSelected(card, null, triggerEvent);
+        return targets.contains(card) && targets.size() > oldTargetCount;
     }
 
     protected Boolean onDividedAsYouChoose(GameObject go) {
@@ -368,14 +426,11 @@ public final class InputSelectTargets extends InputSyncronizedBase {
 
     private void addTarget(final GameEntity ge) {
         sa.getTargets().add(ge);
-        if (ge instanceof Card) {
-            getController().getGui().setUsedToPay(CardView.get((Card) ge), true);
-            lastTarget = (Card) ge;
-        }
-        else if (ge instanceof Player) {
-            getController().getGui().setHighlighted(PlayerView.get((Player) ge), true);
-        }
         targets.add(ge);
+        if (ge instanceof Card c) {
+            lastTarget = c;
+        }
+        showSelection();
 
         if (hasAllTargets()) {
             bOk = true;
@@ -391,43 +446,27 @@ public final class InputSelectTargets extends InputSyncronizedBase {
     }
 
     private void removeTarget(final GameEntity ge) {
+        if (divisionValues != null) {
+            divisionValues.add(sa.getDividedValue(ge));
+        }
         targets.remove(ge);
         sa.getTargets().remove(ge);
         if (ge instanceof Card) {
-            getController().getGui().setUsedToPay(CardView.get((Card) ge), false);
             // try to get last selected card
-            lastTarget = Iterables.getLast(Iterables.filter(targets, Card.class), null);
+            lastTarget = Iterables.getLast(IterableUtil.filter(targets, Card.class), null);
         }
-        else if (ge instanceof Player) {
-            getController().getGui().setHighlighted(PlayerView.get((Player) ge), false);
-        }
+        showSelection();
 
         this.showMessage();
     }
 
     private void done() {
-        for (final GameEntity c : targets) {
-            //getController().macros().addRememberedAction(new TargetEntityAction(c.getView()));
-            if (c instanceof Card) {
-                getController().getGui().setUsedToPay(CardView.get((Card) c), false);
-            }
-            else if (c instanceof Player) {
-                getController().getGui().setHighlighted(PlayerView.get((Player) c), false);
-            }
-        }
-
         this.stop();
     }
 
     private boolean hasAllTargets() {
-        return sa.isMaxTargetChosen() || (divisionValues != null && sa.getStillToDivide() <= 0)
-            || (divisionValues == null && sa.isDividedAsYouChoose() && sa.getTargets().size() == sa.getStillToDivide());
-    }
-
-    @Override
-    protected void onStop() {
-        getController().getGui().clearSelectables();
-        super.onStop();
+        return sa.isMaxTargetChosen() || (numTargets != null && numTargets == targets.size()) || (divisionValues != null && sa.getStillToDivide() <= 0)
+            || (divisionValues == null && sa.isDividedAsYouChoose() && targets.size() == sa.getStillToDivide());
     }
 
 }

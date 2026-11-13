@@ -3,7 +3,6 @@ package forge.gamemodes.limited;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import forge.card.ColorSet;
 import forge.card.DeckHints;
 import forge.card.MagicColor;
@@ -67,7 +66,7 @@ public class CardRanker {
         return sortAndCreateList(cardScores);
     }
 
-    private static List<Pair<Double, PaperCard>> getScores(Iterable<PaperCard> cards) {
+    public static List<Pair<Double, PaperCard>> getScores(Iterable<PaperCard> cards) {
         List<Pair<Double, PaperCard>> cardScores = new ArrayList<>();
 
         List<PaperCard> cache = Lists.newArrayList(cards);
@@ -76,7 +75,7 @@ public class CardRanker {
             final PaperCard card = cache.get(i);
 
             double score = getRawScore(card);
-            if (card.getRules().getAiHints().getRemAIDecks()) {
+            if (forge.card.CardAiHints.isRemovedFromAiDecks(card.getRules())) {
                 score -= 20.0;
             }
 
@@ -99,7 +98,7 @@ public class CardRanker {
 
         for (PaperCard card : cardsInPack) {
             double score = getRawScore(card);
-            if (card.getRules().getAiHints().getRemAIDecks()) {
+            if (forge.card.CardAiHints.isRemovedFromAiDecks(card.getRules())) {
                 score -= 20.0;
             }
             if (!canAddMoreColors && !card.getRules().getDeckbuildingColors().hasNoColorsExcept(chosenColors)) {
@@ -114,8 +113,24 @@ public class CardRanker {
         return cardScores;
     }
 
+    public static List<PaperCard> getOrderedRawScores(List<PaperCard> cards) {
+        List<Pair<Double, PaperCard>> cardScores = Lists.newArrayList();
+        for(PaperCard card : cards) {
+            cardScores.add(Pair.of(getRawScore(card), card));
+        }
+
+        cardScores.sort(Collections.reverseOrder(new CardRankingComparator()));
+
+        List<PaperCard> rankedCards = new ArrayList<>(cardScores.size());
+        for (Pair<Double, PaperCard> pair : cardScores) {
+            rankedCards.add(pair.getValue());
+        }
+
+        return rankedCards;
+    }
+
     public static double getRawScore(PaperCard card) {
-        Double rawScore;
+        double rawScore;
         if (MagicColor.Constant.BASIC_LANDS.contains(card.getName())) {
             rawScore = SCORE_UNPICKABLE;
         } else {
@@ -123,14 +138,15 @@ public class CardRanker {
             String customRankings = IBoosterDraft.CUSTOM_RANKINGS_FILE[0];
             if (customRankings != null) {
                 rkg = DraftRankCache.getCustomRanking(customRankings, card.getName());
+                boolean isCustom = card.getRules().isCustom();
                 if (rkg == null) {
-                    // try the default rankings if custom rankings contain no entry, but penalize missing cards
+                    // try the default rankings if custom rankings contain no entry, but penalize missing cards that aren't custom
                     rkg = DraftRankCache.getRanking(card.getName(), card.getEdition());
-                    if (rkg != null) {
+                    if (!isCustom && rkg != null) {
                         rkg = rkg + 1;
                     }
                 }
-                if (rkg != null) {
+                if (!isCustom && rkg != null) {
                     rkg = rkg / 2;
                 }
             } else {

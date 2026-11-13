@@ -10,12 +10,13 @@
   ],
   "restrictedEditions": [
   ],
-  "legalCards": {
-    "editions": [
-      "LTR",
-      "LTC"
-    ]
-  },
+  "allowedEditions": [
+    "LTR",
+    "LTC",
+    "HOB",
+    "HOC"
+  ],
+  "defaultBasicLandSet": "LTR",
   "difficulties": [
     {
       "name": "Easy",

@@ -19,7 +19,6 @@ package forge.game.trigger;
 
 import java.util.Map;
 
-import forge.card.CardType;
 import forge.game.ability.AbilityKey;
 import forge.game.card.Card;
 import forge.game.spellability.SpellAbility;
@@ -58,25 +57,13 @@ public class TriggerSetInMotion extends Trigger {
             return false;
         }
 
-        if (hasParam("SchemeType")) {
-            if (getParam("SchemeType").equals("NonOngoing")) {
-                if (((Card) runParams.get(AbilityKey.Scheme)).getType().hasSupertype(CardType.Supertype.Ongoing)) {
-                    return false;
-                }
-            } else if (getParam("SchemeType").equals("Ongoing")) {
-                if (((Card) runParams.get(AbilityKey.Scheme)).getType().hasSupertype(CardType.Supertype.Ongoing)) {
-                    return false;
-                }
-            }
-        }
-
         return true;
     }
 
     /** {@inheritDoc} */
     @Override
-    public final void setTriggeringObjects(final SpellAbility sa, Map<AbilityKey, Object> runParams) {
-        sa.setTriggeringObjectsFrom(runParams, AbilityKey.Scheme);
+    public final void setTriggeringObjects(final Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
+        AbilityKey.copyKeys(runParams, objects, AbilityKey.Scheme);
     }
 
     @Override

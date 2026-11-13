@@ -1,5 +1,6 @@
 package forge.menu;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -19,6 +20,7 @@ import forge.toolbox.FDisplayObject;
 import forge.toolbox.FEvent;
 import forge.toolbox.FEvent.FEventHandler;
 import forge.toolbox.FEvent.FEventType;
+import forge.toolbox.Frost;
 import forge.util.Utils;
 
 public class FMenuItem extends FDisplayObject implements IButton {
@@ -45,12 +47,13 @@ public class FMenuItem extends FDisplayObject implements IButton {
         return Header.getBackColor().stepColor(-40);
     }
 
-    private final String text;
+    private String text;
     private final FImage icon;
     private final FEventHandler handler;
     private boolean pressed, allowForIcon, selected, tabMode;
     private float textWidth;
     private TextRenderer textRenderer;
+    private FSkinColor textColor;
 
     public FMenuItem(String text0, FEventHandler handler0) {
         this(text0, null, handler0, true);
@@ -72,6 +75,10 @@ public class FMenuItem extends FDisplayObject implements IButton {
 
     public String getText() {
         return text;
+    }
+
+    public float getItemHeight() {
+        return HEIGHT;
     }
 
     public boolean hasIcon() {
@@ -128,8 +135,45 @@ public class FMenuItem extends FDisplayObject implements IButton {
         return (pressed && !tabMode) || selected;
     }
 
+    public FSkinColor getTextColor() {
+        if(this.textColor != null)
+            return this.textColor;
+        return getForeColor();
+    }
+
+    //frosted sidebar entry: no lines; the selected one gets an accent wash and bar, the rest sit quietly on the glass
+    private void drawFrostedTab(Graphics g) {
+        final float w = getWidth(), h = HEIGHT;
+        if (selected || pressed) {
+            g.fillGradientRect(Frost.accent(0.30f), Frost.accent(0.05f), false, 0, 0, w, h);
+            g.fillRect(Frost.accent(1f), 0, 0, Math.max(2f, Utils.scale(3)), h);
+        } else if (isHovered()) {
+            g.fillRect(Frost.HOVER, 0, 0, w, h);
+        }
+        float x = GAP_X * 2;
+        if (allowForIcon) {
+            if (icon != null) {
+                g.drawImage(icon, x, (h - ICON_SIZE) / 2, ICON_SIZE, ICON_SIZE);
+            }
+            x += ICON_SIZE + GAP_X * 2;
+        }
+        final Color color = selected ? Frost.TEXT : Frost.TEXT_DIM;
+        if (textRenderer == null) {
+            g.drawText(text, FONT, color, x, 0, w - x - GAP_X, h, false, Align.left, true);
+        } else {
+            textRenderer.drawText(g, text, FONT, color, x, 0, w - x - GAP_X, h, 0, h, false, Align.left, true);
+        }
+    }
+
     @Override
     public void draw(Graphics g) {
+        if (Frost.isOn()) {
+            drawFrostedTab(g);
+            if (!tabMode) { //drop-down entries keep a faint divider
+                g.drawLine(1, Frost.EDGE, GAP_X, HEIGHT, getWidth() - GAP_X, HEIGHT);
+            }
+            return;
+        }
         float w = getWidth();
         float h = HEIGHT;
 
@@ -151,10 +195,10 @@ public class FMenuItem extends FDisplayObject implements IButton {
         }
 
         if (textRenderer == null) {
-            g.drawText(text, FONT, getForeColor(), x, 0, w - x - GAP_X, h, false, Align.left, true);
+            g.drawText(text, FONT, getTextColor(), x, 0, w - x - GAP_X, h, false, Align.left, true);
         }
         else {
-            textRenderer.drawText(g, text, FONT, getForeColor(), x, 0, w - x - GAP_X, h, 0, h, false, Align.left, true);
+            textRenderer.drawText(g, text, FONT, getTextColor(), x, 0, w - x - GAP_X, h, 0, h, false, Align.left, true);
         }
 
         //draw separator line
@@ -168,6 +212,7 @@ public class FMenuItem extends FDisplayObject implements IButton {
 
     @Override
     public void setText(String text0) {
+        this.text = text0;
     }
     @Override
     public boolean isSelected() {
@@ -189,5 +234,6 @@ public class FMenuItem extends FDisplayObject implements IButton {
     }
     @Override
     public void setTextColor(int r, int g, int b) {
+        this.textColor = FSkinColor.getStandardColor(r, g, b);
     }
 }

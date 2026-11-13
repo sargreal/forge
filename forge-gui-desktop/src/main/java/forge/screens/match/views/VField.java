@@ -19,15 +19,29 @@ package forge.screens.match.views;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
+import forge.deck.CommanderBracketCalculator;
+import forge.deck.Deck;
+import forge.game.GameType;
 import forge.game.card.CounterEnumType;
+import forge.game.GameView;
 import forge.game.player.PlayerView;
 import forge.game.zone.ZoneType;
 import forge.gui.framework.DragCell;
@@ -44,6 +58,7 @@ import forge.toolbox.FSkin.SkinImage;
 import forge.toolbox.FSkin.SkinnedPanel;
 import forge.toolbox.special.PhaseIndicator;
 import forge.toolbox.special.PlayerDetailsPanel;
+import forge.util.AITimeoutTracker;
 import forge.util.Localizer;
 import forge.view.arcane.PlayArea;
 import net.miginfocom.swing.MigLayout;
@@ -64,19 +79,75 @@ public class VField implements IVDoc<CField> {
     private final DragTab tab = new DragTab(Localizer.getInstance().getMessage("lblField"));
 
     // Other fields
+    private final CMatchUI matchUI;
     private final PlayerView player;
+    private boolean commanderBracketTooltipCalculated = false;
+    private String commanderBracketTooltipLine;
 
     // Top-level containers
     private final FScrollPane scroller = new FScrollPane(false);
     private final PlayArea tabletop;
-    private final SkinnedPanel avatarArea = new SkinnedPanel();
+    private final SkinnedPanel avatarArea = new SkinnedPanel() {
+        @Override
+        protected void paintChildren(final Graphics g) {
+            super.paintChildren(g);
+            paintAITimeoutBar(g);
+        }
+    };
+
+    // ---- AI "thinking" timer bar over the avatar (shrinks to 0 at the AI timeout) ----
+    private static final Color BAR_BG = new Color(0, 0, 0, 165);
+    private static final Color BAR_AMBER = new Color(255, 165, 0);
+    private static final Set<VField> LIVE_FIELDS = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+    static {
+        // AITimeoutTracker calls this when a bar is due to appear and whenever an AI decision ends
+        AITimeoutTracker.setRepaintHook(() -> SwingUtilities.invokeLater(() -> {
+            final List<VField> fields;
+            synchronized (LIVE_FIELDS) { fields = new ArrayList<>(LIVE_FIELDS); }
+            for (final VField f : fields) { f.refreshAITimeoutBar(); }
+        }));
+    }
+    private final Timer aiTimeoutTimer = new Timer(50, e -> refreshAITimeoutBar());
+    private boolean aiTimeoutBarShown;
+
+    /** (game, player) key of this field's player; the tracker is shared by every game in the JVM. */
+    private long aiTimeoutKey() {
+        final GameView gv = matchUI == null ? null : matchUI.getGameView();
+        return gv == null ? Long.MIN_VALUE : AITimeoutTracker.key(gv.getId(), player.getId()); // MIN_VALUE: no session
+    }
+
+    private void refreshAITimeoutBar() {
+        if (player == null) { return; }
+        final boolean show = AITimeoutTracker.getRemainingFraction(aiTimeoutKey()) >= 0f;
+        if (show) {
+            if (!aiTimeoutTimer.isRunning()) { aiTimeoutTimer.start(); }
+            avatarArea.repaint();
+        } else {
+            aiTimeoutTimer.stop();
+            if (aiTimeoutBarShown) { avatarArea.repaint(); } // clear it
+        }
+        aiTimeoutBarShown = show;
+    }
+
+    private void paintAITimeoutBar(final Graphics g) {
+        if (player == null) { return; }
+        final float f = AITimeoutTracker.getRemainingFraction(aiTimeoutKey());
+        if (f < 0f) { return; }
+        final Rectangle r = lblAvatar.getBounds();
+        final int barH = Math.max(4, r.height / 10);
+        final int y = r.y + r.height - barH;
+        g.setColor(BAR_BG);
+        g.fillRect(r.x, y, r.width, barH);
+        g.setColor(f > 0.5f ? Color.GREEN : f > 0.25f ? BAR_AMBER : Color.RED);
+        g.fillRect(r.x, y, Math.round(r.width * f), barH);
+    }
 
     private final PlayerDetailsPanel detailsPanel;
 
     // Avatar area
     private final FLabel lblAvatar     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).iconScaleFactor(1.0f).build();
     private final FLabel lblLife       = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).build();
-    private final FLabel lblPoison     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_ZONE_POISON)).iconInBackground().build();
+    private final FLabel lblPoison     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_POISON)).iconInBackground().build();
     private final FLabel lblEnergy     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_ENERGY)).iconInBackground().build();
     private final FLabel lblExperience = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_EXPERIENCE)).iconInBackground().build();
     private final FLabel lblTicket     = new FLabel.Builder().fontAlign(SwingConstants.CENTER).fontStyle(Font.BOLD).icon(FSkin.getImage(FSkinProp.IMG_TICKET)).iconInBackground().build();
@@ -86,6 +157,10 @@ public class VField implements IVDoc<CField> {
 
     private final Border borderAvatarSimple = new LineBorder(new Color(0, 0, 0, 0), 1);
     private final Border borderAvatarHighlighted = new LineBorder(Color.red, 2);
+    // dashed while the player can be picked as a target, solid red once picked
+    private final Border borderAvatarSelectable = BorderFactory.createDashedBorder(new Color(255, 215, 0), 2f, 5f, 3f, false);
+
+    private final TabDiffTracker tabDiff = new TabDiffTracker();
 
 
     //========= Constructor
@@ -98,11 +173,13 @@ public class VField implements IVDoc<CField> {
     public VField(final CMatchUI matchUI, final EDocID id0, final PlayerView p, final boolean mirror) {
         this.docID = id0;
 
+        this.matchUI = matchUI;
         this.player = p;
+        LIVE_FIELDS.add(this);
         if (p != null) { tab.setText(Localizer.getInstance().getMessage("lblPlayField", p.getName())); }
         else { tab.setText(Localizer.getInstance().getMessage("lblNoPlayerForEDocID", docID.toString())); }
 
-        detailsPanel = new PlayerDetailsPanel(player);
+        detailsPanel = new PlayerDetailsPanel(player, CMatchUI.FLOATING_ZONE_TYPES);
 
         // TODO player is hard-coded into tabletop...should be dynamic
         // (haven't looked into it too deeply). Doublestrike 12-04-12
@@ -138,7 +215,7 @@ public class VField implements IVDoc<CField> {
             public void mouseExited(final MouseEvent e) {
                 avatarArea.setOpaque(false);
                 if (!isHighlighted()) {
-                    avatarArea.setBorder(borderAvatarSimple);
+                    avatarArea.setBorder(control.getMatchUI().isSelectable(player) ? borderAvatarSelectable : borderAvatarSimple);
                 }
             }
         });
@@ -207,6 +284,14 @@ public class VField implements IVDoc<CField> {
         return control.getMatchUI().isHighlighted(player);
     }
 
+    /** Solid red frame once the player is picked, dashed frame while the player can be picked, none otherwise. */
+    public void updateAvatarBorder() {
+        final boolean highlighted = isHighlighted();
+        avatarArea.setBorder(highlighted ? borderAvatarHighlighted
+                : control.getMatchUI().isSelectable(player) ? borderAvatarSelectable : borderAvatarSimple);
+        avatarArea.setOpaque(highlighted);
+    }
+
     public void setAvatar(final SkinImage avatar) {
         lblAvatar.setIcon(avatar);
         lblAvatar.getResizeTimer().start();
@@ -217,6 +302,19 @@ public class VField implements IVDoc<CField> {
     }
     public void updateZones() {
         detailsPanel.updateZones();
+    }
+
+    public void updateTabLabel() {
+        if (player == null) {
+            return;
+        }
+        final int delta = tabDiff.update(tabletop.getCardPanels().size(), tab);
+        String label = Localizer.getInstance().getMessage("lblPlayField", player.getName());
+        if (delta != 0) {
+            label += " (" + delta + " new)";
+        }
+        tab.setText(label);
+        tab.setToolTipText(label);
     }
 
     private void addLblTicket() {
@@ -388,9 +486,54 @@ public class VField implements IVDoc<CField> {
             removeLblTicket();
         }
 
-        final boolean highlighted = isHighlighted();
-        this.avatarArea.setBorder(highlighted ? borderAvatarHighlighted : borderAvatarSimple );
-        this.avatarArea.setOpaque(highlighted);
-        this.avatarArea.setToolTipText(player.getDetailsHtml());
+        updateAvatarBorder();
+        this.avatarArea.setToolTipText(getPlayerDetailsHtml());
     }
+
+    private String getPlayerDetailsHtml() {
+        final String detailsHtml = player.getDetailsHtml();
+        final String commanderBracketLine = getCommanderBracketTooltipLine();
+        if (commanderBracketLine == null) {
+            return detailsHtml;
+        }
+
+        final String nameSeparator = "<hr/>";
+        final int insertIndex = detailsHtml.indexOf(nameSeparator);
+        if (insertIndex < 0) {
+            return detailsHtml;
+        }
+
+        final int lineIndex = insertIndex + nameSeparator.length();
+        return detailsHtml.substring(0, lineIndex)
+                + commanderBracketLine + "<br/>"
+                + detailsHtml.substring(lineIndex);
+    }
+
+    private String getCommanderBracketTooltipLine() {
+        if (commanderBracketTooltipCalculated) {
+            return commanderBracketTooltipLine;
+        }
+
+        commanderBracketTooltipCalculated = true;
+        if (matchUI == null || matchUI.getGameView() == null || !matchUI.getGameView().isCommander()) {
+            return null;
+        }
+        final GameType gameType = matchUI.getGameView().getGameType();
+        if (gameType == GameType.Adventure || gameType == GameType.AdventureEvent) {
+            return null;
+        }
+        final int maximumBracket = matchUI.getMaximumCommanderBracket();
+        if (maximumBracket < 1 || maximumBracket > 4) {
+            return null;
+        }
+        final Deck deck = matchUI.getDeckForPlayer(player);
+        if (deck == null) {
+            return null;
+        }
+
+        commanderBracketTooltipLine = Localizer.getInstance().getMessage("lblBracket")
+                + ": " + CommanderBracketCalculator.getBracket(deck);
+        return commanderBracketTooltipLine;
+    }
+
 }

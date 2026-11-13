@@ -25,6 +25,7 @@ public class EnemyData implements Serializable {
     public String nameOverride;
     public String sprite;
     public String[] deck;
+    public String battleBackground;
     public boolean copyPlayerDeck = false;
     public String ai;
     public boolean boss = false;
@@ -45,6 +46,12 @@ public class EnemyData implements Serializable {
     public String[] questTags = new String[0];
     public float lifetime;
     public int gamesPerMatch = 1;
+    public String bossInsult;
+    public String bossIntro;
+    public EffectData effect;
+    public boolean ignoreGlobalEffect = false;
+    public boolean ignoreBiomeEffect = false;
+    public boolean ignoreDungeonEffect = false;
 
     public EnemyData() {
     }
@@ -53,6 +60,7 @@ public class EnemyData implements Serializable {
         name            = enemyData.name;
         sprite          = enemyData.sprite;
         deck            = enemyData.deck;
+        battleBackground = enemyData.battleBackground;
         ai              = enemyData.ai;
         boss            = enemyData.boss;
         flying          = enemyData.flying;
@@ -66,11 +74,17 @@ public class EnemyData implements Serializable {
         equipment       = enemyData.equipment;
         colors          = enemyData.colors;
         teamNumber      = enemyData.teamNumber;
+        bossInsult      = enemyData.bossInsult;
+        bossIntro       = enemyData.bossIntro;
         nextEnemy       = enemyData.nextEnemy == null ? null : new EnemyData(enemyData.nextEnemy);
         nameOverride    = enemyData.nameOverride == null ? "" : enemyData.nameOverride;
         questTags       = enemyData.questTags.clone();
         lifetime        = enemyData.lifetime;
         gamesPerMatch   = enemyData.gamesPerMatch;
+        effect          = enemyData.effect;
+        ignoreGlobalEffect  = enemyData.ignoreGlobalEffect;
+        ignoreBiomeEffect   = enemyData.ignoreBiomeEffect;
+        ignoreDungeonEffect = enemyData.ignoreDungeonEffect;
         if (enemyData.scale == 0.0f) {
             scale = 1.0f;
         }
@@ -110,6 +124,22 @@ public class EnemyData implements Serializable {
         if (name != null && !name.isEmpty())
             return name;
         return "(Unnamed Enemy)";
+    }
+    public static String getDisplayName(String enemyName){
+        return translate(enemyName, "displayName", enemyName);
+    }
+    public String getDisplayName(){
+        return getDisplayName(getName());
+    }
+    public String getBossInsult(){
+        return translate(getName(), "bossInsult", bossInsult);
+    }
+    public String getBossIntro(){
+        return translate(getName(), "bossIntro", bossIntro);
+    }
+    private static String translate(String enemyName, String field, String defaultValue){
+        return forge.Forge.getLocalizer().getMessageorUseDefault(
+            "adv.enemy." + enemyName.replaceAll("[^A-Za-z0-9]", "") + "." + field, defaultValue);
     }
 
     public boolean match(EnemyData other) {

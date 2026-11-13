@@ -2,7 +2,7 @@ package forge.screens.limited;
 
 import forge.Forge;
 import forge.assets.FSkinFont;
-import forge.deck.FDeckEditor.EditorType;
+import forge.deck.FDeckEditor;
 import forge.gamemodes.limited.BoosterDraft;
 import forge.gamemodes.limited.LimitedPoolType;
 import forge.gui.FThreads;
@@ -41,15 +41,18 @@ public class NewDraftScreen extends LaunchScreen {
 
     @Override
     protected void startMatch() {
+        // initialize custom cubes first to fill the menus, will be instant if preloaded
+        LoadingOverlay.show(Forge.getLocalizer().getMessage("lblLoadingNewDraft"), true, BoosterDraft::initializeCustomDrafts);
+
         //must run in game thread to prevent blocking UI thread
         ThreadUtil.invokeInGameThread(() -> {
             final LimitedPoolType poolType = SGuiChoose.oneOrNone(Forge.getLocalizer().getMessage("lblChooseDraftFormat"), LimitedPoolType.values(true));
             if (poolType == null) { return; }
 
             final BoosterDraft draft = BoosterDraft.createDraft(poolType);
-            if (draft == null) { return; }
+            if (draft == null || !draft.choosePicks()) { return; }
 
-            FThreads.invokeInEdtLater(() -> LoadingOverlay.show(Forge.getLocalizer().getMessage("lblLoadingNewDraft"), true, () -> Forge.openScreen(new DraftingProcessScreen(draft, EditorType.Draft, null))));
+            FThreads.invokeInEdtLater(() -> Forge.openScreen(new DraftingProcessScreen(draft, FDeckEditor.EditorConfigDraft)));
         });
     }
 }

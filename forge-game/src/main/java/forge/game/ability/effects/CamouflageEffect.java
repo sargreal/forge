@@ -75,11 +75,7 @@ public class CamouflageEffect extends SpellAbilityEffect {
         } else { // Human player
             CardCollection pool = new CardCollection(defender.getCreaturesInPlay());
             // remove all blockers that can't block
-            for (final Card blocker : pool) {
-                if (!CombatUtil.canBlock(blocker)) {
-                    pool.remove(blocker);
-                }
-            }
+            pool.removeIf(blocker -> !CombatUtil.canBlock(blocker));
             List<Integer> blockedSoFar = new ArrayList<>(Collections.nCopies(pool.size(), 0));
 
             for (int i = 0; i < attackers.size(); i++) {
@@ -90,7 +86,7 @@ public class CamouflageEffect extends SpellAbilityEffect {
                 // Remove chosen creatures, unless it can block additional attackers
                 for (final Card blocker : blockers) {
                     int index = pool.indexOf(blocker);
-                    Integer blockedCount = blockedSoFar.get(index) + 1;
+                    int blockedCount = blockedSoFar.get(index) + 1;
                     if (!blocker.canBlockAny() && blocker.canBlockAdditional() < blockedCount) {
                         pool.remove(index);
                         blockedSoFar.remove(index);

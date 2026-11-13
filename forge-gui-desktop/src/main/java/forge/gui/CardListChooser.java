@@ -18,8 +18,6 @@
 
 package forge.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
@@ -58,7 +56,7 @@ public class CardListChooser extends FDialog {
     private final CardDetailPanel detail;
     private final CardPicturePanel picture;
 
-    public CardListChooser(final String title, final String message, final List<PaperCard> list) {
+    public CardListChooser(final String title, final String message, final List<PaperCard> list, final boolean confirmClose) {
         this.list = Collections.unmodifiableList(list);
         this.jList = new JList<>(new ChooserListModel());
         this.detail = new CardDetailPanel();
@@ -66,40 +64,56 @@ public class CardListChooser extends FDialog {
         this.picture.setOpaque(false);
 
         this.setTitle(title);
-        
+
         if (FModel.getPreferences().getPrefBoolean(FPref.UI_LARGE_CARD_VIEWERS)) {
             this.setSize(1200, 825);
         } else {
             this.setSize(720, 374);
         }
-        
+
         this.addWindowFocusListener(new CardListFocuser());
 
         FButton btnOK = new FButton(Localizer.getInstance().getMessage("lblSelectCard"));
-        btnOK.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                CardListChooser.this.processWindowEvent(new WindowEvent(CardListChooser.this, WindowEvent.WINDOW_CLOSING));
-            }
-        });
-        
+        btnOK.addActionListener(e -> CardListChooser.this.processWindowEvent(new WindowEvent(CardListChooser.this, WindowEvent.WINDOW_CLOSING)));
+
+        this.add(new FLabel.Builder().text(message).build(), "cell 0 0, spanx 3, gapbottom 4");
+
+        if (FModel.getPreferences().getPrefBoolean(FPref.UI_LARGE_CARD_VIEWERS)) {
+            this.add(new FScrollPane(this.jList, true), "cell 0 1, w 225, h 450, ax c");
+            this.add(this.picture, "cell 1 1, w 480, growy, pushy, ax c");
+            this.add(this.detail, "cell 2 1, w 320, h 500, ax c");
+            this.add(btnOK, "cell 1 2, w 150, h 40, ax c, gaptop 6");
+        } else {
+            this.add(new FScrollPane(this.jList, true), "cell 0 1, w 225, growy, pushy, ax c");
+            this.add(this.picture, "cell 1 1, w 225, growy, pushy, ax c");
+            this.add(this.detail, "cell 2 1, w 225, growy, pushy, ax c");
+            this.add(btnOK, "cell 1 2, w 150, h 26, ax c, gaptop 6");
+        }
+
+        // selection is here
+        this.jList.getSelectionModel().addListSelectionListener(new SelListener());
+        this.jList.setSelectedIndex(0);
+
+        if (!confirmClose) {
+            return;
+        }
+
         //Ensure the window can't be closed without user confirmation.
         //Unfortunately this giant block of code is necessary for that.
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        
+
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(final WindowEvent e) {
-                
+
             }
 
             @Override
             public void windowClosing(final WindowEvent e) {
-                //CardTranslation.getTranslatedName
                 if (FOptionPane.showConfirmDialog(
-                        Localizer.getInstance().getMessage("lblAreYouSureWantPickCard", CardTranslation.getTranslatedName(jList.getSelectedValue().getName())),
+                        Localizer.getInstance().getMessage("lblAreYouSureWantPickCard", CardTranslation.getTranslatedName(jList.getSelectedValue().getDisplayName())),
                         Localizer.getInstance().getMessage("lblSelectThisCardConfirm"), false)
-                    ) {
+                ) {
                     dispose();
                 }
             }
@@ -129,26 +143,8 @@ public class CardListChooser extends FDialog {
 
             }
         });
-        
-        this.add(new FLabel.Builder().text(message).build(), "cell 0 0, spanx 3, gapbottom 4");
-
-        if (FModel.getPreferences().getPrefBoolean(FPref.UI_LARGE_CARD_VIEWERS)) {
-            this.add(new FScrollPane(this.jList, true), "cell 0 1, w 225, h 450, ax c");
-            this.add(this.picture, "cell 1 1, w 480, growy, pushy, ax c");
-            this.add(this.detail, "cell 2 1, w 320, h 500, ax c");
-            this.add(btnOK, "cell 1 2, w 150, h 40, ax c, gaptop 6");
-        } else {
-            this.add(new FScrollPane(this.jList, true), "cell 0 1, w 225, growy, pushy, ax c");
-            this.add(this.picture, "cell 1 1, w 225, growy, pushy, ax c");
-            this.add(this.detail, "cell 2 1, w 225, growy, pushy, ax c");
-            this.add(btnOK, "cell 1 2, w 150, h 26, ax c, gaptop 6");
-        }
-
-        // selection is here
-        this.jList.getSelectionModel().addListSelectionListener(new SelListener());
-        this.jList.setSelectedIndex(0);
     }
-    
+
     public PaperCard getSelectedCard() {
         return jList.getSelectedValue();
     }

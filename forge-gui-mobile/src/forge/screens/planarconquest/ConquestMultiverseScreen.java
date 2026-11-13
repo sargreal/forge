@@ -28,7 +28,6 @@ import forge.gamemodes.planarconquest.ConquestBattle;
 import forge.gamemodes.planarconquest.ConquestChaosBattle;
 import forge.gamemodes.planarconquest.ConquestData;
 import forge.gamemodes.planarconquest.ConquestEvent;
-import forge.gamemodes.planarconquest.ConquestEvent.ChaosWheelOutcome;
 import forge.gamemodes.planarconquest.ConquestEvent.ConquestEventRecord;
 import forge.gamemodes.planarconquest.ConquestLocation;
 import forge.gamemodes.planarconquest.ConquestPlane;
@@ -50,7 +49,6 @@ import forge.toolbox.FDisplayObject;
 import forge.toolbox.FList;
 import forge.toolbox.FOptionPane;
 import forge.toolbox.FScrollPane;
-import forge.util.Callback;
 import forge.util.Utils;
 import forge.util.collect.FCollectionView;
 
@@ -71,6 +69,7 @@ public class ConquestMultiverseScreen extends FScreen {
     private final BattleBar battleBar;
     private ConquestData model;
     private ConquestBattle activeBattle;
+    private ConquestReward regionCommander;
 
     public ConquestMultiverseScreen() {
         super("", ConquestMenu.getMenu());
@@ -98,6 +97,7 @@ public class ConquestMultiverseScreen extends FScreen {
                     if (record.getWins(activeBattle.getTier()) == 1 && record.getHighestConqueredTier() == activeBattle.getTier()) {
                         //if first time conquering event at the selected tier, show animation of new badge being positioned on location
                         model.rewardPlaneswalkEmblems(FModel.getConquestPreferences().getPrefInt(CQPref.PLANESWALK_CONQUER_EMBLEMS));
+                        regionCommander = FModel.getConquest().awardRegionCommander(loc);
                         model.saveData();
                         planeGrid.animateBadgeIntoPosition(loc, activeBattle.getTier());
                     }
@@ -129,39 +129,40 @@ public class ConquestMultiverseScreen extends FScreen {
         battleBar.update();
     }
 
+    private void showRegionCommander() {
+        if (regionCommander == null) {
+            spinChaosWheel();
+            return;
+        }
+        String title = Forge.getLocalizer().getMessage("lblConqueredNReceivedCommander", model.getCurrentLocation().getRegion().getName());
+        ConquestRewardDialog.show(title, List.of(regionCommander), this::spinChaosWheel);
+    }
+
     private void spinChaosWheel() {
-        ConquestChaosWheel.spin(new Callback<ChaosWheelOutcome>() {
-            @Override
-            public void run(ChaosWheelOutcome outcome) {
-                switch (outcome) {
-                case BOOSTER:
-                    awardBoosters(model.getCurrentPlane().getAwardPool(), 1);
-                    break;
-                case DOUBLE_BOOSTER:
-                    awardBoosters(model.getCurrentPlane().getAwardPool(), 2);
-                    break;
-                case SHARDS:
-                    awardShards(FModel.getConquestPreferences().getPrefInt(CQPref.AETHER_WHEEL_SHARDS), false);
-                    break;
-                case DOUBLE_SHARDS:
-                    awardShards(2 * FModel.getConquestPreferences().getPrefInt(CQPref.AETHER_WHEEL_SHARDS), false);
-                    break;
-                case PLANESWALK:
-                    if (model.getUnlockedPlaneCount() == model.getAccessiblePlaneCount()) {
-                        FOptionPane.showMessageDialog(Forge.getLocalizer().getMessage("lblAllPlanesUnlockedNotify"), Forge.getLocalizer().getMessage("lblAllPlanesUnlocked"), EMBLEM_IMAGE, new Callback<Integer>() {
-                            @Override
-                            public void run(Integer result) {
-                                launchChaosBattle();
-                            }
-                        });
-                    } else {
-                        awardBonusPlaneswalkEmblems(FModel.getConquestPreferences().getPrefInt(CQPref.PLANESWALK_WHEEL_EMBLEMS));
-                    }
-                    break;
-                case CHAOS:
-                    launchChaosBattle();
-                    break;
+        ConquestChaosWheel.spin(outcome -> {
+            switch (outcome) {
+            case BOOSTER:
+                awardBoosters(model.getCurrentPlane().getAwardPool(), 1);
+                break;
+            case DOUBLE_BOOSTER:
+                awardBoosters(model.getCurrentPlane().getAwardPool(), 2);
+                break;
+            case SHARDS:
+                awardShards(FModel.getConquestPreferences().getPrefInt(CQPref.AETHER_WHEEL_SHARDS), false);
+                break;
+            case DOUBLE_SHARDS:
+                awardShards(2 * FModel.getConquestPreferences().getPrefInt(CQPref.AETHER_WHEEL_SHARDS), false);
+                break;
+            case PLANESWALK:
+                if (model.getUnlockedPlaneCount() == model.getAccessiblePlaneCount()) {
+                    FOptionPane.showMessageDialog(Forge.getLocalizer().getMessage("lblAllPlanesUnlockedNotify"), Forge.getLocalizer().getMessage("lblAllPlanesUnlocked"), EMBLEM_IMAGE, result -> launchChaosBattle());
+                } else {
+                    awardBonusPlaneswalkEmblems(FModel.getConquestPreferences().getPrefInt(CQPref.PLANESWALK_WHEEL_EMBLEMS));
                 }
+                break;
+            case CHAOS:
+                launchChaosBattle();
+                break;
             }
         });
     }
@@ -601,7 +602,7 @@ public class ConquestMultiverseScreen extends FScreen {
             protected void onEnd(boolean endingAll) {
                 activeBadgeAnimation = null;
                 if (!endingAll) {
-                    spinChaosWheel(); //spin Chaos Wheel after badge positioned
+                    showRegionCommander();
                 }
             }
         }
@@ -694,10 +695,10 @@ public class ConquestMultiverseScreen extends FScreen {
             float labelHeight = playerAvatar.getTop();
 
             if (playerAvatar.card != null) {
-                g.drawText(playerAvatar.card.getName(), AVATAR_NAME_FONT, Color.WHITE, PADDING, 0, labelWidth, labelHeight, false, Align.left, true);
+                g.drawText(playerAvatar.card.getDisplayName(), AVATAR_NAME_FONT, Color.WHITE, PADDING, 0, labelWidth, labelHeight, false, Align.left, true);
             }
             if (opponentAvatar.card != null) {
-                g.drawText(opponentAvatar.card.getName(), AVATAR_NAME_FONT, Color.WHITE, getWidth() - labelWidth - PADDING, getHeight() - labelHeight, labelWidth, labelHeight, false, Align.right, true);
+                g.drawText(opponentAvatar.card.getDisplayName(), AVATAR_NAME_FONT, Color.WHITE, getWidth() - labelWidth - PADDING, getHeight() - labelHeight, labelWidth, labelHeight, false, Align.right, true);
             }
         }
 

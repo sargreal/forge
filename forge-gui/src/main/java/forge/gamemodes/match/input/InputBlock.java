@@ -17,8 +17,6 @@
  */
 package forge.gamemodes.match.input;
 
-import java.util.List;
-
 import forge.game.card.Card;
 import forge.game.card.CardView;
 import forge.game.combat.Combat;
@@ -27,12 +25,14 @@ import forge.game.event.GameEventCombatChanged;
 import forge.game.event.GameEventCombatUpdate;
 import forge.game.player.Player;
 import forge.game.zone.ZoneType;
-import forge.gui.FThreads;
+import forge.gamemodes.match.Selection;
 import forge.gui.events.UiEventBlockerAssigned;
 import forge.player.PlayerControllerHuman;
 import forge.util.ITriggerEvent;
 import forge.util.Localizer;
 import forge.util.ThreadUtil;
+
+import java.util.List;
 
 /**
  * <p>
@@ -43,7 +43,7 @@ import forge.util.ThreadUtil;
  * @version $Id: InputBlock.java 24769 2014-02-09 13:56:04Z Hellfish $
  */
 public class InputBlock extends InputSyncronizedBase {
-    /** Constant <code>serialVersionUID=6120743598368928128L</code>. */
+
     private static final long serialVersionUID = 6120743598368928128L;
 
     private Card currentAttacker = null;
@@ -60,12 +60,7 @@ public class InputBlock extends InputSyncronizedBase {
         for (final Card attacker : combat.getAttackers()) {
             for (final Card c : defender.getCreaturesInPlay()) {
                 if (CombatUtil.canBlock(attacker, c, combat)) {
-                    FThreads.invokeInEdtNowOrLater(new Runnable() { //must set current attacker on EDT
-                        @Override
-                        public void run() {
-                            setCurrentAttacker(attacker);
-                        }
-                    });
+                    currentAttacker = attacker;
                     return;
                 }
             }
@@ -82,15 +77,25 @@ public class InputBlock extends InputSyncronizedBase {
         if (currentAttacker == null) {
             showMessage(localizer.getMessage("lblSelectBlockTarget"));
         } else {
-            String attackerName = currentAttacker.isFaceDown() ? localizer.getMessage("lblMorph") : currentAttacker.getName() + " (" + currentAttacker.getId() + ")";
+            String attackerName = currentAttacker.isFaceDown() ? localizer.getMessage("lblMorph") : currentAttacker.getDisplayName() + " (" + currentAttacker.getId() + ")";
             String message = localizer.getMessage("lblSelectBlocker") + attackerName + " " + localizer.getMessage("lblOrSelectBlockTarget");
             showMessage(message);
         }
 
         if (combat != null)
-            getController().getGame().fireEvent(new GameEventCombatUpdate(combat.getAttackers(), combat.getAllBlockers()));
+            getController().getGame().fireEvent(GameEventCombatUpdate.fromCards(combat.getAttackers(), combat.getAllBlockers()));
 
         getController().getGui().showCombat();
+    }
+
+    @Override
+    protected boolean allowAwaitNextInput() {
+        return true;
+    }
+
+    @Override
+    protected List<CardView> getActionable() {
+        return getController().getBlockerCandidates(defender, combat);
     }
 
     /** {@inheritDoc} */
@@ -99,16 +104,10 @@ public class InputBlock extends InputSyncronizedBase {
         final String blockErrors = CombatUtil.validateBlocks(combat, defender);
         if (blockErrors == null) {
             // Done blocking
-            setCurrentAttacker(null);
             stop();
         } else {
             //must run in game thread to prevent problems for mobile game
-            ThreadUtil.invokeInGameThread(new Runnable() {
-                @Override
-                public void run() {
-                    getController().getGui().message(blockErrors);
-                }
-            });
+            ThreadUtil.invokeInGameThread(() -> getController().getGui().message(blockErrors));
         }
     }
 
@@ -119,27 +118,46 @@ public class InputBlock extends InputSyncronizedBase {
         if (triggerEvent != null && triggerEvent.getButton() == 3 && card.getController() == defender) {
             combat.removeFromCombat(card);
             card.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(CardView.get(card), null));
+            if (otherCardsToSelect != null) {
+                for (Card c : otherCardsToSelect) {
+                    if (c.getController() == defender) {
+                        combat.removeFromCombat(c);
+                        c.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(CardView.get(c), null));
+                    }
+                }
+            }
             isCorrectAction = true;
-        } else {
-            // is attacking?
-            if (combat.isAttacking(card)) {
-                setCurrentAttacker(card);
+        } else if (combat.isAttacking(card)) {
+            currentAttacker = card;
+            isCorrectAction = true;
+        } else if (currentAttacker != null && card.isCreature() && defender.getZone(ZoneType.Battlefield).contains(card)) {
+            // card is valid to even be a blocker
+            if (combat.isBlocking(card, currentAttacker)) {
+                //if creature already blocking current attacker, remove blocker from combat
+                combat.removeBlockAssignment(currentAttacker, card);
+                card.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(CardView.get(card), null));
+                if (otherCardsToSelect != null) {
+                    for (Card c : otherCardsToSelect) {
+                        if (combat.isBlocking(c, currentAttacker)) {
+                            combat.removeBlockAssignment(currentAttacker, c);
+                            c.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(CardView.get(c), null));
+                        }
+                    }
+                }
                 isCorrectAction = true;
             } else {
-                // Make sure this card is valid to even be a blocker
-                if (currentAttacker != null && card.isCreature() && defender.getZone(ZoneType.Battlefield).contains(card)) {
-                    if (combat.isBlocking(card, currentAttacker)) {
-                        //if creature already blocking current attacker, remove blocker from combat
-                        combat.removeBlockAssignment(currentAttacker, card);
-                        card.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(CardView.get(card), null));
-                        isCorrectAction = true;
-                    } else {
-                        isCorrectAction = CombatUtil.canBlock(currentAttacker, card, combat);
-                        if (isCorrectAction) {
-                            combat.addBlocker(currentAttacker, card);
-                            card.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(
-                                    CardView.get(card),
-                                    CardView.get(currentAttacker)));
+                isCorrectAction = CombatUtil.canBlock(currentAttacker, card, combat);
+                if (isCorrectAction) {
+                    combat.addBlocker(currentAttacker, card);
+                    card.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(
+                            CardView.get(card), CardView.get(currentAttacker)));
+                    if (otherCardsToSelect != null) {
+                        for (Card c : otherCardsToSelect) {
+                            if (CombatUtil.canBlock(currentAttacker, c, combat)) {
+                                combat.addBlocker(currentAttacker, c);
+                                c.getGame().getMatch().fireEvent(new UiEventBlockerAssigned(
+                                        CardView.get(c), CardView.get(currentAttacker)));
+                            }
                         }
                     }
                 }
@@ -150,6 +168,7 @@ public class InputBlock extends InputSyncronizedBase {
             card.getGame().fireEvent(new GameEventCombatChanged());
         }
 
+        showSelection();
         showMessage();
         return isCorrectAction;
     }
@@ -157,23 +176,21 @@ public class InputBlock extends InputSyncronizedBase {
     @Override
     public String getActivateAction(Card card) {
         if (combat.isAttacking(card)) {
-            return "declare blockers for card";
+            return Localizer.getInstance().getMessage("lblDeclareBlockersForCard");
         }
         if (currentAttacker != null && card.isCreature() && defender.getZone(ZoneType.Battlefield).contains(card)) {
             if (combat.isBlocking(card, currentAttacker)) {
-                return "remove card from combat";
+                return Localizer.getInstance().getMessage("lblRemoveFromCombat");
             }
             if (CombatUtil.canBlock(currentAttacker, card, combat)) {
-                return "block with card";
+                return Localizer.getInstance().getMessage("lblBlockWithCard");
             }
         }
         return null;
     }
 
-    private void setCurrentAttacker(final Card card) {
-        currentAttacker = card;
-        for (final Card c : combat.getAttackers()) {
-            getController().getGui().setUsedToPay(CardView.get(c), card == c);
-        }
+    @Override
+    protected Selection getSelection() {
+        return currentAttacker == null ? Selection.NONE : Selection.ofChosen(List.of(CardView.get(currentAttacker)));
     }
 }

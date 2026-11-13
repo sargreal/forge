@@ -19,8 +19,8 @@ package forge.gamemodes.quest.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
-import com.google.common.base.Predicate;
 import forge.card.CardEdition;
 import forge.game.GameFormat;
 import forge.gamemodes.quest.setrotation.ISetRotation;
@@ -118,7 +118,6 @@ public final class GameFormatQuest extends GameFormat {
 	 * @return unmodifiable list of excluded sets.
 	 */
 	public List<String> getLockedSets() {
-
 		List<String> exSets = new ArrayList<>();
 		if (this.allowedSetCodes.isEmpty()) {
 			return exSets;
@@ -151,7 +150,7 @@ public final class GameFormatQuest extends GameFormat {
 	 * @return boolean, contains snow-land sets.
 	 */
 	public boolean hasSnowLands() {
-		return (this.isSetLegal("ICE") || this.isSetLegal("CSP"));
+		return this.isSetLegal("ICE") || this.isSetLegal("CSP");
 	}
 
 	public boolean canUnlockSets() {
@@ -160,32 +159,6 @@ public final class GameFormatQuest extends GameFormat {
 
 	public int getUnlocksUsed() {
 		return unlocksUsed;
-	}
-
-	public abstract static class QPredicates {
-		/**
-		 * Checks if is legal in quest format.
-		 *
-		 * @param qFormat the format
-		 * @return the predicate
-		 */
-		public static Predicate<CardEdition> isLegalInFormatQuest(final GameFormatQuest qFormat) {
-			return new LegalInFormatQuest(qFormat);
-		}
-
-		private static final class LegalInFormatQuest implements Predicate<CardEdition> {
-			private final GameFormatQuest qFormat;
-
-			private LegalInFormatQuest(final GameFormatQuest fmt) {
-				this.qFormat = fmt;
-			}
-
-			@Override
-			public boolean apply(final CardEdition subject) {
-				return this.qFormat.isSetLegal(subject.getCode());
-			}
-		}
-
 	}
 
 }
