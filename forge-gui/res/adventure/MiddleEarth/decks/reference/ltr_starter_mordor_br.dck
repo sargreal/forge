@@ -1,0 +1,33 @@
+[metadata]
+Name=LTR Starter Kit - Mordor (BR)
+Comment=Official decklist, The Lord of the Rings: Tales of Middle-earth Starter Kit (2023-06-23). Source: magic.wizards.com/en/news/announcements/the-lord-of-the-rings-tales-of-middle-earth-starter-kit-decklists (via github.com/taw/magic-preconstructed-decks data/starter-kit/ltr). Reference deck for tools/middleearth/deckstrength.sh, not used by the game.
+[Main]
+1 Sauron, the Lidless Eye|LTR
+1 Gollum, Scheming Guide|LTR
+1 Witch-king, Bringer of Ruin|LTR
+1 Fires of Mount Doom|LTR
+1 The Balrog, Flame of Udûn|LTR
+3 Goblin Assailant|LTR
+2 Easterling Vanguard|LTR
+2 Feed the Swarm|LTC
+2 Dunland Crebain|LTR
+2 Mordor Trebuchet|LTR
+1 Snarling Warg|LTR
+1 Shelob's Ambush|LTR
+1 Nasty End|LTR
+1 Gothmog, Morgul Lieutenant|LTR
+1 Voracious Fell Beast|LTR
+1 Swarming of Moria|LTR
+2 Olog-hai Crusher|LTR
+1 Oliphaunt|LTR
+1 Cast into the Fire|LTR
+1 Fire of Orthanc|LTR
+1 Goblin Fireleaper|LTR
+1 Grishnákh, Brash Instigator|LTR
+2 Foray of Orcs|LTR
+1 Mauhúr, Uruk-hai Captain|LTR
+1 Uglúk of the White Hand|LTR
+1 Mind Stone|LTC
+4 Evolving Wilds|LTC
+11 Swamp|LTR
+11 Mountain|LTR
