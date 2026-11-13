@@ -102,7 +102,7 @@ public abstract class ImageFetcher {
     /**
      * Fork (Middle-earth reprint set, see docs/MiddleEarth/notes/wp2-reprint-set.md): an edition entry
      * may name the printing whose image it shows, e.g.
-     * {@code 24 C Giant Spider @Randy Gallegos ${"artSet": "M10", "artNum": "185"}}.
+     * {@code 15 C Giant Spider @Randy Gallegos ${"artSet": "M10", "artNum": "185"}}.
      * Returns that printing if it exists in the card DB, otherwise the card itself.
      */
     public static PaperCard getArtSourcePrinting(PaperCard card) {
