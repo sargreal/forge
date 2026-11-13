@@ -34,12 +34,13 @@ BANDS = [
     (0.58, 0.70, "stronger than the starter kits"),
     (0.70, 1.01, "far too strong"),
 ]
-# Rough enemy tiers on the same scale (vs the starter-kit gauntlet at 20 life each). See DEVELOPMENT.md.
+# Rough enemy tiers, only for the enemy protocol: --enemy-life (enemy at its own life) against the gauntlet at
+# 16 life (the player's Easy starting life). Calibrated on upstream enemies, see docs/MiddleEarth/notes/wp1-deck-lab.md.
 ENEMY_TIERS = [
-    (0.00, 0.30, "easy"),
-    (0.30, 0.50, "normal"),
-    (0.50, 0.70, "hard"),
-    (0.70, 1.01, "elite / boss"),
+    (0.00, 0.45, "easy"),
+    (0.45, 0.60, "normal"),
+    (0.60, 0.75, "hard"),
+    (0.75, 1.01, "elite / boss"),
 ]
 
 
@@ -346,15 +347,17 @@ def report(run_dir, decks, gauntlet, pairs, games, args, elapsed):
     if not args.round_robin:
         md.append("- Gauntlet: " + ", ".join("%s (%d cards)" % (g["name"], g["size"]) for g in gauntlet))
     md.append("- Starting life: candidate %s, gauntlet %s" % (
-        "enemy's own" if args.life == "enemy" else (args.life or "20"), args.opp_life or "20"))
-    md.append("- %d games in %.0f s wall time (%.1f s per game per worker)\n"
-              % (len(games), elapsed, elapsed * args.jobs / max(1, len(games))))
+        ("enemy's own" + (" (else %s)" % args.life if args.life else "")) if args.enemy_life else (args.life or "20"), args.opp_life or "20"))
+    md.append("- %d games, average game %.1f s, %.0f s wall time for this invocation (a resumed run only counts the rest)\n"
+              % (len(games), sum(g["ms"] for g in games) / 1000.0 / max(1, len(games)), elapsed))
     md.append("Score = (wins + draws/2) / games. 50% = as strong as the gauntlet on average. "
               "CI = 95% Wilson interval. Turns = Forge turn counter (both players' turns).\n")
 
     md.append("## Overall\n")
-    md.append("| Deck | Cards | Games | W-L-D | Score | 95% CI | On play | On draw | Avg turns | Timeouts | Rating | Enemy tier |")
-    md.append("| --- | ---: | ---: | --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- |")
+    enemy_mode = args.enemy_life
+    md.append("| Deck | Cards | Games | W-L-D | Score | 95%% CI | On play | On draw | Avg turns | Timeouts | %s |"
+              % ("Enemy tier" if enemy_mode else "Rating"))
+    md.append("| --- | ---: | ---: | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |")
     per_opp = []
     for d in focus:
         tot = Acc()
@@ -371,14 +374,11 @@ def report(run_dir, decks, gauntlet, pairs, games, args, elapsed):
         if not tot.n:
             continue
         lo, hi = tot.ci()
-        rating = band(tot.score, BANDS)
-        if band(lo, BANDS) != band(hi, BANDS):
-            rating += " (uncertain: CI spans %s .. %s)" % (band(lo, BANDS), band(hi, BANDS))
-        tier = band(tot.score, ENEMY_TIERS)
-        md.append("| %s | %d | %d | %d-%d-%d | **%s** | %s–%s | %s | %s | %.1f | %d | %s | %s |" % (
+        rating = band(tot.score, ENEMY_TIERS if enemy_mode else BANDS)
+        md.append("| %s | %d | %d | %d-%d-%d | **%s** | %s–%s | %s | %s | %.1f | %d | %s |" % (
             d["name"], d["size"], tot.n, tot.w, tot.l, tot.d, pct(tot.score), pct(lo), pct(hi),
             pct(tot.play_w / tot.play_n) if tot.play_n else "-", pct(tot.draw_w / tot.draw_n) if tot.draw_n else "-",
-            tot.turns / tot.n, tot.timeouts, rating, tier))
+            tot.turns / tot.n, tot.timeouts, rating))
         rows_csv.append(dict(deck=d["name"], file=d["label"], cards=d["size"], opponent="ALL", games=tot.n,
                              wins=tot.w, losses=tot.l, draws=tot.d, score="%.3f" % tot.score, ci_low="%.3f" % lo,
                              ci_high="%.3f" % hi, avg_turns="%.1f" % (tot.turns / tot.n),
@@ -407,8 +407,11 @@ def report(run_dir, decks, gauntlet, pairs, games, args, elapsed):
         sum(g["reason"] in ("timeout", "stuck") for g in games), sum(g["reason"] in ("error", "deckerror") for g in games),
         sum(g["result"] == "draw" for g in games)))
     md.append("\n## Rating bands\n")
-    md.append("Rating (starter decks): " + "; ".join("%s–%s %s" % (pct(lo), pct(min(hi, 1)), n) for lo, hi, n in BANDS) + ".")
-    md.append("Enemy tier (rough): " + "; ".join("%s–%s %s" % (pct(lo), pct(min(hi, 1)), n) for lo, hi, n in ENEMY_TIERS) + ".")
+    md.append("Rating (decks at 20 life vs the gauntlet; for 40-card decks use --g40): "
+              + "; ".join("%s–%s %s" % (pct(lo), pct(min(hi, 1)), n) for lo, hi, n in BANDS) + ".")
+    md.append("Enemy tier (only with --enemy-life, gauntlet at 16 life): "
+              + "; ".join("%s–%s %s" % (pct(lo), pct(min(hi, 1)), n) for lo, hi, n in ENEMY_TIERS) + ".")
+    md.append("Bands are rough. Treat a score within a few points of an edge, or a wide CI, as undecided and add games.")
 
     with open(os.path.join(run_dir, "summary.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(md) + "\n")
@@ -435,7 +438,8 @@ def main():
   tools/middleearth/deckstrength.sh my_deck.dck                    # vs the LTR Starter Kit gauntlet
   tools/middleearth/deckstrength.sh -n 100 a.dck b.dck             # more games, two candidates
   tools/middleearth/deckstrength.sh decks/starter/white_e.json     # adventure JSON deck (3 samples)
-  tools/middleearth/deckstrength.sh --enemy-life enemy:Bandit      # an enemy, with its own life total
+  tools/middleearth/deckstrength.sh --g40 my40.dck                 # 40-card deck vs the 40-card cuts of the kits
+  tools/middleearth/deckstrength.sh --enemy-life enemy:Bandit      # an enemy at its own life vs the gauntlet at 16
   tools/middleearth/deckstrength.sh --round-robin -n 40 DIR        # every deck in DIR vs every other
   tools/middleearth/deckstrength.sh build                          # build the engine jar first
 """)
@@ -446,10 +450,14 @@ def main():
     ap.add_argument("-t", "--timeout", type=int, default=120, help="per-game timeout in seconds, counted as a draw (default 120)")
     ap.add_argument("-g", "--gauntlet", nargs="+", default=None,
                     help="opponent decks or dirs (default: the .dck files in MiddleEarth/decks/reference/)")
+    ap.add_argument("--g40", action="store_true",
+                    help="use the 40-card cuts of the starter kits (reference/size40/) as the gauntlet; use it for 40-card decks")
     ap.add_argument("--round-robin", action="store_true", help="play the inputs against each other instead of a gauntlet")
     ap.add_argument("--samples", type=int, default=3, help="decks generated per adventure .json input (default 3)")
     ap.add_argument("--life", default="", help="starting life of the candidate decks (default 20)")
-    ap.add_argument("--enemy-life", action="store_true", help="candidates from enemy:<Name> start with the enemy's life")
+    ap.add_argument("--enemy-life", action="store_true",
+                    help="enemy protocol: enemy:<Name> candidates start at the enemy's life, the gauntlet at 16 "
+                         "(the player's Easy starting life) unless --opp-life is given; reports an enemy tier. For a .dck enemy deck give its life with --life N")
     ap.add_argument("--opp-life", default="", help="starting life of the gauntlet decks (default 20)")
     ap.add_argument("--plane", default="MiddleEarth", help="plane used to resolve .json / enemy: inputs")
     ap.add_argument("--seed", type=int, default=None)
@@ -457,7 +465,9 @@ def main():
     ap.add_argument("-o", "--out", default=None, help="output dir (default .me-test/deckstrength/<timestamp>)")
     args = ap.parse_args()
     if args.enemy_life:
-        args.life = "enemy"
+        args.opp_life = args.opp_life or "16"
+    if args.g40:
+        args.gauntlet = [os.path.join(REF_DIR, "size40")]
 
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     run_dir = os.path.abspath(args.out or os.path.join(ROOT, ".me-test", "deckstrength", stamp))
@@ -477,7 +487,7 @@ def main():
             if os.path.realpath(g["src"]) in cand_srcs:
                 log("note: %s is also in the gauntlet; it is not played against itself" % g["name"])
     for d in cands:
-        d["start_life"] = d["life"] if args.life == "enemy" else int(args.life or 0)
+        d["start_life"] = (d["life"] if args.enemy_life else 0) or int(args.life or 0)
     for d in gauntlet:
         d["start_life"] = int(args.opp_life or 0)
     pairs, tasks = build_tasks(cands, gauntlet, args.games, args.round_robin, seed)
