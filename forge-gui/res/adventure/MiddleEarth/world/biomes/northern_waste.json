@@ -1,29 +1,31 @@
 {
-"startPointX": 0.64,
-"startPointY": 0.11,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.62,
+"startPointY": -0.44,
+"noiseWeight": 0.15,
+"distWeight": 1.0,
 "name": "northern_waste",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "Blue",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
+		"spriteName": "Blue_1",
 		"max": 0.2,
-		"resolution": 5
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
+		"spriteName": "Blue_2",
 		"min": 0.8,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.72,
-"height": 0.22,
-"color": "aeaeae",
+"width": 1.2,
+"height": 1.2,
+"color": "10a2e0",
 "spriteNames": [
-	"Stone"
+	"WasteRock",
+	"Stone",
+	"LargeMountainRock"
 ],
 "enemies": [
 	"Adept Black Wizard",
@@ -67,8 +69,9 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"Waste Town Generic"
+	"ME Lossoth Village",
+	"ME Frozen Ruins",
+	"ME Ice Hall"
 ],
-"structures": [
-]
+"structures": []
 }

@@ -1,29 +1,33 @@
 {
-"startPointX": 0.442,
-"startPointY": 0.65,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.655,
+"startPointY": 0.725,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "gondor",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "White",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "White_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
 		"resolution": 10
 	},
 	{
-		"spriteName": "White_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.424,
-"height": 0.12,
-"color": "efe697",
+"width": 0.21,
+"height": 0.21,
+"color": "59a650",
 "spriteNames": [
-	"DarkGras"
+	"Flower",
+	"PlainsTree",
+	"Bush",
+	"DarkGras",
+	"Stone"
 ],
 "enemies": [
 	"Adept White Wizard",
@@ -79,8 +83,10 @@
 	"White Sliver"
 ],
 "pointsOfInterest": [
-	"Plains Town Generic"
+	"Plains Capital",
+	"ME Pelargir",
+	"ME Gondor Town",
+	"ME Osgiliath"
 ],
-"structures": [
-]
+"structures": []
 }

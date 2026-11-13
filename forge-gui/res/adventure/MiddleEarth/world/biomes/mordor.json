@@ -1,34 +1,32 @@
 {
-"startPointX": 0.827,
-"startPointY": 0.655,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.83,
+"startPointY": 0.69,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "mordor",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Black",
 "terrain": [
 	{
 		"spriteName": "Black_1",
-		"max": 0.2,
+		"max": 0.3,
 		"resolution": 10
 	},
 	{
 		"spriteName": "Black_2",
-		"min": 0.8,
+		"min": 0.7,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.346,
-"height": 0.19,
+"width": 0.25,
+"height": 0.25,
 "color": "110903",
 "spriteNames": [
-	"DarkGras",
+	"LargeSwampRock",
+	"SwampRock",
 	"Skull",
-	"DarkWood",
-	"Reed",
-	"Waterlily",
-	"Shroom",
+	"DarkGras",
 	"Shroom2"
 ],
 "enemies": [
@@ -77,8 +75,93 @@
 ],
 "pointsOfInterest": [
 	"Black Castle",
-	"Swamp Town Generic"
+	"ME Mount Doom",
+	"ME Nurn Town",
+	"ME Orc Camp Mordor"
 ],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/black_structures.atlas",
+		"sourcePath": "world/structures/models/black.png",
+		"maskPath": "world/structures/masks/ring.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "muck",
+				"color": "00ffff",
+				"collision": true
+			},
+			{
+				"name": "dead_tree",
+				"color": "004000",
+				"collision": true
+			},
+			{
+				"name": "dead_tree2",
+				"color": "008000",
+				"collision": true
+			},
+			{
+				"name": "dead_tree3",
+				"color": "ff00ff",
+				"collision": true
+			},
+			{
+				"name": "rock",
+				"color": "808080",
+				"collision": true
+			},
+			{
+				"name": "rock2",
+				"color": "ff0000",
+				"collision": true
+			}
+		]
+	},
+	{
+		"N": 2,
+		"x": 0.36,
+		"y": 0.33,
+		"structureAtlasPath": "world/structures/red_structures.atlas",
+		"sourcePath": "world/structures/models/volcano.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.22,
+		"width": 0.22,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "lava",
+				"color": "ffff00",
+				"collision": true
+			},
+			{
+				"name": "mountain",
+				"color": "ff0000",
+				"collision": true
+			},
+			{
+				"name": "dead_tree",
+				"color": "000000",
+				"collision": true
+			},
+			{
+				"name": "dead_tree2",
+				"color": "808080",
+				"collision": true
+			},
+			{
+				"name": "rock",
+				"color": "0000ff",
+				"collision": true
+			}
+		]
+	}
 ]
 }

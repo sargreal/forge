@@ -1,33 +1,35 @@
 {
-"startPointX": 0.61,
-"startPointY": 0.315,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.675,
+"startPointY": 0.215,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "mirkwood",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Green",
+"tilesetName": "Black",
 "terrain": [
 	{
-		"spriteName": "Green_1",
-		"max": 0.2,
-		"resolution": 224
+		"spriteName": "Black_1",
+		"max": 0.25,
+		"resolution": 10
 	},
 	{
-		"spriteName": "Green_2",
-		"min": 0.8,
+		"spriteName": "Black_2",
+		"min": 0.5,
 		"max": 1,
-		"resolution": 10
+		"resolution": 8
 	}
 ],
-"width": 0.143,
-"height": 0.23,
-"color": "59a650",
+"width": 0.19,
+"height": 0.19,
+"color": "110903",
 "spriteNames": [
-	"Stump",
+	"WoodTree",
+	"SwampTree2",
+	"DarkWood",
+	"Shroom",
+	"Shroom2",
 	"Moss",
-	"Stone",
-	"Flower",
-	"Wood"
+	"Skull"
 ],
 "enemies": [
 	"Adept Green Wizard",
@@ -83,8 +85,34 @@
 	"Wurm"
 ],
 "pointsOfInterest": [
-	"Forest Town Generic"
+	"ME Thranduils Halls",
+	"ME Spider Nest",
+	"ME Spider Cave"
 ],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/swamp_forest.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.75,
+		"width": 0.75,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "swamp_forest",
+				"color": "007000",
+				"collision": true
+			},
+			{
+				"name": "swamp_water",
+				"color": "005050",
+				"collision": true
+			}
+		]
+	}
 ]
 }

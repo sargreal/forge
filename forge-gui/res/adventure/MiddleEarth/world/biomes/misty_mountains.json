@@ -1,28 +1,32 @@
 {
-"startPointX": 0.445,
-"startPointY": 0.335,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.51,
+"startPointY": 0.215,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "misty_mountains",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Red",
 "terrain": [
 	{
 		"spriteName": "Red_1",
-		"max": 0.2,
+		"max": 0.3,
 		"resolution": 10
 	},
 	{
 		"spriteName": "Red_2",
-		"min": 0.8,
+		"min": 0.7,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.07,
-"height": 0.37,
+"width": 0.085,
+"height": 0.085,
 "color": "b63729",
 "spriteNames": [
+	"MountainTree",
+	"MountainTree2",
+	"MountainRock",
+	"LargeMountainRock",
 	"Gravel"
 ],
 "enemies": [
@@ -80,8 +84,32 @@
 	"Yeti"
 ],
 "pointsOfInterest": [
-	"Mountain Town Generic"
+	"ME Goblin-town"
 ],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/mountain.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "mountain",
+				"color": "a07020",
+				"collision": true
+			},
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
 ]
 }

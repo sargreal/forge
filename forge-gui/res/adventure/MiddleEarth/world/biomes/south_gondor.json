@@ -1,28 +1,31 @@
 {
-"startPointX": 0.598,
-"startPointY": 0.767,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.66,
+"startPointY": 0.835,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "south_gondor",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "White",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
+		"spriteName": "White_1",
 		"max": 0.2,
-		"resolution": 5
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
+		"spriteName": "White_2",
 		"min": 0.8,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.124,
-"height": 0.114,
-"color": "aeaeae",
+"width": 0.19,
+"height": 0.19,
+"color": "efe697",
 "spriteNames": [
+	"Cactus",
+	"PlainsRock",
+	"LargePlainsRock",
 	"Stone"
 ],
 "enemies": [
@@ -67,8 +70,8 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"Waste Town Generic"
+	"ME Harondor Town",
+	"ME Haradrim Camp"
 ],
-"structures": [
-]
+"structures": []
 }

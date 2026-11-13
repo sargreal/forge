@@ -1,8 +1,8 @@
 {
-"startPointX": 0.618,
-"startPointY": 0.551,
+"startPointX": 0.685,
+"startPointY": 0.555,
 "noiseWeight": 0.5,
-"distWeight": 1,
+"distWeight": 1.0,
 "name": "dead_marshes",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Black",
@@ -19,17 +19,16 @@
 		"resolution": 10
 	}
 ],
-"width": 0.085,
-"height": 0.078,
+"width": 0.08,
+"height": 0.08,
 "color": "110903",
 "spriteNames": [
-	"DarkGras",
-	"Skull",
-	"DarkWood",
 	"Reed",
 	"Waterlily",
-	"Shroom",
-	"Shroom2"
+	"SwampTree",
+	"DarkGras",
+	"Skull",
+	"Shroom"
 ],
 "enemies": [
 	"Adept Black Wizard",
@@ -76,16 +75,7 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"EvilGrove",
-	"EvilGrove1",
-	"EvilGrove2",
-	"EvilGrove3",
-	"EvilGrove4",
-	"EvilGrove5",
-	"EvilGrove6",
-	"DrossOutpost",
-	"Slimefoots Lair",
-	"Grolnoks Bog"
+	"ME Dead Marshes"
 ],
 "structures": []
 }
