@@ -380,6 +380,15 @@ public class ConsoleCommandInterpreter {
             System.out.println("POI Names - Types\n" + String.join("\n", poiNames));
             return "POI lists dumped to stdout.";
         });
+        // Dev helper (MiddleEarth fork): write the whole generated world's minimap image to a PNG.
+        registerCommand(new String[]{"exportMap"}, s -> {
+            com.badlogic.gdx.graphics.Pixmap image = WorldSave.getCurrentSave().getWorld().getBiomeImage();
+            if (image == null) return "No world map available.";
+            String file = s.length > 0 ? s[0] : forge.localinstance.properties.ForgeConstants.USER_ADVENTURE_DIR + "world-map.png";
+            com.badlogic.gdx.graphics.PixmapIO.writePNG(new com.badlogic.gdx.files.FileHandle(file), image);
+            System.out.println("World map exported to " + file);
+            return "World map exported to " + file;
+        });
         registerCommand(new String[]{"modifier", "list"}, s -> {
             ModifierData[] modifiers = Config.instance().getConfigData().modifiers;
             if (modifiers == null || modifiers.length == 0)

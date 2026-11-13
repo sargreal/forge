@@ -3,7 +3,7 @@
 "startPointY": 0.767,
 	"noiseWeight": 0.5,
 	"distWeight": 1,
-"name": "northern_waste",
+"name": "south_gondor",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Colorless",
 "terrain": [
