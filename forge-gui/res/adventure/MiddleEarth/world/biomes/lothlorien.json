@@ -1,33 +1,34 @@
 {
-"startPointX": 0.51,
-"startPointY": 0.41,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.565,
+"startPointY": 0.445,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "lothlorien",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Green",
 "terrain": [
 	{
 		"spriteName": "Green_1",
-		"max": 0.2,
-		"resolution": 224
+		"max": 0.25,
+		"resolution": 10
 	},
 	{
 		"spriteName": "Green_2",
-		"min": 0.8,
+		"min": 0.5,
 		"max": 1,
-		"resolution": 10
+		"resolution": 8
 	}
 ],
-"width": 0.04,
-"height": 0.04,
+"width": 0.08,
+"height": 0.08,
 "color": "59a650",
 "spriteNames": [
+	"WoodTree",
+	"WoodTree2",
+	"Bush",
 	"Stump",
 	"Moss",
-	"Stone",
-	"Flower",
-	"Wood"
+	"Flower"
 ],
 "enemies": [
 	"Adept Green Wizard",
@@ -83,8 +84,27 @@
 	"Wurm"
 ],
 "pointsOfInterest": [
-	"Forest Town Lothlorien"
+	"ME Caras Galadhon"
 ],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/forest.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
 ]
 }

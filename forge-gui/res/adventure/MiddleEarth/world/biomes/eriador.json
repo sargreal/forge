@@ -1,29 +1,33 @@
 {
-"startPointX": 0.26,
-"startPointY": 0.26,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.305,
+"startPointY": 0.29,
+"noiseWeight": 0.5,
+"distWeight": 0.9,
 "name": "eriador",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
-		"resolution": 5
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.48,
-"height": 0.32,
-"color": "aeaeae",
+"width": 0.52,
+"height": 0.52,
+"color": "59a650",
 "spriteNames": [
-	"Stone"
+	"DarkGras",
+	"Bush",
+	"PlainsTree",
+	"Stone",
+	"LargePlainsRock"
 ],
 "enemies": [
 	"Adept Black Wizard",
@@ -67,7 +71,16 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"Waste Town Generic"
+	"ME Bree",
+	"ME Eriador Town",
+	"ME Barrow-downs",
+	"ME Old Forest",
+	"ME Weathertop",
+	"ME Trollshaws",
+	"ME Fornost",
+	"ME Carn Dum",
+	"ME Ruffian Camp",
+	"ME Wolf Den Eriador"
 ],
 "structures": []
 }

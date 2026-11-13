@@ -1,209 +1,467 @@
 [
-{
-	"id": 28,
-	"isTemplate": true,
-	"name": "Welcome to Shandalar",
-	"description": "Learn about your surroundings",
-	"offerDialog": {},
-	"prologue": {
-		"text": "Darkness and silence surrounds you. A vague sense of falling slows second by second. ",
-		"options": [
-			{
-				"name": "Where am I? What am I? What is going on?",
-				"text": "A flash of light brighter than anything you remember precedes a fall to a stone floor. This is almost as jarring as realizing that you actually don't remember much of anything at all.",
-				"options": [
-					{
-						"name": "(Continue)",
-						"text": "A quiet crackling sound draws your eyes to the flickering light of a fire within the cave you now occupy. A hooded figure stands by the fire, facing you as if expecting your arrival."
-					}
-				]
-			},
-			{
-				"condition": [
-					{
-						"checkCharacterFlag": "newGamePlus"
-					}
-				],
-				"name": "Been here, done that. Show me to the enemies. (New Game+)",
-				"text": "Okay, skipping all that hard work somebody put into dialog, the portal opens and you can leave.",
-				"options": [
-					{
-						"action": [
-							{
-								"removeItem": "",
-								"activateMapObject": 78,
-								"setColorIdentity": "",
-								"advanceQuestFlag": "",
-								"advanceMapFlag": "",
-								"setQuestFlag": {
-									"key": "mainQuest",
-									"val": 1
-								},
-								"setMapFlag": {
-									"key": ""
-								},
-								"issueQuest": "",
-								"POIReference": ""
-							}
-						],
-						"name": "(Continue)"
-					}
-				]
-			}
-		]
-	},
-	"epilogue": {},
-	"failureDialog": {},
-	"declinedDialog": {
-		"text": "Come back tomorrow and perhaps I'll have something that you'll actually be willing to do.",
-		"options": [
-			{
-				"name": "(Catching the not so subtle hint, you leave.)"
-			}
-		]
-	},
-	"stages": [
-		{
-			"id": 1,
-			"name": "Talk to the nearby mage",
-			"description": "There's not a lot to do in here other than talk to him, and any information is more than you have right now.",
-			"mapFlag": "mainQuest",
-			"mapFlagValue": 1,
-			"objective": "QuestFlag",
-			"prologue": {},
-			"epilogue": {},
-			"POIToken": ""
+	{
+		"id": 28,
+		"isTemplate": true,
+		"name": "Welcome to Middle-earth",
+		"description": "Learn about your surroundings.",
+		"offerDialog": {},
+		"prologue": {
+			"text": "Darkness and silence surround you. Somewhere far away a voice is singing, low and old.",
+			"options": [
+				{
+					"name": "Where am I? What is going on?",
+					"text": "You wake on a bed of dry bracken in a hollow under a hill. Your memory is a fog: only your name remains, and a feeling that you were brought here for a reason.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "A small fire crackles near the mouth of the hollow. Beside it sits an old man in a grey cloak and a tall pointed hat, puffing on a long pipe and watching you as if he had expected you."
+						}
+					]
+				},
+				{
+					"condition": [
+						{
+							"checkCharacterFlag": "newGamePlus"
+						}
+					],
+					"name": "Been here, done that. Show me to the enemies. (New Game+)",
+					"text": "Skipping all that hard work somebody put into the dialog: the way out of the hollow opens and you can leave.",
+					"options": [
+						{
+							"action": [
+								{
+									"removeItem": "",
+									"activateMapObject": 78,
+									"setColorIdentity": "",
+									"advanceQuestFlag": "",
+									"advanceMapFlag": "",
+									"setQuestFlag": {
+										"key": "mainQuest",
+										"val": 1
+									},
+									"setMapFlag": {
+										"key": ""
+									},
+									"issueQuest": "",
+									"POIReference": ""
+								}
+							],
+							"name": "(Continue)"
+						}
+					]
+				}
+			]
 		},
-		{
-			"id": 2,
-			"name": "Exit the cave",
-			"description": "The portal is open and you can leave now.",
-			"anyPOI": true,
-			"mapFlag": "",
-			"mapFlagValue": 1,
-			"objective": "Leave",
-			"prerequisiteIDs": [ 1 ],
-			"prologue": {},
-			"epilogue": {
-				"text": "So, you have a quest of sorts now: Find and free the planeswalkers. But is that really what you want to do? Despite the fog covering your memory, you are certain that you are powerful enough to take care of yourself.",
-				"options": [
-					{
-						"action": [
-							{
-								"removeItem": "",
-								"setColorIdentity": "",
-								"advanceQuestFlag": "",
-								"advanceMapFlag": "",
-								"setQuestFlag": {
-									"key": "shandWalkers1",
-									"val": 1
-								},
-								"setMapFlag": {
-									"key": ""
-								},
-								"issueQuest": "",
-								"POIReference": ""
-							}
-						],
-						"name": "I want to find the planeswalkers (Future release)",
-						"text": "Well, shouting \"Planeswalkers, where are you?\" into the wastes won't do much. Travel to the nearest settlement and ask around for information.",
-						"options": [
-							{
-								"action": [
-									{
-										"removeItem": "",
-										"setColorIdentity": "",
-										"advanceQuestFlag": "",
-										"advanceMapFlag": "",
-										"setQuestFlag": {
-											"key": ""
-										},
-										"setMapFlag": {
-											"key": ""
-										},
-										"issueQuest": "29",
-										"POIReference": ""
-									}
-								],
-								"name": "(Continue)",
-								"text": "New Quest: A Chat with the Locals - Objective: Travel to any town in the wasteland",
-								"options": [
-									{
-										"name": "(Dismiss)"
-									}
-								]
-							}
-						],
-						"isDisabled": true
-					},
-					{
-						"action": [
-							{
-								"removeItem": "",
-								"setColorIdentity": "",
-								"advanceQuestFlag": "",
-								"advanceMapFlag": "",
-								"setQuestFlag": {
-									"key": "exploreShand1",
-									"val": 1
-								},
-								"setMapFlag": {
-									"key": ""
-								},
-								"issueQuest": "30",
-								"POIReference": ""
-							}
-						],
-						"name": "I want to explore Shandalar ((Has a brief tutorial))"
-					},
-					{
-						"action": [
-							{
-								"removeItem": "",
-								"setColorIdentity": "",
-								"advanceQuestFlag": "",
-								"advanceMapFlag": "",
-								"setQuestFlag": {
-									"key": "shandRep1",
-									"val": 1
-								},
-								"setMapFlag": {
-									"key": ""
-								},
-								"issueQuest": "",
-								"POIReference": ""
-							}
-						],
-						"name": "I want to make a name for myself (Future release)",
-						"text": "Then let's go impress some people. But first, you need some impressive spells. Build your collection to begin your quest.",
-						"options": [
-							{
-								"action": [
-									{
-										"removeItem": "",
-										"setColorIdentity": "",
-										"advanceQuestFlag": "",
-										"advanceMapFlag": "",
-										"setQuestFlag": {
-											"key": ""
-										},
-										"setMapFlag": {
-											"key": ""
-										},
-										"issueQuest": "31",
-										"POIReference": ""
-									}
-								],
-								"name": "(Dismiss)"
-							}
-						],
-						"isDisabled": true
-					}
-				]
+		"epilogue": {},
+		"failureDialog": {},
+		"declinedDialog": {
+			"text": "Come back tomorrow and perhaps I'll have something that you'll actually be willing to do.",
+			"options": [
+				{
+					"name": "(Catching the not so subtle hint, you leave.)"
+				}
+			]
+		},
+		"stages": [
+			{
+				"id": 1,
+				"name": "Talk to the old wizard",
+				"description": "There is not much to do in here other than talk to him, and any news is more than you have now.",
+				"mapFlag": "mainQuest",
+				"mapFlagValue": 1,
+				"objective": "QuestFlag",
+				"prologue": {},
+				"epilogue": {},
+				"POIToken": ""
 			},
-			"POIToken": ""
-		}
-	],
-	"storyQuest": true
-}
+			{
+				"id": 2,
+				"name": "Leave the hollow",
+				"description": "The way out is open and you can leave now.",
+				"anyPOI": true,
+				"mapFlag": "",
+				"mapFlagValue": 1,
+				"objective": "Leave",
+				"prerequisiteIDs": [
+					1
+				],
+				"prologue": {},
+				"epilogue": {
+					"text": "Outside, the green hills of the Shire roll away under a wide sky. The old wizard spoke of a growing Shadow in the East, but is that your fight? Fog or no fog, you are sure you can look after yourself.",
+					"options": [
+						{
+							"action": [
+								{
+									"removeItem": "",
+									"setColorIdentity": "",
+									"advanceQuestFlag": "",
+									"advanceMapFlag": "",
+									"setQuestFlag": {
+										"key": "shandWalkers1",
+										"val": 1
+									},
+									"setMapFlag": {
+										"key": ""
+									},
+									"issueQuest": "",
+									"POIReference": ""
+								}
+							],
+							"name": "I want to stand against the Shadow (Future release)",
+							"text": "Shouting \"Where is the Enemy?\" into the Shire will not get you far. Travel to the nearest settlement and ask around for news.",
+							"options": [
+								{
+									"action": [
+										{
+											"removeItem": "",
+											"setColorIdentity": "",
+											"advanceQuestFlag": "",
+											"advanceMapFlag": "",
+											"setQuestFlag": {
+												"key": ""
+											},
+											"setMapFlag": {
+												"key": ""
+											},
+											"issueQuest": "29",
+											"POIReference": ""
+										}
+									],
+									"name": "(Continue)",
+									"text": "New Quest: A Chat with the Locals - Objective: Travel to any town.",
+									"options": [
+										{
+											"name": "(Dismiss)"
+										}
+									]
+								}
+							],
+							"isDisabled": true
+						},
+						{
+							"action": [
+								{
+									"removeItem": "",
+									"setColorIdentity": "",
+									"advanceQuestFlag": "",
+									"advanceMapFlag": "",
+									"setQuestFlag": {
+										"key": "exploreShand1",
+										"val": 1
+									},
+									"setMapFlag": {
+										"key": ""
+									},
+									"issueQuest": "30",
+									"POIReference": ""
+								}
+							],
+							"name": "I want to explore Middle-earth (brief tutorial)"
+						},
+						{
+							"action": [
+								{
+									"removeItem": "",
+									"setColorIdentity": "",
+									"advanceQuestFlag": "",
+									"advanceMapFlag": "",
+									"setQuestFlag": {
+										"key": "shandRep1",
+										"val": 1
+									},
+									"setMapFlag": {
+										"key": ""
+									},
+									"issueQuest": "",
+									"POIReference": ""
+								}
+							],
+							"name": "I want to make a name for myself (Future release)",
+							"text": "Then go and impress some people. But first you need some impressive spells. Build your collection to begin your quest.",
+							"options": [
+								{
+									"action": [
+										{
+											"removeItem": "",
+											"setColorIdentity": "",
+											"advanceQuestFlag": "",
+											"advanceMapFlag": "",
+											"setQuestFlag": {
+												"key": ""
+											},
+											"setMapFlag": {
+												"key": ""
+											},
+											"issueQuest": "31",
+											"POIReference": ""
+										}
+									],
+									"name": "(Dismiss)"
+								}
+							],
+							"isDisabled": true
+						}
+					]
+				},
+				"POIToken": ""
+			}
+		],
+		"storyQuest": true
+	},
+	{
+		"id": 30,
+		"isTemplate": true,
+		"name": "Where Am I?",
+		"description": "Get your bearings in Middle-earth.",
+		"offerDialog": {},
+		"prologue": {},
+		"epilogue": {
+			"text": "Like most small towns, this one has more shops and market stalls than houses: much of its folk come in from the farms around it each morning.",
+			"options": [
+				{
+					"name": "(Continue)",
+					"text": "Many merchants are selling their wares. The ones that matter most to a spellcaster have colourful (if at times crude) signs in front of their shops.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "The inn sounds just noisy enough to know it is doing good business. You recall what the old wizard said about the challenge coins and think about using them there.",
+							"options": [
+								{
+									"name": "(Continue)",
+									"text": "Most interesting of all is the notice board in front of the town hall, offering work for adventurers. What better way to earn some coin while you explore?",
+									"options": [
+										{
+											"name": "(Continue)"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"failureDialog": {},
+		"declinedDialog": {
+			"text": "Come back tomorrow and perhaps I'll have something that you'll actually be willing to do.",
+			"options": [
+				{
+					"name": "(Catching the not so subtle hint, you leave.)"
+				}
+			]
+		},
+		"stages": [
+			{
+				"id": 1,
+				"name": "Travel to town",
+				"description": "Find a friendly settlement to be introduced to the services it offers.",
+				"anyPOI": true,
+				"mapFlag": "",
+				"mapFlagValue": 1,
+				"POITags": [
+					"Town"
+				],
+				"objective": "Travel",
+				"prologue": {
+					"text": "Every notable place in Middle-earth is either a town or a dungeon.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "A navigation arrow now appears around your character. Follow it to a nearby town, and try to avoid any enemies on the way.",
+							"options": [
+								{
+									"name": "(Continue)",
+									"text": "Hint: follow a road. All roads lead to a town. You also move faster on roads, and fewer enemies appear there.",
+									"options": [
+										{
+											"name": "(Continue)"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				"epilogue": {},
+				"POIToken": ""
+			},
+			{
+				"id": 2,
+				"name": "Leave town",
+				"description": "Head back out into the wilderness when you are ready to proceed.",
+				"anyPOI": true,
+				"POITags": [
+					"Town"
+				],
+				"objective": "Leave",
+				"prerequisiteIDs": [
+					1
+				],
+				"prologue": {
+					"text": "Most towns in a region of Middle-earth look much alike and offer the same basic services.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "The inn contains some special events. You can also sell extra cards there, or buy temporary extra health.\n\nThe '?' sign denotes a town square or a job board where you can obtain side quests.\n\nAll of the other buildings with signs out front are shops, most of them sell cards.\n\nTo leave town, walk back toward the edge of the screen just below your current location.",
+							"options": [
+								{
+									"name": "(Continue)",
+									"text": "Entering a friendly town will also restore any missing hit points for free.\n\nExplore the town if you want, and leave when you are ready to continue.",
+									"options": [
+										{
+											"name": "(Continue)"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				"epilogue": {},
+				"POIToken": ""
+			},
+			{
+				"id": 3,
+				"name": "Find a Dungeon",
+				"description": "Find and enter any dungeon.",
+				"anyPOI": true,
+				"mapFlag": "",
+				"mapFlagValue": 1,
+				"POITags": [
+					"Dungeon"
+				],
+				"objective": "Travel",
+				"prerequisiteIDs": [
+					2
+				],
+				"prologue": {
+					"text": "Your navigation arrow should now direct you to the nearest dungeon. Many quests will send you to dungeons, but you are also free to enter them without a quest. Follow the arrow and travel to a dungeon.",
+					"options": [
+						{
+							"name": "(Continue)"
+						}
+					]
+				},
+				"epilogue": {},
+				"POIToken": ""
+			},
+			{
+				"id": 4,
+				"name": "Win a duel",
+				"description": "Duel and defeat any enemy.",
+				"anyPOI": true,
+				"mixedEnemies": true,
+				"worldMapOK": true,
+				"objective": "Defeat",
+				"enemyExcludeTags": [
+					"Boss",
+					"Leader",
+					"Large"
+				],
+				"prerequisiteIDs": [
+					3
+				],
+				"prologue": {
+					"text": "Many quests you undertake in your adventure will send you to one or more dungeons just like this one. Dungeons are filled with enemies, but also treasure like gold, mana shards, and cards.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "Your next objective is to defeat any single enemy in a duel. You can find them in a dungeon like this one, or wandering around outside on the world map. To begin a duel, simply walk into the enemy.",
+							"options": [
+								{
+									"name": "(Continue)",
+									"text": "If you are defeated by the enemy, that is okay. When that happens you lose some of your starting health and part of your gold, but you have learned what to expect from that enemy in the future.",
+									"options": [
+										{
+											"name": "(Continue)",
+											"text": "Unlike on the world map, an enemy that defeats you in a dungeon will remain on the map; you can try to duel them again, or run away and seek out another opponent. If you want or need to heal yourself, go back to town.",
+											"options": [
+												{
+													"name": "(Continue)",
+													"text": "Some quests, like this one, have multiple objectives that can be achieved simultaneously. Your other current objective is to find and enter a cave on the world map. An enemy defeated in a cave or on the way there will count as the enemy to defeat for your first objective, so feel free to do these things in any order.",
+													"options": [
+														{
+															"name": "(Continue)"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				"epilogue": {
+					"text": "Winning a duel grants you rewards; usually a combination of gold and cards. Some enemies drop a wider assortment of cards for variety, but others specifically give cards from their own deck. If you still need to visit a cave, do that now. Otherwise, it's time to return to town.",
+					"options": [
+						{
+							"name": "(Continue)"
+						}
+					]
+				},
+				"POIToken": ""
+			},
+			{
+				"id": 5,
+				"name": "Find a Cave",
+				"description": "Find and enter any cave.",
+				"anyPOI": true,
+				"mapFlag": "",
+				"mapFlagValue": 1,
+				"POITags": [
+					"Cave"
+				],
+				"objective": "Travel",
+				"prerequisiteIDs": [
+					3
+				],
+				"prologue": {},
+				"epilogue": {
+					"text": "A cave is functionally identical to a dungeon, but can be classified separately for quest purposes; a cave would not have completed your objective to find a dungeon, nor would that dungeon count for this one.",
+					"options": [
+						{
+							"name": "(Continue)",
+							"text": "If you haven't defeated an enemy in a duel yet, you can pick a fight with an enemy here for that. Otherwise, you can return to town.",
+							"options": [
+								{
+									"name": "(Continue)"
+								}
+							]
+						}
+					]
+				},
+				"POIToken": ""
+			},
+			{
+				"id": 6,
+				"name": "Go to a town",
+				"description": "Go to one of the nearby settlements.",
+				"anyPOI": true,
+				"mapFlag": "",
+				"mapFlagValue": 1,
+				"POITags": [
+					"Town"
+				],
+				"objective": "Travel",
+				"prerequisiteIDs": [
+					4,
+					5
+				],
+				"prologue": {
+					"text": "It's not a bad idea to occasionally visit town to sell extra cards, browse the shops, or pick up new quests.\n\nEvery town has its own assortment of shops and thus its own unique collections of cards for sale.",
+					"options": [
+						{
+							"name": "(Continue)"
+						}
+					]
+				},
+				"epilogue": {},
+				"POIToken": ""
+			}
+		],
+		"storyQuest": true,
+		"autoTrack": true
+	}
 ]

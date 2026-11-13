@@ -1,29 +1,33 @@
 {
-"startPointX": 0.47,
-"startPointY": 0.532,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.56,
+"startPointY": 0.58,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "rohan",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Red",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Red_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
 		"resolution": 10
 	},
 	{
-		"spriteName": "Red_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.18,
-"height": 0.084,
-"color": "b63729",
+"width": 0.22,
+"height": 0.22,
+"color": "59a650",
 "spriteNames": [
-	"Gravel"
+	"Flower",
+	"PlainsTree",
+	"Bush",
+	"DarkGras",
+	"Stone"
 ],
 "enemies": [
 	"Armadillo",
@@ -80,8 +84,11 @@
 	"Yeti"
 ],
 "pointsOfInterest": [
-	"Mountain Town Generic"
+	"ME Edoras",
+	"ME Helms Deep",
+	"ME Rohan Town",
+	"ME Isengard",
+	"ME Uruk Camp"
 ],
-"structures": [
-]
+"structures": []
 }

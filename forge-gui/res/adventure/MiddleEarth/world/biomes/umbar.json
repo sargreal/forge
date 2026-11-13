@@ -1,29 +1,32 @@
 {
-"startPointX": 0.453,
-"startPointY": 0.913,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.5,
+"startPointY": 0.93,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "umbar",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Red",
+"tilesetName": "White",
 "terrain": [
 	{
-		"spriteName": "Red_1",
-		"max": 0.2,
+		"spriteName": "White_1",
+		"max": 0.3,
 		"resolution": 10
 	},
 	{
-		"spriteName": "Red_2",
-		"min": 0.8,
+		"spriteName": "White_2",
+		"min": 0.7,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.206,
-"height": 0.175,
-"color": "b63729",
+"width": 0.19,
+"height": 0.19,
+"color": "efe697",
 "spriteNames": [
-	"Gravel"
+	"Cactus",
+	"PlainsRock",
+	"LargePlainsRock",
+	"Stone"
 ],
 "enemies": [
 	"Armadillo",
@@ -80,8 +83,8 @@
 	"Yeti"
 ],
 "pointsOfInterest": [
-	"Mountain Town Generic"
+	"Swamp Capital",
+	"ME Corsair Fort"
 ],
-"structures": [
-]
+"structures": []
 }

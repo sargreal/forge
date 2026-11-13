@@ -1,29 +1,33 @@
 {
 "startPointX": 0.09,
-"startPointY": 0.368,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointY": 0.375,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "harlindon",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "White",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "White_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
 		"resolution": 10
 	},
 	{
-		"spriteName": "White_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.08,
-"height": 0.095,
-"color": "efe697",
+"width": 0.13,
+"height": 0.13,
+"color": "59a650",
 "spriteNames": [
-	"DarkGras"
+	"Shell",
+	"PlainsTree",
+	"Flower",
+	"DarkGras",
+	"Bush"
 ],
 "enemies": [
 	"Adept White Wizard",
@@ -79,8 +83,8 @@
 	"White Sliver"
 ],
 "pointsOfInterest": [
-	"Plains Town Generic"
+	"ME Grey Havens",
+	"ME Harlindon Town"
 ],
-"structures": [
-]
+"structures": []
 }

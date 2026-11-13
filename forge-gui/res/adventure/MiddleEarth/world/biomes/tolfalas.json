@@ -1,29 +1,33 @@
 {
-"startPointX": 0.513,
-"startPointY": 0.737,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.59,
+"startPointY": 0.815,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "tolfalas",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Blue",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Blue_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
 		"resolution": 10
 	},
 	{
-		"spriteName": "Blue_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.026,
-"height": 0.026,
-"color": "10a2e0",
+"width": 0.05,
+"height": 0.05,
+"color": "59a650",
 "spriteNames": [
-	"Shell"
+	"Shell",
+	"PlainsTree",
+	"Flower",
+	"DarkGras",
+	"Bush"
 ],
 "enemies": [
 	"Adept Blue Wizard",
@@ -72,8 +76,7 @@
 
 ],
 "pointsOfInterest": [
-	"Island Town Tolfalas"
+	"ME Tolfalas"
 ],
-"structures": [
-]
+"structures": []
 }

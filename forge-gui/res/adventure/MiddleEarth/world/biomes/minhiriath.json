@@ -1,29 +1,33 @@
 {
-"startPointX": 0.225,
-"startPointY": 0.455,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.285,
+"startPointY": 0.45,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "minhiriath",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
-		"max": 0.2,
-		"resolution": 5
+		"spriteName": "Green_1",
+		"max": 0.3,
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
-		"min": 0.8,
+		"spriteName": "Green_2",
+		"min": 0.7,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.13,
-"height": 0.12,
-"color": "aeaeae",
+"width": 0.19,
+"height": 0.19,
+"color": "59a650",
 "spriteNames": [
-	"Stone"
+	"DarkGras",
+	"Bush",
+	"PlainsTree",
+	"Stone",
+	"LargePlainsRock"
 ],
 "enemies": [
 	"Adept Black Wizard",
@@ -67,8 +71,8 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"Waste Town Generic"
+	"ME Minhiriath Town",
+	"ME Brigand Cave"
 ],
-"structures": [
-]
+"structures": []
 }

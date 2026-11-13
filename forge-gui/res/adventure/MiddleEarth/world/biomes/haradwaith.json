@@ -1,28 +1,31 @@
 {
-"startPointX": 0.765,
-"startPointY": 0.865,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.76,
+"startPointY": 1.48,
+"noiseWeight": 0.15,
+"distWeight": 1.0,
 "name": "harad_waith",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "White",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
+		"spriteName": "White_1",
 		"max": 0.2,
-		"resolution": 5
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
+		"spriteName": "White_2",
 		"min": 0.8,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.47,
-"height": 0.27,
-"color": "aeaeae",
+"width": 1.333,
+"height": 1.333,
+"color": "efe697",
 "spriteNames": [
+	"Cactus",
+	"PlainsRock",
+	"LargePlainsRock",
 	"Stone"
 ],
 "enemies": [
@@ -67,8 +70,10 @@
 	"Wild Rat"
 ],
 "pointsOfInterest": [
-	"Waste Town Generic"
+	"ME Harad Town",
+	"ME Haradrim Stronghold",
+	"ME Lion Den",
+	"ME Oasis"
 ],
-"structures": [
-]
+"structures": []
 }
