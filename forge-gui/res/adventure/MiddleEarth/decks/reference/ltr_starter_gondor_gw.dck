@@ -1,0 +1,34 @@
+[metadata]
+Name=LTR Starter Kit - Gondor (GW)
+Comment=Official decklist, The Lord of the Rings: Tales of Middle-earth Starter Kit (2023-06-23). Source: magic.wizards.com/en/news/announcements/the-lord-of-the-rings-tales-of-middle-earth-starter-kit-decklists (via github.com/taw/magic-preconstructed-decks data/starter-kit/ltr). Reference deck for tools/middleearth/deckstrength.sh, not used by the game.
+[Main]
+1 Aragorn and Arwen, Wed|LTR
+1 Frodo, Determined Hero|LTR
+1 Gandalf, White Rider|LTR
+1 Galadriel, Gift-Giver|LTR
+1 Bilbo's Ring|LTR
+3 Knight of the Keep|LTR
+1 Westfold Rider|LTR
+1 East-Mark Cavalier|LTR
+1 Eastfarthing Farmer|LTR
+2 Protector of Gondor|LTR
+1 Dúnedain Blade|LTR
+1 Second Breakfast|LTR
+1 Rosie Cotton of South Lane|LTR
+2 Banishing Light|LTC
+1 Landroval, Horizon Witness|LTR
+1 You Cannot Pass!|LTR
+2 Mushroom Watchdogs|LTR
+2 Wose Pathfinder|LTR
+2 Bag End Porter|LTR
+1 Generous Ent|LTR
+2 Many Partings|LTR
+1 Galadhrim Bow|LTR
+1 Meriadoc Brandybuck|LTR
+1 Peregrin Took|LTR
+1 Stew the Coneys|LTR
+1 Butterbur, Bree Innkeeper|LTR
+2 Shire Terrace|LTR
+2 Graypelt Refuge|LTC
+11 Forest|LTR
+11 Plains|LTR

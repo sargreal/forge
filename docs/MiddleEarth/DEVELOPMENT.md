@@ -115,6 +115,42 @@ Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hid
 
 **Save data:** the game runs with `user.home=$OUT_DIR/home`, so settings and saves are in `.me-test/home/.forge/adventure/`. `check.sh` uses `.me-test/check-home`. Neither touches the real `~/.forge`.
 
+### 3.4 Deck strength testing (AI vs AI)
+
+`tools/middleearth/deckstrength.sh` rates a deck by letting Forge's AI play it against a **gauntlet** of reference decks, with the AI on both sides. The default gauntlet is the two official *LTR Starter Kit* decks in `forge-gui/res/adventure/MiddleEarth/decks/reference/` (Gondor GW and Mordor BR, 60 cards, LTR/LTC printings). Decision D6: starter decks should score about 50% against them, and enemy decks get a tier from their score.
+
+```bash
+tools/middleearth/deckstrength.sh build                         # once: builds the engine jar (forge-gui-desktop), 3-5 min cold
+tools/middleearth/deckstrength.sh my_deck.dck                   # 60-card deck: 60 games per gauntlet deck = 120 games
+tools/middleearth/deckstrength.sh --g40 my_deck40.dck           # 40-card deck: against the 40-card cuts of the kits
+tools/middleearth/deckstrength.sh -n 100 a.dck b.dck            # several candidates, more games
+tools/middleearth/deckstrength.sh decks/starter/white_e.json    # adventure JSON deck: 3 generated samples (--samples)
+tools/middleearth/deckstrength.sh --enemy-life enemy:Bandit     # enemy tier: enemy at its own life, gauntlet at 16
+tools/middleearth/deckstrength.sh --round-robin -n 40 some/dir  # every deck in a directory against every other
+tools/middleearth/deckstrength.sh -g other_refs/ my_deck.dck    # a different gauntlet
+tools/middleearth/deckstrength.sh -h                            # all options
+```
+
+How it works:
+
+- `deckstrength/deckstrength.py` builds the game list, runs **3 worker JVMs** (`-j`, keep it at 3 or less when other agents share the machine), restarts a worker that dies, and writes the report.
+- `deckstrength/DeckSim.java` is the worker. It does what Forge's `forge-gui-desktop` `sim` mode does (`forge.view.SimulateMatch`), but every game is a fresh one-game match with a **fixed player on the play**: half of each pairing's games are on the play, half on the draw. (In `sim` mode the loser of the previous game goes first, so play/draw isn't controlled.) It loads the card database once per worker, and a game that runs past the timeout (`-t`, default 120 s) counts as a draw.
+- `deckstrength/DeckExport.java` turns adventure `.json` decks and `enemy:<Name>` decks into `.dck` through `CardUtil.getDeck`, the same call the game uses. It needs the adventure jar (`game.sh build` or `FORGE_JAR`). JSON decks are generated randomly, so each sample is a different deck.
+- Everything runs headless, with `user.home` under the run directory. Results go to `.me-test/deckstrength/<timestamp>/`: `summary.md`, `summary.csv` (one row per deck and opponent plus an `ALL` row), `games.csv` (one row per game), the exact decks played (`decks/`), and the worker logs. If a run is interrupted, run the same command with `-o <that dir>` to finish the remaining games.
+
+Reading the result:
+
+- **Score** = (wins + ½ draws) / games against the gauntlet. **50% = as strong as the official starter decks.** The report gives a 95% confidence interval. With the default 120 games (60 per gauntlet deck) it is about ±9 points, so use the default to screen decks and `-n 150` or more (±6) before a final decision. Differences under ~10 points between two decks are noise at the default.
+- **Starter decks** (Rating column): 42–58% is *on par* and is the target. 30–42% is weaker and 58–70% stronger. Below 30% or above 70% is far off. A new starter deck should land on par, and preferably not above ~55%.
+- **40 vs 60 cards:** the plane uses `minDeckSize: 40`, while the kits have 60 cards. A smaller deck draws its best cards more often, and that is worth roughly **+8 to +15 points** (measured: proportional 40-card cuts of the kits score 60% and 66% against the 60-card originals). Rate **40-card decks with `--g40`**, which plays them against the 40-card cuts in `reference/size40/`. Use the 60-card gauntlet for 60-card decks. The bands are the same in both cases.
+- **Enemy tiers:** use `--enemy-life enemy:<Name>`, or `--enemy-life --life <its life> deck.dck` for a deck that isn't in `enemies.json` yet. The enemy plays at its own `life` from `enemies.json`, and the gauntlet plays at 16 (the player's starting life on Easy). The Rating column then shows a tier: <45% easy, 45–60% normal, 60–75% hard, >75% elite/boss. These tiers are calibrated on upstream enemies: Bandit and Goblin (13 life) scored 27% and 48%, Abyssal Baron (30) 61%, and Adult Green Dragon (25) 72%. At 20 life on both sides, upstream "easy" and "hard" enemy decks all score 38–55%, so upstream difficulty comes mostly from enemy life, not from the deck.
+- Also check *Avg turns* (Forge counts both players' turns: 18 turns is 9 rounds) and *Timeouts* (should be about 0; many timeouts mean the AI loops on some card). The *Sanity* section checks that the designated player went first and gives the on-the-play win rate (51–56% so far).
+- **MEAR reprints** (WP2's custom edition) need nothing special. Run the harness from a tree that has `forge-gui/res/editions/Middle-earth Adventure Reprints.txt`, so that `Card|MEAR` lines resolve. The cards are existing cards, so strength doesn't depend on the printing.
+
+Runtime: one game averages 1.6–2 s on an idle machine and about 3.7 s when other agents load all 4 cores (median 1.4–2.8 s, slowest 40 s; 1 timeout in 3,000 games). Each worker JVM needs about 10 s to start. The default run (one candidate, 120 games, 3 workers) takes **about 1.5 minutes on an idle machine and 3–4 minutes under load**. A round robin of n decks plays n(n−1)/2 pairings.
+
+Caveats: this measures **AI vs AI** strength. Forge's AI plays some decks (aggro, simple creatures) much better than others (combo, complex triggers, decks that need restraint). Treat the rating as a guide for comparable decks, and play-test anything that lands near a band edge. Notes and measurements: [notes/wp1-deck-lab.md](notes/wp1-deck-lab.md).
+
 ## 4. Plane data: how-to
 
 Read the upstream format docs in `docs/Adventure/` first (`Configure-Planes.md`, `Create-Enemies.md`, `Create-Rewards.md`, `Create-new-Maps.md`, `Towns-&-Capitals.md`, `Tutorial-*`).
