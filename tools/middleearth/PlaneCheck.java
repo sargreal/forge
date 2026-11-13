@@ -6,6 +6,9 @@ import forge.adventure.data.*;
 import forge.adventure.util.CardUtil;
 import forge.adventure.util.Config;
 import forge.adventure.util.Paths;
+import forge.card.CardDb;
+import forge.card.CardEdition;
+import forge.card.CardRarity;
 import forge.deck.Deck;
 import forge.deck.DeckSection;
 import forge.gui.GuiBase;
@@ -26,6 +29,9 @@ import java.util.*;
  *  3. Card pool: starter decks and enemy decks are measured against the plane's
  *     allowedEditions. A card with no printing in an allowed edition is "off-pool".
  *  4. Card resolution: CardUtil.getFullCardPool / ensureAllowedEdition only yield allowed printings.
+ *  5. Reprint editions (allowed editions whose entries carry ${"artSet","artNum"}, e.g. MEAR):
+ *     every entry has a card script, its art source printing exists, and it isn't already in
+ *     another allowed edition. Also lists tokens that no allowed edition prints (no token art).
  *
  * Exit code: 1 if there are ERRORs (parse failures, missing references, wrong printings),
  * 0 otherwise. Off-pool cards are reported as WARN (content work, see docs/MiddleEarth/PLAN.md).
@@ -139,7 +145,64 @@ public class PlaneCheck {
             }
         }
         info("checked " + checked + " reprints for printing replacement");
+
+        // ---------- 5. reprint editions ----------
+        System.out.println("== Reprint editions (art sources)");
+        checkReprintEditions(allowed);
         finish();
+    }
+
+    /** Editions in the pool whose entries name an art source: the fork's custom reprint set(s). */
+    static void checkReprintEditions(Set<String> allowed) {
+        CardDb db = FModel.getMagicDb().getCommonCards();
+        for (String code : allowed) {
+            CardEdition ed = FModel.getMagicDb().getEditions().get(code);
+            if (ed == null) continue;
+            List<CardEdition.EditionEntry> entries = ed.getAllCardsInSet();
+            if (entries.stream().noneMatch(e -> e.extraParams() != null && e.extraParams().containsKey("artset")))
+                continue;
+            Map<CardRarity, Integer> rarities = new TreeMap<>();
+            Set<String> names = new HashSet<>();
+            Set<String> noTokenArt = new TreeSet<>();
+            int artOk = 0;
+            for (CardEdition.EditionEntry e : entries) {
+                String label = code + " #" + e.collectorNumber() + " " + e.name();
+                rarities.merge(e.rarity(), 1, Integer::sum);
+                if (!names.add(e.name())) error(label + ": listed more than once");
+                PaperCard pc = db.getCard(e.name(), code, e.collectorNumber());
+                if (pc == null || !pc.getEdition().equals(code)) {
+                    error(label + ": not in the card DB (no card script?)");
+                    continue;
+                }
+                for (PaperCard p : db.getAllCards(e.name()))
+                    if (!p.getEdition().equals(code) && allowed.contains(p.getEdition())) {
+                        warn(label + ": already in allowed edition " + p.getEdition());
+                        break;
+                    }
+                Map<String, String> xp = e.extraParams();
+                String set = xp == null ? null : xp.get("artset");
+                String num = xp == null ? null : xp.get("artnum");
+                if (set == null || num == null) {
+                    warn(label + ": no art source (artSet/artNum)");
+                } else {
+                    PaperCard src = db.getCard(e.name(), set, num);
+                    if (src == null || !src.getEdition().equalsIgnoreCase(set) || !src.getCollectorNumber().equalsIgnoreCase(num)) {
+                        error(label + ": art source " + set + " " + num + " is not a printing of this card");
+                    } else {
+                        artOk++;
+                        if (e.artistName() != null && !e.artistName().equals(src.getArtist()))
+                            warn(label + ": artist '" + e.artistName() + "' differs from art source '" + src.getArtist() + "'");
+                        if (verbose) info(label + " -> art " + set + " " + num);
+                    }
+                }
+                for (String t : pc.getRules().getTokens())
+                    if (FModel.getMagicDb().getAllTokens().getTokenFromEditions(t, x -> allowed.contains(x.getCode()), null) == null)
+                        noTokenArt.add(t);
+            }
+            info(code + ": " + entries.size() + " cards " + rarities + ", " + artOk + " art sources resolved");
+            if (!noTokenArt.isEmpty())
+                info(code + ": tokens without a printing in the allowed editions (generic image): " + noTokenArt);
+        }
     }
 
     static void finish() {
