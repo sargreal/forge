@@ -14,7 +14,12 @@
      "options": [
       {
        "name": "(Continue)",
-       "text": "A small fire crackles near the mouth of the hollow. Beside it sits an old man in a grey cloak and a tall pointed hat, puffing on a long pipe and watching you as if he had expected you."
+       "text": "A small fire crackles near the mouth of the hollow. Beside it sits an old man in a grey cloak and a tall pointed hat, puffing on a long pipe and watching you as if he had expected you.",
+       "action": [
+        {
+         "activateMapObject": 78
+        }
+       ]
       }
      ]
     },
@@ -31,7 +36,6 @@
        "action": [
         {
          "removeItem": "",
-         "activateMapObject": 78,
          "setColorIdentity": "",
          "advanceQuestFlag": "",
          "advanceMapFlag": "",

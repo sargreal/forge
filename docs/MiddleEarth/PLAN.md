@@ -131,6 +131,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
+- Smoke tests leave the intro with the console `leave`, so they don't cover the real intro path. Walk it manually (DEVELOPMENT §3.3) after touching quest 28 or the intro dialog.
 - Saruman's deck plays weak (56% even at 38 life; the AI handles control poorly). Rework the deck. See `notes/wp5-wp6-enemies.md`.
 - When `enemies-free.fragment.json` changes, regenerate with `python3 tools/middleearth/merge-enemies.py --base <enemies.json without the fragment> ...`. Simpler from now on: edit `enemies.json` directly and treat the fragment as historical.
 - Side quests are an interim copy of 34 generic Shandalar side quests (Kiora's and Teferi's quests dropped). Re-theme them in Phase 3. Without them, the town job boards crashed (NPE in `AdventureQuestController.getQuestNPCResponse` on an empty side-quest list).
@@ -154,6 +155,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | Play-test fix: the intro portal couldn't be opened. The wizard's dialog *toggles* portal 78. Shandalar's prologue closes it first, but our rewritten prologue (WP3) only did that on the New Game+ branch, so "opening" it closed it (and NG+ players were locked in). The normal prologue path now closes the portal; NG+ leaves it open. The intro wizard ("Adept Black Wizard", re-themed to "Dol Guldur Adept" by the map-enemy pass) now displays as "Wandering Wizard". Verified in the GUI: prologue → wizard → portal → Shire. |
 | 2026-11-14 | Phase 2b merged (Opus agent): Tiled-editable world file with exact POIs and seed, `exportWorldTmx`, PlaneCheck/WorldSim tmx checks, DEVELOPMENT §4.1. Two smoke runs gave identical worlds; the round trip was byte-identical. check: 0 errors, 2 warnings. Main jar rebuilt. |
 | 2026-11-14 | Phase 2a merged (Opus agent): fixed biome-map world with rivers and seas, `BiomeStructure` fixes (engine), WorldSim and PlaneCheck support for biomeMap. check: 0 errors, 2 warnings. WorldSim: 0 reruns/dropped/unreachable. Gen time ~2.9 s (unchanged). Main jar rebuilt. |
 | 2026-11-14 | **Phase 1 complete.** Starter tuning round 2 (Sonnet agent): all 8 outliers are in the on-par band. All 68 new enemies measured (2,176 games). 17 outliers re-tuned through life/difficulty/spawnRate and re-measured. Report: `notes/wp5-wp6-enemies.md`. |
