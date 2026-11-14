@@ -129,6 +129,11 @@ public class MapStage extends GameStage {
         return spriteLayer;
     }
 
+    /** Read-only use by the dev API (forge.adventure.devapi): all actors of the loaded map. */
+    public Array<MapActor> getMapActors() {
+        return actors;
+    }
+
     public PointOfInterestChanges getChanges() {
         return TileMapScene.instance().getPointOfInterestChanges();
     }
