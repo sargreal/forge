@@ -9,7 +9,9 @@ Type=Other
 # No new art: ${"artSet": ..., "artNum": ...} names the printing whose image each card shows
 # (ImageFetcher.getArtSourcePrinting). Old date and Type=Other keep the default art preference
 # (latest printing) and the core/expansion-only preferences from picking these printings outside the plane.
-# Card list, art choices and rarity policy: docs/MiddleEarth/notes/wp2-reprint-set.md
+# "flavorName" gives a printing a Tolkien display name (rules, decks and lookups keep the real name).
+# Card list, art choices and rarity policy: docs/MiddleEarth/notes/wp2-reprint-set.md (flavor names, dual lands
+# and the [tokens] art sources: docs/MiddleEarth/notes/wp2b-mearfix.md)
 
 [cards]
 # --- Wolves & Wargs ---
@@ -17,10 +19,10 @@ Type=Other
 2 C Russet Wolves @Christopher Moeller ${"artSet": "DKA", "artNum": "102"}
 3 C Timberpack Wolf @John Avon ${"artSet": "M13", "artNum": "194"}
 4 C Young Wolf @Ryan Pancoast ${"artSet": "DKA", "artNum": "134"}
-5 U Arctic Wolves @Steve White ${"artSet": "WTH", "artNum": "118"}
-6 U Briarpack Alpha @Daarken ${"artSet": "M14", "artNum": "166"}
+5 U Arctic Wolves @Steve White ${"artSet": "WTH", "artNum": "118", "flavorName": "White Wolves of Forodwaith"}
+6 U Briarpack Alpha @Daarken ${"artSet": "M14", "artNum": "166", "flavorName": "Grey Warg Chieftain"}
 7 U Carrion Howler @John Zeleznik ${"artSet": "RAV", "artNum": "79"}
-8 U Mardu Outrider @Evan Shipard ${"artSet": "ANB", "artNum": "52"}
+8 U Mardu Outrider @Evan Shipard ${"artSet": "ANB", "artNum": "52", "flavorName": "Warg Rider of Gundabad"}
 9 U Pack Guardian @Filip Burburan ${"artSet": "SOI", "artNum": "221"}
 10 U Packsong Pup @April Prime ${"artSet": "VOW", "artNum": "213"}
 11 R Nightpack Ambusher @Dan Murayama Scott ${"artSet": "M20", "artNum": "185"}
@@ -45,14 +47,14 @@ Type=Other
 28 C Duskhunter Bat @Jesper Ejsing ${"artSet": "M12", "artNum": "97"}
 29 C Mist Raven @John Avon ${"artSet": "AVR", "artNum": "67"}
 30 U Murder of Crows @Drew Baker ${"artSet": "ISD", "artNum": "70"}
-31 M Wingmate Roc @Mark Zug ${"artSet": "KTK", "artNum": "31"}
+31 M Wingmate Roc @Mark Zug ${"artSet": "KTK", "artNum": "31", "flavorName": "Great Eagle of the Misty Mountains"}
 # --- Ents & Huorns ---
 32 C Ambassador Oak @Steve Prescott ${"artSet": "MOR", "artNum": "113"}
 33 C Blanchwood Treefolk @DiTerlizzi ${"artSet": "USG", "artNum": "238"}
 34 C Cloudcrown Oak @Rebecca Guay ${"artSet": "LRW", "artNum": "201"}
 35 C Ironroot Treefolk @Jesper Myrfors ${"artSet": "LEA", "artNum": "203"}
 36 C Oakgnarl Warrior @Jim Nelson ${"artSet": "LRW", "artNum": "232"}
-37 C Redwood Treefolk @Steve Luke ${"artSet": "POR", "artNum": "183"}
+37 C Redwood Treefolk @Steve Luke ${"artSet": "POR", "artNum": "183", "flavorName": "Huorn of the Old Forest"}
 38 U Cradle Guard @Mark Zug ${"artSet": "USG", "artNum": "245"}
 39 U Mossbeard Ancient @Alexandre Honoré ${"artSet": "DMU", "artNum": "173"}
 40 U Treefolk Harbinger @Larry MacDougall ${"artSet": "LRW", "artNum": "239"}
@@ -60,56 +62,56 @@ Type=Other
 42 U Warden of the Woods @Svetlin Velinov ${"artSet": "M21", "artNum": "213"}
 43 U Yew Spirit @Dan Murayama Scott ${"artSet": "AVR", "artNum": "207"}
 44 R Indomitable Ancients @Pete Venters ${"artSet": "MOR", "artNum": "13"}
-45 R Willow Geist @Ryan Yee ${"artSet": "MID", "artNum": "207"}
+45 R Willow Geist @Ryan Yee ${"artSet": "MID", "artNum": "207", "flavorName": "Spirit of the Withywindle"}
 # --- Trolls & Giants ---
 46 C Craven Giant @Brian Snõddy ${"artSet": "STH", "artNum": "78"}
-47 C Hagi Mob @Steve Prescott ${"artSet": "KHM", "artNum": "140"}
+47 C Hagi Mob @Steve Prescott ${"artSet": "KHM", "artNum": "140", "flavorName": "Hill-troll Mob"}
 48 C Hill Giant @Kev Walker ${"artSet": "10E", "artNum": "212"}
 49 C Icehide Troll @Andrey Kuzinskiy ${"artSet": "KHM", "artNum": "176"}
-50 C Uthden Troll @Douglas Shuler ${"artSet": "LEA", "artNum": "180"}
+50 C Uthden Troll @Douglas Shuler ${"artSet": "LEA", "artNum": "180", "flavorName": "Ettenmoors Troll"}
 51 U Cudgel Troll @Jesper Ejsing ${"artSet": "M10", "artNum": "174"}
 52 U Stone Giant @Warren Mahy ${"artSet": "M10", "artNum": "159"}
 53 U Two-Headed Giant @Simon Dominic ${"artSet": "DOM", "artNum": "147"}
-54 R Clackbridge Troll @Svetlin Velinov ${"artSet": "ELD", "artNum": "84"}
-55 R Troll Ascetic @Puddnhead ${"artSet": "10E", "artNum": "305"}
+54 R Clackbridge Troll @Svetlin Velinov ${"artSet": "ELD", "artNum": "84", "flavorName": "Troll of the Last Bridge"}
+55 R Troll Ascetic @Puddnhead ${"artSet": "10E", "artNum": "305", "flavorName": "Olog-hai of Mordor"}
 # --- Orcs & Goblins ---
 56 C Armory Veteran @Caio Monteiro ${"artSet": "AFR", "artNum": "130"}
 57 C Brassclaw Orcs @Rob Alexander ${"artSet": "FEM", "artNum": "49a"}
 58 C Dragon Fodder @Jaime Jones ${"artSet": "ALA", "artNum": "97"}
 59 C Goblin Instigator @Filip Burburan ${"artSet": "M19", "artNum": "142"}
 60 C Ironclaw Orcs @Anson Maddocks ${"artSet": "LEA", "artNum": "159"}
-61 C Krumar Bond-Kin @Kev Walker ${"artSet": "KTK", "artNum": "77"}
-62 C Mogg Fanatic @Brom ${"artSet": "10E", "artNum": "219"}
-63 C Mogg War Marshal @Wayne England ${"artSet": "TSP", "artNum": "170"}
+61 C Krumar Bond-Kin @Kev Walker ${"artSet": "KTK", "artNum": "77", "flavorName": "Uruk Bond-Kin"}
+62 C Mogg Fanatic @Brom ${"artSet": "10E", "artNum": "219", "flavorName": "Goblin-town Fanatic"}
+63 C Mogg War Marshal @Wayne England ${"artSet": "TSP", "artNum": "170", "flavorName": "Goblin-town Marshal"}
 64 C Orcish Vandal @Alex Konstad ${"artSet": "DOM", "artNum": "137"}
 65 C Raging Goblin @Jeff Miracola ${"artSet": "10E", "artNum": "224"}
-66 U Beetleback Chief @Wayne England ${"artSet": "EMA", "artNum": "119"}
+66 U Beetleback Chief @Wayne England ${"artSet": "EMA", "artNum": "119", "flavorName": "Chieftain of Goblin-town"}
 67 U Bloodmark Mentor @Dave Allsop ${"artSet": "SHM", "artNum": "83"}
 68 U Dragonlord's Servant @Steve Prescott ${"artSet": "DTK", "artNum": "138"}
 69 U Orc Sureshot @Kev Walker ${"artSet": "FRF", "artNum": "78"}
 70 U Orcish Artillery @Jeff Miracola ${"artSet": "10E", "artNum": "220"}
-71 U Orcish Lumberjack @Dan Frazier ${"artSet": "ICE", "artNum": "210"}
-72 U Tattermunge Maniac @Matt Cavotta ${"artSet": "SHM", "artNum": "219"}
+71 U Orcish Lumberjack @Dan Frazier ${"artSet": "ICE", "artNum": "210", "flavorName": "Isengard Tree-feller"}
+72 U Tattermunge Maniac @Matt Cavotta ${"artSet": "SHM", "artNum": "219", "flavorName": "Moria Goblin Madman"}
 73 U Vengeful Warchief @Karl Kopinski ${"artSet": "M20", "artNum": "121"}
-74 R Blood-Chin Fanatic @David Palumbo ${"artSet": "DTK", "artNum": "88"}
+74 R Blood-Chin Fanatic @David Palumbo ${"artSet": "DTK", "artNum": "88", "flavorName": "Fanatic of the White Hand"}
 75 R Goblin King @Ron Spears ${"artSet": "10E", "artNum": "207"}
 76 R Pitiless Horde @Viktor Titov ${"artSet": "DTK", "artNum": "112"}
 77 M Brutal Hordechief @Tyler Jacobson ${"artSet": "FRF", "artNum": "64"}
 # --- Rohirrim & Men of Gondor ---
-78 C Ambitious Farmhand @Bryan Sola ${"artSet": "MID", "artNum": "2"}
+78 C Ambitious Farmhand @Bryan Sola ${"artSet": "MID", "artNum": "2", "flavorName": "Bree-land Farmhand // Seasoned Bree Watchman"}
 79 C Armored Warhorse @rk post ${"artSet": "M12", "artNum": "7"}
-80 C Cavalry Drillmaster @Slawomir Maniak ${"artSet": "M19", "artNum": "8"}
+80 C Cavalry Drillmaster @Slawomir Maniak ${"artSet": "M19", "artNum": "8", "flavorName": "Riddermark Horse-master"}
 81 C Doomed Traveler @Lars Grant-West ${"artSet": "ISD", "artNum": "11"}
 82 C Elite Vanguard @Mark Tedin ${"artSet": "M10", "artNum": "9"}
 83 C Gather the Townsfolk @Dan Murayama Scott ${"artSet": "DKA", "artNum": "8"}
 84 C Raise the Alarm @Zoltan Boros ${"artSet": "M15", "artNum": "26"}
 85 C Veteran Swordsmith @Michael Komarck ${"artSet": "M10", "artNum": "39"}
-86 U Cavalry Master @Thomas M. Baxa ${"artSet": "TSP", "artNum": "6"}
+86 U Cavalry Master @Thomas M. Baxa ${"artSet": "TSP", "artNum": "6", "flavorName": "Marshal of the Mark"}
 87 U Courageous Outrider @Ryan Alexander Lee ${"artSet": "EMN", "artNum": "18"}
 88 U Shield Mare @Lucas Graciano ${"artSet": "M19", "artNum": "37"}
 89 U White Knight @Christopher Moeller ${"artSet": "M10", "artNum": "41"}
-90 R Knight of the White Orchid @Mark Zug ${"artSet": "ALA", "artNum": "16"}
-91 M Crested Sunmare @Lucas Graciano ${"artSet": "HOU", "artNum": "6"}
+90 R Knight of the White Orchid @Mark Zug ${"artSet": "ALA", "artNum": "16", "flavorName": "Knight of the White Tree"}
+91 M Crested Sunmare @Lucas Graciano ${"artSet": "HOU", "artNum": "6", "flavorName": "Steed of the Mearas"}
 # --- Rangers of the North ---
 92 C Archers' Parapet @Wayne Reynolds ${"artSet": "KTK", "artNum": "128"}
 93 C Borderland Ranger @Jesper Ejsing ${"artSet": "M10", "artNum": "169"}
@@ -123,80 +125,80 @@ Type=Other
 100 U Elven Riders @Darrell Riche ${"artSet": "ONS", "artNum": "254"}
 101 U Elvish Archers @Anson Maddocks ${"artSet": "LEA", "artNum": "191"}
 # --- Dwarves ---
-102 C Axgard Braggart @Svetlin Velinov ${"artSet": "KHM", "artNum": "1"}
-103 C Axgard Cavalry @Evyn Fong ${"artSet": "KHM", "artNum": "121"}
+102 C Axgard Braggart @Svetlin Velinov ${"artSet": "KHM", "artNum": "1", "flavorName": "Braggart of the Iron Hills"}
+103 C Axgard Cavalry @Evyn Fong ${"artSet": "KHM", "artNum": "121", "flavorName": "Iron Hills Cavalry"}
 104 C Breakneck Berserker @Scott Murphy ${"artSet": "KHM", "artNum": "124"}
-105 C Goldmaw Champion @Slawomir Maniak ${"artSet": "KHM", "artNum": "14"}
-106 C Master Skald @Svetlin Velinov ${"artSet": "KHM", "artNum": "19"}
+105 C Goldmaw Champion @Slawomir Maniak ${"artSet": "KHM", "artNum": "14", "flavorName": "Champion of Erebor"}
+106 C Master Skald @Svetlin Velinov ${"artSet": "KHM", "artNum": "19", "flavorName": "Lore-keeper of Erebor"}
 107 C Plundering Barbarian @Andrew Mar ${"artSet": "AFR", "artNum": "158"}
 108 C Rimrock Knight @Chris Rallis ${"artSet": "ELD", "artNum": "137"}
-109 C Seven Dwarves @Jason Rainville ${"artSet": "ELD", "artNum": "141"}
-110 U Dwarven Blastminer @Gary Ruddell ${"artSet": "ONS", "artNum": "199"}
-111 U Dwarven Driller @Edward P. Beard, Jr. ${"artSet": "JUD", "artNum": "85"}
+109 C Seven Dwarves @Jason Rainville ${"artSet": "ELD", "artNum": "141", "flavorName": "Durin's Folk"}
+110 U Dwarven Blastminer @Gary Ruddell ${"artSet": "ONS", "artNum": "199", "flavorName": "Dwarven Wall-breaker"}
+111 U Dwarven Driller @Edward P. Beard, Jr. ${"artSet": "JUD", "artNum": "85", "flavorName": "Dwarven Stone-borer"}
 112 U Dwarven Miner @Jock ${"artSet": "MIR", "artNum": "169"}
 113 U Fearless Liberator @Zezhou Chen ${"artSet": "KHM", "artNum": "135"}
 114 U Pillage @Jesper Ejsing ${"artSet": "A25", "artNum": "144"}
-115 U Warchanter Skald @Daniel Zrom ${"artSet": "KHM", "artNum": "381"}
+115 U Warchanter Skald @Daniel Zrom ${"artSet": "KHM", "artNum": "381", "flavorName": "Iron Hills War-chanter"}
 116 R Runeforge Champion @Andrey Kuzinskiy ${"artSet": "KHM", "artNum": "26"}
 # --- Undead, Wights & the Dead Marshes ---
-117 C Dirtwater Wraith @Steve Luke ${"artSet": "MIR", "artNum": "117"}
+117 C Dirtwater Wraith @Steve Luke ${"artSet": "MIR", "artNum": "117", "flavorName": "Wraith of the Dead Marshes"}
 118 C Dread Rider @Irina Nordsol ${"artSet": "KHM", "artNum": "89"}
 119 C Drudge Skeletons @Daarken ${"artSet": "M10", "artNum": "95"}
-120 C Duty-Bound Dead @Johannes Voss ${"artSet": "M13", "artNum": "92"}
+120 C Duty-Bound Dead @Johannes Voss ${"artSet": "M13", "artNum": "92", "flavorName": "Oathbreaker of Dunharrow"}
 121 C Gravedigger @Dermot Power ${"artSet": "M19", "artNum": "98"}
-122 C Persistent Specimen @Scott Murphy ${"artSet": "VOW", "artNum": "125"}
+122 C Persistent Specimen @Scott Murphy ${"artSet": "VOW", "artNum": "125", "flavorName": "Unquiet Barrow-bones"}
 123 C Rimebound Dead @Dave Kendall ${"artSet": "CSP", "artNum": "69"}
-124 C Sanitarium Skeleton @Kev Walker ${"artSet": "M20", "artNum": "112"}
+124 C Sanitarium Skeleton @Kev Walker ${"artSet": "M20", "artNum": "112", "flavorName": "Barrow-downs Skeleton"}
 125 U Bog Wraith @Daarken ${"artSet": "10E", "artNum": "130"}
 126 U Lingering Souls @Bud Cook ${"artSet": "DKA", "artNum": "12"}
 127 U Phantom Warrior @Greg Staples ${"artSet": "10E", "artNum": "96"}
 128 U Reassembling Skeleton @Austin Hsu ${"artSet": "M19", "artNum": "116"}
 129 U Spectral Sailor @Cristi Balanescu ${"artSet": "M20", "artNum": "76"}
 130 U Will-o'-the-Wisp @Rob Alexander ${"artSet": "A25", "artNum": "115"}
-131 R Death Baron @Nils Hamm ${"artSet": "ALA", "artNum": "70"}
+131 R Death Baron @Nils Hamm ${"artSet": "ALA", "artNum": "70", "flavorName": "Barrow-wight Lord"}
 132 R Hypnotic Specter @Greg Staples ${"artSet": "10E", "artNum": "151"}
 133 R Lord of the Undead @Brom ${"artSet": "PLS", "artNum": "44"}
-134 R Nightmare @Vance Kovacs ${"artSet": "M14", "artNum": "108"}
+134 R Nightmare @Vance Kovacs ${"artSet": "M14", "artNum": "108", "flavorName": "Black Steed of Minas Morgul"}
 135 R Royal Assassin @Mark Zug ${"artSet": "10E", "artNum": "174"}
 # --- Dragons, Drakes & Worms ---
-136 C Craw Wurm @Richard Sardinha ${"artSet": "10E", "artNum": "257"}
+136 C Craw Wurm @Richard Sardinha ${"artSet": "10E", "artNum": "257", "flavorName": "Were-worm of the Last Desert"}
 137 C Dragon Hatchling @David Palumbo ${"artSet": "M13", "artNum": "128"}
 138 U Dragon Whelp @Jokubas Uogintas ${"artSet": "DMU", "artNum": "120"}
 139 U Furnace Whelp @Shreya Shetty ${"artSet": "IMA", "artNum": "129"}
 140 U Volcanic Dragon @Chris Rahn ${"artSet": "M12", "artNum": "158"}
-141 M Thundermaw Hellkite @Svetlin Velinov ${"artSet": "M13", "artNum": "150"}
+141 M Thundermaw Hellkite @Svetlin Velinov ${"artSet": "M13", "artNum": "150", "flavorName": "Great Fire-drake of the North"}
 # --- Ships & Corsairs ---
 142 C Headstrong Brute @Yongjae Choi ${"artSet": "XLN", "artNum": "147"}
-143 C Pirate's Cutlass @John Stanko ${"artSet": "XLN", "artNum": "242"}
-144 U Dire Fleet Captain @Yongjae Choi ${"artSet": "XLN", "artNum": "221"}
-145 U Kitesail Freebooter @Dan Murayama Scott ${"artSet": "XLN", "artNum": "110"}
+143 C Pirate's Cutlass @John Stanko ${"artSet": "XLN", "artNum": "242", "flavorName": "Corsair's Cutlass"}
+144 U Dire Fleet Captain @Yongjae Choi ${"artSet": "XLN", "artNum": "221", "flavorName": "Corsair Captain of Umbar"}
+145 U Kitesail Freebooter @Dan Murayama Scott ${"artSet": "XLN", "artNum": "110", "flavorName": "Umbar Freebooter"}
 146 U Ruin Raider @Kieran Yanner ${"artSet": "XLN", "artNum": "118"}
-147 U Sleek Schooner @Mark Winters ${"artSet": "XLN", "artNum": "247"}
-148 R Fathom Fleet Captain @Matt Stewart ${"artSet": "XLN", "artNum": "106"}
+147 U Sleek Schooner @Mark Winters ${"artSet": "XLN", "artNum": "247", "flavorName": "Swift Ship of Umbar"}
+148 R Fathom Fleet Captain @Matt Stewart ${"artSet": "XLN", "artNum": "106", "flavorName": "Captain of the Black Ships"}
 149 R Fell Flagship @Titus Lunter ${"artSet": "XLN", "artNum": "238"}
-150 M Dire Fleet Ravager @Bram Sels ${"artSet": "XLN", "artNum": "104"}
+150 M Dire Fleet Ravager @Bram Sels ${"artSet": "XLN", "artNum": "104", "flavorName": "Corsair Ravager of Umbar"}
 # --- Staples: White ---
 151 C Disenchant @Amy Weber ${"artSet": "LEA", "artNum": "18"}
-152 C Pacifism @Jesper Ejsing ${"artSet": "M20", "artNum": "32"}
+152 C Pacifism @Jesper Ejsing ${"artSet": "M20", "artNum": "32", "flavorName": "Oath of Peace"}
 153 U Condemn @Daren Bader ${"artSet": "DIS", "artNum": "8"}
-154 U Oblivion Ring @Wayne England ${"artSet": "LRW", "artNum": "34"}
-155 R Wrath of God @Kev Walker ${"artSet": "10E", "artNum": "61"}
+154 U Oblivion Ring @Wayne England ${"artSet": "LRW", "artNum": "34", "flavorName": "Ward of Banishment"}
+155 R Wrath of God @Kev Walker ${"artSet": "10E", "artNum": "61", "flavorName": "Wrath of the Valar"}
 # --- Staples: Blue ---
-156 C Boomerang @Arnie Swekel ${"artSet": "10E", "artNum": "70"}
+156 C Boomerang @Arnie Swekel ${"artSet": "10E", "artNum": "70", "flavorName": "Flood of the Bruinen"}
 157 C Cancel @Mark Poole ${"artSet": "TSP", "artNum": "51"}
-158 C Claustrophobia @Ryan Pancoast ${"artSet": "ISD", "artNum": "48"}
+158 C Claustrophobia @Ryan Pancoast ${"artSet": "ISD", "artNum": "48", "flavorName": "Trapped in the Barrow"}
 159 C Divination @Howard Lyon ${"artSet": "M10", "artNum": "49"}
 160 C Essence Scatter @Jon Foster ${"artSet": "M10", "artNum": "51"}
 161 C Frost Breath @Mike Bierek ${"artSet": "M12", "artNum": "54"}
 162 C Mana Leak @Howard Lyon ${"artSet": "M11", "artNum": "62"}
 163 C Negate @Jeremy Jarvis ${"artSet": "MOR", "artNum": "43"}
 164 C Prodigal Sorcerer @Eric Deschamps ${"artSet": "EMA", "artNum": "67"}
-165 C Sea Gate Oracle @Daniel Ljunggren ${"artSet": "ROE", "artNum": "85"}
+165 C Sea Gate Oracle @Daniel Ljunggren ${"artSet": "ROE", "artNum": "85", "flavorName": "Seer of the Grey Havens"}
 166 C Think Twice @Jim Nelson ${"artSet": "TSP", "artNum": "86"}
 167 C Unsummon @Ron Spencer ${"artSet": "10E", "artNum": "122"}
 168 U Counterspell @Mark Poole ${"artSet": "LEA", "artNum": "54"}
 169 U Fog Bank @Howard Lyon ${"artSet": "M13", "artNum": "52"}
-170 U Mind Control @Mark Tedin ${"artSet": "M10", "artNum": "63"}
+170 U Mind Control @Mark Tedin ${"artSet": "M10", "artNum": "63", "flavorName": "Beguiling Voice"}
 171 U Sleep @Chris Rahn ${"artSet": "M10", "artNum": "71"}
 172 R Control Magic @Terese Nielsen ${"artSet": "EMA", "artNum": "42"}
 173 R Phantasmal Image @Nils Hamm ${"artSet": "M12", "artNum": "72"}
@@ -225,7 +227,7 @@ Type=Other
 # --- Staples: Green ---
 194 C Fog @John Avon ${"artSet": "M10", "artNum": "182"}
 195 C Giant Growth @Matt Cavotta ${"artSet": "10E", "artNum": "266"}
-196 C Grizzly Bears @D. J. Cleland-Hura ${"artSet": "10E", "artNum": "268"}
+196 C Grizzly Bears @D. J. Cleland-Hura ${"artSet": "10E", "artNum": "268", "flavorName": "Bears of the Anduin Vale"}
 197 C Naturalize @Tim Hildebrandt ${"artSet": "10E", "artNum": "282"}
 198 C Prey Upon @Dave Kendall ${"artSet": "ISD", "artNum": "200"}
 199 C Spidersilk Armor @Scott Hampton ${"artSet": "MMQ", "artNum": "273"}
@@ -245,14 +247,37 @@ Type=Other
 210 C Dismal Backwater @Sam Burley ${"artSet": "KTK", "artNum": "232"}
 211 C Dwarven Mine @Alexander Forssberg ${"artSet": "ELD", "artNum": "243"}
 212 C Forgotten Cave @Tony Szczudlo ${"artSet": "ONS", "artNum": "317"}
-213 C Haunted Fengraf @Adam Paquette ${"artSet": "DKA", "artNum": "157"}
-214 C Jungle Hollow @Eytan Zana ${"artSet": "KTK", "artNum": "235"}
+213 C Haunted Fengraf @Adam Paquette ${"artSet": "DKA", "artNum": "157", "flavorName": "Barrow-downs Crypt"}
+214 C Jungle Hollow @Eytan Zana ${"artSet": "KTK", "artNum": "235", "flavorName": "Old Forest Hollow"}
 215 C Rugged Highlands @Eytan Zana ${"artSet": "KTK", "artNum": "240"}
 216 C Secluded Steppe @Heather Hudson ${"artSet": "ONS", "artNum": "324"}
 217 C Swiftwater Cliffs @Eytan Zana ${"artSet": "KTK", "artNum": "243"}
-218 C Witch's Cottage @Gabor Szikszai ${"artSet": "ELD", "artNum": "249"}
+218 C Witch's Cottage @Gabor Szikszai ${"artSet": "ELD", "artNum": "249", "flavorName": "Marish Cottage"}
 219 U Dwarven Ruins @Mark Poole ${"artSet": "FEM", "artNum": "94"}
 220 U Ebon Stronghold @Mark Poole ${"artSet": "FEM", "artNum": "95"}
-221 U Havenwood Battleground @Mark Poole ${"artSet": "FEM", "artNum": "96"}
+221 U Havenwood Battleground @Mark Poole ${"artSet": "FEM", "artNum": "96", "flavorName": "Greenwood Battleground"}
 222 U Leechridden Swamp @Lars Grant-West ${"artSet": "SHM", "artNum": "273"}
 223 R Rootbound Crag @Matt Stewart ${"artSet": "M10", "artNum": "227"}
+# --- Dual lands (WP2b, D10) ---
+224 R Badlands @Daarken ${"artSet": "VMA", "artNum": "291", "flavorName": "Plains of Gorgoroth"}
+225 R Bayou @Karl Kopinski ${"artSet": "VMA", "artNum": "293", "flavorName": "Midgewater Marshes"}
+226 R Plateau @Cornelius Brudi ${"artSet": "ME4", "artNum": "249", "flavorName": "Dunharrow"}
+227 R Savannah @Charles Urbach ${"artSet": "VMA", "artNum": "311", "flavorName": "Wold of Rohan"}
+228 R Scrubland @Eytan Zana ${"artSet": "VMA", "artNum": "313", "flavorName": "The Brown Lands"}
+229 R Taiga @Sam Burley ${"artSet": "VMA", "artNum": "317", "flavorName": "Misty Mountain Pines"}
+230 R Tropical Island @Jesper Myrfors ${"artSet": "30A", "artNum": "279", "flavorName": "Vales of Anduin"}
+231 R Tundra @Lars Grant-West ${"artSet": "VMA", "artNum": "322", "flavorName": "Ice Bay of Forochel"}
+232 R Underground Sea @Cliff Childs ${"artSet": "VMA", "artNum": "323", "flavorName": "Pool of the Watcher"}
+233 R Volcanic Island @Brian Snõddy ${"artSet": "30A", "artNum": "282", "flavorName": "Shores of Nurnen"}
+
+[tokens]
+# Tokens made by MEAR cards that no other allowed edition prints. artSet/artNum name the card set and the
+# token collector number in that set's [tokens] section whose image is shown (ImageFetcher.getTokenArtSource).
+1 b_2_2_pirate_menace @Matt Stewart ${"artSet": "XLN", "artNum": "4"}
+2 b_2_4_spider_reach @Lars Grant-West ${"artSet": "MMA", "artNum": "7"}
+3 g_1_2_spider_reach @Daniel Ljunggren ${"artSet": "ISD", "artNum": "11"}
+4 r_1_1_dwarf @Kari Christensen ${"artSet": "ELD", "artNum": "7"}
+5 r_2_1_dwarf_berserker @Olivier Bernard ${"artSet": "KHM", "artNum": "12"}
+6 w_1_1_soldier @Greg Staples ${"artSet": "M15", "artNum": "2"}
+7 w_3_4_bird_flying @Mark Zug ${"artSet": "KTK", "artNum": "1"}
+8 w_5_5_horse @Lucas Graciano ${"artSet": "HOU", "artNum": "10"}
