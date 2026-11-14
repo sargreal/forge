@@ -1,6 +1,6 @@
 {
-"startPointX": 0.6489,
-"startPointY": 0.6956,
+"startPointX": 0.6556,
+"startPointY": 0.6972,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "gondor",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.1511,
-"height": 0.2378,
+"width": 0.1467,
+"height": 0.2411,
 "color": "3f8f3a",
 "spriteNames": [
 	"Flower",

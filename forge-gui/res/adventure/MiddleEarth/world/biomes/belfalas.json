@@ -1,5 +1,5 @@
 {
-"startPointX": 0.4828,
+"startPointX": 0.4861,
 "startPointY": 0.7289,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
@@ -19,7 +19,7 @@
 		"resolution": 10
 	}
 ],
-"width": 0.2167,
+"width": 0.2233,
 "height": 0.1489,
 "color": "70c070",
 "spriteNames": [

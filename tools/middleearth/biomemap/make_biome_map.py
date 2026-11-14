@@ -90,27 +90,27 @@ BIOME_COLORS = {
 # --------------------------------------------------------------------------------------------
 NORTHERN_WASTE = [(0, 0), (1, 0), (1, 0.07), (0.9, 0.075), (0.8, 0.06), (0.7, 0.052), (0.6, 0.055), (0.52, 0.06),
                   (0.45, 0.08), (0.38, 0.075), (0.3, 0.08), (0.2, 0.075), (0.12, 0.065), (0.05, 0.06), (0, 0.06)]
-ERIADOR = [(0.0, 0.05), (0.5, 0.05), (0.5, 0.3), (0.53, 0.47), (0.42, 0.47), (0.3, 0.45), (0.15, 0.5), (0.0, 0.5)]
+ERIADOR = [(0.0, 0.05), (0.5, 0.05), (0.5, 0.3), (0.53, 0.47), (0.42, 0.47), (0.3, 0.47), (0.15, 0.52), (0.0, 0.52)]
 WILDERLAND = [(0.5, 0.05), (1, 0.05), (1, 0.62), (0.72, 0.62), (0.6, 0.56), (0.5, 0.47)]
 ANDUIN_VALE = [(0.525, 0.09), (0.6, 0.095), (0.612, 0.2), (0.602, 0.29), (0.598, 0.36), (0.594, 0.43), (0.585, 0.47),
                (0.56, 0.465), (0.545, 0.4), (0.528, 0.3), (0.52, 0.18)]
 BROWN_LANDS = [(0.585, 0.44), (0.66, 0.445), (0.72, 0.47), (0.76, 0.52), (0.785, 0.572), (0.73, 0.578),
                (0.68, 0.57), (0.63, 0.56), (0.608, 0.545), (0.592, 0.5)]
 RHUN = [(0.85, 0.3), (1, 0.28), (1, 0.58), (0.86, 0.575), (0.84, 0.5), (0.85, 0.4)]
-MINHIRIATH = [(0.262, 0.41), (0.33, 0.4), (0.412, 0.42), (0.37, 0.48), (0.32, 0.55), (0.29, 0.615), (0.25, 0.58),
+MINHIRIATH = [(0.262, 0.41), (0.33, 0.4), (0.415, 0.42), (0.38, 0.48), (0.335, 0.555), (0.305, 0.635), (0.25, 0.58),
               (0.2, 0.54), (0.165, 0.505), (0.21, 0.47), (0.245, 0.44)]
-ENEDWAITH = [(0.412, 0.42), (0.47, 0.44), (0.49, 0.5), (0.49, 0.56), (0.5, 0.62), (0.5, 0.66), (0.45, 0.68),
+ENEDWAITH = [(0.412, 0.42), (0.47, 0.44), (0.505, 0.5), (0.505, 0.56), (0.5, 0.62), (0.5, 0.66), (0.45, 0.68),
              (0.4, 0.71), (0.36, 0.69), (0.3, 0.63), (0.29, 0.615), (0.32, 0.55), (0.37, 0.48)]
-HARAD = [(0.36, 1.0), (0.4, 0.92), (0.45, 0.85), (0.6, 0.83), (0.75, 0.81), (1, 0.8), (1, 1.0)]
+HARAD = [(0.36, 1.0), (0.4, 0.92), (0.45, 0.85), (0.6, 0.83), (0.74, 0.8), (1, 0.79), (1, 1.0)]
 SOUTH_GONDOR = [(0.615, 0.795), (0.7, 0.8), (0.8, 0.825), (0.8, 0.88), (0.72, 0.9), (0.63, 0.89), (0.6, 0.87), (0.62, 0.83)]
 UMBAR = [(0.38, 0.87), (0.47, 0.86), (0.57, 0.865), (0.6, 0.89), (0.59, 0.94), (0.52, 0.965), (0.45, 0.96), (0.38, 0.95)]
-GONDOR = [(0.57, 0.665), (0.6, 0.625), (0.63, 0.6), (0.66, 0.585), (0.69, 0.575), (0.725, 0.585), (0.725, 0.8),
+GONDOR = [(0.57, 0.665), (0.6, 0.625), (0.63, 0.6), (0.66, 0.585), (0.69, 0.575), (0.735, 0.585), (0.74, 0.81),
           (0.62, 0.8), (0.575, 0.785), (0.56, 0.72)]
-BELFALAS = [(0.38, 0.69), (0.47, 0.655), (0.53, 0.66), (0.575, 0.67), (0.585, 0.73), (0.575, 0.79), (0.52, 0.81),
+BELFALAS = [(0.38, 0.69), (0.47, 0.655), (0.53, 0.645), (0.585, 0.65), (0.59, 0.73), (0.575, 0.79), (0.52, 0.81),
             (0.45, 0.79), (0.37, 0.77)]
 ROHAN = [(0.48, 0.535), (0.52, 0.5), (0.56, 0.47), (0.585, 0.47), (0.605, 0.545), (0.63, 0.565), (0.66, 0.585),
          (0.63, 0.6), (0.6, 0.63), (0.57, 0.65), (0.53, 0.645), (0.49, 0.64), (0.47, 0.57)]
-MORDOR = [(0.735, 0.588), (1.0, 0.588), (1.0, 0.81), (0.735, 0.8)]
+MORDOR = [(0.735, 0.588), (1.0, 0.588), (1.0, 0.815), (0.735, 0.81)]
 FANGORN = [(0.495, 0.465), (0.53, 0.455), (0.56, 0.47), (0.565, 0.5), (0.55, 0.53), (0.52, 0.535), (0.495, 0.52),
            (0.488, 0.49)]
 LOTHLORIEN = [(0.525, 0.412), (0.555, 0.403), (0.575, 0.418), (0.58, 0.45), (0.56, 0.466), (0.535, 0.457), (0.524, 0.44)]
@@ -390,9 +390,14 @@ def build(names):
     for pts, width in PASSES.values():
         draw_line(d, pts, width, 1)
     m = np.where(np.array(passes) == 1, lands, m)
+    holes = m == OCEAN  # land not covered by any region: reported unless a sea covers it
     # seas (warped coast) and islands
     sea = warp(rasterize([(1, s) for s in SEAS], 0), 37, 10)
     m = np.where(sea == 1, OCEAN, m)
+    near_sea = sea == 1
+    for _ in range(12):  # coast pixels that the land polygons miss are just more coast: ignore holes near the sea
+        near_sea = near_sea | np.roll(near_sea, 1, 0) | np.roll(near_sea, -1, 0) | np.roll(near_sea, 1, 1) | np.roll(near_sea, -1, 1)
+    holes &= ~near_sea
     isl = rasterize([(idx[n], s) for n, s in ISLANDS], NONE)
     m = np.where(isl != NONE, isl, m)
     before_water = m.copy()
@@ -410,7 +415,8 @@ def build(names):
     for x, y, r in FORDS.values():
         d.ellipse([x * W - r, y * H - r, x * W + r, y * H + r], fill=1)
     m = np.where(np.array(fords) == 1, before_water, m)
-    return m
+    holes &= np.array(water) != 1
+    return m, holes
 
 
 def load_biomes():
@@ -445,7 +451,13 @@ def main():
         raise SystemExit("no colour for biomes: %s" % sorted(missing))
     if len(set(BIOME_COLORS.values())) != len(BIOME_COLORS):
         raise SystemExit("biome colours must be unique")
-    m = build(names)
+    m, holes = build(names)
+    problems = 0
+    if holes.sum() > 100:  # a few stray coast/river-mouth pixels are fine
+        ys, xs = np.nonzero(holes)
+        print("  !! %d land pixels are in no region (they become ocean), e.g. at %s" %
+              (len(xs), sorted({(round(float(x) / W, 2), round(float(y) / H, 2)) for x, y in zip(xs[::50], ys[::50])})[:12]))
+        problems += 1
     rgb = np.zeros((H, W, 3), np.uint8)
     for i, n in enumerate(names):
         c = BIOME_COLORS[n]
@@ -454,7 +466,6 @@ def main():
     Image.fromarray(rgb, "RGB").save(OUT_PNG, optimize=True)
     print("wrote", os.path.relpath(OUT_PNG, ROOT))
 
-    problems = 0
     bbox = {}
     print("%-24s %6s  %s" % ("biome", "cover%", "bbox x0-x1, y0-y1 (y north)"))
     for i, n in enumerate(names):
