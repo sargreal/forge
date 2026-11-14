@@ -33,7 +33,7 @@
 | Intro | ✅ "Welcome to Middle-earth" quest and tutorial. The wizard dialog is overridden through `MiddleEarth/languages/adventure-en-US.properties` (en-US only; the speaker title still reads "Adept Black Wizard"). |
 | Starter decks | ❌ Common (Shandalar) decks, about 60% off-pool (WP4). |
 | Enemies | ❌ Shandalar lists, partly with names that no longer exist (WP5/WP6, then Wave 3). |
-| Shops / items / heroes | ❌ Generic. Town maps list shop names that the plane's `shops.json` lacks (WP7). |
+| Shops / items / heroes | ✅ 250 ME shops (all 243 shop names requested by the plane's maps exist), 107 items incl. 27 ME items (Sting, Mithril Coat, Andúril, The One Ring…), races Hobbit/Man/Elf/Dwarf/Wizard (reused sprites). |
 | Fixed Tiled world | ❌ Not started (Phase 2). |
 
 World after WP3 (generated, north is up):
@@ -73,12 +73,12 @@ Use `Innistrad/` as the template. Phase 1 is split into work packages (WPs). Eac
 
 **Wave 2 (after WP1 and WP2)**
 
-| WP | Task | Owns |
-| --- | --- | --- |
+| WP | Task | Owns | Status |
+| --- | --- | --- | --- |
 | WP4 starter-decks | 5 colours × starter/constructed/pile × difficulty, matched to the reference strength. W = Gondor/Rohan, U = Elves, B = Mordor, R = Dwarves, G = Hobbits/Ents. | `MiddleEarth/decks/starter/`, `config.json` → `difficulties[*].*Decks` |
 | WP5 enemies-shadow | Mordor, Isengard, Moria, Nazgûl, trolls, orcs/goblins, Easterlings, Haradrim, Corsairs, Balrog, Smaug, Shelob. Reuse upstream decks where they fit (D7). | `MiddleEarth/world/enemies.json` (shadow section), `MiddleEarth/decks/enemy/shadow/` |
 | WP6 enemies-free | Bandits/ruffians, Dunlendings, wolves/wargs, spiders, Huorns, Barrow-wights, Gollum, Saruman, plus allied duelists (rangers, elves, dwarves). | `MiddleEarth/decks/enemy/free/` and an enemies fragment that the coordinator merges |
-| WP7 shops-items-heroes | Regional and faction card shops, ME items (Sting, mithril shirt, elven cloak, phial, the One Ring), hero avatars (hobbit, human, elf, dwarf, wizard). | `world/shops.json`, `world/items.json`, `world/heroes.json`, sprites |
+| WP7 shops-items-heroes | Regional and faction card shops, ME items (Sting, mithril shirt, elven cloak, phial, the One Ring), hero avatars (hobbit, human, elf, dwarf, wizard). | `world/shops.json`, `world/items.json`, `world/heroes.json`, sprites | ✅ 250 shops, 107 items (27 ME), 5 races ([notes](notes/wp7-shops-items-heroes.md)) |
 
 **Wave 3 (integration):** fill the biome `enemies` lists with ME enemies per region (all 43 biomes; the 15 biomes added in WP3 hold verbatim copies of their parent region's Shandalar list), run a full smoke run, and play-test.
 ### Phase 2: Fixed Tiled world (issue #2), can run in parallel
@@ -107,6 +107,10 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
+- Side quests are an interim copy of 34 generic Shandalar side quests (Kiora's and Teferi's quests dropped). Re-theme them in Phase 3. Without them, the town job boards crashed (NPE in `AdventureQuestController.getQuestNPCResponse` on an empty side-quest list).
+- The One Ring is currently sold in Umbar's black market (30,000 gold). It should become a unique boss or quest reward (WP5 / Phase 3). A "can't unequip" curse would need an engine change.
+- Hobbit and Wizard races reuse farmer/peasant and wizard enemy sprites with human portraits. Proper sprites need new art.
+- The wizard intro and the rune display names are en-US only (`MiddleEarth/languages/adventure-en-US.properties`).
 - The LTR Starter Kit decklists come from github.com/taw/magic-preconstructed-decks (citing the Wizards article of 2023-06-23). Do one check against the official page with web access.
 - Generated (`.json` template) decks break down under the restricted pool (`enemy:Troll` → 32× The Lonely Mountain). The current `*_e.json` starters pull in non-ME jumpstart cards, and `check.sh` skips generated decks.
 - Engine bugs found in WP3. They are not fixed; workarounds are in the data:
@@ -126,6 +130,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-14 | WP7 merged: shops, items and heroes; PlaneCheck section 6 (shops, items, heroes). Coordinator fixes: added 34 generic side quests to the plane's `quests.json` (fixes the job-board NPE found by WP7) and ME display names for the six runes. |
 | 2026-11-14 | User decisions on the WP2 questions recorded (D10). WP2b started. |
 | 2026-11-13 | WP1 merged: `tools/middleearth/deckstrength.sh` (DeckSim worker with forced play/draw, DeckExport for .json and `enemy:` decks), LTR Starter Kit reference decks plus 40-card cuts and baselines. Measured: kits 55/45 against each other; upstream starters range 31–73%; ~2–4 s per game. Strength bands are in D9. |
 | 2026-11-13 | WP3 merged: world 900×900, 43 biomes (15 new, enemy lists copied from their parent regions), 90 ME POIs, per-region town names, ME intro and tutorial quest, Oasis map path fix. Added `tools/middleearth/WorldSim.java` (offline layout simulator). Fixed the biome Y-axis note in DEVELOPMENT.md. |
