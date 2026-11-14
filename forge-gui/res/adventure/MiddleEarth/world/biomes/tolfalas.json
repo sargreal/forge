@@ -1,6 +1,6 @@
 {
-"startPointX": 0.59,
-"startPointY": 0.815,
+"startPointX": 0.5922,
+"startPointY": 0.8261,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "tolfalas",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.05,
-"height": 0.05,
-"color": "59a650",
+"width": 0.0311,
+"height": 0.0278,
+"color": "85cc7a",
 "spriteNames": [
 	"Shell",
 	"PlainsTree",

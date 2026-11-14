@@ -1,6 +1,6 @@
 {
-"startPointX": 0.09,
-"startPointY": 0.375,
+"startPointX": 0.0789,
+"startPointY": 0.4294,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "harlindon",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.13,
-"height": 0.13,
-"color": "59a650",
+"width": 0.1067,
+"height": 0.1233,
+"color": "5fb87a",
 "spriteNames": [
 	"Shell",
 	"PlainsTree",

@@ -1,6 +1,6 @@
 {
-"startPointX": 0.5,
-"startPointY": 0.93,
+"startPointX": 0.505,
+"startPointY": 0.9189,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "umbar",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.19,
-"height": 0.19,
-"color": "efe697",
+"width": 0.1967,
+"height": 0.0956,
+"color": "d9cc7a",
 "spriteNames": [
 	"Cactus",
 	"PlainsRock",

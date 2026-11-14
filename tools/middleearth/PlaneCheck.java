@@ -102,6 +102,7 @@ public class PlaneCheck {
                 if (!poiNames.contains(p)) warn("biome " + b.name + ": unknown point of interest '" + p + "' (not placed)");
         }
         info(biomes.size() + " biomes, " + usedEnemies.size() + " distinct enemies used");
+        if (world != null && world.biomeMap != null) checkBiomeMap(world, biomes);
         if (allEnemies) {
             int extra = 0;
             for (EnemyData e : enemyByName.values())
@@ -219,6 +220,34 @@ public class PlaneCheck {
         // ---------- 6. shops, items, heroes ----------
         checkShopsItemsHeroes(json, cd, pois, enemyByName, usedEnemies);
         finish();
+    }
+
+    /** world.json "biomeMap" (fixed layout, World.loadFixedBiomeMap): image exists, size, every colour maps to exactly one biome. */
+    static void checkBiomeMap(WorldData world, List<BiomeData> biomes) {
+        FileHandle f = Config.instance().getFile(world.biomeMap);
+        if (f == null || !f.exists()) { error("biomeMap " + world.biomeMap + " not found"); return; }
+        java.awt.image.BufferedImage img;
+        try { img = javax.imageio.ImageIO.read(f.file()); } catch (Exception e) { error("biomeMap " + world.biomeMap + ": " + e); return; }
+        if (img.getWidth() != world.width || img.getHeight() != world.height)
+            warn("biomeMap is " + img.getWidth() + "x" + img.getHeight() + ", world is " + world.width + "x" + world.height + " (sampled nearest-neighbour)");
+        Map<Integer, String> byColor = new HashMap<>();
+        for (BiomeData b : biomes) {
+            int c = Integer.parseInt(b.color, 16);
+            String other = byColor.putIfAbsent(c, b.name);
+            if (other != null) error("biomeMap: biomes " + other + " and " + b.name + " share colour " + b.color + " (only the first is used)");
+        }
+        Map<Integer, Integer> counts = new TreeMap<>();
+        for (int x = 0; x < img.getWidth(); x++)
+            for (int y = 0; y < img.getHeight(); y++) counts.merge(img.getRGB(x, y) & 0xffffff, 1, Integer::sum);
+        Set<String> used = new HashSet<>();
+        for (Map.Entry<Integer, Integer> e : counts.entrySet()) {
+            String b = byColor.get(e.getKey());
+            if (b == null) error(String.format("biomeMap: colour %06x (%d px) matches no biome (the game uses the first biome)", e.getKey(), e.getValue()));
+            else used.add(b);
+        }
+        for (BiomeData b : biomes)
+            if (!used.contains(b.name)) warn("biomeMap: biome " + b.name + " has no pixels (never painted, its POIs are dropped)");
+        info("biomeMap " + world.biomeMap + ": " + img.getWidth() + "x" + img.getHeight() + ", " + counts.size() + " colours, " + used.size() + "/" + biomes.size() + " biomes painted");
     }
 
     /** WorldData.getEnemy: exact match on name first, then on getName() (nameOverride). */

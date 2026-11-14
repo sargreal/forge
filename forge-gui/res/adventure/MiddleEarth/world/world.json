@@ -1,8 +1,8 @@
 {
 	"width": 900,
 	"height": 900,
-	"playerStartPosX": 0.215,
-	"playerStartPosY": 0.685,
+	"playerStartPosX": 0.205,
+	"playerStartPosY": 0.655,
 	"noiseZoomBiome": 30,
 	"miniMapTileSize": 4,
 	"tileSize": 16,
@@ -11,6 +11,7 @@
 		"tilesetName": "Road",
 		"color": "ffffff"
 	},
+	"biomeMap": "world/biome_map.png",
 	"biomesSprites": "world/sprites/map_sprites.json",
 	"maxRoadDistance": 1400,
 	"biomesNames": [

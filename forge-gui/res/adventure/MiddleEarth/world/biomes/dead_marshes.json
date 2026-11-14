@@ -1,6 +1,6 @@
 {
-"startPointX": 0.685,
-"startPointY": 0.555,
+"startPointX": 0.6856,
+"startPointY": 0.5639,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "dead_marshes",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.08,
-"height": 0.08,
-"color": "110903",
+"width": 0.0711,
+"height": 0.0411,
+"color": "3a4a2a",
 "spriteNames": [
 	"Reed",
 	"Waterlily",

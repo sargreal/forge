@@ -1,6 +1,6 @@
 {
-"startPointX": 0.66,
-"startPointY": 0.835,
+"startPointX": 0.7022,
+"startPointY": 0.8528,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "south_gondor",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.19,
-"height": 0.19,
-"color": "efe697",
+"width": 0.1889,
+"height": 0.0989,
+"color": "f5eeb0",
 "spriteNames": [
 	"Cactus",
 	"PlainsRock",

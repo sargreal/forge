@@ -1,6 +1,6 @@
 {
-"startPointX": 0.76,
-"startPointY": 1.48,
+"startPointX": 0.6944,
+"startPointY": 0.8989,
 "noiseWeight": 0.15,
 "distWeight": 1.0,
 "name": "harad_waith",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 1.333,
-"height": 1.333,
-"color": "efe697",
+"width": 0.6111,
+"height": 0.2022,
+"color": "e6d98a",
 "spriteNames": [
 	"Cactus",
 	"PlainsRock",

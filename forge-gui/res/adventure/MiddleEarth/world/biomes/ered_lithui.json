@@ -1,6 +1,6 @@
 {
-"startPointX": 0.785,
-"startPointY": 0.585,
+"startPointX": 0.7944,
+"startPointY": 0.5883,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ered_lithui",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.075,
-"height": 0.075,
-"color": "b63729",
+"width": 0.1422,
+"height": 0.0456,
+"color": "7a2018",
 "spriteNames": [
 	"MountainTree",
 	"MountainTree2",

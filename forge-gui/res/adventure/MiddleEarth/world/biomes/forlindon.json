@@ -1,6 +1,6 @@
 {
-"startPointX": 0.075,
-"startPointY": 0.205,
+"startPointX": 0.0678,
+"startPointY": 0.2078,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "forlindon",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.12,
-"height": 0.12,
-"color": "59a650",
+"width": 0.0867,
+"height": 0.3044,
+"color": "4fae70",
 "spriteNames": [
 	"Shell",
 	"PlainsTree",

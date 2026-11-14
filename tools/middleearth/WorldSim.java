@@ -1,6 +1,7 @@
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
 import forge.adventure.data.BiomeData;
 import forge.adventure.data.PointOfInterestData;
 import forge.adventure.data.WorldData;
@@ -15,6 +16,7 @@ import java.util.List;
 
 /**
  * Offline replica of World.generateNew (biome painting + POI placement) for layout work.
+ * Honours world.json "biomeMap" (fixed layout from an image) like World.loadFixedBiomeMap.
  * Usage: java -cp FORGE_JAR WorldSim.java <planeDir> <seed|0> <out.png|-> [runs]
  */
 public class WorldSim {
@@ -48,6 +50,9 @@ public class WorldSim {
         Array<PointOfInterestData> allPois = json.fromJson(Array.class, PointOfInterestData.class, new FileHandle(new File(planeDir, "world/points_of_interest.json")));
         width = data.width;
         height = data.height;
+        String biomeMapPath = new JsonReader().parse(new FileHandle(new File(planeDir, "world/world.json"))).getString("biomeMap", null);
+        long[][] fixed = biomeMapPath == null ? null : loadFixedBiomeMap(new File(planeDir, biomeMapPath), biomes);
+        if (fixed != null) System.out.println("biomeMap: " + biomeMapPath);
 
         int totalReruns = 0, maxReruns = 0, totalUnreach = 0, runsWithUnreach = 0;
         Map<String, Integer> dropped = new TreeMap<>();
@@ -58,8 +63,11 @@ public class WorldSim {
             OpenSimplexNoise noise = new OpenSimplexNoise(seed);
             float noiseZoom = data.noiseZoomBiome;
             biomeMap = new long[width][height];
+            if (fixed != null) { // world.json "biomeMap": same masks as World.loadFixedBiomeMap
+                for (int x = 0; x < width; x++) biomeMap[x] = fixed[x].clone();
+            }
             int bi = -1;
-            for (BiomeData biome : biomes) {
+            for (BiomeData biome : fixed != null ? List.<BiomeData>of() : biomes) {
                 bi++;
                 int biomeXStart = (int) Math.round(biome.startPointX * (double) width);
                 int biomeYStart = (int) Math.round(biome.startPointY * (double) height);
@@ -165,6 +173,7 @@ public class WorldSim {
         }
         System.out.println("runs=" + runs + " reruns total=" + totalReruns + " max=" + maxReruns);
         System.out.println("unreachable POIs total=" + totalUnreach + " runs with unreachable=" + runsWithUnreach + " " + unreachNames);
+        System.out.println("  over land and town roads only (without the hidden POI-to-town paths that also cross water): total=" + totalStrict + " " + strictNames);
         System.out.println("dropped (POI could not be placed, summed over runs): " + dropped);
         // land coverage stats
         int[] counts = new int[biomes.size()];
@@ -172,6 +181,35 @@ public class WorldSim {
         StringBuilder sb = new StringBuilder("coverage%: ");
         for (int i = 0; i < biomes.size(); i++) sb.append(biomes.get(i).name).append('=').append(String.format("%.1f", 100.0 * counts[i] / (width * height))).append(' ');
         System.out.println(sb);
+    }
+
+    /** Replica of World.loadFixedBiomeMap: own biome by exact colour (else biome 0), plus biome 0 and lower-index biomes within 2 tiles. */
+    static long[][] loadFixedBiomeMap(File file, List<BiomeData> biomes) throws Exception {
+        BufferedImage img = ImageIO.read(file);
+        Map<Integer, Integer> colorToBiome = new HashMap<>();
+        for (int i = 0; i < biomes.size(); i++) colorToBiome.putIfAbsent(Integer.parseInt(biomes.get(i).color, 16), i);
+        int[][] own = new int[width][height];
+        Set<Integer> unmatched = new TreeSet<>();
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++) {
+                int rgb = img.getRGB(x * img.getWidth() / width, y * img.getHeight() / height) & 0xffffff;
+                Integer b = colorToBiome.get(rgb);
+                if (b == null) unmatched.add(rgb);
+                own[x][y] = b == null ? 0 : b;
+            }
+        if (img.getWidth() != width || img.getHeight() != height)
+            System.out.println("WARNING biomeMap is " + img.getWidth() + "x" + img.getHeight() + ", world is " + width + "x" + height);
+        if (!unmatched.isEmpty()) System.out.println("WARNING biomeMap colours without a biome: " + unmatched.size());
+        long[][] masks = new long[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++) {
+                long mask = 1L | (1L << own[x][y]);
+                for (int nx = Math.max(0, x - 2); nx <= Math.min(width - 1, x + 2); nx++)
+                    for (int ny = Math.max(0, y - 2); ny <= Math.min(height - 1, y + 2); ny++)
+                        if (own[nx][ny] < own[x][y]) mask |= 1L << own[nx][ny];
+                masks[x][y] = mask;
+            }
+        return masks;
     }
 
     static Map<String, Integer> unreachNames = new TreeMap<>();
@@ -203,6 +241,7 @@ public class WorldSim {
             }
             if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y());
         }
+        totalStrict += unreachable(placed, strictNames, verbose ? "  not reachable over land and roads only: " : null); // stricter: no hidden POI paths
         for (int i = 0; i < others.size() - 1; i++) {
             Placed c = others.get(i); int best = -1; float bd = Float.MAX_VALUE;
             for (int j = 0; j < towns.size(); j++) {
@@ -211,6 +250,13 @@ public class WorldSim {
             }
             if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y());
         }
+        return unreachable(placed, unreachNames, verbose ? "  UNREACHABLE " : null);
+    }
+
+    static int totalStrict = 0;
+    static Map<String, Integer> strictNames = new TreeMap<>();
+
+    static int unreachable(List<Placed> placed, Map<String, Integer> names, String verbosePrefix) {
         Placed spawn = placed.stream().filter(p -> p.name().equals("Spawn")).findFirst().orElse(null);
         if (spawn == null) return -1;
         boolean[][] seen = new boolean[width][height];
@@ -234,7 +280,11 @@ public class WorldSim {
                 int x = px + dx, y = py + dy;
                 if (x >= 0 && y >= 0 && x < width && y < height && seen[x][y]) ok = true;
             }
-            if (!ok) { bad++; unreachNames.merge(p.label(), 1, Integer::sum); if (verbose) System.out.println("  UNREACHABLE " + p.label()); }
+            if (!ok) {
+                bad++;
+                names.merge(p.label(), 1, Integer::sum);
+                if (verbosePrefix != null) System.out.println(verbosePrefix + p.label());
+            }
         }
         return bad;
     }

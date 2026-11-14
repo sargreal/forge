@@ -1,6 +1,6 @@
 {
-"startPointX": 0.215,
-"startPointY": 0.315,
+"startPointX": 0.2228,
+"startPointY": 0.3433,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "shire",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.15,
-"height": 0.15,
-"color": "59a650",
+"width": 0.1344,
+"height": 0.1556,
+"color": "9ccf5a",
 "spriteNames": [
 	"Flower",
 	"PlainsTree",
