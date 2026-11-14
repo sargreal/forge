@@ -28,6 +28,9 @@ import java.util.*;
  *  2. Every enemy / POI referenced by a biome exists.
  *  3. Card pool: starter decks and enemy decks are measured against the plane's
  *     allowedEditions. A card with no printing in an allowed edition is "off-pool".
+ *     Starter decks are loaded as Config.starterDeck does (Standard-mode jumpstart decks once per
+ *     starterEditions entry); generated .json starters are sampled several times and also checked
+ *     against minDeckSize.
  *  4. Card resolution: CardUtil.getFullCardPool / ensureAllowedEdition only yield allowed printings.
  *  5. Reprint editions (allowed editions whose entries carry ${"artSet","artNum"}, e.g. MEAR):
  *     every entry has a card script, its art source printing exists, and it isn't already in
@@ -103,12 +106,29 @@ public class PlaneCheck {
 
         // ---------- 3. card pool ----------
         System.out.println("== Starter decks vs allowedEditions");
-        Set<String> starterPaths = new TreeSet<>();
+        // Standard mode passes the chosen starter edition to CardUtil.getDeck (jumpstart packs of that
+        // edition, see Config.starterDeck); the other modes load the deck without one.
+        List<CardEdition> starterEds = new ArrayList<>();
+        if (cd.starterEditions != null) for (String code : cd.starterEditions) {
+            CardEdition ed = FModel.getMagicDb().getEditions().get(code);
+            if (ed == null) error("starterEditions: unknown edition code " + code);
+            else starterEds.add(ed);
+        }
+        if (starterEds.isEmpty()) starterEds.add(null); // the game then falls back to JMP/J22/... packs
+        Set<String> standardPaths = new TreeSet<>(), starterPaths = new TreeSet<>();
         if (cd.difficulties != null) for (DifficultyData d : cd.difficulties) {
-            for (ObjectMapValues m : List.of(new ObjectMapValues(d.starterDecks), new ObjectMapValues(d.constructedStarterDecks), new ObjectMapValues(d.pileDecks)))
+            standardPaths.addAll(new ObjectMapValues(d.starterDecks).values);
+            for (ObjectMapValues m : List.of(new ObjectMapValues(d.constructedStarterDecks), new ObjectMapValues(d.pileDecks), new ObjectMapValues(d.commanderDecks)))
                 starterPaths.addAll(m.values);
         }
-        for (String p : starterPaths) reportDeck("starter " + p, loadDeck(p), allowed);
+        if (cd.starterDecksByEdition != null)
+            for (com.badlogic.gdx.utils.ObjectMap<String, String> m : cd.starterDecksByEdition.values())
+                starterPaths.addAll(new ObjectMapValues(m).values);
+        for (String p : standardPaths)
+            for (CardEdition ed : starterEds)
+                reportStarter("starter " + p + " [" + (ed == null ? "no starter edition" : ed.getCode()) + "]", p, ed, allowed, cd.minDeckSize);
+        for (String p : starterPaths)
+            reportStarter("starter " + p, p, null, allowed, cd.minDeckSize);
 
         System.out.println("== Enemy decks (enemies used by the plane's biomes)");
         int offPoolEnemies = 0;
@@ -225,6 +245,65 @@ public class PlaneCheck {
             error("cannot load deck " + path + ": " + ex);
             return null;
         }
+    }
+
+    /** Generated (.json) starters are random: how many samples to draw per starter deck. */
+    static final int STARTER_SAMPLES = 8;
+
+    /**
+     * Checks a starter deck the way Config.starterDeck loads it. Generated (.json) decks (jumpstart packs,
+     * card piles) are sampled STARTER_SAMPLES times; every sample must be in the pool and at least
+     * minDeckSize cards.
+     */
+    static void reportStarter(String label, String path, CardEdition starterEdition, Set<String> allowed, int minDeckSize) {
+        boolean generated = path.endsWith(".json");
+        int samples = generated ? STARTER_SAMPLES : 1;
+        Map<String, Integer> off = new TreeMap<>();
+        int offCount = 0, minSize = Integer.MAX_VALUE, maxSize = 0;
+        for (int s = 0; s < samples; s++) {
+            Deck deck;
+            java.io.PrintStream out = System.out;
+            try {
+                if (generated) System.setOut(new java.io.PrintStream(java.io.OutputStream.nullOutputStream())); // booster sheet parsing is chatty
+                deck = CardUtil.getDeck(path, false, false, "", false, false, starterEdition, true);
+            } catch (Exception ex) {
+                System.setOut(out);
+                error(label + ": cannot load deck: " + ex);
+                return;
+            } finally {
+                System.setOut(out);
+            }
+            if (deck == null) { error(label + ": deck is null"); return; }
+            int size = deck.getMain().countAll();
+            minSize = Math.min(minSize, size);
+            maxSize = Math.max(maxSize, size);
+            Map<String, Integer> o = offPool(deck, allowed);
+            for (Map.Entry<String, Integer> e : o.entrySet()) off.merge(e.getKey(), e.getValue(), Integer::sum);
+            offCount += o.values().stream().mapToInt(Integer::intValue).sum();
+        }
+        String what = (generated ? samples + " samples, " : "") + (minSize == maxSize ? minSize : minSize + "-" + maxSize) + " cards";
+        if (offCount > 0)
+            warn(label + ": " + offCount + " off-pool card copies (" + what + ")" + (verbose ? " " + off : ""));
+        else if (verbose) info(label + ": OK (" + what + ")");
+        if (minDeckSize > 0 && minSize < minDeckSize)
+            warn(label + ": " + minSize + " cards, below minDeckSize " + minDeckSize);
+    }
+
+    /** Off-pool card names (no printing in an allowed edition, basics excepted) with their copy counts. */
+    static Map<String, Integer> offPool(Deck deck, Set<String> allowed) {
+        Map<String, Integer> off = new TreeMap<>();
+        for (DeckSection s : new DeckSection[]{DeckSection.Main, DeckSection.Sideboard, DeckSection.Commander}) {
+            if (!deck.has(s)) continue;
+            for (Map.Entry<PaperCard, Integer> en : deck.get(s)) {
+                PaperCard c = en.getKey();
+                if (c.getRules().getType().isBasicLand()) continue;
+                boolean inPool = false;
+                for (PaperCard p : FModel.getMagicDb().getCommonCards().getAllCards(c.getName()))
+                    if (allowed.contains(p.getEdition())) { inPool = true; break; }
+                if (!inPool) off.merge(c.getName(), en.getValue(), Integer::sum);
+            }
+        }
+        return off;
     }
 
     /** @return number of off-pool card copies */
