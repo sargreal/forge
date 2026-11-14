@@ -1,0 +1,2462 @@
+[
+  {
+    "name": "ME Wild Wolves",
+    "nameOverride": "Wild Wolves",
+    "sprite": "sprites/enemy/beast/largemammals/wolf.atlas",
+    "deck": [
+      "decks/enemy/free/wild_wolves.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 30,
+    "scale": 0.7,
+    "life": 12,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "G",
+    "questTags": [
+      "MiddleEarth",
+      "Wolf",
+      "Animal",
+      "Beast",
+      "Wild",
+      "Aggressive",
+      "BiomeGreen",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Warg Pack",
+    "nameOverride": "Warg Pack",
+    "sprite": "sprites/enemy/fiend/hellhound_2.atlas",
+    "deck": [
+      "decks/enemy/free/warg_pack.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 28,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Black",
+          "Green"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "BG",
+    "questTags": [
+      "MiddleEarth",
+      "Wolf",
+      "Warg",
+      "Beast",
+      "Wild",
+      "Aggressive",
+      "Shadow",
+      "IdentityBlack",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Mirkwood Spiders",
+    "nameOverride": "Mirkwood Spiders",
+    "sprite": "sprites/enemy/beast/arachnid/spider_black.atlas",
+    "deck": [
+      "decks/enemy/free/mirkwood_spiders.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 22,
+    "life": 13,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "G",
+    "questTags": [
+      "MiddleEarth",
+      "Spider",
+      "Predator",
+      "Ambush",
+      "Wild",
+      "BiomeBlack",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Great Spider",
+    "nameOverride": "Great Spider of Mirkwood",
+    "sprite": "sprites/enemy/beast/arachnid/spider_purple.atlas",
+    "deck": [
+      "decks/enemy/free/great_spiders.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 22,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Black",
+          "Green"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "BG",
+    "questTags": [
+      "MiddleEarth",
+      "Spider",
+      "Predator",
+      "Ambush",
+      "Wild",
+      "BiomeBlack",
+      "IdentityBlack",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Wild Bear",
+    "nameOverride": "Wild Bear",
+    "sprite": "sprites/enemy/beast/bear/bear.atlas",
+    "deck": [
+      "decks/enemy/free/wild_bears.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 25,
+    "life": 13,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "G",
+    "questTags": [
+      "MiddleEarth",
+      "Bear",
+      "Animal",
+      "Territorial",
+      "Wild",
+      "BiomeGreen",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Beorning",
+    "nameOverride": "Beorning",
+    "sprite": "sprites/enemy/humanoid/human/warrior/bearguard.atlas",
+    "deck": [
+      "decks/enemy/free/beorning.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 25,
+    "life": 17,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Green"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "G",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Bear",
+      "Shapeshifter",
+      "FreePeoples",
+      "Territorial",
+      "BiomeGreen",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Huorn",
+    "nameOverride": "Huorn",
+    "sprite": "sprites/enemy/plant/golgari_treant.atlas",
+    "deck": [
+      "decks/enemy/free/huorns.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 14,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Green"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "G",
+    "questTags": [
+      "MiddleEarth",
+      "Treefolk",
+      "Huorn",
+      "Nature",
+      "Territorial",
+      "BiomeGreen",
+      "IdentityGreen"
+    ]
+  },
+  {
+    "name": "ME Old Man Willow",
+    "nameOverride": "Old Man Willow",
+    "sprite": "sprites/enemy/plant/treant_large.atlas",
+    "deck": [
+      "decks/enemy/free/old_man_willow.dck"
+    ],
+    "ai": "",
+    "boss": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.2,
+    "difficulty": 2,
+    "speed": 10,
+    "scale": 0.6,
+    "life": 30,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 3,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "colors": [
+          "Black",
+          "Green"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 50,
+        "addMaxCount": 150
+      },
+      {
+        "type": "shards",
+        "probability": 1,
+        "count": 5,
+        "addMaxCount": 5
+      }
+    ],
+    "colors": "BG",
+    "questTags": [
+      "MiddleEarth",
+      "Treefolk",
+      "Huorn",
+      "Nature",
+      "Boss",
+      "Unique",
+      "IdentityBlack",
+      "IdentityGreen"
+    ],
+    "bossIntro": "The willow creaks and its roots close around you. Sleep, little traveller..."
+  },
+  {
+    "name": "ME Barrow-wight",
+    "nameOverride": "Barrow-wight",
+    "sprite": "sprites/enemy/undead/wraith.atlas",
+    "deck": [
+      "decks/enemy/free/barrow_wights.dck"
+    ],
+    "ai": "",
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 14,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Black"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "B",
+    "questTags": [
+      "MiddleEarth",
+      "Undead",
+      "Wight",
+      "Spirit",
+      "Nocturnal",
+      "BiomeBlack",
+      "IdentityBlack"
+    ]
+  },
+  {
+    "name": "ME Barrow-wight Lord",
+    "nameOverride": "Barrow-wight Lord",
+    "sprite": "sprites/enemy/undead/lich_3.atlas",
+    "deck": [
+      "decks/enemy/free/barrow_lord.dck"
+    ],
+    "ai": "",
+    "boss": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.2,
+    "difficulty": 2,
+    "speed": 18,
+    "life": 32,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 3,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "colors": [
+          "Black"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 50,
+        "addMaxCount": 150
+      },
+      {
+        "type": "shards",
+        "probability": 1,
+        "count": 5,
+        "addMaxCount": 5
+      }
+    ],
+    "colors": "B",
+    "questTags": [
+      "MiddleEarth",
+      "Undead",
+      "Wight",
+      "Boss",
+      "Unique",
+      "IdentityBlack"
+    ],
+    "bossIntro": "Cold be hand and heart and bone, and cold be sleep under stone."
+  },
+  {
+    "name": "ME Dead Marshes Lights",
+    "nameOverride": "Dead Marshes Lights",
+    "sprite": "sprites/enemy/undead/ghost_3.atlas",
+    "deck": [
+      "decks/enemy/free/dead_marshes.dck"
+    ],
+    "ai": "",
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 26,
+    "life": 13,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "UB",
+    "questTags": [
+      "MiddleEarth",
+      "Undead",
+      "Spirit",
+      "Ghost",
+      "Swamp",
+      "BiomeBlack",
+      "IdentityBlue",
+      "IdentityBlack"
+    ]
+  },
+  {
+    "name": "ME Gollum",
+    "nameOverride": "Gollum",
+    "sprite": "sprites/enemy/undead/ghoul.atlas",
+    "deck": [
+      "decks/enemy/free/gollum.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 34,
+    "life": 14,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Black"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "B",
+    "questTags": [
+      "MiddleEarth",
+      "Halfling",
+      "Thief",
+      "Sneaky",
+      "Unique",
+      "IdentityBlack"
+    ],
+    "bossIntro": "Where iss it? Where iss it, my precious?"
+  },
+  {
+    "name": "ME Bill Ferny",
+    "nameOverride": "Bill Ferny",
+    "sprite": "sprites/enemy/humanoid/human/rogue/rogue.atlas",
+    "deck": [
+      "decks/enemy/free/bill_ferny.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 26,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Blue",
+          "Black"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "UB",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Rogue",
+      "Bandit",
+      "Spy",
+      "Unique",
+      "IdentityBlue",
+      "IdentityBlack"
+    ]
+  },
+  {
+    "name": "ME Southern Ruffian",
+    "nameOverride": "Southern Ruffian",
+    "sprite": "sprites/enemy/humanoid/human/bandit/bandit.atlas",
+    "deck": [
+      "decks/enemy/free/southern_ruffians.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 25,
+    "life": 12,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "BR",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Bandit",
+      "Ruffian",
+      "Wandering",
+      "IdentityBlack",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "ME Sharkeys Ruffian",
+    "nameOverride": "Sharkey's Ruffian",
+    "sprite": "sprites/enemy/humanoid/human/bandit/bandittrapster.atlas",
+    "deck": [
+      "decks/enemy/free/sharkeys_men.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 24,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "White",
+          "Black"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "WB",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Bandit",
+      "Ruffian",
+      "Shadow",
+      "IdentityWhite",
+      "IdentityBlack"
+    ]
+  },
+  {
+    "name": "ME Dunlending Raider",
+    "nameOverride": "Dunlending Raider",
+    "sprite": "sprites/enemy/humanoid/human/barbarian/barbarian.atlas",
+    "deck": [
+      "decks/enemy/free/dunlendings.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 26,
+    "life": 13,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "BR",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Dunlending",
+      "Raider",
+      "Barbarian",
+      "BiomeColorless",
+      "IdentityBlack",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "ME Great Eagle",
+    "nameOverride": "Great Eagle",
+    "sprite": "sprites/enemy/beast/bird/falcon.atlas",
+    "deck": [
+      "decks/enemy/free/great_eagles.dck"
+    ],
+    "ai": "",
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 34,
+    "scale": 1.3,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "White",
+          "Blue"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "WU",
+    "questTags": [
+      "MiddleEarth",
+      "Bird",
+      "Eagle",
+      "Flying",
+      "FreePeoples",
+      "BiomeRed",
+      "IdentityWhite",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Watcher in the Water",
+    "nameOverride": "Watcher in the Water",
+    "sprite": "sprites/enemy/beast/ocean/octopus.atlas",
+    "deck": [
+      "decks/enemy/free/watcher.dck"
+    ],
+    "ai": "",
+    "boss": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.2,
+    "difficulty": 2,
+    "speed": 12,
+    "life": 32,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 3,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "colors": [
+          "Blue"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 50,
+        "addMaxCount": 150
+      },
+      {
+        "type": "shards",
+        "probability": 1,
+        "count": 5,
+        "addMaxCount": 5
+      }
+    ],
+    "colors": "U",
+    "questTags": [
+      "MiddleEarth",
+      "Kraken",
+      "Monster",
+      "Water",
+      "Boss",
+      "Unique",
+      "IdentityBlue"
+    ],
+    "bossIntro": "The dark pool stirs. Long pale tentacles reach for the shore."
+  },
+  {
+    "name": "ME Cold-drake",
+    "nameOverride": "Cold-drake",
+    "sprite": "sprites/enemy/dragon/drake.atlas",
+    "deck": [
+      "decks/enemy/free/cold_drakes.dck"
+    ],
+    "ai": "",
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 20,
+    "scale": 0.9,
+    "life": 20,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "R",
+    "questTags": [
+      "MiddleEarth",
+      "Dragon",
+      "Drake",
+      "Monster",
+      "Flying",
+      "BiomeRed",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "ME Grey Mountain Wyrm",
+    "nameOverride": "Grey Mountain Wyrm",
+    "sprite": "sprites/enemy/dragon/dragonlarge.atlas",
+    "deck": [
+      "decks/enemy/free/grey_wyrm.dck"
+    ],
+    "ai": "",
+    "boss": true,
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.2,
+    "difficulty": 2,
+    "speed": 18,
+    "scale": 0.75,
+    "life": 32,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 3,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 1,
+        "colors": [
+          "Red"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 50,
+        "addMaxCount": 150
+      },
+      {
+        "type": "shards",
+        "probability": 1,
+        "count": 5,
+        "addMaxCount": 5
+      }
+    ],
+    "colors": "R",
+    "questTags": [
+      "MiddleEarth",
+      "Dragon",
+      "Monster",
+      "Flying",
+      "Boss",
+      "Unique",
+      "IdentityRed"
+    ],
+    "bossIntro": "Thief! Fire and ruin on all who come to the Grey Mountains!"
+  },
+  {
+    "name": "ME Ranger of the North",
+    "nameOverride": "Ranger of the North",
+    "sprite": "sprites/enemy/humanoid/human/archer/bowmandefender.atlas",
+    "deck": [
+      "decks/enemy/free/ranger_north.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 30,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Green",
+          "White"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "GW",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Ranger",
+      "Dunedain",
+      "FreePeoples",
+      "Duelist",
+      "BiomeGreen",
+      "IdentityGreen",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Ranger of Ithilien",
+    "nameOverride": "Ranger of Ithilien",
+    "sprite": "sprites/enemy/humanoid/human/archer/archer_2.atlas",
+    "deck": [
+      "decks/enemy/free/ranger_ithilien.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 30,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "White",
+          "Blue"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "WU",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Ranger",
+      "Gondor",
+      "FreePeoples",
+      "Duelist",
+      "IdentityWhite",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Rohirrim Rider",
+    "nameOverride": "Rohirrim Rider",
+    "sprite": "sprites/enemy/humanoid/human/knight/cavalier.atlas",
+    "deck": [
+      "decks/enemy/free/rohirrim_riders.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 36,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Knight",
+      "Rohan",
+      "Rider",
+      "FreePeoples",
+      "Duelist",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Marshal of the Mark",
+    "nameOverride": "Marshal of the Mark",
+    "sprite": "sprites/enemy/humanoid/human/knight/cavalier_2.atlas",
+    "deck": [
+      "decks/enemy/free/rohan_marshal.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 36,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Knight",
+      "Rohan",
+      "Rider",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Guard of the Citadel",
+    "nameOverride": "Guard of the Citadel",
+    "sprite": "sprites/enemy/humanoid/human/soldier/swordsman.atlas",
+    "deck": [
+      "decks/enemy/free/gondor_guard.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 24,
+    "life": 13,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "W",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Soldier",
+      "Gondor",
+      "FreePeoples",
+      "Duelist",
+      "BiomeWhite",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Captain of Gondor",
+    "nameOverride": "Captain of Gondor",
+    "sprite": "sprites/enemy/humanoid/human/knight/paladin.atlas",
+    "deck": [
+      "decks/enemy/free/gondor_captain.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 26,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "White",
+          "Blue"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "WU",
+    "questTags": [
+      "MiddleEarth",
+      "Human",
+      "Knight",
+      "Gondor",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "IdentityWhite",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Galadhrim Warden",
+    "nameOverride": "Galadhrim Warden",
+    "sprite": "sprites/enemy/humanoid/elf/hunter.atlas",
+    "deck": [
+      "decks/enemy/free/lorien_wardens.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 28,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Green",
+          "Blue"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "GU",
+    "questTags": [
+      "MiddleEarth",
+      "Elf",
+      "Lorien",
+      "Archer",
+      "FreePeoples",
+      "Duelist",
+      "BiomeGreen",
+      "IdentityGreen",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Woodland Realm Guard",
+    "nameOverride": "Woodland Realm Guard",
+    "sprite": "sprites/enemy/humanoid/elf/hunter_2.atlas",
+    "deck": [
+      "decks/enemy/free/woodland_realm.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 28,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Green",
+          "Blue"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "GU",
+    "questTags": [
+      "MiddleEarth",
+      "Elf",
+      "Mirkwood",
+      "FreePeoples",
+      "Duelist",
+      "BiomeGreen",
+      "IdentityGreen",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Elf-lord of Rivendell",
+    "nameOverride": "Elf-lord of Rivendell",
+    "sprite": "sprites/enemy/humanoid/elf/druid_2.atlas",
+    "deck": [
+      "decks/enemy/free/rivendell_lord.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 28,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Green",
+          "Blue"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "GU",
+    "questTags": [
+      "MiddleEarth",
+      "Elf",
+      "Rivendell",
+      "Noble",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "IdentityGreen",
+      "IdentityBlue"
+    ]
+  },
+  {
+    "name": "ME Dwarf of Erebor",
+    "nameOverride": "Dwarf of Erebor",
+    "sprite": "sprites/enemy/humanoid/dwarf/dwarflarge.atlas",
+    "deck": [
+      "decks/enemy/free/erebor_dwarves.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 22,
+    "scale": 0.75,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "Erebor",
+      "Warrior",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Iron Hills Warlord",
+    "nameOverride": "Iron Hills Warlord",
+    "sprite": "sprites/enemy/humanoid/dwarf/bear_cavalry.atlas",
+    "deck": [
+      "decks/enemy/free/iron_hills.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 26,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "IronHills",
+      "Warrior",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Dwarf Prospector",
+    "nameOverride": "Dwarf Prospector",
+    "sprite": "sprites/enemy/humanoid/dwarf/miner.atlas",
+    "deck": [
+      "decks/enemy/free/dwarf_prospectors.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 22,
+    "life": 12,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "R",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "Miner",
+      "Subterranean",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "ME Hobbit Troublemaker",
+    "nameOverride": "Hobbit Troublemaker",
+    "sprite": "sprites/enemy/humanoid/human/peasant/farmer.atlas",
+    "deck": [
+      "decks/enemy/free/hobbit_troublemakers.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 28,
+    "scale": 0.8,
+    "life": 11,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "GW",
+    "questTags": [
+      "MiddleEarth",
+      "Halfling",
+      "Hobbit",
+      "Shire",
+      "FreePeoples",
+      "Duelist",
+      "Beginner",
+      "IdentityGreen",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "ME Ent",
+    "nameOverride": "Ent of Fangorn",
+    "sprite": "sprites/enemy/plant/treant.atlas",
+    "deck": [
+      "decks/enemy/free/ents.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 14,
+    "life": 24,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Green",
+          "White"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "GW",
+    "questTags": [
+      "MiddleEarth",
+      "Treefolk",
+      "Ent",
+      "Nature",
+      "FreePeoples",
+      "Duelist",
+      "BiomeGreen",
+      "IdentityGreen",
+      "IdentityWhite"
+    ]
+  }
+]
