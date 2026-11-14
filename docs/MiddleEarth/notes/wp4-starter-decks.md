@@ -12,7 +12,7 @@ Branch `worktree-agent-ac206f8d82cc5306a`.
 - `check.sh -v`: every starter shows 0 off-pool cards, 0 errors. Warnings 743 → 713 (the 30 off-pool starter warnings are gone).
 - `PlaneCheck.java` now loads starters exactly as `Config.starterDeck` does: Standard-mode jumpstart decks with each `starterEditions` entry, generated `.json` starters sampled 8 times, and a `minDeckSize` check.
 
-STRENGTH_SUMMARY
+- **Strength (coordinator re-measure after the agent stopped mid-tuning, `--g40 -n 40`):** 7 of 15 constructed decks are on par (44–59%). Too strong: Mirkwood 74%, Corsairs of Umbar 71%, Rivendell 68%, Wilderland 68%, Mordor 65%. Too weak: the Shire 35%, Isengard 39%, Lothlórien 39%. Tuning continues as a follow-up.
 
 ## 1. Inventory: how a new game picks its deck
 
@@ -46,21 +46,41 @@ Upstream does not make the constructed decks weaker by difficulty; the colour pa
 
 All under `forge-gui/res/adventure/MiddleEarth/decks/starter/ME/`.
 
-MAPPING_TABLE
+_(Not written: the agent hit the usage limit. See the files in `decks/starter/ME/` and `config.json`.)_
 
 ## 3. Constructed decks
 
 Construction rules: 40 cards, 17 lands (two-colour decks: 2 gain lands of the pair + 8/7 basics), about 15–17 creatures, 2–4 removal spells, at most 1–2 rares, no mythics. Set-specific printings (`Card|LTR`, first of LTR, HOB, LTC, HOC, PLTC, MEAR that prints the card); basics `|LTR`.
 
-DECKLISTS
+_(Not written: the agent hit the usage limit. See the files in `decks/starter/ME/` and `config.json`.)_
 
 ## 4. Strength
 
-STRENGTH_TABLES
+Constructed decks, final state of the branch, 80 games each against the 40-card kit cuts (run `wp4-final`):
+
+| Deck | Cards | Games | W-L-D | Score | 95% CI | On play | On draw | Avg turns | Timeouts | Rating |
+| --- | ---: | ---: | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |
+| Bree | 40 | 80 | 39-41-0 | **49%** | 38%–60% | 60% | 38% | 23.4 | 0 | on par with the starter kits |
+| Erebor | 40 | 80 | 46-34-0 | **57%** | 47%–68% | 62% | 52% | 17.5 | 0 | on par with the starter kits |
+| Gondor | 40 | 80 | 40-40-0 | **50%** | 39%–61% | 62% | 38% | 20.3 | 0 | on par with the starter kits |
+| Isengard | 40 | 80 | 31-49-0 | **39%** | 29%–50% | 40% | 38% | 21.4 | 0 | weaker than the starter kits |
+| The Istari | 40 | 80 | 44-36-0 | **55%** | 44%–65% | 60% | 50% | 19.9 | 0 | on par with the starter kits |
+| Ithilien | 40 | 80 | 35-45-0 | **44%** | 33%–55% | 52% | 35% | 20.7 | 0 | on par with the starter kits |
+| Lothlórien | 40 | 80 | 31-49-0 | **39%** | 29%–50% | 42% | 35% | 22.7 | 0 | weaker than the starter kits |
+| Mirkwood | 40 | 80 | 59-21-0 | **74%** | 63%–82% | 75% | 72% | 22.6 | 0 | far too strong |
+| Mordor | 40 | 80 | 52-28-0 | **65%** | 54%–75% | 68% | 62% | 18.3 | 0 | stronger than the starter kits |
+| The Oathbreakers | 40 | 80 | 47-33-0 | **59%** | 48%–69% | 50% | 68% | 19.8 | 0 | stronger than the starter kits |
+| Rivendell | 40 | 80 | 54-26-0 | **68%** | 57%–77% | 72% | 62% | 19.8 | 0 | stronger than the starter kits |
+| Riders of Rohan | 40 | 80 | 47-33-0 | **59%** | 48%–69% | 72% | 45% | 18.8 | 0 | stronger than the starter kits |
+| The Shire | 40 | 80 | 28-52-0 | **35%** | 25%–46% | 42% | 28% | 22.5 | 0 | weaker than the starter kits |
+| Corsairs of Umbar | 40 | 80 | 57-23-0 | **71%** | 61%–80% | 65% | 78% | 18.8 | 0 | far too strong |
+| Wilderland | 40 | 80 | 54-26-0 | **68%** | 57%–77% | 70% | 65% | 19.1 | 0 | stronger than the starter kits |
+
+Standard mode builds from the official LTR Jumpstart packs. They vary a lot by pack (9–75% in runs r3/r4) and aren't tuned, because they are official product.
 
 ## 5. Tuning notes
 
-TUNING
+_(Not written: the agent hit the usage limit. See the files in `decks/starter/ME/` and `config.json`.)_
 
 ## 6. Checker change (`tools/middleearth/PlaneCheck.java`)
 
@@ -83,4 +103,4 @@ No exceptions in the game log. (Screenshots in `.me-test/gui/`, not committed.)
 
 ## 8. Open questions
 
-OPEN
+_(Not written: the agent hit the usage limit. See the files in `decks/starter/ME/` and `config.json`.)_
