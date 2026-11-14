@@ -685,6 +685,23 @@ public final class CardEdition implements Comparable<CardEdition> {
                 "\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\",?"
         );
 
+        /** Fork: parses the inside of a token line's ${...} block, same rules as for card lines (keys lowercased). */
+        static Map<String, String> parseTokenParams(String text) {
+            Matcher paramMatcher = EXTRA_PARAMS_PATTERN.matcher(text);
+            if (!paramMatcher.lookingAt()) {
+                System.err.println("Ignoring malformed token parameter text: " + text);
+                return null;
+            }
+            Map<String, String> params = new HashMap<>(2);
+            do {
+                String k = paramMatcher.group(1).trim().toLowerCase();
+                String v = paramMatcher.group(2).trim();
+                if (!k.isEmpty() && !v.isEmpty())
+                    params.put(k, v);
+            } while (paramMatcher.find());
+            return params;
+        }
+
         private final boolean isCustomEditions;
 
         public Reader(File path) {
@@ -775,6 +792,14 @@ public final class CardEdition implements Comparable<CardEdition> {
                 for (String line : contents.get("tokens")) {
                     if (StringUtils.isBlank(line))
                         continue;
+                    // Fork: optional trailing ${...} params on token lines (art source, see EditionEntry.hasArtSource)
+                    Map<String, String> tokenParams = null;
+                    line = line.trim();
+                    int paramStart = line.indexOf(" ${");
+                    if (paramStart >= 0 && line.endsWith("}")) {
+                        tokenParams = parseTokenParams(line.substring(paramStart + 3, line.length() - 1));
+                        line = line.substring(0, paramStart);
+                    }
                     Matcher matcher = TOKEN_PATTERN.matcher(line);
 
                     if (!matcher.matches()) {
@@ -785,7 +810,7 @@ public final class CardEdition implements Comparable<CardEdition> {
                     String cardName = matcher.group(3);
                     String artistName = matcher.group(5);
                     // rarity isn't used for this anyway
-                    EditionEntry tis = new EditionEntry(cardName, collectorNumber, CardRarity.Token, artistName, null);
+                    EditionEntry tis = new EditionEntry(cardName, collectorNumber, CardRarity.Token, artistName, tokenParams);
                     tokenMap.put(cardName, tis);
                 }
             }

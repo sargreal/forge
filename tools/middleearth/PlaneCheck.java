@@ -32,6 +32,8 @@ import java.util.*;
  *  5. Reprint editions (allowed editions whose entries carry ${"artSet","artNum"}, e.g. MEAR):
  *     every entry has a card script, its art source printing exists, and it isn't already in
  *     another allowed edition. Also lists tokens that no allowed edition prints (no token art).
+ *     Flavor names (${"flavorName"}) are unique, are no real card name, and the printing still resolves by
+ *     real name, flavor name and image key; [tokens] art sources (${"artSet","artNum"}) exist.
  *
  * Exit code: 1 if there are ERRORs (parse failures, missing references, wrong printings),
  * 0 otherwise. Off-pool cards are reported as WARN (content work, see docs/MiddleEarth/PLAN.md).
@@ -200,9 +202,85 @@ public class PlaneCheck {
                         noTokenArt.add(t);
             }
             info(code + ": " + entries.size() + " cards " + rarities + ", " + artOk + " art sources resolved");
+            checkFlavorNames(ed, entries);
+            checkTokenArtSources(ed);
             if (!noTokenArt.isEmpty())
-                info(code + ": tokens without a printing in the allowed editions (generic image): " + noTokenArt);
+                warn(code + ": tokens without a printing in the allowed editions (generic image): " + noTokenArt);
+            else
+                info(code + ": 0 tokens without art (every token its cards make has a printing in the allowed editions)");
         }
+    }
+
+    /**
+     * WP2b: flavor names (${"flavorName": ...}) are unique, don't collide with a real card name or another
+     * edition's flavor name, and the printing still resolves by its real name, by its flavor name and by its
+     * image key, with the art source intact.
+     */
+    static void checkFlavorNames(CardEdition ed, List<CardEdition.EditionEntry> entries) {
+        CardDb db = FModel.getMagicDb().getCommonCards();
+        String code = ed.getCode();
+        Set<String> realNames = new HashSet<>();
+        for (PaperCard u : db.getUniqueCards()) for (forge.card.ICardFace f : u.getRules().getAllFaces()) if (f != null) realNames.add(f.getName().toLowerCase());
+        Map<String, String> otherFlavors = new HashMap<>();
+        for (CardEdition other : FModel.getMagicDb().getEditions()) {
+            if (other == ed) continue;
+            for (CardEdition.EditionEntry e : other.getAllCardsInSet())
+                if (e.getFlavorName() != null)
+                    for (String part : e.getFlavorName().split("\\s*//\\s*")) otherFlavors.put(part.toLowerCase(), other.getCode() + " " + e.name());
+        }
+        Map<String, String> seen = new HashMap<>();
+        int ok = 0, n = 0;
+        for (CardEdition.EditionEntry e : entries) {
+            String fl = e.getFlavorName();
+            if (fl == null) continue;
+            n++;
+            String label = code + " #" + e.collectorNumber() + " " + e.name() + " \"" + fl + "\"";
+            boolean good = true;
+            for (String part : fl.split("\\s*//\\s*")) {
+                String k = part.toLowerCase();
+                if (seen.containsKey(k)) { error(label + ": flavor name also used by " + seen.get(k)); good = false; }
+                seen.put(k, e.name());
+                if (realNames.contains(k)) { error(label + ": flavor name is the name of a real card"); good = false; }
+                if (otherFlavors.containsKey(k)) { error(label + ": flavor name already used by " + otherFlavors.get(k)); good = false; }
+            }
+            PaperCard byReal = db.getCard(e.name(), code, e.collectorNumber());
+            if (byReal == null || !byReal.getName().equals(e.name()) || !byReal.hasFlavorName()) {
+                error(label + ": real-name lookup " + e.name() + "|" + code + " gives " + byReal); continue;
+            }
+            String front = fl.split("\\s*//\\s*")[0];
+            // CardFace.assignMissingFieldsToVariant rewrites the oracle text: real name -> flavor name, then the real
+            // name's "nickname" (first word) -> the flavor's first word. A flavor name containing that word gets mangled.
+            String realNick = forge.util.Lang.getInstance().getNickName(e.name().split(" // ")[0]);
+            if (!realNick.equals(forge.util.Lang.getInstance().getNickName(front)) && java.util.regex.Pattern.compile("\\b" + java.util.regex.Pattern.quote(realNick) + "\\b").matcher(front).find()) {
+                error(label + ": flavor name contains '" + realNick + "', which the oracle-text rewrite would replace"); good = false;
+            }
+            if (!byReal.getDisplayName().equals(front)) { error(label + ": display name is '" + byReal.getDisplayName() + "'"); good = false; }
+            PaperCard byFlavor = db.getCard(front);
+            if (byFlavor == null || !byFlavor.equals(byReal)) { error(label + ": flavor-name lookup gives " + byFlavor); good = false; }
+            PaperCard byKey = forge.util.ImageUtil.getPaperCardFromImageKey(byReal.getImageKey(false));
+            if (byKey == null || !byKey.equals(byReal)) { error(label + ": image key " + byReal.getImageKey(false) + " gives " + byKey); good = false; }
+            if (e.hasArtSource() && forge.util.ImageFetcher.getArtSourcePrinting(byReal) == byReal) { error(label + ": art source lost"); good = false; }
+            if (verbose) info(label + " -> file " + byReal.getCardImageKey());
+            if (good) ok++;
+        }
+        info(code + ": " + n + " flavor names, " + ok + " unique and resolving (real name, flavor name, image key, art source)");
+    }
+
+    /** WP2b: [tokens] entries with ${"artSet","artNum"} must point at the same token script in that set. */
+    static void checkTokenArtSources(CardEdition ed) {
+        int n = 0, ok = 0;
+        for (Map.Entry<String, CardEdition.EditionEntry> en : ed.getTokens().entries()) {
+            CardEdition.EditionEntry t = en.getValue();
+            n++;
+            String label = ed.getCode() + " token #" + t.collectorNumber() + " " + en.getKey();
+            if (!FModel.getMagicDb().getAllTokens().containsRule(en.getKey())) { error(label + ": no token script"); continue; }
+            if (!t.hasArtSource()) { warn(label + ": no art source (artSet/artNum)"); continue; }
+            org.apache.commons.lang3.tuple.Pair<CardEdition, String> src = forge.util.ImageFetcher.getTokenArtSource(ed, en.getKey(), t.collectorNumber());
+            if (src.getLeft() == ed) { error(label + ": art source " + t.getArtSourceSet() + " " + t.getArtSourceNumber() + " does not print this token"); continue; }
+            ok++;
+            if (verbose) info(label + " -> art " + src.getLeft().getCode() + " token " + src.getRight() + " (" + src.getLeft().getTokensCode() + "/" + src.getRight() + ")");
+        }
+        if (n > 0) info(ed.getCode() + ": " + n + " tokens, " + ok + " token art sources resolved");
     }
 
     static void finish() {

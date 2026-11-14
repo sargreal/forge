@@ -12,6 +12,7 @@ import forge.localinstance.properties.ForgeConstants;
 import forge.localinstance.properties.ForgePreferences;
 import forge.model.FModel;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.util.*;
@@ -119,6 +120,28 @@ public abstract class ImageFetcher {
             return exact ? source : card;
         }
         return card;
+    }
+
+    /**
+     * Fork: the token counterpart of {@link #getArtSourcePrinting}. A {@code [tokens]} line may carry
+     * {@code ${"artSet": "<card set code>", "artNum": "<token collector number in that set>"}}.
+     * Returns (source edition, source collector number) if that set lists the same token script
+     * under that number, otherwise (edition, collectorNumber) unchanged.
+     */
+    public static Pair<CardEdition, String> getTokenArtSource(CardEdition edition, String tokenName, String collectorNumber) {
+        Pair<CardEdition, String> own = Pair.of(edition, collectorNumber);
+        for (CardEdition.EditionEntry entry : edition.getTokens().get(tokenName)) {
+            if (!entry.hasArtSource() || !collectorNumber.equalsIgnoreCase(entry.collectorNumber()))
+                continue;
+            CardEdition source = StaticData.instance().getEditions().get(entry.getArtSourceSet());
+            if (source == null)
+                return own;
+            for (CardEdition.EditionEntry t : source.getTokens().get(tokenName))
+                if (entry.getArtSourceNumber().equalsIgnoreCase(t.collectorNumber()))
+                    return Pair.of(source, t.collectorNumber());
+            return own;
+        }
+        return own;
     }
 
     public static String getPlanechaseFilename(final String cardName) {
@@ -365,11 +388,13 @@ public abstract class ImageFetcher {
             Collection<CardEdition.EditionEntry> allTokens = edition.getTokens().get(tokenName);
 
             if (tempdata.length > 2) {
-                String tokenCode = edition.getTokensCode();
+                // Fork: a token may borrow another set's token image (see getTokenArtSource); cached under its own key.
+                Pair<CardEdition, String> urlToken = getTokenArtSource(edition, tokenName, tempdata[2]);
+                String tokenCode = urlToken.getLeft().getTokensCode();
                 String preferredLang = FModel.getPreferences().getPref(ForgePreferences.FPref.UI_CARD_DOWNLOAD_LANG);
-                String langCode = CdnUuidCache.resolvePreferredLangCode(preferredLang, tokenCode, tempdata[2], edition.getCardsLangCode());
+                String langCode = CdnUuidCache.resolvePreferredLangCode(preferredLang, tokenCode, urlToken.getRight(), urlToken.getLeft().getCardsLangCode());
                 // Just assume the CNr from the token image is valid
-                downloadUrls.add(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD + ImageUtil.getScryfallTokenDownloadUrl(tempdata[2], tokenCode, langCode, face));
+                downloadUrls.add(ForgeConstants.URL_PIC_SCRYFALL_DOWNLOAD + ImageUtil.getScryfallTokenDownloadUrl(urlToken.getRight(), tokenCode, langCode, face));
             } else if (!allTokens.isEmpty()) {
                 // This loop is going to try to download all the arts until it finds one
                 // This is a bit wrong since it _should_ just be trying to get the one with the appropriate collector number
