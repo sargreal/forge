@@ -67,12 +67,8 @@
     "name": "Adept Black Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/black_wiz2.atlas",
     "deck": [
-      "decks/standard/blackwizard_medium_demonicpact.dck",
-      "decks/standard/blackwizard_medium_fear.dck",
-      "decks/standard/blackwizard_medium_goblins.dck",
-      "decks/standard/blackwizard_easy_artifact.dck",
-      "decks/standard/blackwizard_easy_badmoon.dck",
-      "decks/standard/blackwizard_easy_mill.dck"
+      "decks/enemy/shadow/dol_guldur_spirit.dck",
+      "decks/enemy/shadow/dol_guldur_necromancer.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -129,19 +125,15 @@
       "IdentityBlack",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Dol Guldur Adept"
   },
   {
     "name": "Adept Blue Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/blue_wiz2.atlas",
     "deck": [
-      "decks/standard/bluewizard_medium_donate.dck",
-      "decks/standard/bluewizard_medium_dragons.dck",
-      "decks/standard/bluewizard_easy_artifact.dck",
-      "decks/standard/bluewizard_easy_control.dck",
-      "decks/standard/bluewizard_easy_thassa.dck",
-      "decks/standard/bluewizard_medium_midrange.dck",
-      "decks/standard/bluewizard_medium_mill.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -189,16 +181,15 @@
       "IdentityBlue",
       "BiomeBlue",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Easterling Sorcerer"
   },
   {
     "name": "Adept Green Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/green_wiz2.atlas",
     "deck": [
-      "decks/standard/greenwizard_medium_cheatramp.dck",
-      "decks/standard/greenwizard_medium_nissa.dck",
-      "decks/standard/greenwizard_medium_snakes.dck",
-      "decks/standard/greenwizard_medium_trample.dck"
+      "decks/enemy/free/huorns.dck",
+      "decks/enemy/free/wild_bears.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -256,20 +247,15 @@
       "IdentityGreen",
       "BiomeGreen",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Wild-wood Druid"
   },
   {
     "name": "Adept Red Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/red_wiz2.atlas",
     "deck": [
-      "decks/standard/redwizard_medium_artifact.dck",
-      "decks/standard/redwizard_medium_giant.dck",
-      "decks/standard/redwizard_medium_circleofflame.dck",
-      "decks/standard/redwizard_medium_ralburn.dck",
-      "decks/standard/redwizard_medium_hasteburn.dck",
-      "decks/standard/redwizard_easy_burn.dck",
-      "decks/standard/redwizard_easy_dragons.dck",
-      "decks/standard/redwizard_easy_gauntletofmight.dck"
+      "decks/enemy/shadow/uruk_hai.dck",
+      "decks/enemy/shadow/orc_captain.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -328,16 +314,15 @@
       "IdentityRed",
       "BiomeRed",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Isengard Fire-wright"
   },
   {
     "name": "Adept White Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/white_wiz2.atlas",
     "deck": [
-      "decks/standard/whitewizard_medium_aggro.dck",
-      "decks/standard/whitewizard_medium_basri.dck",
-      "decks/standard/whitewizard_medium_control.dck",
-      "decks/standard/whitewizard_medium_knight.dck"
+      "decks/enemy/free/rohirrim_riders.dck",
+      "decks/enemy/free/gondor_captain.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -397,7 +382,8 @@
       "IdentityWhite",
       "BiomeColorless",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Gondorian Loremaster"
   },
   {
     "name": "Adult Green Dragon",
@@ -489,7 +475,8 @@
     "name": "Adventurer",
     "sprite": "sprites/enemy/humanoid/swordsman_3.atlas",
     "deck": [
-      "decks/standard/adventurer.dck"
+      "decks/enemy/free/ranger_north.dck",
+      "decks/enemy/free/hobbit_troublemakers.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -556,10 +543,11 @@
   },
   {
     "name": "Aerie Guard",
-    "nameOverride": "",
+    "nameOverride": "Guard of the Eyrie",
     "sprite": "sprites/enemy/fiend/aerie_guard.atlas",
     "deck": [
-      "decks/standard/aerie_guard.dck"
+      "decks/enemy/free/gondor_guard.dck",
+      "decks/enemy/free/great_eagles.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -621,7 +609,8 @@
     "name": "Aether Channeler",
     "sprite": "sprites/enemy/humanoid/human/cleric/monk_3.atlas",
     "deck": [
-      "decks/standard/aether_channeler.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -691,7 +680,8 @@
       "IdentityBlue",
       "IdentityAzorius",
       "Mystic"
-    ]
+    ],
+    "nameOverride": "Easterling Channeler"
   },
   {
     "name": "Akroma",
@@ -1052,7 +1042,8 @@
     "name": "Ancient Vampire",
     "sprite": "sprites/enemy/undead/vampire_4.atlas",
     "deck": [
-      "decks/standard/ancientvampire.dck"
+      "decks/enemy/shadow/ringwraith.dck",
+      "decks/enemy/shadow/dol_guldur_necromancer.dck"
     ],
     "ai": "",
     "flying": true,
@@ -1118,7 +1109,8 @@
       "Evil",
       "Wise",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "Ancient Blood-lord"
   },
   {
     "name": "Angel Overseer",
@@ -1412,11 +1404,8 @@
     "name": "Apprentice Black Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/black_wizard.atlas",
     "deck": [
-      "decks/standard/blackwizard_easy_bog.dck",
-      "decks/standard/blackwizard_easy_humans.dck",
-      "decks/standard/blackwizard_easy_pile.dck",
-      "decks/standard/blackwizard_easy_thrull.dck",
-      "decks/standard/blackwizard_easy.json"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -1477,16 +1466,15 @@
       "IdentityBlack",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Dol Guldur Acolyte"
   },
   {
     "name": "Apprentice Blue Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/mage.atlas",
     "deck": [
-      "decks/standard/bluewizard_apprentice_1.dck",
-      "decks/standard/bluewizard_apprentice_2.dck",
-      "decks/standard/bluewizard_apprentice_3.dck",
-      "decks/standard/bluewizard_easy.json"
+      "decks/enemy/free/hobbit_troublemakers.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "flying": true,
@@ -1550,16 +1538,15 @@
       "IdentityBlue",
       "BiomeColorless",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Marsh-lights Trickster"
   },
   {
     "name": "Apprentice Green Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/green_wiz1.atlas",
     "deck": [
-      "decks/standard/greenwizard_easy_elf.dck",
-      "decks/standard/greenwizard_easy_enchantment.dck",
-      "decks/standard/greenwizard_easy_vanilla.dck",
-      "decks/standard/greenwizard_easy.json"
+      "decks/enemy/free/wild_wolves.dck",
+      "decks/enemy/free/beorning.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -1621,17 +1608,14 @@
       "IdentityGreen",
       "BiomeGreen",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Wildwood Hedge-witch"
   },
   {
     "name": "Apprentice Red Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/enchanter.atlas",
     "deck": [
-      "decks/standard/redwizard_easy.json",
-      "decks/standard/redwizard_easy_1.dck",
-      "decks/standard/redwizard_easy_2.dck",
-      "decks/standard/redwizard_apprentice_1.dck",
-      "decks/standard/redwizard_easy_3.dck"
+      "decks/enemy/shadow/misty_goblin.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -1694,15 +1678,14 @@
       "IdentityRed",
       "BiomeRed",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Goblin Fire-eater"
   },
   {
     "name": "Apprentice White Wizard",
     "sprite": "sprites/enemy/humanoid/human/cleric/priest.atlas",
     "deck": [
-      "decks/standard/whitewizard_easy_ajani.dck",
-      "decks/standard/whitewizard_easy_wanderer.dck",
-      "decks/standard/whitewizard_easy_angelhuman.dck"
+      "decks/enemy/free/gondor_guard.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -1765,7 +1748,8 @@
       "IdentityWhite",
       "BiomeColorless",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Gondorian Healer"
   },
   {
     "name": "Arcane Golem",
@@ -1842,10 +1826,11 @@
   },
   {
     "name": "Archaeologist",
-    "nameOverride": "",
+    "nameOverride": "Delver of Ruins",
     "sprite": "sprites/enemy/humanoid/human/artificer/archaeologist.atlas",
     "deck": [
-      "decks/standard/archaeologist.dck"
+      "decks/enemy/free/dwarf_prospectors.dck",
+      "decks/enemy/free/hobbit_troublemakers.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -1898,7 +1883,8 @@
     "nameOverride": "Human Archer",
     "sprite": "sprites/enemy/humanoid/human/archer/archer_2.atlas",
     "deck": [
-      "decks/standard/human_archer.dck"
+      "decks/enemy/free/ranger_ithilien.dck",
+      "decks/enemy/free/gondor_guard.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -1944,10 +1930,11 @@
   },
   {
     "name": "Archer Elite",
-    "nameOverride": "",
+    "nameOverride": "Elite Ranger-archer",
     "sprite": "sprites/enemy/humanoid/human/archer/bowmandefender.atlas",
     "deck": [
-      "decks/standard/archerelite.dck"
+      "decks/enemy/free/ranger_ithilien.dck",
+      "decks/enemy/free/ranger_north.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -2225,7 +2212,8 @@
     "name": "Armored Knight",
     "sprite": "sprites/enemy/humanoid/knight.atlas",
     "deck": [
-      "decks/standard/armored_knight.dck"
+      "decks/enemy/free/gondor_guard.dck",
+      "decks/enemy/free/gondor_captain.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -2289,7 +2277,8 @@
       "IdentityRed",
       "IdentityBoros",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Gondorian Knight"
   },
   {
     "name": "Artifact Warrior",
@@ -2368,7 +2357,8 @@
     "nameOverride": "Forge Devil",
     "sprite": "sprites/enemy/fiend/devil.atlas",
     "deck": [
-      "decks/standard/ashmouth_devil.dck"
+      "decks/enemy/shadow/uruk_berserker.dck",
+      "decks/enemy/shadow/orc_captain.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -2457,7 +2447,7 @@
     "nameOverride": "Dwarven Grunt",
     "sprite": "sprites/enemy/humanoid/dwarf/dwarf_8.atlas",
     "deck": [
-      "decks/standard/axgard_dwarf.dck"
+      "decks/enemy/free/iron_hills.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -2534,7 +2524,7 @@
     "name": "Badger",
     "sprite": "sprites/enemy/beast/smallmammals/badger.atlas",
     "deck": [
-      "decks/standard/badger.dck"
+      "decks/enemy/free/wild_bears.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -2679,8 +2669,8 @@
     "name": "Bandit Archer",
     "sprite": "sprites/enemy/humanoid/human/bandit/banditarcher.atlas",
     "deck": [
-      "decks/standard/banditarcher_blink.dck",
-      "decks/standard/banditarcher_damage.dck"
+      "decks/enemy/free/southern_ruffians.dck",
+      "decks/enemy/free/ranger_ithilien.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -2752,15 +2742,15 @@
       "Archer",
       "Human",
       "Fighter"
-    ]
+    ],
+    "nameOverride": "Ruffian Archer"
   },
   {
     "name": "Bandit Leader",
     "sprite": "sprites/enemy/humanoid/human/bandit/banditleader.atlas",
     "deck": [
-      "decks/standard/banditleader_bolas.dck",
-      "decks/standard/banditleader_hellbent.dck",
-      "decks/standard/banditleader_rakdos.dck"
+      "decks/enemy/free/bill_ferny.dck",
+      "decks/enemy/free/sharkeys_men.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -2832,15 +2822,14 @@
       "IdentityRakdos",
       "Leader",
       "Human"
-    ]
+    ],
+    "nameOverride": "Ruffian Chief"
   },
   {
     "name": "Bandit Scoundrel",
     "sprite": "sprites/enemy/humanoid/human/bandit/bandit.atlas",
     "deck": [
-      "decks/standard/bandit_monor.dck",
-      "decks/standard/bandit_mutate.dck",
-      "decks/standard/bandit_zoo.dck"
+      "decks/enemy/free/southern_ruffians.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -2911,13 +2900,15 @@
       "IdentityRakdos",
       "Human",
       "Scavenger"
-    ]
+    ],
+    "nameOverride": "Ruffian Scoundrel"
   },
   {
     "name": "Bandit Slingshot",
     "sprite": "sprites/enemy/humanoid/human/bandit/banditslingshot.atlas",
     "deck": [
-      "decks/standard/banditslingshot_flyers.dck"
+      "decks/enemy/free/southern_ruffians.dck",
+      "decks/enemy/free/hobbit_troublemakers.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -2988,13 +2979,15 @@
       "IdentityRakdos",
       "Archer",
       "Human"
-    ]
+    ],
+    "nameOverride": "Ruffian Slinger"
   },
   {
     "name": "Bandit Trapmaster",
     "sprite": "sprites/enemy/humanoid/human/bandit/bandittrapster.atlas",
     "deck": [
-      "decks/standard/bandittrapper_hazezon.dck"
+      "decks/enemy/free/sharkeys_men.dck",
+      "decks/enemy/free/southern_ruffians.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -3065,14 +3058,16 @@
       "Sneaky",
       "Trapper",
       "Human"
-    ]
+    ],
+    "nameOverride": "Ruffian Trapper"
   },
   {
     "name": "Barbarian",
     "nameOverride": "Human Barbarian",
     "sprite": "sprites/enemy/humanoid/human/barbarian/barbarian.atlas",
     "deck": [
-      "decks/standard/barbarian.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/wild_wolves.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -3130,7 +3125,7 @@
     "name": "Bat",
     "sprite": "sprites/enemy/beast/smallmammals/bat.atlas",
     "deck": [
-      "decks/standard/bat.dck"
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -3191,7 +3186,8 @@
       "Aggressive",
       "Bat",
       "Nocturnal"
-    ]
+    ],
+    "nameOverride": "Great Bat"
   },
   {
     "name": "Bear",
@@ -3271,7 +3267,8 @@
     "nameOverride": "Human Beastmaster",
     "sprite": "sprites/enemy/humanoid/human/warrior/caribou_elite.atlas",
     "deck": [
-      "decks/standard/beastmaster.dck"
+      "decks/enemy/free/wild_wolves.dck",
+      "decks/enemy/free/wild_bears.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -3348,7 +3345,8 @@
     "name": "Beholder",
     "sprite": "sprites/enemy/aberration/beholder.atlas",
     "deck": [
-      "decks/standard/beholder.dck"
+      "decks/enemy/free/watcher.dck",
+      "decks/enemy/shadow/the_necromancer.dck"
     ],
     "ai": "",
     "flying": true,
@@ -3417,7 +3415,8 @@
       "IdentityRed",
       "IdentityGrixis",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Eye of the Deep"
   },
   {
     "name": "Berserker",
@@ -3596,7 +3595,8 @@
     "name": "Black Golem",
     "sprite": "sprites/enemy/construct/golem_black.atlas",
     "deck": [
-      "decks/standard/blackconstruct.dck"
+      "decks/enemy/shadow/stone_troll.dck",
+      "decks/enemy/shadow/cave_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -3665,7 +3665,8 @@
       "IdentityBlack",
       "Construct",
       "Robot"
-    ]
+    ],
+    "nameOverride": "Black Stone-troll"
   },
   {
     "name": "Bloodgift Demon",
@@ -4043,7 +4044,7 @@
     "name": "Boggart",
     "sprite": "sprites/enemy/humanoid/goblin/goblin_2.atlas",
     "deck": [
-      "decks/standard/eyeblight.dck"
+      "decks/enemy/shadow/snaga.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4086,14 +4087,16 @@
       "IdentityGruul",
       "BiomeRed",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Snaga Skulker"
   },
   {
     "name": "Bone Dragon",
-    "nameOverride": "",
+    "nameOverride": "Bone Drake",
     "sprite": "sprites/enemy/dragon/bonedragon.atlas",
     "deck": [
-      "decks/standard/bonedragon.dck"
+      "decks/enemy/shadow/fell_beast.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4253,7 +4256,7 @@
     "name": "Brain Mole",
     "sprite": "sprites/enemy/monstrosity/brainmole.atlas",
     "deck": [
-      "decks/standard/millwizard.dck"
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4301,7 +4304,8 @@
       "Wandering",
       "Unholy",
       "Evil"
-    ]
+    ],
+    "nameOverride": "Marsh-mole"
   },
   {
     "name": "Bull",
@@ -4447,7 +4451,7 @@
     "name": "Caracal",
     "sprite": "sprites/enemy/beast/cat/caracal.atlas",
     "deck": [
-      "decks/standard/caracal.dck"
+      "decks/enemy/free/wild_wolves.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -4503,14 +4507,16 @@
       "Large",
       "Hunter",
       "Beast"
-    ]
+    ],
+    "nameOverride": "Wildcat"
   },
   {
     "name": "Cathar",
     "nameOverride": "Human Raider",
     "sprite": "sprites/enemy/humanoid/human/soldier/cathar.atlas",
     "deck": [
-      "decks/standard/cathar.dck"
+      "decks/enemy/free/gondor_guard.dck",
+      "decks/enemy/free/rohirrim_riders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4596,7 +4602,8 @@
     "name": "Cave Spider",
     "sprite": "sprites/enemy/beast/arachnid/spider_cave.atlas",
     "deck": [
-      "decks/standard/cave_spider.dck"
+      "decks/enemy/free/mirkwood_spiders.dck",
+      "decks/enemy/shadow/shelob_brood.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4698,7 +4705,7 @@
     "name": "Centaur Warrior",
     "sprite": "sprites/enemy/fey/centaur_2.atlas",
     "deck": [
-      "decks/standard/centaur_warrior.dck"
+      "decks/enemy/free/rohirrim_riders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -4729,14 +4736,16 @@
       "IdentitySelesnya",
       "BiomeGreen",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Horse-lord Warrior"
   },
   {
     "name": "Cephalid",
-    "nameOverride": "Cephalid Mindslaver",
+    "nameOverride": "Easterling Mind-binder",
     "sprite": "sprites/enemy/aberration/mindflayer.atlas",
     "deck": [
-      "decks/standard/cephalid.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "flying": true,
@@ -4913,10 +4922,8 @@
     "nameOverride": "Challenger",
     "sprite": "sprites/enemy/aberration/challenger.atlas",
     "deck": [
-      "decks/standard/challenger_20_allied_fires.dck",
-      "decks/standard/challenger_20_cavalcade_charge.dck",
-      "decks/standard/challenger_20_final_adventure.dck",
-      "decks/standard/challenger_20_flash_of_ferocity.dck"
+      "decks/enemy/shadow/uruk_captain.dck",
+      "decks/enemy/free/gondor_captain.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -5007,10 +5014,8 @@
     "nameOverride": "Challenger",
     "sprite": "sprites/enemy/aberration/challenger.atlas",
     "deck": [
-      "decks/standard/challenger_21_azorius_control.dck",
-      "decks/standard/challenger_21_dimir_rogue.dck",
-      "decks/standard/challenger_21_mono-green_stompy.dck",
-      "decks/standard/challenger_21_mono-red_aggro.dck"
+      "decks/enemy/free/rohan_marshal.dck",
+      "decks/enemy/free/rivendell_lord.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -5101,10 +5106,8 @@
     "nameOverride": "Challenger",
     "sprite": "sprites/enemy/aberration/challenger.atlas",
     "deck": [
-      "decks/standard/challenger_22_dimir_control.dck",
-      "decks/standard/challenger_22_gruul_stompy.dck",
-      "decks/standard/challenger_22_mono_white_aggro.dck",
-      "decks/standard/challenger_22_rakdos_vampires.dck"
+      "decks/enemy/shadow/ringwraith.dck",
+      "decks/enemy/shadow/black_rider.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -6260,7 +6263,7 @@
     "name": "Cloaker",
     "sprite": "sprites/enemy/fiend/cloaker.atlas",
     "deck": [
-      "decks/standard/cloaker.dck"
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "flying": true,
@@ -6327,7 +6330,8 @@
       "Flying",
       "Demon",
       "Aberration"
-    ]
+    ],
+    "nameOverride": "Cloaked Shadow"
   },
   {
     "name": "Cloud Giant",
@@ -6799,7 +6803,8 @@
     "name": "Corrupted Blue Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/corrupted_bluewiz.atlas",
     "deck": [
-      "decks/standard/bluewiz_corrupted.dck"
+      "decks/enemy/shadow/the_necromancer.dck",
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -6846,7 +6851,8 @@
       "IdentityBlue",
       "Wizard",
       "Corrupted"
-    ]
+    ],
+    "nameOverride": "Corrupted Sorcerer"
   },
   {
     "name": "Corrupted Cleric",
@@ -6959,7 +6965,8 @@
     "name": "Corrupted Red Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/corrupted_redwiz.atlas",
     "deck": [
-      "decks/standard/redwiz_corrupted.dck"
+      "decks/enemy/shadow/uruk_captain.dck",
+      "decks/enemy/shadow/warg_rider.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -7006,7 +7013,8 @@
       "IdentityRed",
       "Wizard",
       "Corrupted"
-    ]
+    ],
+    "nameOverride": "Corrupted Fire-wright"
   },
   {
     "name": "Cosmic Horror",
@@ -7210,7 +7218,8 @@
     "name": "Crocodile",
     "sprite": "sprites/enemy/beast/reptile/crocodile_water.atlas",
     "deck": [
-      "decks/standard/crocodile.dck"
+      "decks/enemy/free/dead_marshes.dck",
+      "decks/enemy/free/watcher.dck"
     ],
     "ai": "",
     "flying": true,
@@ -7254,13 +7263,15 @@
       "Large",
       "Sneaky",
       "Crocodile"
-    ]
+    ],
+    "nameOverride": "Marsh Crocodile"
   },
   {
     "name": "Curselord",
     "sprite": "sprites/enemy/humanoid/human/wizard/black_wiz2.atlas",
     "deck": [
-      "decks/standard/curselord.dck"
+      "decks/enemy/shadow/dol_guldur_necromancer.dck",
+      "decks/enemy/shadow/ringwraith.dck"
     ],
     "ai": "",
     "spawnRate": 0.4,
@@ -7322,14 +7333,15 @@
       "BiomeBlack",
       "Evil",
       "Curses"
-    ]
+    ],
+    "nameOverride": "Curse-lord of Angmar"
   },
   {
     "name": "Cyclops",
     "nameOverride": "Youthful Cyclops",
     "sprite": "sprites/enemy/giant/cyclops.atlas",
     "deck": [
-      "decks/standard/cyclops.dck"
+      "decks/enemy/shadow/hill_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -7370,7 +7382,8 @@
     "name": "Dark Enchanter",
     "sprite": "sprites/enemy/humanoid/viashino/dreamwalker.atlas",
     "deck": [
-      "decks/miniboss/darkenchanter.dck"
+      "decks/enemy/shadow/the_necromancer.dck",
+      "decks/enemy/shadow/dol_guldur_necromancer.dck"
     ],
     "ai": "",
     "boss": true,
@@ -7438,13 +7451,15 @@
       "Enchanter",
       "Unholy",
       "Evil"
-    ]
+    ],
+    "nameOverride": "Dark Enchanter of Dol Guldur"
   },
   {
     "name": "Dark Knight",
     "sprite": "sprites/enemy/humanoid/human/knight/death_knight.atlas",
     "deck": [
-      "decks/standard/death_knight.dck"
+      "decks/enemy/shadow/black_rider.dck",
+      "decks/enemy/shadow/uruk_captain.dck"
     ],
     "ai": "",
     "spawnRate": 0.8,
@@ -7522,7 +7537,8 @@
       "IdentityBlack",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Black Knight of Mordor"
   },
   {
     "name": "Dark Spirit",
@@ -7607,7 +7623,8 @@
     "name": "Dawnhart Witch",
     "sprite": "sprites/enemy/humanoid/human/warlock/dawnhart_witch.atlas",
     "deck": [
-      "decks/standard/dawnhart_witch.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/wild_wolves.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -7683,13 +7700,15 @@
       "IdentityWhite",
       "IdentitySelesnya",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Dunlending Wise-woman"
   },
   {
     "name": "Death Knight",
     "sprite": "sprites/enemy/humanoid/human/knight/death_knight_2.atlas",
     "deck": [
-      "decks/standard/death_knight.dck"
+      "decks/enemy/shadow/black_rider.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -7768,16 +7787,15 @@
       "IdentityBlack",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Dead Knight of Angmar"
   },
   {
     "name": "Demon",
     "sprite": "sprites/enemy/fiend/demon_3.atlas",
     "deck": [
-      "decks/standard/demon.json",
-      "decks/standard/demonshard.dck",
-      "decks/standard/demonblackred.dck",
-      "decks/standard/demonmonoblack.dck"
+      "decks/enemy/shadow/uruk_captain.dck",
+      "decks/enemy/shadow/olog_hai.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -7869,7 +7887,8 @@
       "Unholy",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Fell Spirit"
   },
   {
     "name": "Demon of Tibalt",
@@ -8293,7 +8312,8 @@
     "name": "Disciple of Teferi",
     "sprite": "sprites/enemy/humanoid/human/cleric/monk.atlas",
     "deck": [
-      "decks/standard/disciple_of_teferi.dck"
+      "decks/enemy/free/rivendell_lord.dck",
+      "decks/enemy/free/lorien_wardens.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -8365,7 +8385,8 @@
       "IdentityRed",
       "IdentityWhite",
       "Identity Jeskai"
-    ]
+    ],
+    "nameOverride": "Disciple of Rivendell"
   },
   {
     "name": "Djinn",
@@ -8524,7 +8545,8 @@
     "name": "Doppelganger",
     "sprite": "sprites/enemy/undead/doppelganger.atlas",
     "deck": [
-      "decks/standard/mimic.dck"
+      "decks/enemy/free/gollum.dck",
+      "decks/enemy/free/hobbit_troublemakers.dck"
     ],
     "copyPlayerDeck": true,
     "ai": "",
@@ -8567,7 +8589,8 @@
       "IdentityUnknown",
       "BiomeColorless",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Shape-changer"
   },
   {
     "name": "Dragon",
@@ -8659,7 +8682,7 @@
     "name": "Dragonfly",
     "sprite": "sprites/enemy/beast/insect/dragonfly.atlas",
     "deck": [
-      "decks/standard/insect.dck"
+      "decks/enemy/free/mirkwood_spiders.dck"
     ],
     "ai": "",
     "flying": true,
@@ -8712,7 +8735,8 @@
       "IdentityGreen",
       "IdentityAbzan",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Giant Mirkwood Fly"
   },
   {
     "name": "Drake",
@@ -9050,10 +9074,11 @@
   },
   {
     "name": "Dwarf Demolisher",
-    "nameOverride": "",
+    "nameOverride": "Dwarf Sapper",
     "sprite": "sprites/enemy/humanoid/dwarf/dwarf_3.atlas",
     "deck": [
-      "decks/standard/dwarfdemolisher.dck"
+      "decks/enemy/free/erebor_dwarves.dck",
+      "decks/enemy/free/dwarf_prospectors.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -9122,10 +9147,11 @@
   },
   {
     "name": "Dwarf Mercenary",
-    "nameOverride": "",
+    "nameOverride": "Iron Hills Mercenary",
     "sprite": "sprites/enemy/humanoid/dwarf/dwarf_4.atlas",
     "deck": [
-      "decks/standard/dwarfmercenary.dck"
+      "decks/enemy/free/iron_hills.dck",
+      "decks/enemy/free/dwarf_prospectors.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -9206,10 +9232,11 @@
   },
   {
     "name": "Dwarf Pilot",
-    "nameOverride": "",
+    "nameOverride": "Dwarf Engineer",
     "sprite": "sprites/enemy/humanoid/dwarf/dwarfpilot.atlas",
     "deck": [
-      "decks/standard/dwarfpilot.dck"
+      "decks/enemy/free/dwarf_prospectors.dck",
+      "decks/enemy/free/erebor_dwarves.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -9382,7 +9409,8 @@
     "name": "Efreet",
     "sprite": "sprites/enemy/elemental/efreet_2.atlas",
     "deck": [
-      "decks/standard/efreet.dck"
+      "decks/enemy/shadow/fell_beast.dck",
+      "decks/enemy/shadow/mordor_orc.dck"
     ],
     "ai": "",
     "flying": true,
@@ -9413,14 +9441,15 @@
       "IdentityBlue",
       "IdentityIzzet",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Fire-drake of Mordor"
   },
   {
     "name": "Eldraine Faerie",
     "nameOverride": "Faerie Trickster",
     "sprite": "sprites/enemy/fey/pixie.atlas",
     "deck": [
-      "decks/standard/eldraine_faerie.dck"
+      "decks/enemy/free/lorien_wardens.dck"
     ],
     "ai": "",
     "flying": true,
@@ -9506,7 +9535,8 @@
     "nameOverride": "Fair Knight",
     "sprite": "sprites/enemy/humanoid/paladin_2.atlas",
     "deck": [
-      "decks/standard/eldraine_knight.dck"
+      "decks/enemy/free/gondor_guard.dck",
+      "decks/enemy/free/rohirrim_riders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -9591,7 +9621,8 @@
     "name": "Eldrazi",
     "sprite": "sprites/enemy/aberration/eldrazi/eldrazi.atlas",
     "deck": [
-      "decks/standard/eldrazi.dck"
+      "decks/enemy/shadow/olog_hai.dck",
+      "decks/enemy/shadow/the_necromancer.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -9677,13 +9708,15 @@
       "IdentityBlue",
       "IdentitySultai",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Fell Horror"
   },
   {
     "name": "Eldrazi Devastator",
     "sprite": "sprites/enemy/aberration/eldrazi/eldrazi_large.atlas",
     "deck": [
-      "decks/standard/eldrazilarge.dck"
+      "decks/enemy/shadow/olog_hai.dck",
+      "decks/enemy/shadow/uruk_captain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -9771,7 +9804,8 @@
       "IdentityBlue",
       "IdentitySultai",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Fell Devastator"
   },
   {
     "name": "Eldrazi Floater",
@@ -10177,7 +10211,8 @@
     "name": "Elk",
     "sprite": "sprites/enemy/beast/largemammals/deer_2.atlas",
     "deck": [
-      "decks/standard/elk.dck"
+      "decks/enemy/free/beorning.dck",
+      "decks/enemy/free/wild_bears.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -10243,13 +10278,14 @@
       "Prey",
       "IdentityGreen",
       "BiomeGreen"
-    ]
+    ],
+    "nameOverride": "Wild Stag"
   },
   {
     "name": "Emrakul",
     "sprite": "sprites/enemy/aberration/emrakul.atlas",
     "deck": [
-      "decks/boss/emrakul.dck"
+      "decks/enemy/shadow/balrog.dck"
     ],
     "ai": "",
     "boss": true,
@@ -10445,7 +10481,8 @@
     "name": "Evil Wall",
     "sprite": "sprites/enemy/construct/wall.atlas",
     "deck": [
-      "decks/standard/hiddenwall.dck"
+      "decks/enemy/free/huorns.dck",
+      "decks/enemy/shadow/stone_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -10503,13 +10540,14 @@
       "Construct",
       "Artifact",
       "Hidden"
-    ]
+    ],
+    "nameOverride": "Haunted Wall"
   },
   {
     "name": "Eye",
     "sprite": "sprites/enemy/aberration/eye.atlas",
     "deck": [
-      "decks/standard/eye.dck"
+      "decks/enemy/free/watcher.dck"
     ],
     "ai": "",
     "flying": true,
@@ -10573,7 +10611,8 @@
       "BiomeBlack",
       "Horror",
       "Evil"
-    ]
+    ],
+    "nameOverride": "Watching Eye"
   },
   {
     "name": "Faerie",
@@ -10737,7 +10776,7 @@
     "name": "Falcon",
     "sprite": "sprites/enemy/beast/bird/falcon.atlas",
     "deck": [
-      "decks/standard/falcon_w.dck"
+      "decks/enemy/free/great_eagles.dck"
     ],
     "ai": "",
     "flying": true,
@@ -10781,7 +10820,8 @@
       "Wild",
       "Flying",
       "IdentityWhite"
-    ]
+    ],
+    "nameOverride": "Eagle's Fledgling"
   },
   {
     "name": "Falcon-headed Aven Warrior",
@@ -10873,7 +10913,8 @@
     "name": "Fallen Angel",
     "sprite": "sprites/enemy/celestial/fallen_angel.atlas",
     "deck": [
-      "decks/standard/fallen_angel.dck"
+      "decks/enemy/shadow/winged_nazgul.dck",
+      "decks/enemy/shadow/ringwraith.dck"
     ],
     "ai": "",
     "flying": true,
@@ -10949,13 +10990,15 @@
       "Large",
       "Mystic",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Fallen Messenger"
   },
   {
     "name": "False Knight",
     "sprite": "sprites/enemy/humanoid/human/knight/false_knight.atlas",
     "deck": [
-      "decks/standard/death_knight.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -11032,13 +11075,15 @@
       "Unholy",
       "IdentityBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Hollow Knight"
   },
   {
     "name": "False Monk",
     "sprite": "sprites/enemy/humanoid/human/warlock/false_monk.atlas",
     "deck": [
-      "decks/standard/cultist.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/bill_ferny.dck"
     ],
     "spawnRate": 1,
     "difficulty": 0.1,
@@ -11111,7 +11156,8 @@
       "Disguised",
       "Unholy",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "False Pilgrim"
   },
   {
     "name": "Farmer",
@@ -11364,7 +11410,8 @@
     "name": "Fire Giant",
     "sprite": "sprites/enemy/giant/firegiant.atlas",
     "deck": [
-      "decks/standard/firegiant.dck"
+      "decks/enemy/shadow/hill_troll.dck",
+      "decks/enemy/shadow/cave_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -11431,7 +11478,8 @@
       "Warrior",
       "Territorial",
       "IdentityRed"
-    ]
+    ],
+    "nameOverride": "Fire-scarred Hill-troll"
   },
   {
     "name": "Flame Elemental",
@@ -11518,7 +11566,8 @@
     "name": "Flesh Abomination",
     "sprite": "sprites/enemy/monstrosity/flesh_horror.atlas",
     "deck": [
-      "decks/standard/flesh_horror.dck"
+      "decks/enemy/shadow/olog_hai.dck",
+      "decks/enemy/shadow/mouth_of_sauron.dck"
     ],
     "ai": "",
     "spawnRate": 0.3,
@@ -11733,7 +11782,8 @@
     "name": "Forest Giant",
     "sprite": "sprites/enemy/giant/forestgiant.atlas",
     "deck": [
-      "decks/standard/foresttitan.dck"
+      "decks/enemy/free/ents.dck",
+      "decks/enemy/free/huorns.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -11800,7 +11850,8 @@
       "Warrior",
       "Territorial",
       "IdentityGreen"
-    ]
+    ],
+    "nameOverride": "Forest Ent-giant"
   },
   {
     "name": "Fox",
@@ -11996,7 +12047,8 @@
     "name": "Frost Titan",
     "sprite": "sprites/enemy/giant/titan.atlas",
     "deck": [
-      "decks/standard/frost_titan.dck"
+      "decks/enemy/shadow/olog_hai.dck",
+      "decks/enemy/free/cold_drakes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -12077,7 +12129,8 @@
       "IdentityAzorius",
       "BiomeWhite",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Frost Troll-chief"
   },
   {
     "name": "Fungus",
@@ -12600,7 +12653,8 @@
     "name": "Geist",
     "sprite": "sprites/enemy/undead/ghost.atlas",
     "deck": [
-      "decks/standard/ghost_blue.dck"
+      "decks/enemy/free/dead_marshes.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "flying": true,
@@ -12670,7 +12724,8 @@
       "IdentityBlue",
       "BiomeBlue",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Dead Marsh Spirit"
   },
   {
     "name": "Geistmage",
@@ -13001,7 +13056,8 @@
     "name": "Ghoul",
     "sprite": "sprites/enemy/undead/ghoul.atlas",
     "deck": [
-      "decks/standard/ghoul.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -13031,13 +13087,15 @@
       "IdentityDimir",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Grave-ghoul"
   },
   {
     "name": "Ghoul Gravecaller",
     "sprite": "sprites/enemy/undead/ghoullarge.atlas",
     "deck": [
-      "decks/standard/ghoulgravecrawler.dck"
+      "decks/enemy/free/barrow_lord.dck",
+      "decks/enemy/shadow/dol_guldur_necromancer.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -13089,7 +13147,8 @@
       "BiomeBlack",
       "Ghoul",
       "Zombie"
-    ]
+    ],
+    "nameOverride": "Grave-caller"
   },
   {
     "name": "Giant Cyclops",
@@ -13158,7 +13217,7 @@
     "name": "Giant Fly",
     "sprite": "sprites/enemy/beast/insect/giantfly.atlas",
     "deck": [
-      "decks/standard/insect.dck"
+      "decks/enemy/free/mirkwood_spiders.dck"
     ],
     "ai": "",
     "flying": true,
@@ -13212,7 +13271,8 @@
       "IdentityGreen",
       "IdentityAbzan",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Giant Marsh Fly"
   },
   {
     "name": "Giant Panda",
@@ -13292,7 +13352,8 @@
     "name": "Giant Spider",
     "sprite": "sprites/enemy/beast/arachnid/spider_purple.atlas",
     "deck": [
-      "decks/standard/spider_token.dck"
+      "decks/enemy/free/mirkwood_spiders.dck",
+      "decks/enemy/free/great_spiders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -13490,10 +13551,11 @@
   },
   {
     "name": "Gladiator",
-    "nameOverride": "",
+    "nameOverride": "Pit Champion",
     "sprite": "sprites/enemy/humanoid/human/warrior/gladiator.atlas",
     "deck": [
-      "decks/standard/gladiator.dck"
+      "decks/enemy/free/rohan_marshal.dck",
+      "decks/enemy/free/gondor_captain.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -13678,7 +13740,8 @@
     "name": "Goblin Chief",
     "sprite": "sprites/enemy/humanoid/goblin/wolf_rider_2.atlas",
     "deck": [
-      "decks/enemy/shadow/moria_orc.dck"
+      "decks/enemy/shadow/moria_orc.dck",
+      "decks/enemy/shadow/great_goblin.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -13724,7 +13787,8 @@
       "IdentityBlack",
       "IdentityRakdos",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Goblin Chieftain"
   },
   {
     "name": "Goblin Fanatic",
@@ -13987,6 +14051,7 @@
     "name": "Goblin Warrior",
     "sprite": "sprites/enemy/humanoid/goblin/wolf_rider.atlas",
     "deck": [
+      "decks/enemy/shadow/misty_goblin.dck",
       "decks/enemy/shadow/warg_rider.dck"
     ],
     "ai": "",
@@ -14272,7 +14337,8 @@
     "name": "Golgari Treefolk",
     "sprite": "sprites/enemy/plant/treant_golgari.atlas",
     "deck": [
-      "decks/standard/treefolk_golgari.dck"
+      "decks/enemy/free/huorns.dck",
+      "decks/enemy/free/old_man_willow.dck"
     ],
     "spawnRate": 1,
     "difficulty": 0.2,
@@ -14351,13 +14417,14 @@
       "IdentityBlack",
       "IdentityGreen",
       "IdentityGolgari"
-    ]
+    ],
+    "nameOverride": "Rotting Huorn"
   },
   {
     "name": "Gorgon",
     "sprite": "sprites/enemy/monstrosity/gorgone.atlas",
     "deck": [
-      "decks/standard/gorgon.dck"
+      "decks/enemy/shadow/stone_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -14435,14 +14502,16 @@
       "IdentityGreen",
       "IdentityGolgari",
       "BiomeGreen"
-    ]
+    ],
+    "nameOverride": "Stone-turned Troll"
   },
   {
     "name": "Gorgon 2",
     "nameOverride": "Gorgon Sculptor",
     "sprite": "sprites/enemy/monstrosity/gorgonen.atlas",
     "deck": [
-      "decks/standard/gorgon_2.dck"
+      "decks/enemy/shadow/stone_troll.dck",
+      "decks/enemy/shadow/hill_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -14605,10 +14674,11 @@
   },
   {
     "name": "Grave Titan",
-    "nameOverride": "",
+    "nameOverride": "Grave-troll",
     "sprite": "sprites/enemy/giant/gravetitan.atlas",
     "deck": [
-      "decks/standard/gravetitan.dck"
+      "decks/enemy/shadow/cave_troll.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -14751,7 +14821,7 @@
     "name": "Greater Sandwurm",
     "sprite": "sprites/enemy/monstrosity/sandwurm2.atlas",
     "deck": [
-      "decks/standard/sandwurm.dck"
+      "decks/enemy/free/cold_drakes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -14788,13 +14858,15 @@
       "Nature",
       "Subterranean",
       "IdentityWhite"
-    ]
+    ],
+    "nameOverride": "Desert Cold-drake"
   },
   {
     "name": "Greater Zombie",
     "sprite": "sprites/enemy/undead/zombie.atlas",
     "deck": [
-      "decks/standard/zombie_greater.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -14857,7 +14929,8 @@
       "Zombie",
       "Humanoid",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "Barrow-wight Revenant"
   },
   {
     "name": "Green Beast",
@@ -15184,7 +15257,7 @@
     "name": "Griselbrand",
     "sprite": "sprites/enemy/fiend/griselbrand.atlas",
     "deck": [
-      "decks/boss/griselbrand.dck"
+      "decks/enemy/shadow/witch_king.dck"
     ],
     "ai": "",
     "boss": true,
@@ -15393,7 +15466,7 @@
     "name": "Harpy",
     "sprite": "sprites/enemy/monstrosity/harpy.atlas",
     "deck": [
-      "decks/standard/harpy.dck"
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -15470,14 +15543,16 @@
       "Thief",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Crebain Scavenger"
   },
   {
     "name": "Harpy 2",
     "nameOverride": "Harpy Crone",
     "sprite": "sprites/enemy/monstrosity/harpy_2.atlas",
     "deck": [
-      "decks/standard/harpy_2.dck"
+      "decks/enemy/shadow/crebain.dck",
+      "decks/enemy/shadow/fell_beast.dck"
     ],
     "ai": "",
     "flying": true,
@@ -15701,7 +15776,8 @@
     "name": "Hellhound",
     "sprite": "sprites/enemy/fiend/hellhound_2.atlas",
     "deck": [
-      "decks/standard/hellhound.dck"
+      "decks/enemy/free/warg_pack.dck",
+      "decks/enemy/shadow/warg_rider.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -15781,13 +15857,15 @@
       "IdentityRed",
       "IdentityRakdos",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Hell-warg"
   },
   {
     "name": "Hellion",
     "sprite": "sprites/enemy/monstrosity/sandwurm.atlas",
     "deck": [
-      "decks/standard/hellion.dck"
+      "decks/enemy/shadow/mordor_orc.dck",
+      "decks/enemy/shadow/uruk_berserker.dck"
     ],
     "ai": "",
     "spawnRate": 0.2,
@@ -15829,7 +15907,8 @@
       "IdentityRed",
       "BiomeRed",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Hill-orc Marauder"
   },
   {
     "name": "Hermit Crab",
@@ -15994,7 +16073,9 @@
     "name": "High Cultist",
     "sprite": "sprites/enemy/humanoid/human/warlock/high_cultist.atlas",
     "deck": [
-      "decks/standard/cultist.dck"
+      "decks/enemy/shadow/dol_guldur_necromancer.dck",
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/ringwraith.dck"
     ],
     "spawnRate": 1,
     "difficulty": 0.1,
@@ -16067,7 +16148,8 @@
       "Disguised",
       "Unholy",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "High Cultist of the Eye"
   },
   {
     "name": "High Elf",
@@ -16209,7 +16291,7 @@
     "nameOverride": "Giant Bull Hippo",
     "sprite": "sprites/enemy/beast/largemammals/hippo.atlas",
     "deck": [
-      "decks/standard/hippo.dck"
+      "decks/enemy/shadow/mumak.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -16635,7 +16717,7 @@
     "nameOverride": "Human Horseman",
     "sprite": "sprites/enemy/humanoid/human/knight/cavalier_2.atlas",
     "deck": [
-      "decks/standard/horsemanship.dck"
+      "decks/enemy/free/rohirrim_riders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -17051,10 +17133,11 @@
   },
   {
     "name": "Human Mercenary",
-    "nameOverride": "",
+    "nameOverride": "Sellsword",
     "sprite": "sprites/enemy/humanoid/swordsman_3.atlas",
     "deck": [
-      "decks/standard/humanmercenary.dck"
+      "decks/enemy/free/southern_ruffians.dck",
+      "decks/enemy/free/gondor_guard.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -17325,7 +17408,7 @@
     "name": "Ice Elemental",
     "sprite": "sprites/enemy/elemental/iceelemental2.atlas",
     "deck": [
-      "decks/standard/ice_elemental.dck"
+      "decks/enemy/free/cold_drakes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -17359,13 +17442,15 @@
       "Loner",
       "Mythical",
       "IdentitySelesnya"
-    ]
+    ],
+    "nameOverride": "Frost-wraith"
   },
   {
     "name": "Illusionist",
     "sprite": "sprites/enemy/humanoid/human/wizard/blue_wiz2.atlas",
     "deck": [
-      "decks/standard/illusion.dck"
+      "decks/enemy/free/hobbit_troublemakers.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -17410,7 +17495,8 @@
       "Scientist",
       "IdentityBlue",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Dead Marshes Illusionist"
   },
   {
     "name": "Immersturm Demon",
@@ -17889,10 +17975,11 @@
   },
   {
     "name": "Khan",
-    "nameOverride": "Human Raider",
+    "nameOverride": "Raider Chief",
     "sprite": "sprites/enemy/humanoid/human/knight/cavalier.atlas",
     "deck": [
-      "decks/standard/mardu.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/southern_ruffians.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -17977,7 +18064,8 @@
     "name": "Khenra Warrior",
     "sprite": "sprites/enemy/humanoid/khenra/jackalwarrior.atlas",
     "deck": [
-      "decks/standard/jackal.dck"
+      "decks/enemy/free/southern_ruffians.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "spawnRate": 0.3,
@@ -18027,7 +18115,8 @@
       "IdentityGreen",
       "IdentityGruul",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Harad Desert Warrior"
   },
   {
     "name": "Kiora",
@@ -18182,10 +18271,11 @@
   },
   {
     "name": "Knight Mercenary",
-    "nameOverride": "",
+    "nameOverride": "Sellsword Knight",
     "sprite": "sprites/enemy/humanoid/human/knight/cavalier_2.atlas",
     "deck": [
-      "decks/standard/knightmercenary.dck"
+      "decks/enemy/free/gondor_guard.dck",
+      "decks/enemy/free/rohirrim_riders.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -18266,10 +18356,11 @@
   },
   {
     "name": "Kobold Dragoncaller",
-    "nameOverride": "",
+    "nameOverride": "Snaga Drake-caller",
     "sprite": "sprites/enemy/humanoid/kobold/kobolddragoncaller.atlas",
     "deck": [
-      "decks/standard/kobolddragoncaller.dck"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/fell_beast.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -18400,10 +18491,11 @@
   },
   {
     "name": "Kobold Shaman",
-    "nameOverride": "",
+    "nameOverride": "Snaga Shaman",
     "sprite": "sprites/enemy/humanoid/kobold/koboldshaman.atlas",
     "deck": [
-      "decks/standard/roshnakhtheroic.dck"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/misty_goblin.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -18731,7 +18823,8 @@
     "name": "Kor Warrior",
     "sprite": "sprites/enemy/humanoid/kor/mineguard.atlas",
     "deck": [
-      "decks/standard/kor_warrior.dck"
+      "decks/enemy/free/rohirrim_riders.dck",
+      "decks/enemy/free/gondor_guard.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -18782,7 +18875,8 @@
       "IdentityWhite",
       "IdentityBoros",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Rohan Spearman"
   },
   {
     "name": "Kozilek",
@@ -19115,7 +19209,8 @@
     "name": "Lich",
     "sprite": "sprites/enemy/undead/lich_2.atlas",
     "deck": [
-      "decks/standard/lich.dck"
+      "decks/enemy/shadow/dol_guldur_necromancer.dck",
+      "decks/enemy/shadow/the_necromancer.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -19191,7 +19286,8 @@
       "Unholy",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Barrow-lich"
   },
   {
     "name": "Lightning Elemental",
@@ -19568,7 +19664,8 @@
     "name": "Lion",
     "sprite": "sprites/enemy/beast/cat/lion.atlas",
     "deck": [
-      "decks/standard/lion.dck"
+      "decks/enemy/free/wild_wolves.dck",
+      "decks/enemy/free/beorning.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -19623,14 +19720,16 @@
       "Large",
       "Hunter",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Mountain Lion"
   },
   {
     "name": "Loamspeaker",
-    "nameOverride": "",
+    "nameOverride": "Loamspeaker of the Wood",
     "sprite": "sprites/enemy/humanoid/elf/shaman.atlas",
     "deck": [
-      "decks/standard/loamspeaker.dck"
+      "decks/enemy/free/huorns.dck",
+      "decks/enemy/free/ents.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -20136,10 +20235,8 @@
     "name": "Master Black Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/black_wiz3.atlas",
     "deck": [
-      "decks/standard/blackwizard_hard_gravepact.dck",
-      "decks/standard/blackwizard_hard_knight.dck",
-      "decks/standard/blackwizard_hard_liliana.dck",
-      "decks/standard/blackwizard_hard_sacrifice.dck"
+      "decks/enemy/shadow/dol_guldur_necromancer.dck",
+      "decks/enemy/shadow/ringwraith.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -20183,16 +20280,15 @@
       "IdentityBlack",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Master of Dol Guldur"
   },
   {
     "name": "Master Blue Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/mage_2.atlas",
     "deck": [
-      "decks/standard/bluewizard_hard_control.dck",
-      "decks/standard/bluewizard_hard_tempo.dck",
-      "decks/standard/bluewizard_hard_artifact.dck",
-      "decks/standard/bluewizard_hard_bounce.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "flying": true,
@@ -20238,15 +20334,15 @@
       "IdentityBlue",
       "BiomeColorless",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Eastern Sorcerer-king"
   },
   {
     "name": "Master Green Wizard",
     "sprite": "sprites/enemy/humanoid/elf/green_wiz3.atlas",
     "deck": [
-      "decks/standard/greenwizard_hard_ramp.dck",
-      "decks/standard/greenwizard_hard_rampbis.dck",
-      "decks/standard/greenwizard_hard_sapproling.dck"
+      "decks/enemy/free/ents.dck",
+      "decks/enemy/free/huorns.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -20291,16 +20387,15 @@
       "IdentityGreen",
       "BiomeGreen",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Elder of the Wild-wood"
   },
   {
     "name": "Master Red Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/red_wiz3.atlas",
     "deck": [
-      "decks/standard/redwizard_hard_burn.dck",
-      "decks/standard/redwizard_hard_dragons.dck",
-      "decks/standard/redwizard_hard_fight.dck",
-      "decks/standard/redwizard_hard_lavaaxe.dck"
+      "decks/enemy/shadow/uruk_captain.dck",
+      "decks/enemy/shadow/olog_hai.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -20346,17 +20441,15 @@
       "IdentityRed",
       "BiomeRed",
       "BiomeColorless"
-    ]
+    ],
+    "nameOverride": "Orthanc Fire-master"
   },
   {
     "name": "Master White Wizard",
     "sprite": "sprites/enemy/humanoid/human/wizard/white_wiz3.atlas",
     "deck": [
-      "decks/standard/whitewizard_hard_humility.dck",
-      "decks/standard/whitewizard_hard_hatebears.dck",
-      "decks/standard/whitewizard_hard_humansoldier.dck",
-      "decks/standard/whitewizard_hard_armaggedon.dck",
-      "decks/standard/whitewizard_hard_enchantments.dck"
+      "decks/enemy/free/gondor_captain.dck",
+      "decks/enemy/free/rivendell_lord.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -20401,7 +20494,8 @@
       "IdentityWhite",
       "BiomeColorless",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Loremaster of Minas Tirith"
   },
   {
     "name": "Merfolk",
@@ -20599,7 +20693,8 @@
     "name": "Merfolk Fighter",
     "sprite": "sprites/enemy/humanoid/merfolk/merfolk.atlas",
     "deck": [
-      "decks/standard/merfolk_lords.dck"
+      "decks/enemy/shadow/corsair.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -20653,13 +20748,15 @@
       "IdentitySimic",
       "BiomeBlue",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Umbar Sea-raider"
   },
   {
     "name": "Merfolk Lord",
     "sprite": "sprites/enemy/humanoid/merfolk/merfolk_lord.atlas",
     "deck": [
-      "decks/standard/merfolk_lord2.dck"
+      "decks/enemy/shadow/corsair_captain.dck",
+      "decks/enemy/free/watcher.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -20714,13 +20811,14 @@
       "IdentityBlue",
       "IdentitySimic",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Umbar Sea-lord"
   },
   {
     "name": "Merfolk Soldier",
     "sprite": "sprites/enemy/humanoid/merfolk/mermaid.atlas",
     "deck": [
-      "decks/standard/merfolk_v_goblins.dck"
+      "decks/enemy/shadow/corsair.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -20764,7 +20862,8 @@
       "IdentityBlue",
       "BiomeBlue",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Umbar Deckhand"
   },
   {
     "name": "Merfolk warrior",
@@ -20921,7 +21020,8 @@
     "name": "Mimic",
     "sprite": "sprites/enemy/aberration/mimic.atlas",
     "deck": [
-      "decks/standard/mimic.dck"
+      "decks/enemy/free/gollum.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -20999,13 +21099,15 @@
       "IdentityBlack",
       "IdentityBlue",
       "IdentityDimir"
-    ]
+    ],
+    "nameOverride": "Marsh Mimic"
   },
   {
     "name": "Mindclaw Shaman",
     "sprite": "sprites/enemy/humanoid/viashino/dreamwalker.atlas",
     "deck": [
-      "decks/standard/mindclaw_shaman.dck"
+      "decks/enemy/shadow/crebain.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -21087,7 +21189,8 @@
       "IdentityRakdos",
       "BiomeRed",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Mindclaw Shaman"
   },
   {
     "name": "Minor Demon",
@@ -21235,7 +21338,8 @@
     "name": "Minotaur Flayer",
     "sprite": "sprites/enemy/fiend/warden_2.atlas",
     "deck": [
-      "decks/standard/minotaur.dck"
+      "decks/enemy/shadow/uruk_berserker.dck",
+      "decks/enemy/shadow/hill_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -21315,7 +21419,8 @@
       "IdentityRed",
       "IdentityRakdos",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Uruk Flayer"
   },
   {
     "name": "Minotaur Warcaller",
@@ -21543,7 +21648,8 @@
     "name": "Mountain Ogre",
     "sprite": "sprites/enemy/monstrosity/ogre_large.atlas",
     "deck": [
-      "decks/enemy/shadow/hill_troll.dck"
+      "decks/enemy/shadow/hill_troll.dck",
+      "decks/enemy/shadow/cave_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -21594,13 +21700,15 @@
       "IdentityRakdos",
       "Large",
       "Dungeon"
-    ]
+    ],
+    "nameOverride": "Mountain Troll"
   },
   {
     "name": "Mummy",
     "sprite": "sprites/enemy/undead/mummy.atlas",
     "deck": [
-      "decks/standard/mummy.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/shadow/easterling.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -21653,7 +21761,8 @@
       "BiomeColorless",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Entombed King's Wight"
   },
   {
     "name": "Myr Superion",
@@ -22031,7 +22140,8 @@
     "name": "Necrogoyf",
     "sprite": "sprites/enemy/monstrosity/shardsoul_slayer.atlas",
     "deck": [
-      "decks/standard/necrogoyf.dck"
+      "decks/enemy/free/dead_marshes.dck",
+      "decks/enemy/free/barrow_wights.dck"
     ],
     "ai": "",
     "flying": true,
@@ -22084,7 +22194,8 @@
       "Predator",
       "Unholy",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "Marsh-corpse"
   },
   {
     "name": "Necromancer",
@@ -22142,7 +22253,8 @@
       "Wizard",
       "Human",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "Necromancer Adept"
   },
   {
     "name": "Nezumi Leader",
@@ -22717,7 +22829,8 @@
     "nameOverride": "",
     "sprite": "sprites/enemy/humanoid/orc/orc_hunter.atlas",
     "deck": [
-      "decks/enemy/shadow/mordor_orc.dck"
+      "decks/enemy/shadow/mordor_orc.dck",
+      "decks/enemy/shadow/warg_rider.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -22774,7 +22887,8 @@
     "nameOverride": "",
     "sprite": "sprites/enemy/humanoid/orc/orc_warrior.atlas",
     "deck": [
-      "decks/enemy/shadow/uruk_hai.dck"
+      "decks/enemy/shadow/uruk_hai.dck",
+      "decks/enemy/shadow/mordor_orc.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -22992,7 +23106,8 @@
     "name": "Orzhov Cleric",
     "sprite": "sprites/enemy/humanoid/human/cleric/cleric_orzhov.atlas",
     "deck": [
-      "decks/standard/cleric_orzhov.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -23071,13 +23186,15 @@
       "IdentityWhite",
       "IdentityBlack",
       "IdentityOrzhov"
-    ]
+    ],
+    "nameOverride": "Easterling Priest"
   },
   {
     "name": "Owl",
     "sprite": "sprites/enemy/beast/bird/owl.atlas",
     "deck": [
-      "decks/standard/owl.dck"
+      "decks/enemy/free/great_eagles.dck",
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -23140,13 +23257,14 @@
       "BiomeGreen",
       "BiomeWhite",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Great Owl"
   },
   {
     "name": "Parrot",
     "sprite": "sprites/enemy/beast/bird/parrot.atlas",
     "deck": [
-      "decks/standard/parrot.dck"
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -23208,7 +23326,8 @@
       "Scavenger",
       "IdentityGreen",
       "IdentityBlue"
-    ]
+    ],
+    "nameOverride": "Southern Parrot"
   },
   {
     "name": "Penguin",
@@ -23360,7 +23479,8 @@
     "name": "Pharaoh",
     "sprite": "sprites/enemy/undead/pharaoh.atlas",
     "deck": [
-      "decks/standard/pharaoh.dck"
+      "decks/enemy/free/barrow_lord.dck",
+      "decks/enemy/shadow/easterling.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -23412,7 +23532,8 @@
       "IdentityOrzhov",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Wight-king of the East"
   },
   {
     "name": "Phoenix",
@@ -23600,7 +23721,8 @@
       "BiomeColorless",
       "BiomeBlue",
       "Pirate"
-    ]
+    ],
+    "nameOverride": "Corsair"
   },
   {
     "name": "Pirate 2",
@@ -23766,7 +23888,7 @@
   },
   {
     "name": "Pirate Captain",
-    "nameOverride": "",
+    "nameOverride": "Corsair Captain of Umbar",
     "sprite": "sprites/enemy/humanoid/human/rogue/pirate_captain.atlas",
     "deck": [
       "decks/enemy/shadow/corsair_captain.dck"
@@ -23923,7 +24045,8 @@
     "name": "Plague Rat Swarm",
     "sprite": "sprites/enemy/beast/smallmammals/wildratpoison.atlas",
     "deck": [
-      "decks/standard/rat_poisonrat.dck"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/misty_goblin.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -23982,7 +24105,8 @@
       "IdentityBlack",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Plague Rats of Moria"
   },
   {
     "name": "Plaguelord",
@@ -24119,10 +24243,11 @@
   },
   {
     "name": "Poisonous Snake",
-    "nameOverride": "",
+    "nameOverride": "Poisonous Marsh-serpent",
     "sprite": "sprites/enemy/beast/reptile/snake_cobra.atlas",
     "deck": [
-      "decks/standard/poisonoussnake.dck"
+      "decks/enemy/shadow/shelob_brood.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -24193,7 +24318,8 @@
     "name": "Polar Bear",
     "sprite": "sprites/enemy/beast/polar/polarbear.atlas",
     "deck": [
-      "decks/standard/polarbear.dck"
+      "decks/enemy/free/wild_bears.dck",
+      "decks/enemy/free/beorning.dck"
     ],
     "ai": "",
     "spawnRate": 0.3,
@@ -24260,7 +24386,8 @@
       "IdentityBlue",
       "IdentityGreen",
       "Snow"
-    ]
+    ],
+    "nameOverride": "Cold-land Bear"
   },
   {
     "name": "Porcupine",
@@ -24379,10 +24506,11 @@
   },
   {
     "name": "Pyromancer",
-    "nameOverride": "",
+    "nameOverride": "Mordor Fire-caller",
     "sprite": "sprites/enemy/humanoid/human/shaman/pyromancer.atlas",
     "deck": [
-      "decks/standard/pyromancer.dck"
+      "decks/enemy/shadow/mordor_orc.dck",
+      "decks/enemy/shadow/uruk_berserker.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -24672,7 +24800,7 @@
     "name": "Raven",
     "sprite": "sprites/enemy/beast/bird/raven.atlas",
     "deck": [
-      "decks/standard/raven.dck"
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -24739,13 +24867,15 @@
       "IdentityDimir",
       "BiomeColorless",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Carrion Raven"
   },
   {
     "name": "Reassembling Skeleton",
     "sprite": "sprites/enemy/undead/skeleton.atlas",
     "deck": [
-      "decks/standard/reassemblingskeleton.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -24781,7 +24911,8 @@
       "IdentityBlack",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Restless Barrow-wight"
   },
   {
     "name": "Recruiter Sliver",
@@ -24882,7 +25013,7 @@
     "name": "Rhino",
     "sprite": "sprites/enemy/beast/largemammals/rhino.atlas",
     "deck": [
-      "decks/standard/rhino.dck"
+      "decks/enemy/shadow/mumak.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -24938,7 +25069,8 @@
       "IdentityGruul",
       "Territorial",
       "Beast"
-    ]
+    ],
+    "nameOverride": "War-beast of Harad"
   },
   {
     "name": "Rogue",
@@ -25123,7 +25255,8 @@
     "name": "Runelord",
     "sprite": "sprites/enemy/humanoid/human/wizard/runescribe.atlas",
     "deck": [
-      "decks/standard/runelord.dck"
+      "decks/enemy/free/erebor_dwarves.dck",
+      "decks/enemy/free/iron_hills.dck"
     ],
     "ai": "",
     "spawnRate": 0.5,
@@ -25184,7 +25317,8 @@
       "Wizard",
       "Auramaster",
       "Runelord"
-    ]
+    ],
+    "nameOverride": "Dwarven Runelord"
   },
   {
     "name": "Sand Ghoul",
@@ -25316,7 +25450,7 @@
     "name": "Satyr",
     "sprite": "sprites/enemy/fey/satyr.atlas",
     "deck": [
-      "decks/standard/satyr.dck"
+      "decks/enemy/shadow/snaga.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -25394,7 +25528,8 @@
       "IdentityRed",
       "IdentityGruul",
       "BiomeGreen"
-    ]
+    ],
+    "nameOverride": "Snaga Scout"
   },
   {
     "name": "Satyr Grove Guardian",
@@ -25484,7 +25619,7 @@
     "name": "Scarab",
     "sprite": "sprites/enemy/beast/insect/scarab.atlas",
     "deck": [
-      "decks/standard/scarab.dck"
+      "decks/enemy/shadow/shelob_brood.dck"
     ],
     "ai": "",
     "spawnRate": 0.8,
@@ -25533,7 +25668,8 @@
       "Nature",
       "IdentityBlack",
       "Scarab"
-    ]
+    ],
+    "nameOverride": "Carrion Beetle"
   },
   {
     "name": "Scarecrow",
@@ -25670,7 +25806,8 @@
     "name": "Scorpion",
     "sprite": "sprites/enemy/beast/arachnid/scorpion.atlas",
     "deck": [
-      "decks/standard/scorpion.dck"
+      "decks/enemy/shadow/shelob_brood.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "spawnRate": 0.8,
@@ -25725,13 +25862,15 @@
       "BiomeRed",
       "BiomeWhite",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Giant Scorpion of Harad"
   },
   {
     "name": "Scourgemaster",
     "sprite": "sprites/enemy/fiend/scourgemaster.atlas",
     "deck": [
-      "decks/enemy/shadow/orc_captain.dck"
+      "decks/enemy/shadow/orc_captain.dck",
+      "decks/enemy/shadow/uruk_captain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -25792,7 +25931,8 @@
       "Unholy",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Orc Taskmaster"
   },
   {
     "name": "Sea Monster",
@@ -25879,7 +26019,8 @@
     "name": "Shade",
     "sprite": "sprites/enemy/undead/shade.atlas",
     "deck": [
-      "decks/standard/shade.dck"
+      "decks/enemy/shadow/dol_guldur_spirit.dck",
+      "decks/enemy/shadow/ringwraith.dck"
     ],
     "ai": "",
     "flying": true,
@@ -25944,7 +26085,8 @@
       "Magic",
       "IdentityBlack",
       "Humanoid"
-    ]
+    ],
+    "nameOverride": "Fell Shade"
   },
   {
     "name": "Shaman",
@@ -26032,10 +26174,11 @@
   },
   {
     "name": "Shaman of Zedruu",
-    "nameOverride": "",
+    "nameOverride": "Harad Shaman",
     "sprite": "sprites/enemy/humanoid/viashino/pikelizard.atlas",
     "deck": [
-      "decks/standard/shamanelite.dck"
+      "decks/enemy/shadow/haradrim.dck",
+      "decks/enemy/shadow/easterling.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -26119,8 +26262,8 @@
     "name": "Simic Wizard",
     "sprite": "sprites/enemy/humanoid/viashino/lizardwizard.atlas",
     "deck": [
-      "decks/standard/simicwizard_intruderalarm.dck",
-      "decks/standard/simicwizard_evolve.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/wild_wolves.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -26178,7 +26321,8 @@
       "IdentityBlue",
       "IdentityGreen",
       "IdentitySimic"
-    ]
+    ],
+    "nameOverride": "Dunlending Hedge-wizard"
   },
   {
     "name": "Skeleton",
@@ -26276,7 +26420,8 @@
     "name": "Skeleton Soldier",
     "sprite": "sprites/enemy/undead/skeleton_2.atlas",
     "deck": [
-      "decks/standard/skeleton_2.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -26309,7 +26454,8 @@
       "IdentityBlack",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Barrow-wight Guard"
   },
   {
     "name": "Slimefoot",
@@ -27330,7 +27476,8 @@
     "name": "Spiked Ravager",
     "sprite": "sprites/enemy/fiend/spikedravager.atlas",
     "deck": [
-      "decks/standard/demon_demonicpact.dck"
+      "decks/enemy/shadow/uruk_berserker.dck",
+      "decks/enemy/shadow/orc_captain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -27391,7 +27538,8 @@
       "Unholy",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Spiked Uruk Ravager"
   },
   {
     "name": "Spirit",
@@ -27888,7 +28036,8 @@
     "name": "Swamp Troll",
     "sprite": "sprites/enemy/giant/swamptroll.atlas",
     "deck": [
-      "decks/standard/swamptroll.dck"
+      "decks/enemy/shadow/olog_hai.dck",
+      "decks/enemy/shadow/stone_troll.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -28073,7 +28222,8 @@
     "name": "Tarkir Djinn",
     "sprite": "sprites/enemy/elemental/djinn_2.atlas",
     "deck": [
-      "decks/standard/djinn_tarkir.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "flying": true,
@@ -28105,7 +28255,8 @@
       "IdentityRed",
       "IdentityIzzet",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Desert Spirit"
   },
   {
     "name": "Teferi",
@@ -28818,7 +28969,8 @@
     "name": "Treefolk Guardian",
     "sprite": "sprites/enemy/plant/treant_2.atlas",
     "deck": [
-      "decks/standard/treefolk.dck"
+      "decks/enemy/free/huorns.dck",
+      "decks/enemy/free/ents.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -29106,7 +29258,8 @@
     "name": "Undead Goblin",
     "sprite": "sprites/enemy/undead/goblinzombie.atlas",
     "deck": [
-      "decks/enemy/shadow/moria_orc.dck"
+      "decks/enemy/shadow/moria_orc.dck",
+      "decks/enemy/free/barrow_wights.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -29173,7 +29326,8 @@
       "Evil",
       "Aberration",
       "IdentityRakdos"
-    ]
+    ],
+    "nameOverride": "Barrow Goblin"
   },
   {
     "name": "Undead Roamer",
@@ -29305,7 +29459,8 @@
     "name": "Unholy Knight",
     "sprite": "sprites/enemy/undead/deathknightidle.atlas",
     "deck": [
-      "decks/standard/unholyknight.dck"
+      "decks/enemy/shadow/ringwraith.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -29375,7 +29530,8 @@
       "IdentityBlack",
       "Hostile",
       "Unholy"
-    ]
+    ],
+    "nameOverride": "Unholy Knight of Angmar"
   },
   {
     "name": "Unholy Skull",
@@ -29652,7 +29808,8 @@
     "name": "Vampire",
     "sprite": "sprites/enemy/undead/vampire.atlas",
     "deck": [
-      "decks/standard/vampire.dck"
+      "decks/enemy/shadow/crebain.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "flying": true,
@@ -29686,13 +29843,15 @@
       "IdentityBlack",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Blood-drinker Bat-lord"
   },
   {
     "name": "Vampire Lord",
     "sprite": "sprites/enemy/undead/vampire_3.atlas",
     "deck": [
-      "decks/standard/vampire_blood_token_fly.dck"
+      "decks/enemy/shadow/black_rider.dck",
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
     ],
     "ai": "",
     "flying": true,
@@ -29719,13 +29878,15 @@
       "IdentityBlack",
       "IdentityRed",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Vampire Lord of the Mountains"
   },
   {
     "name": "Viashino",
     "sprite": "sprites/enemy/humanoid/viashino/battler.atlas",
     "deck": [
-      "decks/standard/viashino.dck"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/mordor_orc.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -29799,13 +29960,14 @@
       "IdentityRed",
       "IdentityJund",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Orc Lizard-rider"
   },
   {
     "name": "Viper",
     "sprite": "sprites/enemy/beast/reptile/big_snake_2.atlas",
     "deck": [
-      "decks/standard/snake.dck"
+      "decks/enemy/shadow/shelob_brood.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -29863,7 +30025,8 @@
       "IdentityGreen",
       "IdentityGolgari",
       "BiomeGreen"
-    ]
+    ],
+    "nameOverride": "Harad Viper"
   },
   {
     "name": "Volcano Dragon",
@@ -30136,7 +30299,7 @@
     "name": "Vulture",
     "sprite": "sprites/enemy/beast/bird/vulture.atlas",
     "deck": [
-      "decks/standard/vulture.dck"
+      "decks/enemy/shadow/crebain.dck"
     ],
     "ai": "",
     "flying": true,
@@ -30183,13 +30346,14 @@
       "Wild",
       "Flying",
       "IdentityBlack"
-    ]
+    ],
+    "nameOverride": "Carrion Vulture"
   },
   {
     "name": "Walking Brain",
     "sprite": "sprites/enemy/aberration/walkingbrain.atlas",
     "deck": [
-      "decks/standard/walkingbrain.dck"
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 0.3,
@@ -30251,7 +30415,8 @@
       "IdentityBlue",
       "BiomeBlue",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Wandering Marsh-light"
   },
   {
     "name": "Walter, the Stray Camel",
@@ -30568,7 +30733,8 @@
     "name": "Water Elemental",
     "sprite": "sprites/enemy/elemental/waterelemental_3.atlas",
     "deck": [
-      "decks/standard/water_elemental.dck"
+      "decks/enemy/free/watcher.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "spawnRate": 0.7,
@@ -30607,7 +30773,8 @@
       "Humanoid",
       "IdentityBlue",
       "BiomeBlue"
-    ]
+    ],
+    "nameOverride": "Water-spirit"
   },
   {
     "name": "Weak Demon",
@@ -30718,7 +30885,8 @@
     "name": "Werewolf",
     "sprite": "sprites/enemy/fiend/hellhound.atlas",
     "deck": [
-      "decks/standard/werewolf.dck"
+      "decks/enemy/free/warg_pack.dck",
+      "decks/enemy/free/wild_wolves.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -30753,13 +30921,14 @@
       "IdentityRed",
       "IdentityGruul",
       "BiomeGreen"
-    ]
+    ],
+    "nameOverride": "Were-warg"
   },
   {
     "name": "White Dwarf",
     "sprite": "sprites/enemy/humanoid/dwarf/dwarf_6.atlas",
     "deck": [
-      "decks/standard/white_dwarf.dck"
+      "decks/enemy/free/erebor_dwarves.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -30788,15 +30957,15 @@
       "Subterranean",
       "IdentityWhite",
       "BiomeWhite"
-    ]
+    ],
+    "nameOverride": "Dwarf of the White Hills"
   },
   {
     "name": "Wild Rat",
     "sprite": "sprites/enemy/beast/smallmammals/wildrat.atlas",
     "deck": [
-      "decks/standard/infectrat.dck",
-      "decks/standard/rat.json",
-      "decks/standard/ratswarm.dck"
+      "decks/enemy/shadow/snaga.dck",
+      "decks/enemy/shadow/misty_goblin.dck"
     ],
     "ai": "",
     "randomizeDeck": true,
@@ -30855,13 +31024,15 @@
       "IdentityBlack",
       "BiomeColorless",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Wild Cave-rat"
   },
   {
     "name": "Wild-Magic Sorcerer",
     "sprite": "sprites/enemy/humanoid/viashino/dreamwalker_2.atlas",
     "deck": [
-      "decks/standard/wild-magic_sorcerer.dck"
+      "decks/enemy/shadow/easterling.dck",
+      "decks/enemy/shadow/haradrim.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -30940,14 +31111,16 @@
       "IdentityGruul",
       "BiomeGreen",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Eastern Sorcerer"
   },
   {
     "name": "Witch",
     "nameOverride": "Accursed Witch",
     "sprite": "sprites/enemy/humanoid/human/warlock/witchlarge.atlas",
     "deck": [
-      "decks/standard/witch.dck"
+      "decks/enemy/free/dunlendings.dck",
+      "decks/enemy/free/bill_ferny.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -31006,7 +31179,8 @@
     "name": "Wolf",
     "sprite": "sprites/enemy/beast/largemammals/wolf.atlas",
     "deck": [
-      "decks/standard/wolfboss.dck"
+      "decks/enemy/free/wild_wolves.dck",
+      "decks/enemy/free/warg_pack.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -31209,7 +31383,8 @@
     "name": "Wraith",
     "sprite": "sprites/enemy/undead/wraith.atlas",
     "deck": [
-      "decks/standard/wraithswampwalk.dck"
+      "decks/enemy/shadow/dol_guldur_spirit.dck",
+      "decks/enemy/free/dead_marshes.dck"
     ],
     "ai": "",
     "flying": true,
@@ -31265,7 +31440,8 @@
       "Undead",
       "BiomeBlack",
       "Minion"
-    ]
+    ],
+    "nameOverride": "Dol Guldur Wraith"
   },
   {
     "name": "Wurm",
@@ -31419,7 +31595,8 @@
     "name": "Yeti",
     "sprite": "sprites/enemy/monstrosity/yeti_2.atlas",
     "deck": [
-      "decks/standard/yeti.dck"
+      "decks/enemy/free/wild_bears.dck",
+      "decks/enemy/free/cold_drakes.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -31497,7 +31674,8 @@
       "IdentityBlue",
       "IdentityTemur",
       "BiomeRed"
-    ]
+    ],
+    "nameOverride": "Snow-troll"
   },
   {
     "name": "Zedruu",
@@ -31587,10 +31765,10 @@
   },
   {
     "name": "Zombie",
-    "nameOverride": "Walking Zombie",
+    "nameOverride": "Barrow-wight Thrall",
     "sprite": "sprites/enemy/undead/zombie.atlas",
     "deck": [
-      "decks/standard/zombie_black_easy.dck"
+      "decks/enemy/free/barrow_wights.dck"
     ],
     "ai": "",
     "spawnRate": 1,
@@ -31638,7 +31816,8 @@
     "name": "Zombie Lord",
     "sprite": "sprites/enemy/undead/lich.atlas",
     "deck": [
-      "decks/standard/zombie_black_medium.dck"
+      "decks/enemy/free/barrow_wights.dck",
+      "decks/enemy/free/barrow_lord.dck"
     ],
     "ai": "",
     "spawnRate": 0.7,
@@ -31678,13 +31857,15 @@
       "Leader",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Barrow-wight Captain"
   },
   {
     "name": "Zombie Master",
     "sprite": "sprites/enemy/undead/lich_3.atlas",
     "deck": [
-      "decks/standard/zombie_black_hard.dck"
+      "decks/enemy/free/barrow_lord.dck",
+      "decks/enemy/shadow/dol_guldur_necromancer.dck"
     ],
     "ai": "",
     "spawnRate": 0.4,
@@ -31724,7 +31905,8 @@
       "Leader",
       "IdentityBlack",
       "BiomeBlack"
-    ]
+    ],
+    "nameOverride": "Barrow-lord's Servant"
   },
   {
     "name": "Snaga",
