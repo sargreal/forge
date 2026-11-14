@@ -150,7 +150,7 @@
  },
  {
   "name": "Instant4White",
-  "description": "Houses of Healing",
+  "description": "Herb-masters of Gondor",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "InstantShop",
   "overlaySprite": "Overlay4White",
@@ -252,7 +252,7 @@
  },
  {
   "name": "Artifact4White",
-  "description": "Armoury of the Citadel",
+  "description": "Smithy of the Citadel",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "ArtifactShop",
   "overlaySprite": "Overlay4White",
@@ -550,7 +550,7 @@
  },
  {
   "name": "Enchantment4Blue",
-  "description": "Mirror of Galadriel",
+  "description": "Elven Tapestries",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "EnchantmentShop",
   "overlaySprite": "Overlay4Blue",
@@ -1510,7 +1510,7 @@
  },
  {
   "name": "Instant4Red",
-  "description": "Dragonfire",
+  "description": "Burning Words",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "InstantShop",
   "overlaySprite": "Overlay4Red",
@@ -2583,7 +2583,7 @@
  },
  {
   "name": "Black5",
-  "description": "Fell Beasts",
+  "description": "Wings of Shadow",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "RotatingShop",
   "overlaySprite": "Overlay6Black",
@@ -2978,7 +2978,7 @@
  },
  {
   "name": "Selesnya",
-  "description": "Shire Market",
+  "description": "Market of the Four Farthings",
   "spriteAtlas": "maps/tileset/buildings.atlas",
   "sprite": "SelesnyaShop",
   "rewards": [
