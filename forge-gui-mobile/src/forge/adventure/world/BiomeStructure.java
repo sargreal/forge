@@ -66,7 +66,7 @@ public class BiomeStructure {
             colorIdMap.put(Integer.parseInt(data.mappingInfo[i].color, 16), i);
         }
         for (int mx = 0; mx < targetWidth; mx += Math.min(targetWidth - mx, MAXIMUM_WAVEFUNCTIONSIZE)) {
-            for (int my = 0; my < targetWidth; my += Math.min(targetHeight - my, MAXIMUM_WAVEFUNCTIONSIZE)) {
+            for (int my = 0; my < targetHeight; my += Math.min(targetHeight - my, MAXIMUM_WAVEFUNCTIONSIZE)) {
                 OverlappingModel model = new OverlappingModel(sourceImage, data.N, Math.min(targetWidth - mx, MAXIMUM_WAVEFUNCTIONSIZE), Math.min(targetHeight - my, MAXIMUM_WAVEFUNCTIONSIZE), data.periodicInput, data.periodicOutput, data.symmetry, data.ground);
 
                 boolean suc = false;

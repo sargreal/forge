@@ -293,6 +293,43 @@ public class World implements Disposable, SaveFileContent {
             }
     }
 
+    /**
+     * Fork (Middle-earth): optional fixed biome layout. WorldData.biomeMap names an image in which each pixel's RGB
+     * selects the biome whose "color" matches exactly (unmatched colours fall back to the first biome; row 0 = north,
+     * the image is sampled nearest-neighbour if its size differs from the world). Each tile gets its own biome bit,
+     * the first biome's bit (it underlies everything, as in random generation) and the bits of lower-index biomes within
+     * 2 tiles, so that biome borders are drawn as transitions over the neighbouring biome instead of over the base.
+     * Returns null when no biome map is configured (random generation).
+     */
+    private long[][] loadFixedBiomeMap() {
+        if (data.biomeMap == null || data.biomeMap.isEmpty())
+            return null;
+        Pixmap image = new Pixmap(Config.instance().getFile(data.biomeMap));
+        int[][] own = new int[width][height];
+        try {
+            Map<Integer, Integer> colorToBiome = new HashMap<>();
+            List<BiomeData> biomes = data.GetBiomes();
+            for (int i = 0; i < biomes.size(); i++)
+                colorToBiome.putIfAbsent(Color.rgb888(biomes.get(i).GetColor()), i);
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    own[x][y] = colorToBiome.getOrDefault(image.getPixel(x * image.getWidth() / width, y * image.getHeight() / height) >>> 8, 0);
+        } finally {
+            image.dispose();
+        }
+        long[][] masks = new long[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++) {
+                long mask = 1L | (1L << own[x][y]);
+                for (int nx = Math.max(0, x - 2); nx <= Math.min(width - 1, x + 2); nx++)
+                    for (int ny = Math.max(0, y - 2); ny <= Math.min(height - 1, y + 2); ny++)
+                        if (own[nx][ny] < own[x][y])
+                            mask |= 1L << own[nx][ny];
+                masks[x][y] = mask;
+            }
+        return masks;
+    }
+
     private long measureGenerationTime(String msg, long lastTime) {
         long currentTime = System.currentTimeMillis();
         System.out.println(msg + " :\t\t" + ((currentTime - lastTime) / 1000f) + " s");
@@ -364,8 +401,9 @@ public class World implements Disposable, SaveFileContent {
             futures.clear();
 
 //////////////////
-///////// calculation each biome position based on noise and radius
+///////// calculation each biome position based on noise and radius (or from the fixed biome map image)
 //////////////////
+            long[][] fixedBiomes = loadFixedBiomeMap();
             for (BiomeData biome : data.GetBiomes()) {
 
                 biomeIndex[0]++;
@@ -378,7 +416,7 @@ public class World implements Disposable, SaveFileContent {
                 int beginY = Math.max(biomeYStart - biomeHeight / 2, 0);
                 int endX = Math.min(biomeXStart + biomeWidth / 2, width);
                 int endY = Math.min(biomeYStart + biomeHeight / 2, height);
-                if (biome.width == 1.0 && biome.height == 1.0) {
+                if (biome.width == 1.0 && biome.height == 1.0 || fixedBiomes != null) {
                     beginX = 0;
                     beginY = 0;
                     endX = width;
@@ -386,13 +424,20 @@ public class World implements Disposable, SaveFileContent {
                 }
                 for (int x = beginX; x < endX; x++) {
                     for (int y = beginY; y < endY; y++) {
-                        //value 0-1 based on noise
-                        float noiseValue = ((float) noise.eval(x / (float) width * noiseZoom, y / (float) height * noiseZoom) + 1) / 2f;
-                        noiseValue *= biome.noiseWeight;
-                        //value 0-1 based on dist to origin
-                        float distanceValue = ((float) Math.sqrt((x - biomeXStart) * (x - biomeXStart) + (y - biomeYStart) * (y - biomeYStart))) / (Math.max(biomeWidth, biomeHeight) / 2f);
-                        distanceValue *= biome.distWeight;
-                        if (noiseValue + distanceValue < 1.0 || biome.invertHeight && (1 - noiseValue) + distanceValue < 1.0) {
+                        float noiseValue = 0;
+                        boolean inBiome;
+                        if (fixedBiomes != null) {
+                            inBiome = (fixedBiomes[x][y] & (1L << biomeIndex[0])) != 0;
+                        } else {
+                            //value 0-1 based on noise
+                            noiseValue = ((float) noise.eval(x / (float) width * noiseZoom, y / (float) height * noiseZoom) + 1) / 2f;
+                            noiseValue *= biome.noiseWeight;
+                            //value 0-1 based on dist to origin
+                            float distanceValue = ((float) Math.sqrt((x - biomeXStart) * (x - biomeXStart) + (y - biomeYStart) * (y - biomeYStart))) / (Math.max(biomeWidth, biomeHeight) / 2f);
+                            distanceValue *= biome.distWeight;
+                            inBiome = noiseValue + distanceValue < 1.0 || biome.invertHeight && (1 - noiseValue) + distanceValue < 1.0;
+                        }
+                        if (inBiome) {
                             Color color = biome.GetColor();
                             float[] hsv = new float[3];
                             color.toHsv(hsv);
