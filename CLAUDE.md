@@ -13,7 +13,11 @@ Quick commands:
 tools/middleearth/game.sh build    # build the adventure client (forge-gui-mobile-dev)
 tools/middleearth/check.sh         # headless plane data check, ~10 s, must report 0 errors
 tools/middleearth/game.sh smoke    # GUI smoke test under Xvfb; screenshots and world map go to .me-test/
+tools/middleearth/tests/run_all.sh # check.sh + GUI regression tests (intro walkthrough) via the dev API
+tools/middleearth/gamectl.py state # while a game runs (game.sh start): state as text; also choose/walk/interact/console…
 ```
+
+Drive the running game with `gamectl.py` (dev API, DEVELOPMENT.md §3.5) instead of screenshots and key presses.
 
 Rules:
 
