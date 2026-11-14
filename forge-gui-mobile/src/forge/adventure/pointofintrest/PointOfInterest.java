@@ -92,6 +92,16 @@ public class PointOfInterest implements Serializable, SaveFileContent {
         oldMapId=parent.getID();
         rectangle.set(position.x, position.y, sprite.getWidth(), sprite.getHeight());
     }
+    /** Fork (Middle-earth): sprite variant, exported to and restored from the fixed world map (WorldMapTmx). */
+    public int getSpriteIndex() {
+        return spriteIndex;
+    }
+    public void setSpriteIndex(int index) {
+        Array<Sprite> textureAtlas = Config.instance().getPOISprites(data);
+        spriteIndex = index;
+        sprite = textureAtlas.get(index % textureAtlas.size);
+        rectangle.setSize(sprite.getWidth(), sprite.getHeight());
+    }
     public Sprite getSprite() {
         return sprite;
     }

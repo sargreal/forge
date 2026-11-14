@@ -102,7 +102,8 @@ public class PlaneCheck {
                 if (!poiNames.contains(p)) warn("biome " + b.name + ": unknown point of interest '" + p + "' (not placed)");
         }
         info(biomes.size() + " biomes, " + usedEnemies.size() + " distinct enemies used");
-        if (world != null && world.biomeMap != null) checkBiomeMap(world, biomes);
+        if (world != null && world.biomeMap != null && world.worldMap == null) checkBiomeMap(world, biomes);
+        if (world != null && world.worldMap != null) checkWorldMap(world, biomes, pois);
         if (allEnemies) {
             int extra = 0;
             for (EnemyData e : enemyByName.values())
@@ -248,6 +249,87 @@ public class PlaneCheck {
         for (BiomeData b : biomes)
             if (!used.contains(b.name)) warn("biomeMap: biome " + b.name + " has no pixels (never painted, its POIs are dropped)");
         info("biomeMap " + world.biomeMap + ": " + img.getWidth() + "x" + img.getHeight() + ", " + counts.size() + " colours, " + used.size() + "/" + biomes.size() + " biomes painted");
+    }
+
+    /**
+     * world.json "worldMap" (Tiled world, World.loadWorldMap / WorldMapTmx): file and tileset exist, every tileset tile
+     * names an existing biome, every gid of the Biomes layer maps to a biome, every POI object references an existing POI
+     * entry, exactly one start object, and every POI that the biomes list is present.
+     */
+    static void checkWorldMap(WorldData world, List<BiomeData> biomes, Array<PointOfInterestData> pois) {
+        if (world.biomeMap != null) info("worldMap set: biomeMap " + world.biomeMap + " is ignored by the game");
+        FileHandle f = Config.instance().getFile(world.worldMap);
+        if (f == null || !f.exists()) { error("worldMap " + world.worldMap + " not found"); return; }
+        com.badlogic.gdx.utils.XmlReader.Element map;
+        try { map = new com.badlogic.gdx.utils.XmlReader().parse(f); } catch (Exception e) { error("worldMap " + world.worldMap + ": " + e); return; }
+        int w = map.getIntAttribute("width", 0), h = map.getIntAttribute("height", 0);
+        if (w != world.width || h != world.height) warn("worldMap is " + w + "x" + h + ", world is " + world.width + "x" + world.height + " (sampled nearest-neighbour)");
+        if (map.getIntAttribute("tilewidth", 0) != world.tileSize) warn("worldMap tilewidth " + map.getIntAttribute("tilewidth", 0) + " != tileSize " + world.tileSize + " (POI coordinates are world pixels)");
+        String seed = forge.adventure.world.WorldMapTmx.properties(map).get("seed");
+        if (seed == null) warn("worldMap: no map property 'seed' (every new game generates different decorations and roads)");
+        else try { Long.parseLong(seed.trim()); } catch (NumberFormatException e) { error("worldMap: seed '" + seed + "' is not a long"); }
+        Set<String> biomeNames = new HashSet<>();
+        for (BiomeData b : biomes) biomeNames.add(b.name);
+        Map<Integer, String> gidToBiome = new HashMap<>();
+        for (com.badlogic.gdx.utils.XmlReader.Element ts : map.getChildrenByName("tileset")) {
+            int first = ts.getIntAttribute("firstgid", 1);
+            com.badlogic.gdx.utils.XmlReader.Element tileset = ts;
+            String source = ts.getAttribute("source", null);
+            if (source != null) {
+                FileHandle tsx = f.parent().child(source);
+                if (!tsx.exists()) { error("worldMap: tileset " + source + " not found"); continue; }
+                tileset = new com.badlogic.gdx.utils.XmlReader().parse(tsx);
+                com.badlogic.gdx.utils.XmlReader.Element image = tileset.getChildByName("image");
+                if (image != null && !tsx.parent().child(image.getAttribute("source")).exists()) error("worldMap: tileset image " + image.getAttribute("source") + " not found");
+            }
+            for (com.badlogic.gdx.utils.XmlReader.Element tile : tileset.getChildrenByName("tile")) {
+                String biome = forge.adventure.world.WorldMapTmx.properties(tile).get("biome");
+                if (biome == null) continue;
+                if (!biomeNames.contains(biome)) error("worldMap: tileset tile " + tile.getAttribute("id") + " names unknown biome '" + biome + "'");
+                gidToBiome.put(first + tile.getIntAttribute("id"), biome);
+            }
+        }
+        int[] gids = null;
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("layer"))
+            if (forge.adventure.world.WorldMapTmx.BIOME_LAYER.equals(layer.getAttribute("name", "")))
+                try { gids = forge.adventure.world.WorldMapTmx.decodeLayer(layer, w * h); } catch (Exception e) { error("worldMap: Biomes layer: " + e.getMessage()); return; }
+        if (gids == null) { error("worldMap: no tile layer '" + forge.adventure.world.WorldMapTmx.BIOME_LAYER + "'"); return; }
+        Map<Integer, Integer> gidCounts = new TreeMap<>();
+        for (int g : gids) gidCounts.merge(g & 0x0FFFFFFF, 1, Integer::sum);
+        Set<String> painted = new HashSet<>();
+        for (Map.Entry<Integer, Integer> e : gidCounts.entrySet()) {
+            String b = gidToBiome.get(e.getKey());
+            if (b == null) error("worldMap: gid " + e.getKey() + " (" + e.getValue() + " tiles) maps to no biome (the game uses the first biome)");
+            else painted.add(b);
+        }
+        for (BiomeData b : biomes) if (!painted.contains(b.name)) warn("worldMap: biome " + b.name + " is not painted");
+        Set<String> poiNames = new HashSet<>();
+        if (pois != null) for (PointOfInterestData p : pois) poiNames.add(p.name);
+        int starts = 0;
+        Map<String, Integer> placed = new TreeMap<>();
+        for (com.badlogic.gdx.utils.XmlReader.Element group : map.getChildrenByName("objectgroup")) {
+            if (!forge.adventure.world.WorldMapTmx.POI_LAYER.equals(group.getAttribute("name", ""))) continue;
+            for (com.badlogic.gdx.utils.XmlReader.Element o : group.getChildrenByName("object")) {
+                if (forge.adventure.world.WorldMapTmx.START_TYPE.equals(o.getAttribute("type", o.getAttribute("class", "")))) { starts++; continue; }
+                String n = o.getAttribute("name", "");
+                if (!poiNames.contains(n)) error("worldMap: POI object " + o.getAttribute("id", "?") + " '" + n + "' has no entry in points_of_interest.json (skipped by the game)");
+                else placed.merge(n, 1, Integer::sum);
+            }
+        }
+        if (starts != 1) error("worldMap: " + starts + " start objects (need exactly one, type 'start')");
+        Map<String, Integer> expected = new TreeMap<>();
+        if (pois != null)
+            for (BiomeData b : biomes) if (b.pointsOfInterest != null)
+                for (String n : new LinkedHashSet<>(Arrays.asList(b.pointsOfInterest)))
+                    for (PointOfInterestData p : pois) if (p.name.equals(n)) { expected.merge(n, p.count, Integer::sum); break; }
+        int missing = 0;
+        for (Map.Entry<String, Integer> e : expected.entrySet()) {
+            int have = placed.getOrDefault(e.getKey(), 0);
+            if (have == 0 && e.getValue() > 0) { error("worldMap: POI '" + e.getKey() + "' is listed by a biome but has no object"); missing++; }
+            else if (have < e.getValue()) warn("worldMap: POI '" + e.getKey() + "' has " + have + " objects, biomes list " + e.getValue());
+        }
+        info("worldMap " + world.worldMap + ": " + w + "x" + h + ", seed " + seed + ", " + painted.size() + "/" + biomes.size() + " biomes painted, "
+                + placed.values().stream().mapToInt(Integer::intValue).sum() + " POI objects (" + placed.size() + " distinct), " + starts + " start");
     }
 
     /** WorldData.getEnemy: exact match on name first, then on getName() (nameOverride). */

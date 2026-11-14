@@ -32,6 +32,8 @@ public class WorldData implements Serializable {
     public String[] biomesNames;
     /** Optional (fork): image that fixes each tile's biome by colour (one pixel per tile, row 0 = north). Unset = random biome generation. */
     public String biomeMap;
+    /** Optional (fork): Tiled .tmx that fixes biomes, POIs, start and seed (see WorldMapTmx). Takes precedence over biomeMap. */
+    public String worldMap;
 
 
     private BiomeSprites sprites;
