@@ -178,5 +178,6 @@ git merge upstream/master
 
 - Branch: `claude/happy-heisenberg-moqu93` (current dev branch) and `middleearth` (older base).
 - Every change: update PLAN.md (status and change log), run `check.sh`, and run `game.sh smoke` if the change touches world generation or engine code.
+- Agent budget (PLAN D11): routine content work runs on Sonnet, at most 2 agents in parallel, and each task is sized to finish in one run.
 - Parallel agents: each one works in its own git worktree or branch and uses its own `DISPLAY_NUM` (for example 101, 102…). Data-only agents can skip the build: `export FORGE_JAR=/home/user/forge/forge-gui-mobile-dev/target/forge-gui-mobile-dev-2.0.17-SNAPSHOT-jar-with-dependencies.jar` (the main checkout's jar). It still reads the game data from the agent's own tree. Agents write their report to `docs/MiddleEarth/notes/<wp>.md` and don't edit PLAN.md.
 - Parallel agents: split work by **disjoint files**, for example one agent per region's enemies or one on `World.java` for Phase 2. Shared files (`world.json`, `enemies.json`, PLAN.md) are edited by one agent at a time, or merged afterwards by the coordinator.
