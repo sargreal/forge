@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="6">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3ctu5CAQheG2VPTaMvI+ef+XnM3MyLL6YgwFVNW/OEpLURKl8+WAgXb/PB6Pn8pIRZJSlhdJE2V3np+BrlJQVzuuTHYVrnCFK1ydPeEKVxquBFe4auhKcHU7git3rhZc4cqpK8ZB264YC225ksaJOncXXOEKV7gyMsfybgtX2MKVv3MNuNJxRWf5tIUrbI12JQZdJVzhCle4Yh0LV7gy4UpwhStcNXElzlwtuMIVrnA14fXg7GdmJPC83bKrmc+O4opxkK7C1exjoOAKV5jClTFXO65whSlcTehKcIUrugpXBlxFMoUr9mlwZdeV4ApXmOL8lSFXO65wRVfhyoCrHVe4oqvcvC7Vs6sdV247q7crwRWuMOV6fuXBleAKV7hiHMQVrnCFq8CuFlyFcSW4whWdhStc4WpyV6w34ApXuMKVj/k7ruacX41wteAKV5N3Fq5iutK0JcyxpnclTlxxvj2Oq4SrUOdkLHfWld8FV3FdLUqmcBXDVcJViNfRW35PJsEWrhq7ElzhSmEsxJVNV59sZYOuuF/f3K5yI1dpgCv6ak5X+UVwhas7rvLFWHDFODjWVK4IrnDV0tMdW1wT+nWVlaPliq56nd8LsezpqrFernZcqbnKE2XEHAtX7V3lCdPTFX3VxlU2kBbnGnCl5yobDWdl+rvybqqnqx1XRa4yri7ZwhWuOOM+1lXGFa4au8q4wtUNVxFM9XbFumhcU7jClZar/OB1ORquIpjKH0zdOcfFPiGurrrKD84kt3IVxdQMriSIK8HV7bGw9qxHRFcZV//zxBWulObuzzfxbEu+PBZcVc+xnoWx6uvu/weu7o+Fd6Pl6tXXHX/ut88dH9f2Lq7KXT2VUvJ3O3/Ns0NwZdOVtdS6ygHyzVbCVpGvK+ui0V0lXBX7wtW160JMldliHCw/M4Ofclf0Fa5a5JfOKrKFmfuuotpKuBriyrOxK/eWwYu+Ky++Su6HhZd6V6X3+4jgis7q78qirzv3HMXMGFfi2BVj4VhXYtwUrvqtX3mzdfc+yZjp62o7RA4frZpijjXO1XYhgitcNXD0KhZNMcdq72pTCq7iutpwxVhozNUMxnDV19U2KOd5vUziCVe2XR19yelxy7UwXMV09c5ZrTHN9+jFjz1XW2V3ab5fPa7su3rnq4cpXNW52gzlk62kkE+uer6Gnb4a01tpgKuEKzeuXnXW8X3rR/QVtvy5koGuGAt9udL0df5e7/YI17+hs+K4qsl6yjdXR194sns9+M3VqpASW/iy72pTcnTVFb2Fq162cIUrDVu4uu/q33OJq/e9hasyW+fnMpKrElvRXW0VfRWxs67aoq9s21oHBls68/YZbK0T28IVrrA11z7OaFsrttzuD460tRqwxTiIKzprrvX2UbZWOsv9Ps63dZ0IrlZcqewPLgN80Vkx9p2Xzr5wFfs8g5Y1xkLOyZT02eKss9h3ns/XwliIq4FjJa5wVeuMdVJcaRqzthcdwdYfq+FZXg==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Caradhras" type="poi" x="1" y="559">
+   <properties>
+    <property name="displayName" value="Caradhras"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Caras Galadhon" type="poi" x="746" y="1554">
+   <properties>
+    <property name="displayName" value="Caras Galadhon"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Dol Guldur" type="poi" x="1878" y="1180">
+   <properties>
+    <property name="displayName" value="Dol Guldur"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Emyn Muil Cave" type="poi" x="2215" y="2174">
+   <properties>
+    <property name="displayName" value="Emyn Muil"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Gladden Fields" type="poi" x="745" y="472">
+   <properties>
+    <property name="displayName" value="Gladden Fields"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

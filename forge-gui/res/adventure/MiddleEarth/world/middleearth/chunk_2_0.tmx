@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="3">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt2ssRwyAMQEFj+kj/ZeaSAoL5WII9vHtG7AiSSbmuq2zQrVAxJa644oorrrgSV0xxxRVXXIkrrrhiiiuuxJW4YoorpsSVuGKKK6bElbhiiiuuxJW4YoorrsSVuOKKK660gytnxBVXyuDK+XDFk7jSSa6cB1dMKbor58AVT4rsyuy5YkkRXZkzVzwpsiuz5WpG9ZcZx6g+KJqr0Z9RaxyN9DXbE185LfWe3WpXbOWy9PTsVnriK6+n1rN7yxRf+Sy1nNubnmb42tFuTVCPq6h3+b3pXqyJi+gpilWWxruqm8eRdvFl3qyxpIzfIaR/rJmHJOXrYwbiSlyJK2moKa40wxRX4kpc6WRTXIkrcaVTPXElrsSVuDIXcSWuxJXElaKb4kpciStxJXElrsSVxJW4EldSvymuxJW4ElcSV+JKXElciSv5vV3iSu5BcSVxpWimuJJ9Ja7kHpS4UnxTXMm+ElfiSuJKXIkriStxJa4krsSV/E9G7RWuuJpgqhxmiyuuuOKKK3HF1QpXvhNyZVdxxRVXXHHFlffVLFtc2FdcccWVe5Ar2VdjbbHBFVfuQa7sq5NtscEWV1xlscWFNxZX9lUWW1xwxZV7kCv76mRb5sAVV1zJ+0qyr8SV3IGSXSWuxJTkbdXfF2ntHiM=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Carn Dum" type="poi" x="1426" y="1412">
+   <properties>
+    <property name="displayName" value="Carn Dum"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Lossoth Village" type="poi" x="950" y="501">
+   <properties>
+    <property name="displayName" value="Lossoth Village"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

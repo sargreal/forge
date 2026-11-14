@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3UFOw0AMBdBGODdIt9D7n5INSAiJtkAmGdtv8VdskPJkz3gmaVwul/jI60FZB2X5IWuibEUShVytXE2Tt2+55+HtycxWs9aEqeZqz3DF1dG+uOJqlC+uuBrhy56QqxHhqq6taq70Qq644oorrrjiiiuu7AfzunJOyJWapQ9yxdUsro54JlxxxRVXXHHFVV5b9oNzulq54oorrrjiiiszd6644iqtK72QK664mtFV5l5o3W6NxZV6xRVXXHHFFVdcMcUVV1xxxRRXTHHFFVezu1qY4qqBq42rdK5m74UbV1wxxRVXrVytXJU3xRVXXHHFFVedTW0NTHHFFVdcccUUV3O42rjiiiuuErjauOKKK66S3JPhykyUKa644oorrvZOcMXVAFNdXQVXJV2dHa7Gu+pqiyuuuOKKK646uzJv54orrrjiqrsr96/6uFq44mrgHJ6rfK5iQldnnutwVdPVwhVXXHHFlXPog1wFV21tccUVV3XeUQ2uSs8YfKshl6vgqnXN4sqZIVf1XAVXJdfsXOV2tXLVypYe6F4WVzV/f4krrtg6x1XciR7IVSVTs7uybudKveIq02+mBlcp69XZ7+Jw1cOV7xlxxVVfV8EVV1x5z54rrpq6Cq644sr6qlAfZOuxq+CKK/WqtauFK64anjdzxRVX853jcMUVV8fvA7u5ih3j3lX9+cJnXna2M7srcyuuqtcqrrjiiqtMPbDq92SecZVtP7hw1WrOEFyVni10dGVNxZWZ1bG53kmG88FQqx72wOsTGW3pr//D179zdW6tGvF8R3p6Nlyd42rEs5zB029d3R6Eq/NdzZTf2OFqv7VVdVe3ncIVV1zpgVlczWJr5vlVF1Nd6hVXXFXuhVxxxVUeV53vXoV1e3pbM9crrvZ35feV9MHMrlauuOKKq3/a4oorrtjiiqvOroIrfZArrrhKdV+GK67YyuHKu6lcudPAViZX3svhiiumuFKvursKrrgaYIqr2rbOdBVcccUVV1xxxZV1O1dccXWYq7AfZIorrg7IOwQ+55M=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Anduin Town" type="poi" x="1206" y="2007">
+   <properties>
+    <property name="displayName" value="Vale Steading"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Beorns Hall" type="poi" x="1223" y="1115">
+   <properties>
+    <property name="displayName" value="Beorn's Hall"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Goblin-town" type="poi" x="119" y="1367">
+   <properties>
+    <property name="displayName" value="Goblin-town"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Spider Nest" type="poi" x="1957" y="456">
+   <properties>
+    <property name="displayName" value="Spider Nest"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

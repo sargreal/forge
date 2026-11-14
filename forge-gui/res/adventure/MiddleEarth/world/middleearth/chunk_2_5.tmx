@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="2">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt1LEOgyAARVFYif//vV1No02jPErlDHcgxEVOXi2lVEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEk6aPMPdNHN1erBWbrr6syaeOJKM3viiiWu9E+muGKKK33y8ktDXNkZrsSVeOKKJ65Y4kpcccUSVxxxtbadVR1xZZO4Yosr8cQVW1wxxRVb4oorrrjiii2uxBVXXHHFFFdiiiumuOKKKzHFFVdcMcWVmOKKK6544kpcccUVV0xxJaa44oorprhiSlxxxRVTXHElrpjiiimumBJXXHHFFFdMiSuuuGKKq+fUdnHBVW9TbHGVdMUXV0lXbHGVcsUXV0lXbHGVcsUWVylXbHGVcvWNsf39KKONq8e46tkdTzPtLFPzlfA02pi9mtNWC3oa4YwpJfaTK/Vw9f4NV0rElbhiiiuuuGJKXLHFFVdcMSWumOKKKa64EldMccUVV0yJK6a4YoortsQVT1xxxRVX4ooprpjiiitxJa644ooprebKe3LFFVdcaVVX3nKuXgONgTM=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Corsair Fort" type="poi" x="2014" y="1183">
+   <properties>
+    <property name="displayName" value="Corsair Fort"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

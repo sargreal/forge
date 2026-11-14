@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="9">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt20FuwyAQQNGwtmhP0d7/iN1XbeO4DB6Gt/i7REHhiRBjfzwej4/EvSXts2B9YN+/L37O1bl6ydWzdjT0myu2xrk66+1tg3pRX5lc7VgvaourXK46V1wFuepccRVgamVbPeG+na21bXWulnHVN3LE1TxTfUNPXM1x1Tc0xdUcVxmsda7Km5pprd8UJ3lcjTbWueLqoquf3tcTxElOV6vHCVdcccUVV1yJK67Y4oorrsQVV2xxxRVXYosrtrjiiiuxxRVXXHHFldjiiiuuuOJKbHHFFVdccSWuuGKLK664EldcscUVV1yJK6644oorrsQVV1xxxRZX4oorrrjiiitxxRVXXHHFlbjiiiuuuOJKbJl7rrjiiivZX4krrrjiiimuxBVXLHHFFVfiiiuu8tVYYIorrrjiiitxNdQUV1xxxRRXXHElrsaa4oorrrjiiqudTXHFFFdcrWKKK6YiTHHFFVdcreCpua+PqQBTXDE12lNzHzJXgaa4YirCFFdcRZjiiqn/7s8958XV6GsJXHE1ypTnUpniiqsVXHmOniuuuOKKK3srrrjiiqs6prjiqoKrle8ntF/P5+rM2SVXddaqTK6yG3MWmMdVGxBX661VPbGn2bau3mfE1bquoqyNGgtT8a7aTT0bz6yx7b6vGu2qaUlfUePnal9jkePlaU9bjSu+FjPF1X6uZo3N3movX6u4YmQdWzPHwtUermaPg6navu76bK7q+rrbM1P1bN39G3zlXNf853aVYV/36pmuuc/vK8N/BXNYy9YK/z+1lq9VrpUpV8eTMl3bN181bJ15PVd6xdcrDrnSWVtXfzcPrvSHnaumjkB75mbPPX60LXNwvfcnVTF1xRsfYy3daey4Oa7mmppl60hki5d4T7N8HYniZq6pSFtccVV9zWJnvqkoW9YrpqrbYogrrmqZirDFFVdcccUVVzu7alxxZb3iynrF1eauGleuXxU902GorqvGlfPBYq6+AHQzGGs=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Belfalas Town" type="poi" x="632" y="911">
+   <properties>
+    <property name="displayName" value="Edhellond"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Dol Amroth" type="poi" x="19" y="1559">
+   <properties>
+    <property name="displayName" value="Dol Amroth"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Gondor Town" type="poi" x="2258" y="239">
+   <properties>
+    <property name="displayName" value="Tarnost"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Gondor Town" type="poi" x="2317" y="30">
+   <properties>
+    <property name="displayName" value="Erech"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Pelargir" type="poi" x="2150" y="1380">
+   <properties>
+    <property name="displayName" value="Pelargir"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Sea Cave" type="poi" x="439" y="654">
+   <properties>
+    <property name="displayName" value="Sea Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="7" name="ME Tolfalas" type="poi" x="1311" y="2317">
+   <properties>
+    <property name="displayName" value="Tolfalas"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="8" name="Plains Capital" type="poi" x="2325" y="139">
+   <properties>
+    <property name="displayName" value="Minas Tirith"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

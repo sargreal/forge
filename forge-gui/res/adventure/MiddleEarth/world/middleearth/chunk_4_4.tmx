@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="3">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3UtOwzAUQNF6msgDlgHZ//6YFAlV/aSN7fjZZ3AHCIFCfRS7TlLy5XLJAfuu3JcOxRRXPbtKXKmwq8SVCrlKd+JKXLHFFVdccaWYrqyxuOKKq0iu7LlzxRVXn5o6w1XmiiuuuAowB7awxQdXXHEVxRcfXHFl3R5pPmSEK+cs+6JcccWVznSVuBJXXHX63ERvtrwf5IorrqKs37ka21XiiqtBXLn2PO7zzlxpJFclHf3cxAhXpSwxxVW+GijpiSuu8h0PRyxx5f3gI1el4oMrruy3c8UVV5r1ujNXXHHFVZR7GbjiKpItPrjiyv3tXHHFlWZ+fpArrrjiatY1O1c+94Mrrrjiaua1FVtccRXfVeJKXHEV2FXmSgO68p6QK664ivQ5yFxxZY3FVQRTtV2xxRVXcVz1boorriKa4qq8K+cqrkq7Slxx9UHpQ1Nc6V1XKZgprvozld701KMprvp1FdlUK1ds7TcV3RNXcV3lQHHVv6scMK76dpW54qqwqxw8rvq0xRVbXDlnRbCVueKKK/e7B7HFFVtccRXp+jNbXHHFFVdcuWeULa644mrM/+9sHhRXXHHFFVdcaXxX9tu5ch8WV1xxxRVXXFljccUVO1xxxRVXXHElrrjiiiuuXB8UV1xxZR7kiitxxRVXXHHFlbjiiiuuuOJKTHHFlb12rs53tXHFVSVXz3rmZ+OJqwdtB3Ou4qqGq1fdvpb3vvfo5/b8vtLtOYat0LHlyefCnnvm4pXdM46PK9X2Nfo+g3E/xxZXquGLK9WwxZVqxJW46m8PS+O7Wq9xxdURP3syxlwdNcQWVy08ccVVLVNccVXDFFdzu1orZpzndLVyxVVBSy1McRXP1drwnMNVrNYO5y2uxnB1r+iWmOrT1QgZX6644oopcSWumOKKLXElrlqbGsnp8i+u2rlq5bXF3/f39bIjrvRuS4e2jMs8rhauVMlVK1/GZU5XtY0ZF65qOPsFh9JPpw==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Cirith Ungol" type="poi" x="982" y="667">
+   <properties>
+    <property name="displayName" value="Cirith Ungol"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Mount Doom" type="poi" x="1923" y="91">
+   <properties>
+    <property name="displayName" value="Mount Doom"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

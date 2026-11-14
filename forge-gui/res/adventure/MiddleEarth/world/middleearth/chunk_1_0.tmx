@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3TEOwjAMQNFS3//OrEiACJWdYPKGt7ZS8nHSifM4jnPQDQadukJX6Apd6YplXWkLXaErdu9KW+iKTl1pC12hK3bvSl/oCl2hK22hK3p1pS10hXMQXYFzkB5d6YvKrrSFrujUlb44tYWu0JW+dKUtdIWutKUrbaErdKUrXekKXaErbelKVzTsSlu60hRXu4oX9MVVMUhXVHQVZhdFXWX09e5Z9kJXkdDTp+fZm+c12qGr0b6ynqWrXm1FUVuZz+qwfjP3Zpeusn3T1cpvgija+2/WSlfrvg0q9qBq36+slZ5q+5q1D/FjXc3qK/5M1ndBxh5UvW/GOj6+a8eOZlr5e7V3e7dljcg+LwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGbxH8tUNaUtqrqyHugKTeHODuYVusIZCGYVukJT4G6FeYWmwPmHWYWuQFO4V2FWgabQFe5VaEpXaApd4V4FZhW6whkIZhW6QlPgboV5habA+YdZha7AGYhZha7o7A6/39AJ
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+ </objectgroup>
+</map>

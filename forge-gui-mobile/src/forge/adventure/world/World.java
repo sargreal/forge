@@ -354,7 +354,7 @@ public class World implements Disposable, SaveFileContent {
     }
 
     /**
-     * Fork (Middle-earth): reads WorldData.worldMap (Tiled .tmx, see WorldMapTmx), or returns null if none is set.
+     * Fork (Middle-earth): reads WorldData.worldMap (Tiled .tmx or .world, see WorldMapTmx), or returns null if none is set.
      * Applies the map's start object to playerStartPosX/Y.
      */
     private WorldMapTmx loadWorldMap() {
@@ -399,8 +399,10 @@ public class World implements Disposable, SaveFileContent {
     /**
      * Fork (Middle-earth): writes the current world (each tile's own biome, all placed POIs with position, display name
      * and sprite variant, the player start and the generation seed) as a Tiled map plus tileset. See WorldMapTmx.
+     * A {@code .tmx} file gives one map; anything else is a directory (or a {@code .world} file) for a Tiled world of
+     * chunks of {@code chunkSize} tiles (0 = as the current worldMap, else 150) plus the overview.
      */
-    public void exportWorldTmx(FileHandle file) {
+    public void exportWorldTmx(FileHandle file, int chunkSize) {
         int roadBit = data.GetBiomes().size();
         int[][] own = new int[width][height];
         for (int x = 0; x < width; x++)
@@ -419,12 +421,22 @@ public class World implements Disposable, SaveFileContent {
         }
         float[] start = {(int) (data.playerStartPosX * width * data.tileSize), mapHeightPx - (int) (data.playerStartPosY * height * data.tileSize)};
         long exportSeed = generationSeed;
-        if (exportSeed == 0) {
-            WorldMapTmx worldMap = data.worldMap == null || data.worldMap.isEmpty() ? null
-                    : WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), width, height);
+        boolean tmx = "tmx".equalsIgnoreCase(file.extension());
+        WorldMapTmx worldMap = null;
+        if ((exportSeed == 0 || (!tmx && chunkSize <= 0)) && data.worldMap != null && !data.worldMap.isEmpty())
+            worldMap = WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), width, height);
+        if (exportSeed == 0)
             exportSeed = worldMap != null && worldMap.seed != null ? worldMap.seed : seed;
+        if (tmx) {
+            WorldMapTmx.write(file, data, own, pois, start, exportSeed);
+            return;
         }
-        WorldMapTmx.write(file, data, own, pois, start, exportSeed);
+        // Phase 2c: a Tiled world (chunks + overview) into the directory, or next to the given .world file
+        boolean worldFile = WorldMapTmx.WORLD_EXTENSION.equalsIgnoreCase(file.extension());
+        if (chunkSize <= 0)
+            chunkSize = worldMap != null && !worldMap.chunks.isEmpty() ? worldMap.chunks.get(0).width : WorldMapTmx.DEFAULT_CHUNK_SIZE;
+        WorldMapTmx.writeWorld(worldFile ? file.parent() : file, worldFile ? file.nameWithoutExtension() : file.name(),
+                data, own, pois, start, exportSeed, chunkSize);
     }
 
     private long measureGenerationTime(String msg, long lastTime) {

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="9">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3UFuwkAMQFGibHyD3P+mXbFBCAp4Es/4Lb5UVaiqmCcnTYb0uN1uh05ve2hfLGvMFVdccaVfXd1fy5W+dfXqtVyJK64quVrNljU2s7jiiitxpernV7P5ssb1ZxVX4oorrrjiiiuNc3VwJa7EFVdNr11xJa400zFwFlvWeU5XB1fiSlxx1fCcnSuNnFVciStxxVbncyuuNGJWue6ujrOKK7OKK7Nqts98WX+zii2ziimuOs8qvlwH5creBa64Wn1vKF/2srNlZu2LxwZXZxh7/Jqd3s8SNc88m48vrsQVV1xVdsURW1wx5e9Brrpfv2KJK+fsTJlXXHEl93Py9zNUWdv4MPOq7j3nfWJXI3y9ep+YmsdVJDRyr8Px5vurz7qZ9sdEcs757RONRV2t5izjM4OzeuKq5/+SiJNyPazX8a+7q93xbypHM7naGx3/RrgKrpawdfWsikK5Bzm/qyjYKve4312XXfXcKrhaet6d/XyPKJ49PXmuznq2VXDlXC3RVUyUvWP1XcWE2ZdYw9fOFVsn2gquGEs0FZPHUA1jq3jiqo6tWDBmrjfGlZ752rjiKrlf790EV3ph6t4n92G4UparaBIfea52rri6+BjIlcwqrswqrjrNKq5kVnF1tSmuuLrKFFcyp7iqfk7FlUaY4krmFFfmFFf+9uNKTHFVzxRXXJlTXF3hafviZ/HE1cYUV4U9MdXb1TbIFFt9XY30xFRPVyM9MdXPFU9cVTcVLLV35doBVxXvw/DEFVNcVd8vxRRX9uBxxRRXPn8srjzXhasas8p6c5U1q6wxV1murCtXmcdA68kVU1zNcL/GWnL1y54nprgyp7hiSl1cBVNcMaXCroIprphSUVfPfiemuMr+nBRTXI3YP8AUV6NNcdXXVdbvwRRXTKm6K6a4OsMUV31djfLEFFdmlLJcmVHKdjXCE1Nc8aRsV5memOKKJ13hauNJia540qeuIsGU91WZM8r7qf+6Ykm/umJKma7cd9HoeNJZnpjSp/0BakSE2A==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Start" type="start" x="552" y="168">
+   <point/>
+  </object>
+  <object id="2" name="ME Barrow-downs" type="poi" x="2002" y="571">
+   <properties>
+    <property name="displayName" value="Barrow-downs"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Bree" type="poi" x="2177" y="1">
+   <properties>
+    <property name="displayName" value="Bree"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Brigand Cave" type="poi" x="1844" y="1830">
+   <properties>
+    <property name="displayName" value="Brigand Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Old Forest" type="poi" x="1887" y="142">
+   <properties>
+    <property name="displayName" value="Old Forest"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Shire Town" type="poi" x="516" y="561">
+   <properties>
+    <property name="displayName" value="Bindbole Wood"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="7" name="ME Shire Town" type="poi" x="739" y="648">
+   <properties>
+    <property name="displayName" value="Newbury"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="8" name="Spawn" type="poi" x="553" y="129">
+   <properties>
+    <property name="displayName" value="Wizard's Hollow"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

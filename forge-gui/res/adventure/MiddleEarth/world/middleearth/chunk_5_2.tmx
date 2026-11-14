@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3cGKrEAMQFEFof7/j9+sh4EHmlQlVWdx92oOUZpu+7mu63nZ+On+o1GsW/8t+po/H7uL22Jmja+vrkZhW5ys8xXhqqItNtb6inJVyRYP631FuqrwHM9ADV/RrlbaMvc6vjJcrbBl1me4GhNdmXM9WzNd3UxxFeAqe2eZbV1bs13dTHH10VTWzjLP+rZWuLqZ4irAVdTOMsM+tla5upniKsDVl51lbv1szTL1dmeZF1fRO8us+tp6iu4sM+Iq2pb59LdVxdXNFFeJtrRHq1yxxRVb6uaKLa7sLM125RleXKmTK7bElTq5ergSV+JKXHHFFVfiSlxxxZXPsMSVuOKKK67ElbjiiiuuxJW44oorv6EQV+KKK664ElfiiiuuuBJX4oorri7vLRJX4oorrrhSh/dfccUVV5rpyv+Biyud6ootrgZX4koNXI3kzIgrrtTFFVvnuRpciSs1cDUmZ1ZccaUOprja39VYmHlxxRVXHUyxxRVX6uKJK67YUjdTXHHFFldciStz44otrrgSV2xxxRVX7oU63RVb7oNcccWVTr8PssUVV1x1csUWV1xx1ckVW/2+386WTnfFFldcccWWdv39IFtcscXVzq7Y4ootrtgSV2xxxZX3qrElrtjiii2u2NLpz+1sccWW+yBb4oqrSq7YUpYrtpTlii1luWJLWfuKLdlXbHHF1smu7Cz9bnDFVrCnwRVbCZ64YivDE1eMZXjiiq8MT1GueNrf2Jvz54qvSE9cMZbhKcIVK3v5ijxHrhjLOC+uzjWWeS5cnedrxjkwdY6xmcfN1f6+VhwvT/saW3mMXO3nq8KxMbWPsUrHw5VWunKtxJW40qmuXCdxpQ6uXCNFu3J99LZ/CmQO+g==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+ </objectgroup>
+</map>

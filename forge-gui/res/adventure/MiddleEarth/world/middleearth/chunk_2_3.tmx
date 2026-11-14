@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3EFugzAQQNGwKxuEeoNK9P5X7CaLqkoTG2YItt/iS121kv00JkD6cbvdPgKb701/mvX2vk7o894Zprgaw9Xnya7saf+2Zq64SnI1J7pyBnJ1hit7OYYtrpRlKsuVM5CrOdCV66qxbT36/eYUW1d0NXE1tK05wRVTXEW7ck3FVfQ5aE5x9fXi9zLFVaSt9R5TXEXOqlpXTHEV7YoptmpMrUwpyNVa4YonrvbMKq40B33+K3XFFFuvXK2Vrpji6ogprlTqqsbUypQKXa2VvXJlzdk66sqs4iraFVM6w5V15mqvqdWsUoGtPa6Y0u/7BxGmVqbElRp1ZW0VYWplSk/mFVeKtrUGuLKemgMs/c56KsOWtVSGLesorsSVuJK4ElfiSuJKXIkrMcWVuFL7riaulGBqKrRlPVXiqsYUV+JKrZyBXKn0MyBX4kqt3K/iSlyJK438vIYrcSWuNLItrpTtynNnvesstL5ccaVWrrGsLVdcKcOV92Tk/Sv1+K4oV4qwtccUVypx5fuDirS11xRX+s/VEVNcyf/9EFca3ZY1VIYt6yeuxJVaz/0rZblyv11ZriauxJW4ElNcKcwUV7rKrOJKGbOKK2XMKq70zNWR5zrWUv+dgVwpe1ZxpQxTXCny7Nvry9qO7SjDFFc81ZjiSpEzyjmoElNnvJ9s7V2Tz85BvdEUVzxlmHIOMpVliiumZq50wWupI7bsS//P9bhSC6a4YoortWKqxJZ9cn2eYct+uYeQYcu+McWVc++qccXUGbbsIVNcMdWKLXvJlHnFFFcawdQ3V0wluXqUvWUqwhFXTGVZ4oqpTFNcMWVeMdWSLfvNFFfec+FKvZjadtiy/849rph6h6lthy0OmCoxxRVPkZb+xhVTkZ5qbXHRz/dEsz3V2OJiLFNbUFwxFemp1BYfTHHVv6ml4OcrmOKqnc9+S0Gl98a3k+LquqaWHZ09m2pt8dKeqeW+n8sb5hNX/Zx9j0xdqUeueniONcKc2i4eV9d4d6oHSyWu+DrH1FLoamuwZ64mntLXo0dTJa4mnlL/Xo+mSl1N5hNXB2z9AB6Gp6c=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Dunland Town" type="poi" x="1412" y="502">
+   <properties>
+    <property name="displayName" value="Dunland Hold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Dunlending Hold" type="poi" x="48" y="1199">
+   <properties>
+    <property name="displayName" value="Dunlending Hold"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Isengard" type="poi" x="2228" y="629">
+   <properties>
+    <property name="displayName" value="Isengard"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="2">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3bFuKjEQQNFMmcZfQf7/F1+TIooE4m3s9cz4FFdJEQU8HJnVAkt8fHzEiz4btmOt47ufv//u0aCv7+KNupu643bHG1U39XMtcYit3Wvq6unZmqK5rd1r6bxPjUNd7X7O6+xqTHQV9qdpe1TXfeqqq7A/TTE1Gpu66iqSm/pMeAxV3dT/ri8a2Np9nzqbGheL4raqPOdxVcdVxnObTM1xFQmOzzP6OdlURVcrb3swlcpVFDc1bugkUzNdRdFjKabmm5rtKpgq62r2mk90NZhaamqFq0hsamzoRFPZXTFV01RmV6/+37O17PJTydW4wdQqV7HI1CjUSXtTZVdM1fCU1RVTXM22Vd2UvYorps5wZa/qY2q1q7BXcbXR1e+/56m2qTtcReN9iqm9rqKZqwdTaVxFA1cPplK6emUr8+s1D6bSu3r3WJ4prmb7Yqq2qd2usr9vgan6rrKdv+Kpl6tgqryprK6Cq9KmMrsKpsqa4srrMie6ikNdjQYFWylcjWZxtdfUaFqwtc3V4Kq9L6bOdhXFTY1DisNt2ae4mu2LKa5mu3KcztVsV0xxNcvUgymuJtvyugxXTHGV3RVTXHHFVQVX3u/C1WxXTHHFFVcVXDHFVUdXTPV8nwxTXHU6rmKppyumuOq0VzHU93MT9iquHFNx5ZiKqVM+l+r8FFczTTmPztVsV67HwZX9ShWvU8QUV13OLXByzvVFmeLqiqlnP++2xci51/1giqsq5yHYONvVKltscBVMcZV837o6K5b6upph66+zYqqnq6u2Vs6Iq37XLfqLqU7fUcbVvbZ2zISrvteZGQXuJ1c1bPm+Fq5OjCsxxhVbXKmHLY8dY1yJK53sy2PEGFeqYs1jwBZXqmLL7LniSlyJK7HFlfLbMnO2uFIVY2bMFVeq4s0stcKXGWqFMXPTCltmphW2zEsrbJmVVtgyJ3GlKrbMSCt8mY1OvHaPatoyE62wZR5a4cscJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEnSs/4Brw9FHg==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Mountain Cave" type="poi" x="1853" y="376">
+   <properties>
+    <property name="displayName" value="Mountain Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

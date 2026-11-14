@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="6" height="6" tilewidth="150" tileheight="150" infinite="0" nextlayerid="5" nextobjectid="135">
+ <properties>
+  <property name="generated" value="by exportWorldTmx from the chunks: 1 px = 1 world tile, one grid cell = one chunk. Edits are not read back, except the Reference layer, which a new export keeps."/>
+ </properties>
+ <imagelayer id="1" name="Biomes" locked="1">
+  <image source="overview.png" width="900" height="900"/>
+ </imagelayer>
+ <imagelayer id="2" name="Reference" offsetx="-218.25" offsety="38.73" opacity="0.6">
+  <image source="map-of-middle-earth.jpg" width="1600" height="900"/>
+ </imagelayer>
+ <objectgroup id="3" name="Chunks" locked="1">
+  <object id="1" name="chunk_0_0.tmx" x="0" y="0" width="150" height="150"/>
+  <object id="2" name="chunk_1_0.tmx" x="150" y="0" width="150" height="150"/>
+  <object id="3" name="chunk_2_0.tmx" x="300" y="0" width="150" height="150"/>
+  <object id="4" name="chunk_3_0.tmx" x="450" y="0" width="150" height="150"/>
+  <object id="5" name="chunk_4_0.tmx" x="600" y="0" width="150" height="150"/>
+  <object id="6" name="chunk_5_0.tmx" x="750" y="0" width="150" height="150"/>
+  <object id="7" name="chunk_0_1.tmx" x="0" y="150" width="150" height="150"/>
+  <object id="8" name="chunk_1_1.tmx" x="150" y="150" width="150" height="150"/>
+  <object id="9" name="chunk_2_1.tmx" x="300" y="150" width="150" height="150"/>
+  <object id="10" name="chunk_3_1.tmx" x="450" y="150" width="150" height="150"/>
+  <object id="11" name="chunk_4_1.tmx" x="600" y="150" width="150" height="150"/>
+  <object id="12" name="chunk_5_1.tmx" x="750" y="150" width="150" height="150"/>
+  <object id="13" name="chunk_0_2.tmx" x="0" y="300" width="150" height="150"/>
+  <object id="14" name="chunk_1_2.tmx" x="150" y="300" width="150" height="150"/>
+  <object id="15" name="chunk_2_2.tmx" x="300" y="300" width="150" height="150"/>
+  <object id="16" name="chunk_3_2.tmx" x="450" y="300" width="150" height="150"/>
+  <object id="17" name="chunk_4_2.tmx" x="600" y="300" width="150" height="150"/>
+  <object id="18" name="chunk_5_2.tmx" x="750" y="300" width="150" height="150"/>
+  <object id="19" name="chunk_0_3.tmx" x="0" y="450" width="150" height="150"/>
+  <object id="20" name="chunk_1_3.tmx" x="150" y="450" width="150" height="150"/>
+  <object id="21" name="chunk_2_3.tmx" x="300" y="450" width="150" height="150"/>
+  <object id="22" name="chunk_3_3.tmx" x="450" y="450" width="150" height="150"/>
+  <object id="23" name="chunk_4_3.tmx" x="600" y="450" width="150" height="150"/>
+  <object id="24" name="chunk_5_3.tmx" x="750" y="450" width="150" height="150"/>
+  <object id="25" name="chunk_0_4.tmx" x="0" y="600" width="150" height="150"/>
+  <object id="26" name="chunk_1_4.tmx" x="150" y="600" width="150" height="150"/>
+  <object id="27" name="chunk_2_4.tmx" x="300" y="600" width="150" height="150"/>
+  <object id="28" name="chunk_3_4.tmx" x="450" y="600" width="150" height="150"/>
+  <object id="29" name="chunk_4_4.tmx" x="600" y="600" width="150" height="150"/>
+  <object id="30" name="chunk_5_4.tmx" x="750" y="600" width="150" height="150"/>
+  <object id="31" name="chunk_0_5.tmx" x="0" y="750" width="150" height="150"/>
+  <object id="32" name="chunk_1_5.tmx" x="150" y="750" width="150" height="150"/>
+  <object id="33" name="chunk_2_5.tmx" x="300" y="750" width="150" height="150"/>
+  <object id="34" name="chunk_3_5.tmx" x="450" y="750" width="150" height="150"/>
+  <object id="35" name="chunk_4_5.tmx" x="600" y="750" width="150" height="150"/>
+  <object id="36" name="chunk_5_5.tmx" x="750" y="750" width="150" height="150"/>
+ </objectgroup>
+ <objectgroup id="4" name="POI" locked="1">
+  <object id="37" name="Start" type="start" x="184.5" y="310.5">
+   <point/>
+  </object>
+  <object id="38" name="Barad-dur" type="Black Castle" x="776.8125" y="564.25">
+   <point/>
+  </object>
+  <object id="39" name="Hobbiton" type="Forest Capital" x="199.25" y="295.5">
+   <point/>
+  </object>
+  <object id="40" name="Rivendell" type="Island Capital" x="423.5625" y="252.75">
+   <point/>
+  </object>
+  <object id="41" name="Vale Steading" type="ME Anduin Town" x="525.375" y="275.4375">
+   <point/>
+  </object>
+  <object id="42" name="Barrow-downs" type="ME Barrow-downs" x="275.125" y="335.6875">
+   <point/>
+  </object>
+  <object id="43" name="Edhellond" type="ME Belfalas Town" x="489.5" y="656.9375">
+   <point/>
+  </object>
+  <object id="44" name="Beorn's Hall" type="ME Beorns Hall" x="526.4375" y="219.6875">
+   <point/>
+  </object>
+  <object id="45" name="Bree" type="ME Bree" x="286.0625" y="300.0625">
+   <point/>
+  </object>
+  <object id="46" name="Brigand Cave" type="ME Brigand Cave" x="265.25" y="414.375">
+   <point/>
+  </object>
+  <object id="47" name="Caradhras" type="ME Caradhras" x="450.0625" y="334.9375">
+   <point/>
+  </object>
+  <object id="48" name="Caras Galadhon" type="ME Caras Galadhon" x="496.625" y="397.125">
+   <point/>
+  </object>
+  <object id="49" name="Carn Dum" type="ME Carn Dum" x="389.125" y="88.25">
+   <point/>
+  </object>
+  <object id="50" name="Cirith Ungol" type="ME Cirith Ungol" x="661.375" y="641.6875">
+   <point/>
+  </object>
+  <object id="51" name="Corsair Fort" type="ME Corsair Fort" x="425.875" y="823.9375">
+   <point/>
+  </object>
+  <object id="52" name="Dale" type="ME Dale" x="711.6875" y="141.5">
+   <point/>
+  </object>
+  <object id="53" name="Dead Marshes" type="ME Dead Marshes" x="606.9375" y="505.9375">
+   <point/>
+  </object>
+  <object id="54" name="Derndingle" type="ME Derndingle" x="470.625" y="463.5">
+   <point/>
+  </object>
+  <object id="55" name="Dol Amroth" type="ME Dol Amroth" x="451.1875" y="697.4375">
+   <point/>
+  </object>
+  <object id="56" name="Dol Guldur" type="ME Dol Guldur" x="567.375" y="373.75">
+   <point/>
+  </object>
+  <object id="57" name="Dunland Hold" type="ME Dunland Town" x="388.25" y="481.375">
+   <point/>
+  </object>
+  <object id="58" name="Dunlending Hold" type="ME Dunlending Hold" x="303" y="524.9375">
+   <point/>
+  </object>
+  <object id="59" name="Abandoned Mine" type="ME Dwarf Mine" x="125.5" y="413.5625">
+   <point/>
+  </object>
+  <object id="60" name="Eagles' Eyrie" type="ME Eagles Eyrie" x="455.1875" y="90.25">
+   <point/>
+  </object>
+  <object id="61" name="Easterling Camp" type="ME Easterling Camp" x="849.6875" y="276.625">
+   <point/>
+  </object>
+  <object id="62" name="Edoras" type="ME Edoras" x="500.5" y="554.875">
+   <point/>
+  </object>
+  <object id="63" name="Emyn Muil" type="ME Emyn Muil Cave" x="588.4375" y="435.875">
+   <point/>
+  </object>
+  <object id="64" name="Nogrod" type="ME Ered Luin Town" x="124.3125" y="363.0625">
+   <point/>
+  </object>
+  <object id="65" name="Ranger Outpost" type="ME Eriador Town" x="270.5625" y="176.375">
+   <point/>
+  </object>
+  <object id="66" name="Last Bridge" type="ME Eriador Town" x="332.8125" y="230.75">
+   <point/>
+  </object>
+  <object id="67" name="Mithlond Quay" type="ME Forlindon Town" x="45.875" y="236.3125">
+   <point/>
+  </object>
+  <object id="68" name="Elf-haven" type="ME Forlindon Town" x="49.875" y="154.6875">
+   <point/>
+  </object>
+  <object id="69" name="Fornost Ruins" type="ME Fornost" x="265.125" y="174.5625">
+   <point/>
+  </object>
+  <object id="70" name="Frozen Ruins" type="ME Frozen Ruins" x="776.75" y="31.3125">
+   <point/>
+  </object>
+  <object id="71" name="Gladden Fields" type="ME Gladden Fields" x="496.5625" y="329.5">
+   <point/>
+  </object>
+  <object id="72" name="Goblin-town" type="ME Goblin-town" x="457.4375" y="235.4375">
+   <point/>
+  </object>
+  <object id="73" name="Tarnost" type="ME Gondor Town" x="591.125" y="614.9375">
+   <point/>
+  </object>
+  <object id="74" name="Erech" type="ME Gondor Town" x="594.8125" y="601.875">
+   <point/>
+  </object>
+  <object id="75" name="Grey Havens" type="ME Grey Havens" x="92.625" y="342.5625">
+   <point/>
+  </object>
+  <object id="76" name="Mount Gundabad" type="ME Gundabad" x="463.5625" y="63.5">
+   <point/>
+  </object>
+  <object id="77" name="Sun Road Oasis" type="ME Harad Town" x="694.375" y="842.6875">
+   <point/>
+  </object>
+  <object id="78" name="Harnen Hold" type="ME Harad Town" x="737.5625" y="842.875">
+   <point/>
+  </object>
+  <object id="79" name="Haradrim Camp" type="ME Haradrim Camp" x="620.5" y="758.8125">
+   <point/>
+  </object>
+  <object id="80" name="Haradrim Stronghold" type="ME Haradrim Stronghold" x="628.625" y="868.75">
+   <point/>
+  </object>
+  <object id="81" name="Lond Galen" type="ME Harlindon Town" x="52.1875" y="390">
+   <point/>
+  </object>
+  <object id="82" name="Harondor Watch" type="ME Harondor Town" x="674.25" y="772.75">
+   <point/>
+  </object>
+  <object id="83" name="Helm's Deep" type="ME Helms Deep" x="465.5" y="555.5625">
+   <point/>
+  </object>
+  <object id="84" name="Ice-bound Hall" type="ME Ice Hall" x="560.25" y="22.125">
+   <point/>
+  </object>
+  <object id="85" name="Iron Hills" type="ME Iron Hills" x="809.3125" y="118.375">
+   <point/>
+  </object>
+  <object id="86" name="Deep Mine" type="ME Iron Mine" x="832.75" y="109.5">
+   <point/>
+  </object>
+  <object id="87" name="Isengard" type="ME Isengard" x="439.25" y="489.3125">
+   <point/>
+  </object>
+  <object id="88" name="Lake-town" type="ME Lake-town" x="686.25" y="193.6875">
+   <point/>
+  </object>
+  <object id="89" name="Lion's Den" type="ME Lion Den" x="794.875" y="817.375">
+   <point/>
+  </object>
+  <object id="90" name="Lossoth Village" type="ME Lossoth Village" x="359.375" y="31.3125">
+   <point/>
+  </object>
+  <object id="91" name="Minas Morgul" type="ME Minas Morgul" x="656.75" y="599.125">
+   <point/>
+  </object>
+  <object id="92" name="Eryn Vorn Lodge" type="ME Minhiriath Town" x="272" y="484">
+   <point/>
+  </object>
+  <object id="93" name="Mountain Cave" type="ME Misty Cave" x="442.5" y="425.875">
+   <point/>
+  </object>
+  <object id="94" name="Black Gate" type="ME Morannon" x="664.8125" y="529.625">
+   <point/>
+  </object>
+  <object id="95" name="Moria" type="ME Moria" x="444.1875" y="345.875">
+   <point/>
+  </object>
+  <object id="96" name="Mount Doom" type="ME Mount Doom" x="720.1875" y="605.6875">
+   <point/>
+  </object>
+  <object id="97" name="Mountain Cave" type="ME Mountain Cave" x="415.8125" y="623.5">
+   <point/>
+  </object>
+  <object id="98" name="Durthang Market" type="ME Nurn Town" x="757.5" y="704.5625">
+   <point/>
+  </object>
+  <object id="99" name="Morgai Camp" type="ME Nurn Town" x="776.375" y="709.875">
+   <point/>
+  </object>
+  <object id="100" name="Oasis" type="ME Oasis" x="708.25" y="882.875">
+   <point/>
+  </object>
+  <object id="101" name="Old Forest" type="ME Old Forest" x="267.9375" y="308.875">
+   <point/>
+  </object>
+  <object id="102" name="Orc Camp" type="ME Orc Camp Lithui" x="831.625" y="521.625">
+   <point/>
+  </object>
+  <object id="103" name="Orc Camp" type="ME Orc Camp Mordor" x="794.1875" y="633.5625">
+   <point/>
+  </object>
+  <object id="104" name="Orc-hold" type="ME Orc Hold Grey Mountains" x="555.9375" y="73.1875">
+   <point/>
+  </object>
+  <object id="105" name="Osgiliath" type="ME Osgiliath" x="623.9375" y="594.375">
+   <point/>
+  </object>
+  <object id="106" name="Paths of the Dead" type="ME Paths of the Dead" x="491.1875" y="582.4375">
+   <point/>
+  </object>
+  <object id="107" name="Pelargir" type="ME Pelargir" x="584.375" y="686.25">
+   <point/>
+  </object>
+  <object id="108" name="Wainrider Halt" type="ME Rhun Town" x="841.9375" y="468.5625">
+   <point/>
+  </object>
+  <object id="109" name="Westfold Steading" type="ME Rohan Town" x="523.6875" y="460.4375">
+   <point/>
+  </object>
+  <object id="110" name="Ruffian Camp" type="ME Ruffian Camp" x="268.6875" y="299.375">
+   <point/>
+  </object>
+  <object id="111" name="Sea Cave" type="ME Sea Cave" x="477.4375" y="640.875">
+   <point/>
+  </object>
+  <object id="112" name="Cave of Shadows" type="ME Shadow Cave" x="803.9375" y="735.6875">
+   <point/>
+  </object>
+  <object id="113" name="Bindbole Wood" type="ME Shire Town" x="182.25" y="335.0625">
+   <point/>
+  </object>
+  <object id="114" name="Newbury" type="ME Shire Town" x="196.1875" y="340.5">
+   <point/>
+  </object>
+  <object id="115" name="Bucklebury" type="ME Shire Town" x="201.3125" y="272.1875">
+   <point/>
+  </object>
+  <object id="116" name="Spider Hollow" type="ME Spider Cave" x="612.3125" y="162.25">
+   <point/>
+  </object>
+  <object id="117" name="Spider Nest" type="ME Spider Nest" x="572.3125" y="178.5">
+   <point/>
+  </object>
+  <object id="118" name="Tharbad" type="ME Tharbad" x="338.375" y="448.625">
+   <point/>
+  </object>
+  <object id="119" name="Thorin's Halls" type="ME Thorins Halls" x="96.9375" y="204.5">
+   <point/>
+  </object>
+  <object id="120" name="Thranduil's Halls" type="ME Thranduils Halls" x="640.3125" y="143.4375">
+   <point/>
+  </object>
+  <object id="121" name="Tolfalas" type="ME Tolfalas" x="531.9375" y="744.8125">
+   <point/>
+  </object>
+  <object id="122" name="Trollshaws" type="ME Trollshaws" x="394.0625" y="244.9375">
+   <point/>
+  </object>
+  <object id="123" name="Uruk-hai Camp" type="ME Uruk Camp" x="533.8125" y="509.625">
+   <point/>
+  </object>
+  <object id="124" name="Warg Den" type="ME Warg Den" x="751.1875" y="201.3125">
+   <point/>
+  </object>
+  <object id="125" name="Weathertop" type="ME Weathertop" x="334.25" y="277.875">
+   <point/>
+  </object>
+  <object id="126" name="Riverside" type="ME Wilderland Town" x="722.5" y="212.625">
+   <point/>
+  </object>
+  <object id="127" name="Upper Vale" type="ME Wilderland Town" x="796.375" y="220.1875">
+   <point/>
+  </object>
+  <object id="128" name="Withered Heath" type="ME Withered Heath" x="644.25" y="69.6875">
+   <point/>
+  </object>
+  <object id="129" name="Wolf Den" type="ME Wolf Den Eriador" x="189.625" y="208.375">
+   <point/>
+  </object>
+  <object id="130" name="Woodmen-town" type="ME Woodmen Town" x="615.6875" y="315.5">
+   <point/>
+  </object>
+  <object id="131" name="Erebor" type="Mountain Capital" x="699.125" y="112.8125">
+   <point/>
+  </object>
+  <object id="132" name="Minas Tirith" type="Plains Capital" x="595.3125" y="608.6875">
+   <point/>
+  </object>
+  <object id="133" name="Wizard's Hollow" type="Spawn" x="184.5625" y="308.0625">
+   <point/>
+  </object>
+  <object id="134" name="Umbar" type="Swamp Capital" x="452.9375" y="814.5">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3dltxDAMBcAVVMTC7r/QVJAgCUwtj/lQB4NHmaLk9Xq91qF1FV53srWTr8UVV1xxxRVXXHFVzNXNVXlTMiunq4srrrhiiiuuuOKKK6a44oorrpjiiimuuOKKK6644oqrNK4urrjiiiuuuOKKK664KuSLK7a4Yosrrrhy7swWV1xxxdVMW+aQuZpmiiuuuOJKHeTKvVS2uOKKK6644oor5zn27UxxxRVXXKmDXHGV1xZX3gDhiiuuuOKKLa644oorrrhiiyuuuOKKK67Y0muv52pxxRVXzp2LmJJZvV2tBIurXq6Y4irS1ObKvYkAW1xxJa+4qlIDueIqwhRXXD29r9IX5apbXnHVw9V3prji6un6Z56Bq6iskldcccVVJl9LHeQqyJV5UWfP5pC5MofFFVfu43DFFVdmR7ma42px5X/iB89tuOIqqhfKFVfyiq0MrlZSV/6byhVXamGVOshVbVfyiqtPm+KKq4ga6HuQq+p5pYc1xxRXXHVxZQar976KK7PIUVnlfQauuOIqe4/d27VMdc0rb9f2rYFcuUsfUQO9jcxV17ziql8N5IorrriqUgO54irCFFe1bWX8DuSqvi15xVX3uRiuuIo2xZVa2NWVuYY8trjiiiu2Kth60hRXXD3dt+Kqh6uMNZArrrq6cp+QK6644oorrtjK0mvfXHGVNKu44qqrK3ssrrjiiqverjKb4oorrtjiiqtqrjZXXCXPKq5m77G4YutpV5Gm3lxx1diVWnjWVrSpTK70seq7enPVwlbWrOJq3h7rRFZxNSuzTmUVV3NcnTTFFVdccfVfV5GmuOppiyuuPuEq2hRX/Wz99ez3lCmu5rjaQ11dQ9YpVydMcdXP1uaKLa7YSu5rJzJVyZXc4ootrqq50nfIva/6yVR2V2xxxRZX1VyZJ83VC+WKK65m+nrKVSZTXHHFlX9U3ElM/cbVFyF8IEQ=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Forlindon Town" type="poi" x="734" y="1381">
+   <properties>
+    <property name="displayName" value="Mithlond Quay"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Forlindon Town" type="poi" x="798" y="75">
+   <properties>
+    <property name="displayName" value="Elf-haven"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Thorins Halls" type="poi" x="1551" y="872">
+   <properties>
+    <property name="displayName" value="Thorin's Halls"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

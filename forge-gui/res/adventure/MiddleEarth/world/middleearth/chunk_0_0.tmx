@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <properties>
+  <property name="seed" value="-8110469294258918603"/>
+ </properties>
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3UEOwiAQQNHWngLuf1A3mmgTk6ZSyjBv8Rdu3PSFIai4Lsuy6quH/o4jrrjiiiumuBJTXHHFFVdccSWuuOKKKa6YEldcccUWV1yJK6644oorpsQVV1yxxRVX4ooprrjiiitxxRZXXHHFlLhiiyuuuGJLXLHFFVNccSWu2OKKKa7YEldcccUUV2yJq99tr9jg6gpX+1jh6gpXG3NcdTTFGlc9Xd3hbSTzPPV11fo5j2b9/Z483WvqzHPeAsRUjOcULa4Y4Ioprpjiiitx1aJyMEa4aumJNa56eWKNq56mWMvnqnDF1SSe2GKKK6644oorrpjiiiuuuOKqcMUWV1wxxRVXXHHFFlfDm+KKK6a4sl5xldkUV0xxxVUUU1ltMcUVVzFNccUTW1xxxVVmTxlt8cRVNleFK6544mtQVyVRXDHFFVdMcZVxneKKK65iuipcccUVV+YgV9YrrrjiqoOryhVXJ0zVj/avK1dcHaiejCuuWjiazRZT9/vhii2uuOKKK67mssUVV/btXHE1/xkDU1xxxRVX5iBXXHFlDnLFFldcccWVWcgVV1zZu3PFlXMGv/PyGSFXeWxxxRVX7iliiqustipboe4X5YqrzLa4innPNlNcccWW/wXgiiuuuDIHueLK3p0rrrgyB5niyv7KeTtXXHFlDnLFFVdcccUVV1xx5Xt9XHHFlXMGrkY1xZW1ii2mormqXHHFFVNcufeDK664SmmLKa7cA8kVV9YqrpjiiiuuuHJPLVdcccUVV1xxlc3VE2VZ11Y=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+ </objectgroup>
+</map>

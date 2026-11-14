@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="7">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3Mtq40AQBVALTGAWPQj/g73K/3/fbGZhjB+y1K/qPotLiCMScB2qKi0ll9PpdAmW5Unuv752kGVjfgbNJXBe2YpiamRbF7a44iqErYWtIVxduOKqkq2VK64KzUOuuBqpZy1sccUVV0FscXU6/fn/XlzuPkbOq9raserm8f24sOV8tICrkXpWa1tcjeNra3254uqoq3c15qq+q4jG9tSaK66OmKpti6v4vo7Wnau2rtZBTNWwxVVcV7nrz1U7V734Wjt3NbOtqK5WroZ11cpY6R2bq/lcrVxN5eqor/WNnxrPq/cyC7nK56u3vyPliqsIrlauuGp4v9D51TFba4fp4V40V/tdrR2n5fMzP1wNG664GnHP4moOV4sdi6tAtrhiq8X9Ha7Ysmdx1ZuvV67OXLGlZ3HV4U4/6p7Fyj4Ls+xZv08+fxeu+p6xvexZvzujrv3aOgc1xVX/PUu/Eq64imLLHBSuuOLKHJzlma0ezxu4GtvVfbjiKrqrH66GeHb53f3tSH2Li/5dLVz5Pe6gsS3fK4ItLso/V1zKaO3+xVUcW8+u6dUWV/0725N1o62Sxrhi68zV1La+Mbjl53Ele/rbN65K+OKKrRK2uHJ2cf6Qb02duWJrg6t3zu5fu7+GK+f55wLhSs8q4YsrPauELa78j4jcrpxfccWVRJqFXHFVwhZXZmFuW+agntXSllpxpV9Ja1tccZXbleeQ2cpt65mdd9er0dx//7N+2a+2XqtGelaJe9Pqo2cddZWeRH30rEdb60FTXLG1xdezj+lD1MU8/DaJKz2rgSmu2OJKWs/DxBVbmV0lrrgqYIsrye0qcSWZnytNXEnmnpW4ksx7VuJKXnjYaytxJW8sfHKVMlviamxPW22lglGbcU19ssWVHN2BattSo/FNtZiH6jSHq8SVFDwDqGVLrbjiiqkUxJZ6zWWq1g6vZvO5SlxJod/XzEGpYcvezlNuW86vmIoS9evTE1eiT3HFFFdccSVMccXV7K6ud2GKq5yePoWt8menywCurjvCVF/3enqytNfUCL56tdS7q2sFU5GtpQC2enD1WNNrpnlXwlsPDrnKtxNFiL2qrKvH9/o6UW4Tni0cdbV1NsycWyFb0VwtB1zJa1e3TMYinGtyVd/VLOfqR2xxU69fpUFcLVwVc7XHWBrM1sJVU1fR7yHvscXNcVfvrB2p5y2wLW7KuHqW9OXrj9f0bmvhqomrnD57t8VNPFcRbHET01XvvriJ7apXW9zEd9WDMa7GdtXSF1fju2ppjKs5XLXwxc08rm5csRXcFjPzuarhixmuuOKKK664khld3bjiiqsh8vd/uOLqiJ8t4YorrtraYoktruo7YmtuV38rxjz8nH93iwHl
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Derndingle" type="poi" x="330" y="216">
+   <properties>
+    <property name="displayName" value="Derndingle"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Edoras" type="poi" x="808" y="1678">
+   <properties>
+    <property name="displayName" value="Edoras"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Helms Deep" type="poi" x="248" y="1689">
+   <properties>
+    <property name="displayName" value="Helm's Deep"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Paths of the Dead" type="poi" x="659" y="2119">
+   <properties>
+    <property name="displayName" value="Paths of the Dead"/>
+    <property name="spriteIndex" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Rohan Town" type="poi" x="1179" y="167">
+   <properties>
+    <property name="displayName" value="Westfold Steading"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Uruk Camp" type="poi" x="1341" y="954">
+   <properties>
+    <property name="displayName" value="Uruk-hai Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

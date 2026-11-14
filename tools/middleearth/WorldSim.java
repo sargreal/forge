@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Offline replica of World.generateNew (biome painting + POI placement) for layout work.
  * Honours world.json "biomeMap" (fixed layout from an image) like World.loadFixedBiomeMap.
- * With world.json "worldMap" (Tiled world, Phase 2b) it reads biomes and POIs from the tmx through the engine's own
+ * With world.json "worldMap" (Tiled map or chunked .world, Phase 2b/2c) it reads biomes and POIs through the engine's own
  * WorldMapTmx parser and checks the fixed placement instead: POIs outside their biome, overlaps, missing POI entries,
  * unreachable POIs. Exit code 1 if there are problems.
  * Usage: java -cp FORGE_JAR WorldSim.java <planeDir> <seed|0> <out.png|-> [runs]
@@ -233,6 +233,11 @@ public class WorldSim {
                 + " POI objects, start " + (tmx.start == null ? "missing" : Arrays.toString(tmx.start)) + ", parsed in " + (System.currentTimeMillis() - t0) + " ms)");
         biomeMap = masks(tmx.biomes);
         int problems = 0, tile = data.tileSize;
+        if (!tmx.chunks.isEmpty()) { // Tiled world: chunks tile the world exactly, objects inside their chunk (checked by the reader)
+            System.out.println("  " + tmx.chunks.size() + " chunks, first " + tmx.chunks.get(0).fileName + " " + tmx.chunks.get(0).width + "x" + tmx.chunks.get(0).height);
+            for (String p : tmx.problems) { System.out.println("  CHUNKS: " + p); problems++; }
+            if (tmx.mapWidth != width || tmx.mapHeight != height) { System.out.println("  CHUNKS: cover " + tmx.mapWidth + "x" + tmx.mapHeight + ", world is " + width + "x" + height); problems++; }
+        }
         Map<String, Set<Integer>> listedIn = new HashMap<>();
         for (int b = 0; b < biomes.size(); b++)
             if (biomes.get(b).pointsOfInterest != null)
