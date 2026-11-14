@@ -405,10 +405,17 @@ public class ConsoleCommandInterpreter {
             System.out.println("World map exported to " + file);
             return "World map exported to " + file;
         });
-        // Dev helper (MiddleEarth fork): write the world (biomes, POIs, start, seed) as a Tiled map for world.json "worldMap".
+        // Dev helper (MiddleEarth fork): write the world (biomes, POIs, start, seed) for world.json "worldMap":
+        // exportWorldTmx [dir | file.world | file.tmx] [chunkSize]. A directory or .world gives a Tiled world of chunks + overview.
         registerCommand(new String[]{"exportWorldTmx"}, s -> {
-            String file = s.length > 0 ? s[0] : forge.localinstance.properties.ForgeConstants.USER_ADVENTURE_DIR + "world.tmx";
-            WorldSave.getCurrentSave().getWorld().exportWorldTmx(new com.badlogic.gdx.files.FileHandle(file));
+            String file = s.length > 0 ? s[0] : forge.localinstance.properties.ForgeConstants.USER_ADVENTURE_DIR + "world";
+            int chunkSize;
+            try {
+                chunkSize = s.length > 1 ? Integer.parseInt(s[1]) : 0;
+            } catch (NumberFormatException e) {
+                return "chunk size must be a number";
+            }
+            WorldSave.getCurrentSave().getWorld().exportWorldTmx(new com.badlogic.gdx.files.FileHandle(file), chunkSize);
             System.out.println("World exported to " + file);
             return "World exported to " + file;
         });

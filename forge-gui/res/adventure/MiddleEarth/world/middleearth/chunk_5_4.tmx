@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3CEWgzAURcFg41jH3//+sG1MgfJJAiNGIVoet+cgKGspZQUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDVchFbauduroGGtMZsLWlMSxrTk77Qk770pC9NaQs96UtT2tKUttCVtnSlK11pC13pSlfa0pWu0JWudKUrXelKV2hKV7rSlaZ0ha50pSltaUpbaEpfetKWpvD/QfSlJ33pCe+TQWNa0pqG8H5RAAAAAAAAAAAAAAAAAAAAAAAAYHRhA5K6+tQerw2bcaarVt3Jlhzp6kxvdiX+dFVfez5r9q3iRfez8VBHzrvnNrN28+u+KJjidzByQ7rSaUZDutJXRkO6erd6I3trTFfM0pdtyejQVgAAAAAAAAAAYzzLMcJ3c62+d+n1bGsvmY0/tZMNKmCOWA==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Nurn Town" type="poi" x="120" y="1673">
+   <properties>
+    <property name="displayName" value="Durthang Market"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Nurn Town" type="poi" x="422" y="1758">
+   <properties>
+    <property name="displayName" value="Morgai Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Orc Camp Mordor" type="poi" x="707" y="537">
+   <properties>
+    <property name="displayName" value="Orc Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Shadow Cave" type="poi" x="863" y="2171">
+   <properties>
+    <property name="displayName" value="Cave of Shadows"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

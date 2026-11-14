@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3Utu4zAQBUATvgO30f1PmU0MBI7tSAJFspu1eNsEY1det75zv91udzmV8iur/du/XoQJrlp6YowpruLY4oorfdXHFiNccWUOcqWvuBKmuDIDudJXXAlXrWxxYgZypau44mplW6yYgVzpKq644krMQK50FVf6iivRV1xx5byoGciV6Cqu9BVX+oor4Yorc5ArfcWV6Cuu9BVXXHElXLk+qK+40ldcMcXVfls+G32lr/QVV1xxJeag/UpncaWzuBJ9xRVXXJmDXIm+4kpfcaWvuBKuuDIHudJXXIm+4kpfcaWruGKKK/dfccWVOei5VKa44kpfcaWvuOJK/D+8ZiBXuoorrpjiyhzsa4orfcWVvuJKX3ElXHFlDjoe1FdcCVdcMcWV3Yor0VeuD3LFlTnIlegrrphqkcoVVxeYqo1tMbTeXlU/hCtd1dLTUVtcre2qHoy+Yqq1qWpvt1s19mQO6qurPO11pa/WcVW5YmpCS3ttuZ8h925VudJXQSztnYVc5XFVB0Rf5Z6Ds5jiKkdf1YHhKp+rOkm4yjcHudJZK7lyPBh/x+KKK7s7V5HONUTdsTia/9zobLa44oorczDS8SFXrhGOsMUSV1ytfQ/WjHsWL+7BuvI5Clnv2S22ZDZXPnOuuJLZXR19H9ZjJ3U8yFWr557LU7hiqsX7P4q+4qqxq8IVVxfsVq9McfX3M4ruqtfPKR9McRXrOfoe5wPqQU/lzbVClmK992PUOabywRRXuVyN9FTe3Nuw/YSnWO+T6WVqr6dHtqewlONdfb3m3Z2rpV3ttVFOdBNXed+rdnaGHckZT1zl7Kselrhax9V/Rlpa4mpNV71+58ZV6P2qTPr3wFXcvpq5P7mKaatMPJs3rkJ2RGRTXM3bVzMfQ3AV7/ssAY5LuYrlKoIprmLtV1l6iqu5+ipLT3E1z/cb5Tw/V3HmYKRrR1zF+Z654ooprrgaZ4qrcbtV4UpXmYFcccWVOZhyBnKlr64wxRVX+irvOVGu7Ff6iitz0H7lumAuV9+wmM2z
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Island Capital" type="poi" x="1977" y="1644">
+   <properties>
+    <property name="displayName" value="Rivendell"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Eriador Town" type="poi" x="525" y="1292">
+   <properties>
+    <property name="displayName" value="Last Bridge"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Trollshaws" type="poi" x="1505" y="1519">
+   <properties>
+    <property name="displayName" value="Trollshaws"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Weathertop" type="poi" x="548" y="2046">
+   <properties>
+    <property name="displayName" value="Weathertop"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

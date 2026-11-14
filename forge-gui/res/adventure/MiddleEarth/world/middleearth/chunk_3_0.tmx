@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3c2OgjAUgFEdyxuwxL7/Y87KhBh/EArctmfxJbOc4Z60VZT5u1wuf5IkSZIkSZIkSZIkSZIkSZIkSZIkSZIkSZIkSZIkSZIkSZKkReVZrodKm4rqK33IDOsxlYMaWprZxnV1pLG0Y+Yc09TettLBmX1sV1u9pWC1Pu+9r00u3JrXk6mSejS05rrkk6rNU02+zromt9nPZ7pKDVSTkelFLblKjbWXqRKzn36shKvMVUhfU4DuK11lrsL5mgJ1n7X0785chbI3Bez+psfvfw/mqmUr08KzztqzTwRXn+LqmDNwzXHFTBRbzlcsteaKG67OdmW2XJV0ZaZclXBlhlxtzby4YoorrsSVuIrj6jrL3Lkq4er6IrPniiuuuFItriauuOJKXIkrrnxelCu2vB4UV1xxZR9stm+fg+NKpZ/DUMu5PXEV3tJWY1yxtDWumEoH+Tra1OB81aSpCM/9GLhq0tKjkSuWVrr5ln2Qp5KeznRlvWrT0lmuBuvVIX7GAPXualj4ew1virgm9eQqbZjH8yxfuRoCdcbeNgYr8nr1bm7RXT3/nUNHnqK6WjKvWlx9KjXqKdI++OtManc1v/6teTrT1bRxLi25Ghc6GyvrrPWKq7bjiiuuuOLqWFdscdW7K+tV2eceD/bCLkxxxZV9sP69cOSKK6a6dFWTrZGrQ+479+Rq5Ko6V9HP7yNXTbliqy9XmSuu7IVcccVV564yV1xZr7jiiiuuursHzZXzFVdcccUVV1xxxVVtrjJXXHHFFVdcccUVV1xxVYWr3JEr93GsV1xx5b4zV1xx1YKrK1dcNbxmccUVU95n4IorrrjiiivnK6644oorz2lgiyuuuMo7ztD9HN9L7fH7qVxxxRZXtT3TnSuu2FrXjSuuuGrqf5u07urGFVtc+V9MXHHFlffb2SrqKnHFVeWu7IN92Hq4StYrrgr2D5xBqG8=
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Eagles Eyrie" type="poi" x="83" y="1444">
+   <properties>
+    <property name="displayName" value="Eagles' Eyrie"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Gundabad" type="poi" x="217" y="1016">
+   <properties>
+    <property name="displayName" value="Mount Gundabad"/>
+    <property name="spriteIndex" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Ice Hall" type="poi" x="1764" y="354">
+   <properties>
+    <property name="displayName" value="Ice-bound Hall"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Orc Hold Grey Mountains" type="poi" x="1695" y="1171">
+   <properties>
+    <property name="displayName" value="Orc-hold"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

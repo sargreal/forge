@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt2LsNwzAMQEEXAVJ7Cmn/CbNAgjjRx6J4xbUGTD7Ihh7HcTzeeEIDTaEronZlJugK30F0Bb6DOK/QFfTsSlvoikhdaQtdoSuyd6UtRnWlLXSFrsjelbbQFbpCV9C/K22hK3RF9q60ha7QFdm70ha6QlfoCnSFrtAV6Apd4b4dnFfoCl2BrtAVWbrSFroiUlfaQldE6kpf6IpoXWkLXRGpK32hK3SFrrTFuK60RZSuagN7ztFV7dyNvvbuqlxUb2bv63dV/lAXYf/j/kVm9rRSU/rq/x/b0lVpVBemobldlY5qAFpqVyarwTwH3KHMvsO5Y26a+v1sH31H09rXCrPS1fh/0l/sMiNd3d9X3ZCu7uls91noishdmbWudIWu0BW60hW6QlfoSles2pU560pX6ApdoStdoSvydWXGutIVukJX7Or8QFf0aklXtHajK0Y31LurK8+zu/0b+tbBiOfbZ76mzsFNaSxfTyuw976zOEnT16x56ChXg73fXQN5+7IfnemIlTrzXdKXc4kVGjQLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIIMX2u4PLg==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Black Castle" type="poi" x="429" y="1828">
+   <properties>
+    <property name="displayName" value="Barad-dur"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Orc Camp Lithui" type="poi" x="1306" y="1146">
+   <properties>
+    <property name="displayName" value="Orc Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Rhun Town" type="poi" x="1471" y="297">
+   <properties>
+    <property name="displayName" value="Wainrider Halt"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

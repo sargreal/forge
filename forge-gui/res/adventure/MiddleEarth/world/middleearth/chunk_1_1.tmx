@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="7">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3MGRwjAQRUGpFITzz5QLBy5QlKyxNZ4+vAS8vV9aFhittbGw/tGQAmx5FrJXYkpMSe5VsldiSmJK7lSyVRJXYkruVVKlreo/8nNnapUlxri6yhRb7lURnviyVdGm2GIqyhRb7lRcuVdlMsVWzb3qF8aLexVXzr8MptiyVVxxlckUW7aKK/cqrmwVVww5A9lyBnJlq7jiiSuunIFc2SquxBVXTHHlbsWVvarxOVOm7BVX9oorrrjiyjno/aL2iis9/5kwxRVX7lVsMVV1q3w/A1dcOQPZYoor39d3xzN2B2BK+9jy/LTamOelCHOeibgSV+JKWnuf91zElbiS+5XElbiSO5bEldgSWxJXYkted5BsltgSWxJXYktseS7iSl7Tks2SbJa4EleSO5ZslriSnIOyVWrteMeVVnr6J660ytITfHG1r6XMtrjKYSqbLa72dpTVGVdzhu72tLstrnLt04yz48TvjddFa1uasRe5h1zVtRV95nLFVIQvm8XWWV/fzleuuIqIK6YidowrriLuXlxxZa+44oor5yBXXHHFldcZmKq5W1xxZa+Y4oorrrhiKtYVW0zYLKa4YspZyJVsFlM2iym2uJLNYspmcVX9/9CdK3HFlfcmc8UVV+KKK+9556qsq86VFrgaXIkrrpKa4kq2iit/D3LleyO5EltcccUVV1yJLa644ootrsQWV1xxxRZX4oorn1HlymdUuRJXXHHFlTtW1l6NzmXl
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Forest Capital" type="poi" x="788" y="2328">
+   <properties>
+    <property name="displayName" value="Hobbiton"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Eriador Town" type="poi" x="1929" y="422">
+   <properties>
+    <property name="displayName" value="Ranger Outpost"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Fornost" type="poi" x="1842" y="393">
+   <properties>
+    <property name="displayName" value="Fornost Ruins"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Ruffian Camp" type="poi" x="1899" y="2390">
+   <properties>
+    <property name="displayName" value="Ruffian Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Shire Town" type="poi" x="821" y="1955">
+   <properties>
+    <property name="displayName" value="Bucklebury"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Wolf Den Eriador" type="poi" x="634" y="934">
+   <properties>
+    <property name="displayName" value="Wolf Den"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

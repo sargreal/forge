@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3ctuIjEQBdBY/ohJxv//n7OZBUKQftNVrrO4IpGyQPjoltuhoX19fbXE+UmevzvSn/L4evQP5c9CGldcccVVAFMVXFWzlaGruMrZWVxxNWNfVZmDjauPu+pcTesqqqmZXK19bfeu/dV+Z+qqiq6WfLUnR++68fnxaledq7S2jszgdqGtJVPR9uwzutpjK8oeb8/8i9hVXMW6jojeU9VdtZssHfW1ZKonMVXRVfQzkKj7dK7ynrH1BK46V2FttReetu4F9ZUs9VcmV/pqrmvXxpWcbCuSqarn7bPYOuNsjiuW1pyD9IDhKt6ePbup32xZ43s66if4Nd9RW9Y65v8tM4Yrpq72Zc2ZuiLWnSmuuOKKpc6VMMVVQkvf//P482/hiqlXdtb6mdUWG9vz/aFwxVR0W4Or8pa2+hovfn8XrlhaMjV2hqt6hrbYGgfDVT1Ha31xxdLZrkbgzmIpr60R2BZTXHHF1LOvqLaYyp0R1BZTXHHFFFdMccUTX+faYoqr6q74yTMPeeKqoitmctpiiqtKrji519XgSi4wddQWU1xxJVlsMcUVV8IVU1xxxdS5tphiiyvhiieumGJqDlcscMUVV1t9McUVV8IVV1wxxRRXErurOlNccSXmIFdcccUVV3KbqYiuGKjTVVwxldkVA/qKK64yuLL288zBwRVXXIl9O1NcccWU60GZ5lrQ+6+4cj+O2F+xxZV76bma0xVbXPFl3+5ztrniii2uuOLK93lxZd/OlPf1ccWVOcgVV0xxxRZXXHHFFVPuo2eLK33FFVfCFVdcccVV7XMGvvLdR8gVX1XPGdjiiiuusrliiyu25nPVJ9y3c5XrvKElDk/mIFfzzMLZXfH1WVedK6644osrxgrb4qquL674yuSqc1XeF1dsccUWV1xxxRVbsV11rtjiiquJbTWZ0pe+Yosrvira4oqrKJ3F0bzm9BVvXEmWDuOKK64ksqnHteWKrbNNnWmLq1jO+sq172/+dq+r9vDonGGu9Juy9vmNDe70VV1vR58XV5xdtYbmIGNXrZ2+qm3r6uew9fOuuMrnrN2wVlFms5jNXMnVxv4BJX5eTw==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Dwarf Mine" type="poi" x="2008" y="1817">
+   <properties>
+    <property name="displayName" value="Abandoned Mine"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Ered Luin Town" type="poi" x="1989" y="1009">
+   <properties>
+    <property name="displayName" value="Nogrod"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Grey Havens" type="poi" x="1482" y="681">
+   <properties>
+    <property name="displayName" value="Grey Havens"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Harlindon Town" type="poi" x="835" y="1440">
+   <properties>
+    <property name="displayName" value="Lond Galen"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

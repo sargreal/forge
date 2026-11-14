@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt2zkOwyAQQFEjjeSD5P53TJMyCyIGM/CKV6UbvsbykjiOIxb0aBDwZ2dmAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAdueLWdDazlnxew0zpaUbXfGtHV1x1+7RlY5OXaEr9KQrLekKXTGsncxN6Wq+fZOtH125XulKQ7rSEbrSlK60pCs9oSst6UpTutIUutKUrjSlKz2hJ3SlJ13pamdlkW/e9DNfV6XTPqhtwd5Zt6vS8Zxb2nI263RVBp27lvbrqgzeI7pa936wpi2zomVf/GrLrGi9DmmLns9FP7VlXlzZVdEVF93za4te7wfftWVmXPHeWVvoat1n1yt+J6Ote99/ZJx7NLalgf4NZe4r7KzpG8rYV9hZaRrK1FfYWekaytBXaCttQzP3FRe0pSF96WrdhmbqKza7FpbNzf7/wYxtFYadVWzSlpbGntcT5NWPRQ==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Easterling Camp" type="poi" x="1595" y="2026">
+   <properties>
+    <property name="displayName" value="Easterling Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Warg Den" type="poi" x="19" y="821">
+   <properties>
+    <property name="displayName" value="Warg Den"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Wilderland Town" type="poi" x="742" y="1123">
+   <properties>
+    <property name="displayName" value="Upper Vale"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

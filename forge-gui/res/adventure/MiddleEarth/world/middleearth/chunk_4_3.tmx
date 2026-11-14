@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="5">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3cGq4kAQQFEDkl0W+QoR8v/fN5t5IDJmNK8rdlWfxcVFMAvr0Cat6Hy5XObCXfWV5gEyZ6644ootje6KL6644oovccUWV3xxxZi44oortrhiS1y972t+er244craxlXF9Y0rWcO44osrrrgSW1xxxRVbXIkrrrjiiiuuxBRXbHHFFVfiiiuuuGKLK3HFFVtcccWV2OKKLa644kp8ccUVV2xVaXvIjLmKcMUWV1GuWsbMuLY2tthK6Iovrtjiiiu2uOKLK7b4yuuKsdq2NrbYKuyKr1q+Nra4GsQVX/l9bWyxNaArtrhii61srjjjii22tgJxxdVIpm4H+8TP3nm4qmPq1mlc5fJ0SxhX/Zm6FWx0VzzlqbqnV9fCHNV2NQevTWY8rquo/1jmaixX1wBTn+7tqG9Xyz96Pv7z2Oo3bR6fd3TPUH26WnbaO37WvpzZ5nK1NIorrq4NPZ3ly2z7dPU4o+WLcVVrD3/pPKbyuVoSxlSfrpbEWav6aykSV1xF2jJTrrjiKkPmydVvu3PFVZCr+5Mv8+SqpatHX2bKVWtXP5krVxGuXjnjjquWrj71J64i44Mrvrhiiyuu2OKKK6644oorttwPcnV+61Ncje1qfdHe8XfOwdX7/e/1zWJoz1OruDruqgdjn6wzZ8ZVG1dRztaT15mRXfVuaj1ocC0UV993VTGuuOLqO6444YorrrwHcsWVuGKKK6644kr1XLm24oorrrjiiiuuuOKKK6644oorrrjiiiuuuOKKK6644oorrrjiiiuuuOKDK6644oorrlTX1Z0rrrgavulvXHEV4WriiqsgV2xxFeVq4oqpIFcTV1wFuZq44uOX+wxscRW1f+X9kKszXY26ZrHRbr89iy2u8n2Ok8EWVzk/H2SLC664yvR9htGvsdiI+57MqPeEXPg/L6644oorrsQVW1xxxRVXOtYfA3AgoA==
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Dead Marshes" type="poi" x="111" y="895">
+   <properties>
+    <property name="displayName" value="Dead Marshes"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Minas Morgul" type="poi" x="908" y="2386">
+   <properties>
+    <property name="displayName" value="Minas Morgul"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Morannon" type="poi" x="1037" y="1274">
+   <properties>
+    <property name="displayName" value="Black Gate"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Osgiliath" type="poi" x="383" y="2310">
+   <properties>
+    <property name="displayName" value="Osgiliath"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

@@ -122,7 +122,8 @@ EOF
     $GAMECTL state | head -4
     $GAMECTL screenshot "$OUT_DIR/smoke-overworld.png" >/dev/null
     $GAMECTL console "exportMap $OUT_DIR/smoke-worldmap.png"
-    $GAMECTL console "exportWorldTmx $OUT_DIR/smoke-world.tmx"
+    rm -rf "$OUT_DIR/smoke-world"   # Tiled world (chunks + overview); two runs must give identical files
+    $GAMECTL console "exportWorldTmx $OUT_DIR/smoke-world"
     echo "screenshots: $OUT_DIR/smoke-overworld.png $OUT_DIR/smoke-worldmap.png"
     echo "POI placement retries: $(grep -c 'Can not place POI' "$LOG" || true)"
     "$0" errors ;;

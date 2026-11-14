@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="7">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3LENhEAMRcGNvaXQf39UACKwBcYTTHAhf58Q2uD2WmvTWrzkuOFcdFXBuehKV+gKXaErXaErdIWudIWu0BW60hW6QlfoSlfoCl2hK13pSlfoCl3pSle6QlfoSle60hW6Qle60pWu0BW60pW2dIWu0JWudKUrdIW2dKUrXaErtKUrXekKXeGOQVfa0hV9/vNDV7rSFV9vSVe60lXOOWhKV5Vb7+bPrqs++3Z6p+mq966amtHVm/uEpn7Zlb10NeXOL2zhO6L5fqGrUdtV7WkLGz69I7v6PVHl3XdAQmf2I6stewEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAjhM2mIfw
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Harad Town" type="poi" x="1510" y="1483">
+   <properties>
+    <property name="displayName" value="Sun Road Oasis"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Harad Town" type="poi" x="2201" y="1486">
+   <properties>
+    <property name="displayName" value="Harnen Hold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Haradrim Camp" type="poi" x="328" y="141">
+   <properties>
+    <property name="displayName" value="Haradrim Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="ME Haradrim Stronghold" type="poi" x="458" y="1900">
+   <properties>
+    <property name="displayName" value="Haradrim Stronghold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Harondor Town" type="poi" x="1188" y="364">
+   <properties>
+    <property name="displayName" value="Harondor Watch"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Oasis" type="poi" x="1732" y="2126">
+   <properties>
+    <property name="displayName" value="Oasis"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

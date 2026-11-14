@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="2">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt20GOgkAQQFF7C53M/W87q0kIUcMoBd1Vb/EXugBS9QImans8Hk0v+wnqqutfb4qd3K4aV2VsNa50oq9WxBRX19mqZIqrWGOtoCeucrZyJa7EFFdccaVUnrjiiivNZIornrjSLKa44oorrRNlX1xxxRNX4kpMccUUV6pniiumuOKKK1X1xBVPXOVt4Uone9rGlc70lNWWXd/vKaMvOx/HE1eK8MSVokxl8ZVxr/3Jfvvm/ahz/sVVPk9H2+/wyH2m787TPjgPV3lNHXHQd/e5b49XzRZP8XHFFFu1XfUJ44qlkWxxxU2ELa6Ycs8aw1UvWIXPWTxxlcFVZ4orroZyNZMvnuYyxRVPUa5m8MXTfJ5m8MXU/K5G9HbW7934GcvU3bb2c+Aml6u7fL2bCVc5TN1hy/7ruFq44oorFXf16j8mquNqCfbEVU1TZ9lauOLqRFtHj81AXVdLkCmu2Dri65Pj2T9XEdk/V1xxxZU6V2KKK6644oorccUVV1xxxZW44oorrrjiSkxxxRVXTHElrrjiiiuuuBJXXHHFFVNciSuuuOKKK67EFVdcccUUV+KKK6644oorccUVU1xxxZU44ootrrjiSjxxxRVXtzphi6tIA1xxFbl7pvK52l7z8uT1u2fXFTPjaS5Xs8yPJ65U15X9cMWUuFI1V3bCFVMa1ZUdcMWRRnJlzlyxpChX3/ozV/leTKO5MgdJkiRJkiRJkiRJkiRJkiRJkiRJkiRJkiRJkiT9t19dfhTf
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Swamp Capital" type="poi" x="47" y="1032">
+   <properties>
+    <property name="displayName" value="Umbar"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

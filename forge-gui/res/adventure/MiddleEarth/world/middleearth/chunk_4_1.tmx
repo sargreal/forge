@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt3TtuwzAQRVET0BLk/W81bWDkgzh8Emd4itsmBQ9Gskxa5+PxODfuWKTx0lG8kyuuuGpp6itXg6tpjU1NdZxZq7n63E6uzKtrTKWNrW6Kq+tsjY1mFVf3OOs+q6rbqvLZbaYtrrj6yVe3Z1adbJ0b2uKKq4QtrrhKPOviiqvEvXwlU1Vtdfie76+2uOIqYYsrrhLPUbniKvFdEFdcJX0NrrhqZoyrfntE717D8WZc1dl7fMc6crXXnvar1pOrPc9KjPDac7X3OZyUL66c70rY4oqrxFktrria4Ysrtlb43McVV1fa4oqthC2uuPKcgSuuuOpgiyuuuOKqii2uuOKKK6644oortrjiiiuu2HIehyuuuOKKK3scuOKKK6644oorrrjy+6JcccUVV1xxxRVXdW1xxRRXXFXZ784VV7NdeU8cV96ZytWK76Lgiqs7fz+LK664EldcdTTV6R6Lp/Xfo8oVV1xxVem9z1xxZWaxVMWV885MccXTqq4OrpjiiqsipqpfC5lii6u9TFXel8VUXVuDK642s8VUD19cMbWDLZ7Y4oqrKraY6meLK6662mKqpy2uuOo4s7hiiyuuqlwPmTKzuOKqysziysziiqsqtrhiiyuuuOJqZ1tMscUVV1VsccUVV1xVscWVZ/FcsVVlZnHF1uCKqyLnLbhiiyumqswt84qthC+ulHivJldK2OJKiesiV0rc03OlhC2ulLDFkxK2uFLi+fyMtXx+02wzv/1t67+OrXfN/LfE/7D269h6NujgiquQK62155QrJWYWT0rMLK6UmFlcKTGzmBJXXFW5FroOKjGzuFJiZjGlhC3zSlxxVcUWV0rY4koJW1yJK66qZI+MuGKKK6644kpcccUVU1xxJa7EFVdccaU9XVk3rrjiiiu5vxJXXHHFldxfiSu2uOJKXGm1PgBfD20a
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Lake-town" type="poi" x="1380" y="699">
+   <properties>
+    <property name="displayName" value="Lake-town"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Spider Cave" type="poi" x="197" y="196">
+   <properties>
+    <property name="displayName" value="Spider Hollow"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Wilderland Town" type="poi" x="1960" y="1002">
+   <properties>
+    <property name="displayName" value="Riverside"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

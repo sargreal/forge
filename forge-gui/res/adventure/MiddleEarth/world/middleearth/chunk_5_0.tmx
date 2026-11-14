@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrt2bERg0AMRcEbhk7Uf4+kThzYSBx32mAL4OsNARxjjAMAAAAAAAAAAAAAAAAAAAAAAAAAAAASnD+wF1ktva01ze/bUnVrK3df/ZzdWrqzxQqtv3HXJ1s7KblB1600U9OXrchqzCYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOwqbEBBU/HRlsbIaOkbO1HRlb7IbklfPNGUvqhoSV/EJLbXkr5YqSl9zfl+HX9+847FaWKPd4W+dKUtdKUtXelLV7pCW9rSlMZ0hcZ0pS9daUxXdO7KnfWkLV3pis5dubemdKUrXaErNKUpXekK/3DQla50pSld6Qpd6UpXmtKVrtCVrrSlLU1pCl3pSle60pWu0JXGdKUzTekLXWlMV9rSFHrRlb50pStNoS9N6UpX+tITHdtyZ23pR196QVd0a8ze+tLSPBf3Ji2G
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Frozen Ruins" type="poi" x="428" y="501">
+   <properties>
+    <property name="displayName" value="Frozen Ruins"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="2" name="ME Iron Hills" type="poi" x="949" y="1894">
+   <properties>
+    <property name="displayName" value="Iron Hills"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="ME Iron Mine" type="poi" x="1324" y="1752">
+   <properties>
+    <property name="displayName" value="Deep Mine"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

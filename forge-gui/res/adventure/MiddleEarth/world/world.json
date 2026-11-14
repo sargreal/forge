@@ -11,7 +11,7 @@
 		"tilesetName": "Road",
 		"color": "ffffff"
 	},
-	"worldMap": "world/middleearth.tmx",
+	"worldMap": "world/middleearth/middleearth.world",
 	"biomesSprites": "world/sprites/map_sprites.json",
 	"maxRoadDistance": 1400,
 	"biomesNames": [
