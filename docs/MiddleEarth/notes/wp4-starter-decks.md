@@ -104,3 +104,20 @@ No exceptions in the game log. (Screenshots in `.me-test/gui/`, not committed.)
 ## 8. Open questions
 
 _(Not written: the agent hit the usage limit. See the files in `decks/starter/ME/` and `config.json`.)_
+
+## Tuning round 2
+
+Target 45-55% against the two LTR starter kits (`deckstrength.sh --g40`). Iterations at n=30 (60 games); the final numbers are n=40 (80 games, 95% CI about +/-10 points), so single runs are noisy (the same deck moved 53% to 77% between runs).
+
+| Deck | Before | After (n=40) | Swaps (out -> in) |
+| --- | ---: | ---: | --- |
+| Mirkwood | 74% | 52% | Shelob, Assassinate, Bitter Downfall, Claim the Precious, Gollum's Bite, 2 Shelob's Ambush, Old Fat Spider, most deathtouch/reach spiders (Attercop, Deadly Recluse, Netcaster, Penumbra) -> Mirkwood Spider, Twin-Silk/Canopy Spider, Front Porch Sentries, Carrion Crow, Grizzly Bears, Drudge Skeletons, Wargling |
+| Umbar | 71% | 54% | The Mouth of Sauron, Essence Scatter, Unsummon, Claim the Precious, Deceive the Messenger, Gollum's Bite, Kitesail Freebooter, Mist Raven, Bloodhunter Bat -> Ruin Raider/Pelargir Survivor/Spectral Sailor, Dread Rider, Gravedigger, Fog Bank, Lakeshore Apothecary, Sanitarium Skeleton, Drudge Skeletons, Sea Gate Oracle, Duty-Bound Dead |
+| Rivendell | 68% | 52% | Elrond Lord of Rivendell, Bewitching Leechcraft, Arcane Denial, Meneldor, one Knights of Dol Amroth, Horses of the Bruinen -> Grey Havens Navigator, Ithilien Kingfisher, Mirkwood Meditator, Long Lake Nuisance, Lakeshore Apothecary, Ravenhill Flock |
+| Wilderland | 68% | 45% | Beorn Reluctant Host, Smite the Deathless, Fear Fire Foes -> Ordinary Bear, Little Bear, Iron Hills Stalwart |
+| Mordor | 65% | 55% | Gothmog, Black Breath, Morgul-Knife Wound, Claim the Precious, Orcish Medicine, Mordor Muster, Troll of Khazad-dum, one Nazgul, Cirith Ungol Patrol, Snarling Warg, Uruk-hai Berserker, Gorbag, Mirkwood Bats -> cheap black bodies (Easterling Vanguard, Haunt of the Dead Marshes, skeletons, Front Porch Sentries, Dirtwater Wraith). The deck is mono-black and consistent, so it only came down once the removal and the efficient bodies were gone. |
+| Shire | 35% | 48% | Brandywine Farmer, Revive the Shire, Gift of Strands, Stew the Coneys -> Cradle Guard, Cloudcrown Oak, Warden of the Woods, Nightpack Ambusher (rare) |
+| Isengard | 39% | 45% | Goblin Fireleaper, Foray of Orcs, Orcish Medicine, Battle-Scarred Goblin -> Mardu Outrider, Headstrong Brute, Terror, Brassclaw Orcs |
+| Lothlorien | 39% | 42% | Hithlain Knots, Glorious Gale, Elven Farsight, Isolation at Orthanc, Stew the Coneys, Galadhrim Bow, Shower of Arrows, Murder of Crows -> Galion, Elvish Warrior, Mirkwood Meditator, Elven Raft-Steerer, Galadriel Gift-Giver (rare), Knights of Dol Amroth, Gandalf Wandering Wizard |
+
+Notes: Lothlorien is just under the band at n=40 (42%; 43% and 55-60% in earlier n=30 runs with Murder of Crows). All decks keep 16-17 lands, 40 cards, at most 2 rares and no mythics. `check.sh -v`: 0 errors, starter decks show no off-pool cards. In the simulation, cheap deathtouch/reach blockers and efficient removal inflate a deck's score far more than raw card quality.
