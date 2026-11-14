@@ -29,7 +29,7 @@
 | Area | State |
 | --- | --- |
 | Card pool | ✅ LTR, LTC, HOB, HOC, PLTC and the custom reprint set MEAR (233 cards, 66 with Tolkien flavor names, incl. the 10 original duals; all tokens have art). |
-| World layout | ✅ Fixed layout from a biome map (Phase 2a): 43 regions plus ocean, rivers, lakes/seas and fords, start in the Shire. |
+| World layout | ✅ Fixed, deterministic world from the Tiled file `middleearth.tmx` (Phase 2b), originally generated from the Phase 2a biome map: 43 regions plus ocean, rivers, lakes/seas and fords, start in the Shire. |
 | Towns / POIs | ✅ 90 POIs (about 97 placed per world). Named towns and dungeons sit at their map positions. Middle-earth town name lists per region. |
 | Intro | ✅ "Welcome to Middle-earth" quest and tutorial. The wizard dialog is overridden through `MiddleEarth/languages/adventure-en-US.properties` (en-US only; the speaker title still reads "Adept Black Wizard"). |
 | Starter decks | ✅ All in-pool. Constructed: 15 ME faction decks (Easy mono, Normal allied, Hard enemy pairs). Standard: official LTR Jumpstart packs. Pile: pool-filtered templates. All 15 constructed decks measure 42–59% against the LTR Starter Kits (round 2 tuning). |
@@ -90,8 +90,12 @@ Original plan: fill the biome `enemies` lists with ME enemies per region (all 43
 
 ![world map phase 2a](img/worldmap-phase2a.png)
 
+**Phase 2b ✅ (2026-11-14):** the world is now `MiddleEarth/world/middleearth.tmx` (49 KB). It holds a `Biomes` tile layer painted with `biomes.tsx` (one tile per biome), a `POI` object layer with all 97 placed POIs and their names, a `start` object and a `seed`, and it's exported once from the game with `exportWorldTmx`. Every new game builds the identical world (verified pixel- and byte-identical). The polygon script is retired; rerunning it would overwrite manual edits. How to edit: DEVELOPMENT.md §4.1, [notes](notes/phase2b-tiled-world.md).
+
 **Phase 2 open items:**
-- Should hand-painting be supported (an overlay PNG)? Today the script overwrites the map.
+- Open and save the tmx once in real Tiled to confirm compatibility (Tiled isn't installed in the sandbox).
+- Structures (mountains, Mordor) are anchored on the biome JSON bounding boxes. When painting a biome far outside its box, update `startPointX/Y` and `width/height` (a candidate for automation).
+- Optional `Roads` layer.
 - Distinct tilesets per region: Shire, Eriador, Rohan and Gondor all use the Green tileset, so their borders don't show.
 - Review the proportions (Lindon width, Rhûn, the Harad coast).
 - Optional minor rivers.
@@ -122,6 +126,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 | Token art sources: `[tokens]` lines in an edition file accept `${"artSet", "artNum"}` (the token's collector number in the source set). The Scryfall token URL is built from that set's token; the image is cached under the original key. | `forge-core/.../card/CardEdition.java` (`parseTokenParams`, token `EditionEntry` params), `forge-gui/.../util/ImageFetcher.java` (`getTokenArtSource`) | Lets MEAR tokens show existing token art (WP2b, D10). |
 | Fixed biome layout: optional `WorldData.biomeMap` (image). `World.loadFixedBiomeMap()` assigns each tile's biome by exact pixel colour = biome `color` (row 0 = north; unmatched colours → first biome), with lower-index neighbours within 2 tiles for border transitions. One branch in `generateNew`; random generation is unchanged when unset. Limit: 64 biomes (bit mask). | `forge-gui-mobile/.../data/WorldData.java`, `.../world/World.java` | Phase 2a: geographically faithful Middle-earth with rivers and seas. |
 | `BiomeStructure.initialize` fixes: the height loop was bounded by width (infinite loop for non-square biomes); `chunkSize()` never leaves chunks smaller than N (1-px chunks crashed `OverlappingModel` in a worker thread and `generateNew` waited forever); a failed structure leaves its chunk empty instead of indexing out of bounds. | `forge-gui-mobile/.../world/BiomeStructure.java` | Engine bug 1 from WP3, plus bugs found in Phase 2a. |
+| Tiled world file: optional `WorldData.worldMap` (`.tmx`). New `world/WorldMapTmx` (read/write without GL: `XmlReader` + zlib). `World.loadWorldMap()`/`placeWorldMapPois()`: biomes from the tile layer (gid → tile property `biome`), POIs placed exactly from the `POI` object layer (`name`, `displayName`, `spriteIndex`), player start from the `start` object, generation seeded from the map's `seed`. The random POI loop is skipped. `buildBiomeMasks()` is shared with the PNG path; `drawPoiMarker()` is factored out. `exportWorldTmx [file]` console command. `PointOfInterest.get/setSpriteIndex`. The save format is unchanged. | `forge-gui-mobile/.../world/WorldMapTmx.java` (new), `World.java`, `WorldData.java`, `pointofintrest/PointOfInterest.java`, `stage/ConsoleCommandInterpreter.java` | Phase 2b: the world is fixed, deterministic and editable in Tiled. |
 | `exportMap [file]` console command | `forge-gui-mobile/src/forge/adventure/stage/ConsoleCommandInterpreter.java` | Writes the whole generated world to a PNG for layout work and tests. |
 
 ## Known issues / backlog
@@ -149,6 +154,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-14 | Phase 2b merged (Opus agent): Tiled-editable world file with exact POIs and seed, `exportWorldTmx`, PlaneCheck/WorldSim tmx checks, DEVELOPMENT §4.1. Two smoke runs gave identical worlds; the round trip was byte-identical. check: 0 errors, 2 warnings. Main jar rebuilt. |
 | 2026-11-14 | Phase 2a merged (Opus agent): fixed biome-map world with rivers and seas, `BiomeStructure` fixes (engine), WorldSim and PlaneCheck support for biomeMap. check: 0 errors, 2 warnings. WorldSim: 0 reruns/dropped/unreachable. Gen time ~2.9 s (unchanged). Main jar rebuilt. |
 | 2026-11-14 | **Phase 1 complete.** Starter tuning round 2 (Sonnet agent): all 8 outliers are in the on-par band. All 68 new enemies measured (2,176 games). 17 outliers re-tuned through life/difficulty/spawnRate and re-measured. Report: `notes/wp5-wp6-enemies.md`. |
 | 2026-11-14 | Wave 3 map enemies (Sonnet agent): 170 generic map enemies → ME decks, 143 ME display names. Coordinator added 8 arena challengers missing upstream (Erebor, Umbar and Rivendell capitals). check: 0 errors, **2 warnings** (whitespace typos in upstream maps; the game falls back to a biome enemy). |
