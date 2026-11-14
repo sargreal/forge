@@ -1,0 +1,24 @@
+[metadata]
+Name=Stone Troll
+Comment=WP5 new. Trollshaws trolls (Tom, Bert and William): B/G big trolls that eat what they catch (normal).
+[Main]
+2 Clackbridge Troll|MEAR
+3 Cudgel Troll|MEAR
+2 Cultivate|LTC
+2 Giant Growth|MEAR
+2 Gollum's Bite|LTR
+3 Icehide Troll|MEAR
+2 Jungle Hollow|MEAR
+3 Large Bear|HOB
+2 Murder|MEAR
+2 Rampant Growth|LTC
+3 Savvy Hunter|LTC
+2 Stew the Coneys|LTR
+2 Tom, Bert, and William|HOB
+3 Troll Ascetic|MEAR
+3 Troll Negotiations|HOB
+2 Troll of Khazad-dûm|LTR
+2 Woodland Cemetery|LTC
+11 Forest|LTR
+9 Swamp|LTR
+[Sideboard]

@@ -1,0 +1,29 @@
+[metadata]
+Name=Uruk-hai of Isengard
+Comment=WP5 reuse of upstream decks/standard/orc_warrior.dck (enemy Orc Warrior). Swaps: Assault on Osgiliath -> Foray of Orcs; Bleeding Edge -> Crude Bent Blade; 4 Blood Crypt -> 2 Sulfurous Springs + 2 Dragonskull Summit; 2 Burakos, Party Leader -> 2 Mauhúr, Uruk-hai Captain; Orcish Captain -> Uglúk of the White Hand; 4 Zurgo Bellstriker -> 4 Uruk-hai Berserker.
+[Main]
+2 Armory Veteran|MEAR
+1 Barad-dûr|LTR
+2 Blood-Chin Fanatic|MEAR
+1 Book of Mazarbul|LTR
+4 Brutal Hordechief|MEAR
+1 Crude Bent Blade|HOB
+2 Dragonskull Summit|LTC
+1 Fall of Cair Andros|LTR
+2 Foray of Orcs|LTR
+2 Ironclaw Orcs|MEAR
+2 March from the Black Gate|LTR
+2 Mardu Outrider|MEAR
+2 Mauhúr, Uruk-hai Captain|LTR
+2 Merciless Executioner|LTC
+2 Murder|MEAR
+2 Orcish Artillery|MEAR
+2 Orcish Vandal|MEAR
+2 Pitiless Horde|MEAR
+2 Sulfurous Springs|LTC
+1 Uglúk of the White Hand|LTR
+4 Uruk-hai Berserker|LTR
+2 Warbeast of Gorgoroth|LTR
+8 Mountain|LTR
+9 Swamp|LTR
+[Sideboard]

@@ -1,0 +1,27 @@
+[metadata]
+Name=Uruk-hai Berserker
+Comment=WP5 reuse of upstream decks/standard/orc_brute.dck (enemy Orc Brute). Swaps: 2 Badlands -> 2 Bloodfell Caves; 4 Bloodstained Mire -> 2 Smoldering Marsh + 2 Sulfurous Springs; 4 Savai Triome + 2 Plains -> 3 Mountain + 3 Swamp; 4 Brute Strength -> 2 Reverent Howl + 2 Rush the Room; 2 Frenzied Saddlebrute -> 2 Pitiless Horde; 2 Power Word Kill -> 2 Murder; 2 Sprinting Warbrute -> 2 Brutal Hordechief; 2 Thrasher Brute -> 2 Blood-Chin Fanatic; 2 Zurgo Bellstriker -> 2 Ironclaw Orcs; 2 Zurgo Helmsmasher -> 2 Krumar Bond-Kin.
+[Main]
+2 Animate Dead|MEAR
+2 Blasphemous Act|LTC
+2 Blood-Chin Fanatic|MEAR
+2 Bloodfell Caves|MEAR
+2 Brutal Hordechief|MEAR
+2 Dire Fleet Ravager|MEAR
+3 Feed the Swarm|LTC
+2 Gorbag of Minas Morgul|LTR
+2 Ironclaw Orcs|MEAR
+2 Krumar Bond-Kin|MEAR
+4 Mardu Outrider|MEAR
+2 Murder|MEAR
+2 Pitiless Horde|MEAR
+2 Reverent Howl|HOB
+2 Ruin Raider|MEAR
+2 Rush the Room|LTR
+2 Smoldering Marsh|LTC
+2 Sulfurous Springs|LTC
+2 Uglúk of the White Hand|LTR
+1 Vengeful Warchief|MEAR
+9 Mountain|LTR
+9 Swamp|LTR
+[Sideboard]
