@@ -36852,5 +36852,580 @@
       "IdentityGreen",
       "IdentityWhite"
     ]
+  },
+  {
+    "name": "Challenger 1",
+    "nameOverride": "Champion of Erebor",
+    "sprite": "sprites/enemy/humanoid/dwarf/dwarflarge.atlas",
+    "deck": [
+      "decks/enemy/free/erebor_dwarves.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.5,
+    "speed": 22,
+    "scale": 0.75,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 3
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon",
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.25,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 10,
+        "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.08,
+        "count": 1,
+        "itemName": "Dwarven Axe"
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "Erebor",
+      "Warrior",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "Challenger 2",
+    "nameOverride": "Champion of the Iron Hills",
+    "sprite": "sprites/enemy/humanoid/dwarf/bear_cavalry.atlas",
+    "deck": [
+      "decks/enemy/free/iron_hills.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 26,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "IronHills",
+      "Warrior",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed",
+      "IdentityWhite"
+    ]
+  },
+  {
+    "name": "Challenger 3",
+    "nameOverride": "Champion of the Blue Mountains",
+    "sprite": "sprites/enemy/humanoid/dwarf/miner.atlas",
+    "deck": [
+      "decks/enemy/free/dwarf_prospectors.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 1,
+    "difficulty": 0.1,
+    "speed": 22,
+    "life": 12,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 1,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "uncommon"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.15,
+        "count": 1,
+        "rarity": [
+          "rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.5,
+        "count": 10,
+        "addMaxCount": 40
+      }
+    ],
+    "colors": "R",
+    "questTags": [
+      "MiddleEarth",
+      "Dwarf",
+      "Miner",
+      "Subterranean",
+      "FreePeoples",
+      "Duelist",
+      "BiomeRed",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "Challenger 4",
+    "nameOverride": "Drake-tamer of the Grey Mountains",
+    "sprite": "sprites/enemy/dragon/drake.atlas",
+    "deck": [
+      "decks/enemy/free/cold_drakes.dck"
+    ],
+    "ai": "",
+    "flying": true,
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 20,
+    "scale": 0.9,
+    "life": 20,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "R",
+    "questTags": [
+      "MiddleEarth",
+      "Dragon",
+      "Drake",
+      "Monster",
+      "Flying",
+      "BiomeRed",
+      "IdentityRed"
+    ]
+  },
+  {
+    "name": "Assassin",
+    "sprite": "sprites/enemy/humanoid/human/warrior/warrior.atlas",
+    "deck": [
+      "decks/enemy/shadow/haradrim.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": false,
+    "spawnRate": 1.0,
+    "difficulty": 0.3,
+    "speed": 25,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 20,
+        "addMaxCount": 80
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Red",
+          "White"
+        ],
+        "rarity": [
+          "uncommon",
+          "rare"
+        ]
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 2
+      }
+    ],
+    "colors": "RW",
+    "questTags": [
+      "Shadow",
+      "Human",
+      "Haradrim",
+      "Warrior",
+      "Soldier",
+      "BiomeWhite",
+      "IdentityRed",
+      "IdentityWhite"
+    ],
+    "nameOverride": "Haradrim Assassin"
+  },
+  {
+    "name": "Banshee",
+    "sprite": "sprites/enemy/undead/ghost_3.atlas",
+    "deck": [
+      "decks/enemy/shadow/dol_guldur_spirit.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": false,
+    "spawnRate": 1.0,
+    "difficulty": 0.3,
+    "speed": 22,
+    "life": 15,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 20,
+        "addMaxCount": 80
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Black"
+        ],
+        "rarity": [
+          "uncommon",
+          "rare"
+        ]
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 2
+      }
+    ],
+    "colors": "B",
+    "questTags": [
+      "Shadow",
+      "Spirit",
+      "Ghost",
+      "Undead",
+      "Unholy",
+      "DolGuldur",
+      "BiomeBlack",
+      "IdentityBlack"
+    ],
+    "nameOverride": "Wailing Spirit"
+  },
+  {
+    "name": "Rat Ninja",
+    "sprite": "sprites/enemy/humanoid/human/rogue/pirate2.atlas",
+    "deck": [
+      "decks/enemy/shadow/corsair.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": false,
+    "spawnRate": 1.0,
+    "difficulty": 0.3,
+    "speed": 25,
+    "life": 16,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 2,
+        "rarity": [
+          "common",
+          "uncommon"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 0.7,
+        "count": 20,
+        "addMaxCount": 80
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Blue",
+          "Black"
+        ],
+        "rarity": [
+          "uncommon",
+          "rare"
+        ]
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 1,
+        "addMaxCount": 2
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "subTypes": [
+          "Pirate"
+        ],
+        "cardTypes": [
+          "Creature"
+        ]
+      }
+    ],
+    "colors": "UB",
+    "questTags": [
+      "Shadow",
+      "Human",
+      "Corsair",
+      "Pirate",
+      "Bandit",
+      "Water",
+      "BiomeBlue",
+      "IdentityBlue",
+      "IdentityBlack"
+    ],
+    "nameOverride": "Corsair Cutthroat"
+  },
+  {
+    "name": "Loamcaller",
+    "nameOverride": "Loremaster of Imladris",
+    "sprite": "sprites/enemy/humanoid/elf/druid_2.atlas",
+    "deck": [
+      "decks/enemy/free/rivendell_lord.dck"
+    ],
+    "ai": "",
+    "randomizeDeck": true,
+    "spawnRate": 0.6,
+    "difficulty": 1,
+    "speed": 28,
+    "life": 22,
+    "rewards": [
+      {
+        "type": "deckCard",
+        "probability": 1,
+        "count": 2,
+        "addMaxCount": 4
+      },
+      {
+        "type": "deckCard",
+        "probability": 0.7,
+        "count": 1,
+        "addMaxCount": 1,
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ],
+        "cardTypes": [
+          "Creature",
+          "Artifact",
+          "Enchantment",
+          "Instant",
+          "Sorcery"
+        ]
+      },
+      {
+        "type": "card",
+        "probability": 0.5,
+        "count": 1,
+        "colors": [
+          "Green",
+          "Blue"
+        ],
+        "rarity": [
+          "rare",
+          "mythic rare"
+        ]
+      },
+      {
+        "type": "gold",
+        "probability": 1,
+        "count": 20,
+        "addMaxCount": 100
+      },
+      {
+        "type": "shards",
+        "probability": 0.5,
+        "count": 2,
+        "addMaxCount": 3
+      }
+    ],
+    "colors": "GU",
+    "questTags": [
+      "MiddleEarth",
+      "Elf",
+      "Rivendell",
+      "Noble",
+      "Leader",
+      "FreePeoples",
+      "Duelist",
+      "IdentityGreen",
+      "IdentityBlue"
+    ]
   }
 ]
