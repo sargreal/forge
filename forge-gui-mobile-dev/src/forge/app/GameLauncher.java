@@ -138,6 +138,7 @@ public class GameLauncher {
             }
         });
 
+        DevApiServer.startIfEnabled(); // dev/test only: no-op unless -Dforge.devapi.port is set
         new Lwjgl3Application(start, config);
     }
 

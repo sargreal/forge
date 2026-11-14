@@ -339,6 +339,52 @@ public class NewGameScene extends MenuScene {
         return editionIds.length > 0 ? editionIds[0] : null;
     }
 
+    /**
+     * Dev API (forge.adventure.devapi, test builds only): set the character-creation choices without
+     * the UI, then {@link #start()}. A null value keeps the current choice. Names match case-insensitively:
+     * race and difficulty by name, gender "male"/"female", mode by enum name (Standard, Constructed, Chaos...),
+     * colors by color id ("W") or color-id name. Returns an error message, or null when the game is starting.
+     */
+    public String devApiStart(String name, String raceName, String genderName, String difficultyName, String modeName, String colors) {
+        if (modeName != null) {
+            int m = -1;
+            for (int i = 0; i < modes.size; i++)
+                if (modes.get(i).name().equalsIgnoreCase(modeName)) m = i;
+            if (m < 0) return "unknown mode " + modeName + ", available: " + modes;
+            mode.setCurrentIndex(m); // fires the listener that refreshes the color/deck list
+        }
+        if (colors != null) {
+            String[] ids = Config.instance().colorIds(), names = Config.instance().colorIdNames();
+            int c = -1;
+            for (int i = 0; i < ids.length; i++)
+                if (ids[i].equalsIgnoreCase(colors) || (names != null && i < names.length && UIActor.localize(names[i]).equalsIgnoreCase(colors))) c = i;
+            if (c < 0) return "unknown colors " + colors + ", available: " + String.join(",", ids);
+            colorId.setCurrentIndex(c);
+        }
+        if (difficultyName != null) {
+            DifficultyData[] diffs = Config.instance().getConfigData().difficulties;
+            int d = -1;
+            for (int i = 0; i < diffs.length; i++)
+                if (diffs[i].name.equalsIgnoreCase(difficultyName)) d = i;
+            if (d < 0) return "unknown difficulty " + difficultyName;
+            difficulty.setCurrentIndex(d);
+        }
+        if (raceName != null) {
+            Array<String> races = HeroListData.instance().getRaces();
+            int r = -1;
+            for (int i = 0; i < races.size; i++)
+                if (races.get(i).equalsIgnoreCase(raceName)) r = i;
+            if (r < 0) return "unknown race " + raceName + ", available: " + races;
+            race.setCurrentIndex(r);
+        }
+        if (genderName != null)
+            gender.setCurrentIndex(genderName.toLowerCase().startsWith("f") ? 1 : 0);
+        if (name != null && !name.isEmpty())
+            selectedName.setText(name);
+        start();
+        return null;
+    }
+
     boolean started = false;
 
     public boolean start() {

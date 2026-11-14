@@ -85,7 +85,7 @@ With `world.json` → `worldMap` (the Tiled world, see §4.1) WorldSim doesn't s
 tools/middleearth/game.sh smoke
 ```
 
-This starts the real game under Xvfb, makes a new character, clicks through the intro, goes to the overworld, and writes the following to `.me-test/` (gitignored):
+This starts the real game under Xvfb, starts a new game through the dev API (§3.5), closes the intro dialog, leaves with the console `leave`, and writes the following to `.me-test/` (gitignored):
 
 - `smoke-overworld.png`: a screenshot of the overworld.
 - `smoke-world.tmx` (+ `biomes.tsx`, `biomes.png`): the world exported with `exportWorldTmx`. Two smoke runs of a plane with `worldMap` must give byte-identical files.
@@ -97,12 +97,13 @@ To look at screenshots, downscale them first:
 
 ### 3.3 Driving the game by hand or from scripts
 
-`tools/middleearth/game.sh` has these building blocks (screen is 1280×720, origin top-left):
+Prefer the dev API (§3.5): it moves the player, picks dialog options and reports state as text. The xdotool building blocks below are the fallback for UI the API doesn't cover. `tools/middleearth/game.sh` has these (screen is 1280×720, origin top-left):
 
 ```bash
 G=tools/middleearth/game.sh
-$G start [plane]          # Xvfb :$DISPLAY_NUM + game; isolated game home in $OUT_DIR/home (settings, saves)
-$G wait-menu              # waits for splash, clicks "Adventure Mode", waits for the title menu
+$G start [plane]          # Xvfb :$DISPLAY_NUM + game with the dev API; isolated game home in $OUT_DIR/home
+$G api                    # the dev API port (8700 + DISPLAY_NUM)
+$G wait-menu              # waits for the adventure title menu
 $G click 533 87           # New Game   (title menu)
 $G click 1115 447         # Start      (character creation)
 $G skip-dialog 12         # Return advances dialog options
@@ -153,6 +154,66 @@ Reading the result:
 Runtime: one game averages 1.6–2 s on an idle machine and about 3.7 s when other agents load all 4 cores (median 1.4–2.8 s, slowest 40 s; 1 timeout in 3,000 games). Each worker JVM needs about 10 s to start. The default run (one candidate, 120 games, 3 workers) takes **about 1.5 minutes on an idle machine and 3–4 minutes under load**. A round robin of n decks plays n(n−1)/2 pairings.
 
 Caveats: this measures **AI vs AI** strength. Forge's AI plays some decks (aggro, simple creatures) much better than others (combo, complex triggers, decks that need restraint). Treat the rating as a guide for comparable decks, and play-test anything that lands near a band edge. Notes and measurements: [notes/wp1-deck-lab.md](notes/wp1-deck-lab.md).
+
+### 3.5 Driving the game via the dev API
+
+The adventure client has a **dev-only HTTP API** for agents and test scripts: start a game, walk, talk, pick dialog options, accept rewards and read the game state as text, without screenshots. It is off unless the JVM gets `-Dforge.devapi.port=N` (or env `FORGE_DEVAPI_PORT`), and it binds to `127.0.0.1` only. `game.sh start` turns it on at port **8700 + `DISPLAY_NUM`** (`game.sh api` prints it); `NO_DEVAPI=1 game.sh start` starts the normal game. Design and limits: [notes/tooling-devapi.md](notes/tooling-devapi.md).
+
+With the API on, `game.sh start` also sets two options in the isolated game home: `UI_SELECTOR_MODE=Adventure` (the game opens Adventure mode directly, no Classic/Adventure chooser) and `disableWinLose` (duels return to the map without the win/lose screen).
+
+**Client:** `tools/middleearth/gamectl.py` (standard library only) is a CLI and an importable module. It finds the port from `DISPLAY_NUM` (or `FORGE_DEVAPI_PORT`, or `--port`).
+
+```bash
+export DISPLAY_NUM=113                      # your own display number
+G="python3 tools/middleearth/gamectl.py"
+tools/middleearth/game.sh start && tools/middleearth/game.sh wait-menu
+$G newgame --difficulty Normal --colors W --mode Constructed --name Tester   # returns when the first map is up
+$G state                                     # summary: scene, player, position, quests, flags, dialog, objects
+$G state --json                              # everything, raw
+$G choose 0                                  # dialog option 0 (prints the next dialog page)
+$G interact 69                               # walk into map object 69 (NPC/enemy, portal, chest, entry)
+$G walk 12 30                                # walk to tile (12,30) with the map's pathfinding; --px for pixels
+$G reward                                    # accept the reward screen ("done")
+$G console "give gold 100"                   # console command, prints its output
+$G wait onOverworld --timeout 20000
+$G interact --poi Hobbiton                   # overworld: walk into a POI (id, name or display name)
+$G duel autoplay                             # in a duel: the AI plays your side; or: duel concede
+$G screenshot /abs/path/x.png                # for humans
+```
+
+**Coordinates:** libGDX coordinates, **y grows upward** (0 = bottom of the map / south of the world). `pos.px` is the player sprite's bottom-left corner; `pos.tile` = px / tile size (16). `walkTo`/`teleport` take tiles by default (`"unit": "px"` for pixels). The console's `teleport to X Y` takes **pixels** (= `pos.px`).
+
+**Endpoints** (all `POST` with a JSON body, also `GET /state`; responses are JSON, errors have `"ok": false, "error"` and HTTP 4xx/5xx):
+
+| Endpoint | Body | Does |
+| --- | --- | --- |
+| `/state` | `{radius?}` | Scene, transition flag, plane; player (life/max, gold, shards, deck name and size, difficulty); location (`map` file + POI or `overworld` + biome), position (px and tile); quests with their current stage; quest, character and map flags; the open `dialog` (speaker, text, options with index/label/enabled); a `modal` UI dialog; the `reward` screen (type, items); the `duel` (players, life, AI flag, turn, phase); `objects`: in a map every actor (id, type enemy/portal/entry/dialog/reward/shop, name/enemy, state of portals, target map, inactive/hidden/deleted, position, distance); on the overworld POIs and enemies within `radius` px (default 30 tiles), nearest first. |
+| `/newGame` | `{plane?, name?, race?, gender?, difficulty?, colors?, mode?}` | Starts a new game with these choices through `NewGameScene` (nothing else clicked) and returns when the first map is shown. Values are names: difficulty `Easy/Normal/Hard…`, mode `Standard/Constructed/Chaos/Pile/Custom/Precon…`, colors a color id (`W`) or its name, gender `male/female`. `plane` only checks: the plane is fixed at startup (`game.sh start <plane>`). |
+| `/dialog/choose` | `{index}` | Clicks option N of the open map/quest dialog (or a modal dialog) like a tap. Disabled options are refused. |
+| `/dialog/close` | `{}` | Hides the dialog without choosing (like the console's hack; quest chains may not continue). |
+| `/reward/accept` | `{}` | Presses "done" on the reward screen until it closes. |
+| `/walkTo` | `{x, y, unit?: "tile"\|"px", timeoutMs?, pathfinding?}` | Walks at normal speed (steers the on-screen joystick input), with the POI map's navigation graph. Returns `reason`: `arrived`, `blocked` (no progress for 1.5 s), `dialog`, `mapChanged`, `sceneChanged` (entered a POI, duel…), `timeout`. |
+| `/interact` | `{objectId}` in a map, `{poi}` on the overworld | Walks into the object until its collision fires: talks to an NPC/enemy with a dialog, enters a portal/entry, picks up a reward, starts a duel. Same reasons as walkTo plus `touched` (contact, nothing happened, e.g. a closed portal) and `targetGone`. |
+| `/teleport` | `{x, y, unit?}` | Instant move, for setup. |
+| `/console` | `{command}` | Runs a console command, returns its output text. |
+| `/key` | `{key, holdMs?}` | Raw key event to the current input processor (libGDX key names: `Escape`, `Enter`, `F9`, `W`). Movement keys are polled, so use `walkTo`, not `/key`, to move. |
+| `/wait` | `{condition, timeoutMs}` | Polls until: `scene=<Class>`, `dialogOpen`, `dialogClosed`, `onOverworld`, `inMap[=<map file substring>]`, `quest=<id>`, `questStage=<questId>:<stageId>` or `questStage=<stage name text>`, `rewardOpen`, `duel`, `idle`. Returns `ok:false` on timeout. |
+| `/screenshot` | `{path}` | Writes a PNG of the game window. |
+| `/duel/concede`, `/duel/autoplay` | `{}` | In a duel: concede, or hand the human seat to Forge's AI (the AI then plays the whole game). |
+
+**Writing a test:** import the client and assert on `/state`. See `tools/middleearth/tests/intro_walkthrough.py` (≈35 s, about 15 API calls):
+
+```python
+import sys; sys.path.insert(0, "tools/middleearth"); import gamectl
+g = gamectl.Game()
+g.new_game(name="Tester", difficulty="Normal", colors="W", mode="Constructed")
+g.wait("dialogOpen", 15000)
+assert "Darkness" in g.dialog()["text"]
+g.choose(0)
+portal = g.objects(id=78)[0]; assert portal["state"] == "closed"
+```
+
+Put new GUI tests in `tools/middleearth/tests/` and list them in `tests/run_all.sh` (`check.sh` + every GUI test; exit code ≠ 0 on failure). A test starts its own game with `game.sh start` when none answers on its port, and stops it at the end (`--keep` leaves it running for inspection).
 
 ## 4. Plane data: how-to
 

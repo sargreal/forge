@@ -1501,6 +1501,16 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         }
     }
 
+    /** Read-only view for the dev API (forge.adventure.devapi). */
+    public Map<String, Byte> getCharacterFlags() {
+        return java.util.Collections.unmodifiableMap(characterFlags);
+    }
+
+    /** Read-only view for the dev API (forge.adventure.devapi). */
+    public Map<String, Byte> getQuestFlags() {
+        return java.util.Collections.unmodifiableMap(questFlags);
+    }
+
     public boolean checkCharacterFlag(String key) {
         return characterFlags.get(key) != null;
     }
