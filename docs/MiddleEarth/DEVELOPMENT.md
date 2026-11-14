@@ -77,6 +77,8 @@ java -cp $J tools/middleearth/WorldSim.java forge-gui/res/adventure/MiddleEarth 
 
 This is a replica of `World.generateNew`'s biome painting and POI placement, using the engine's own noise class. It runs N seeds and reports the following: placement reruns, POIs that were dropped or are unreachable from the start, and biome coverage in percent. Use it before `smoke` when you change biomes or POIs. It is a replica, so confirm the final result with `smoke`.
 
+With `world.json` → `worldMap` (the Tiled world, see §4.1) WorldSim doesn't simulate placement. It reads biomes and POIs from the tmx with the engine's own parser and reports POIs outside their biome, overlapping POIs (closer than 2 tiles), POI objects without a `points_of_interest.json` entry, a missing start, and POIs that are unreachable from `Spawn`. It ends with `problems: N` (exit code 1 if N > 0). The seed and run-count arguments are ignored.
+
 ### 3.2 GUI smoke test (about 1 min)
 
 ```bash
@@ -86,6 +88,7 @@ tools/middleearth/game.sh smoke
 This starts the real game under Xvfb, makes a new character, clicks through the intro, goes to the overworld, and writes the following to `.me-test/` (gitignored):
 
 - `smoke-overworld.png`: a screenshot of the overworld.
+- `smoke-world.tmx` (+ `biomes.tsx`, `biomes.png`): the world exported with `exportWorldTmx`. Two smoke runs of a plane with `worldMap` must give byte-identical files.
 - `smoke-worldmap.png`: the **whole generated world** (4000×4000, from the `exportMap` console command). Use it to judge biome layout against the Middle-earth map.
 - `game.log`, and a summary of exceptions and POI-placement retries.
 
@@ -111,7 +114,7 @@ $G errors                 # exceptions in the log
 $G stop
 ```
 
-Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `sanitize editions`.
+Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `exportWorldTmx [file]` (Tiled world, §4.1), `sanitize editions`.
 
 **Save data:** the game runs with `user.home=$OUT_DIR/home`, so settings and saves are in `.me-test/home/.forge/adventure/`. `check.sh` uses `.me-test/check-home`. Neither touches the real `~/.forge`.
 
@@ -159,10 +162,24 @@ Read the upstream format docs in `docs/Adventure/` first (`Configure-Planes.md`,
 - **Overrides**: to replace a common file, create the same relative path under `MiddleEarth/`. Common enemies, items and decks stay reachable for anything we don't override, so prefer plane-local copies with ME names.
 - **Enemies**: `world/enemies.json` (plane-local once created). Biomes reference enemies by `getName()`, which is `nameOverride` if set, otherwise `name`. Decks go under `MiddleEarth/decks/...`. Sprites are `.atlas` + `.png` under `sprites/` (see `Create-Enemies.md`).
 - **Biomes**: `world/biomes/*.json`, listed in `world/world.json` → `biomesNames`. `startPointX/Y` and `width/height` are fractions of the world. **Careful, the axes differ:** for biome `startPointY`, Y = 0 is **north** (top). For `world.json` `playerStartPosY` and POI `offsetY`, Y = 0 is **south**. The biome `name` must be unique, and it also selects the town name list (`world/town_names_<biome name>.txt`).
-- **Fixed layout (Phase 2a):** `world.json` → `biomeMap` = `world/biome_map.png` fixes every tile's biome by colour. Don't paint it by hand: edit the polygons in `tools/middleearth/biomemap/make_biome_map.py` and rerun it (it also rewrites biome colours/boxes and POI anchors), then WorldSim and smoke. See [notes/phase2a-biome-map.md](notes/phase2a-biome-map.md). With `biomeMap` set, biome `startPointX/Y` and `width/height` are the biome's bounding box (written by the script) and noise/distance weights are unused.
+- **Fixed world (Phase 2b):** `world.json` → `worldMap` = `world/middleearth.tmx` fixes every tile's biome, every POI (position, name, sprite variant), the player start and the generation seed. Edit it in Tiled, see §4.1. The older `biomeMap` PNG and its script `tools/middleearth/biomemap/make_biome_map.py` are retired: use them only to regenerate the world from scratch, which overwrites all manual edits (steps in the script header; background in [notes/phase2a-biome-map.md](notes/phase2a-biome-map.md)). Biome `startPointX/Y` and `width/height` are still the biome's bounding box (WFC structures are anchored on it); noise/distance weights and POI `offsetX/offsetY/radiusFactor` are unused with a world map.
 - **Biome shapes (random generation):** non-square biomes with `structures` are fine since Phase 2a (the `BiomeStructure` loop bug is fixed).
 - **POIs and towns**: `world/points_of_interest.json` gives the name, type, `map` (`.tmx`), sprite and count. Town names come from `world/town_names_<color>.txt`.
 - **Validating JSON**: always run `check.sh`. The game itself often swallows parse errors (it falls back to defaults or skips entries).
+
+### 4.1 Editing the world in Tiled
+
+The world is `forge-gui/res/adventure/MiddleEarth/world/middleearth.tmx` (900×900 tiles of 16 px), with the tileset `biomes.tsx` + `biomes.png` next to it. Format details: [notes/phase2b-tiled-world.md](notes/phase2b-tiled-world.md).
+
+1. Open `middleearth.tmx` in Tiled (1.10 or newer).
+2. **Biomes:** paint on the tile layer `Biomes` with the tiles of the `biomes` tileset. Each tile is one biome (its colour, darker border); the tile property `biome` holds the biome name. Tile 0 (`ocean`, the `base` biome) is water: sea, lakes and rivers. Keep fords and bridges as land gaps.
+3. **POIs:** layer `POI`, one point object per POI. The object **name** must be an entry of `points_of_interest.json` (e.g. `Forest Capital`, `ME Anduin Town`, `Cave`); the property `displayName` is the name shown in game (towns), `spriteIndex` (int, optional) picks the sprite variant. The object position is the POI sprite's bottom-left corner. To add a POI, copy an existing object (Ctrl+D) and change name and properties. Remove one by deleting the object. POIs are placed exactly where the objects are, also on water, so keep them on land in a biome that lists them.
+4. **Start:** the object of type (class) `start` is the player start. There must be exactly one.
+5. Save (keep the layer format base64 zlib, or CSV), then run `tools/middleearth/check.sh` (0 errors), WorldSim (`problems: 0`) and `game.sh smoke`; look at `.me-test/smoke-worldmap.png`.
+
+Still generated at world creation, from the map property `seed` (so it is the same in every new game): terrain variants and decorations (trees, rocks), WFC structures (mountains, Mordor), roads between towns and the hidden paths from POIs to the nearest town (both computed from the POI positions), and the biome transition borders. Changing `seed` gives different decorations and structures but the same layout. Overworld enemy spawns stay random (they use the global random), and dungeon and town interiors keep varying per save (they are seeded from the save's own seed, which a world map does not replace).
+
+To get the tmx back from a running game (e.g. after changes to the export), use the console: `exportWorldTmx /abs/path/middleearth.tmx`. It also rewrites `biomes.tsx`/`biomes.png` next to it from the biome list and colours.
 
 ## 5. Keeping in sync with upstream
 

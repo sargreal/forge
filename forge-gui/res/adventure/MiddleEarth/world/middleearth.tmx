@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="900" height="900" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="99">
+ <properties>
+  <property name="seed" value="-8110469294258918603"/>
+ </properties>
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <layer id="1" name="Biomes" width="900" height="900">
+  <data encoding="base64" compression="zlib">
+   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
+  </data>
+ </layer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="Start" type="start" x="2952" y="4968">
+   <point/>
+  </object>
+  <object id="2" name="Black Castle" type="poi" x="12429" y="9028">
+   <properties>
+    <property name="displayName" value="Barad-dur"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="Forest Capital" type="poi" x="3188" y="4728">
+   <properties>
+    <property name="displayName" value="Hobbiton"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="Island Capital" type="poi" x="6777" y="4044">
+   <properties>
+    <property name="displayName" value="Rivendell"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="ME Anduin Town" type="poi" x="8406" y="4407">
+   <properties>
+    <property name="displayName" value="Vale Steading"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" name="ME Barrow-downs" type="poi" x="4402" y="5371">
+   <properties>
+    <property name="displayName" value="Barrow-downs"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="7" name="ME Belfalas Town" type="poi" x="7832" y="10511">
+   <properties>
+    <property name="displayName" value="Edhellond"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="8" name="ME Beorns Hall" type="poi" x="8423" y="3515">
+   <properties>
+    <property name="displayName" value="Beorn's Hall"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="9" name="ME Bree" type="poi" x="4577" y="4801">
+   <properties>
+    <property name="displayName" value="Bree"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="10" name="ME Brigand Cave" type="poi" x="4244" y="6630">
+   <properties>
+    <property name="displayName" value="Brigand Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="11" name="ME Caradhras" type="poi" x="7201" y="5359">
+   <properties>
+    <property name="displayName" value="Caradhras"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="12" name="ME Caras Galadhon" type="poi" x="7946" y="6354">
+   <properties>
+    <property name="displayName" value="Caras Galadhon"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="13" name="ME Carn Dum" type="poi" x="6226" y="1412">
+   <properties>
+    <property name="displayName" value="Carn Dum"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="14" name="ME Cirith Ungol" type="poi" x="10582" y="10267">
+   <properties>
+    <property name="displayName" value="Cirith Ungol"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="15" name="ME Corsair Fort" type="poi" x="6814" y="13183">
+   <properties>
+    <property name="displayName" value="Corsair Fort"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="16" name="ME Dale" type="poi" x="11387" y="2264">
+   <properties>
+    <property name="displayName" value="Dale"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="17" name="ME Dead Marshes" type="poi" x="9711" y="8095">
+   <properties>
+    <property name="displayName" value="Dead Marshes"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="18" name="ME Derndingle" type="poi" x="7530" y="7416">
+   <properties>
+    <property name="displayName" value="Derndingle"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="19" name="ME Dol Amroth" type="poi" x="7219" y="11159">
+   <properties>
+    <property name="displayName" value="Dol Amroth"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="20" name="ME Dol Guldur" type="poi" x="9078" y="5980">
+   <properties>
+    <property name="displayName" value="Dol Guldur"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="21" name="ME Dunland Town" type="poi" x="6212" y="7702">
+   <properties>
+    <property name="displayName" value="Dunland Hold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="22" name="ME Dunlending Hold" type="poi" x="4848" y="8399">
+   <properties>
+    <property name="displayName" value="Dunlending Hold"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="23" name="ME Dwarf Mine" type="poi" x="2008" y="6617">
+   <properties>
+    <property name="displayName" value="Abandoned Mine"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="24" name="ME Eagles Eyrie" type="poi" x="7283" y="1444">
+   <properties>
+    <property name="displayName" value="Eagles' Eyrie"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="25" name="ME Easterling Camp" type="poi" x="13595" y="4426">
+   <properties>
+    <property name="displayName" value="Easterling Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="26" name="ME Edoras" type="poi" x="8008" y="8878">
+   <properties>
+    <property name="displayName" value="Edoras"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="27" name="ME Emyn Muil Cave" type="poi" x="9415" y="6974">
+   <properties>
+    <property name="displayName" value="Emyn Muil"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="28" name="ME Ered Luin Town" type="poi" x="1989" y="5809">
+   <properties>
+    <property name="displayName" value="Nogrod"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="29" name="ME Eriador Town" type="poi" x="4329" y="2822">
+   <properties>
+    <property name="displayName" value="Ranger Outpost"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="30" name="ME Eriador Town" type="poi" x="5325" y="3692">
+   <properties>
+    <property name="displayName" value="Last Bridge"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="31" name="ME Forlindon Town" type="poi" x="734" y="3781">
+   <properties>
+    <property name="displayName" value="Mithlond Quay"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="32" name="ME Forlindon Town" type="poi" x="798" y="2475">
+   <properties>
+    <property name="displayName" value="Elf-haven"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="33" name="ME Fornost" type="poi" x="4242" y="2793">
+   <properties>
+    <property name="displayName" value="Fornost Ruins"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="34" name="ME Frozen Ruins" type="poi" x="12428" y="501">
+   <properties>
+    <property name="displayName" value="Frozen Ruins"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="35" name="ME Gladden Fields" type="poi" x="7945" y="5272">
+   <properties>
+    <property name="displayName" value="Gladden Fields"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="36" name="ME Goblin-town" type="poi" x="7319" y="3767">
+   <properties>
+    <property name="displayName" value="Goblin-town"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="37" name="ME Gondor Town" type="poi" x="9458" y="9839">
+   <properties>
+    <property name="displayName" value="Tarnost"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="38" name="ME Gondor Town" type="poi" x="9517" y="9630">
+   <properties>
+    <property name="displayName" value="Erech"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="39" name="ME Grey Havens" type="poi" x="1482" y="5481">
+   <properties>
+    <property name="displayName" value="Grey Havens"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="40" name="ME Gundabad" type="poi" x="7417" y="1016">
+   <properties>
+    <property name="displayName" value="Mount Gundabad"/>
+    <property name="spriteIndex" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="41" name="ME Harad Town" type="poi" x="11110" y="13483">
+   <properties>
+    <property name="displayName" value="Sun Road Oasis"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="42" name="ME Harad Town" type="poi" x="11801" y="13486">
+   <properties>
+    <property name="displayName" value="Harnen Hold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="43" name="ME Haradrim Camp" type="poi" x="9928" y="12141">
+   <properties>
+    <property name="displayName" value="Haradrim Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="44" name="ME Haradrim Stronghold" type="poi" x="10058" y="13900">
+   <properties>
+    <property name="displayName" value="Haradrim Stronghold"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="45" name="ME Harlindon Town" type="poi" x="835" y="6240">
+   <properties>
+    <property name="displayName" value="Lond Galen"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="46" name="ME Harondor Town" type="poi" x="10788" y="12364">
+   <properties>
+    <property name="displayName" value="Harondor Watch"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="47" name="ME Helms Deep" type="poi" x="7448" y="8889">
+   <properties>
+    <property name="displayName" value="Helm's Deep"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="48" name="ME Ice Hall" type="poi" x="8964" y="354">
+   <properties>
+    <property name="displayName" value="Ice-bound Hall"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="49" name="ME Iron Hills" type="poi" x="12949" y="1894">
+   <properties>
+    <property name="displayName" value="Iron Hills"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="50" name="ME Iron Mine" type="poi" x="13324" y="1752">
+   <properties>
+    <property name="displayName" value="Deep Mine"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="51" name="ME Isengard" type="poi" x="7028" y="7829">
+   <properties>
+    <property name="displayName" value="Isengard"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="52" name="ME Lake-town" type="poi" x="10980" y="3099">
+   <properties>
+    <property name="displayName" value="Lake-town"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="53" name="ME Lion Den" type="poi" x="12718" y="13078">
+   <properties>
+    <property name="displayName" value="Lion's Den"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="54" name="ME Lossoth Village" type="poi" x="5750" y="501">
+   <properties>
+    <property name="displayName" value="Lossoth Village"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="55" name="ME Minas Morgul" type="poi" x="10508" y="9586">
+   <properties>
+    <property name="displayName" value="Minas Morgul"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="56" name="ME Minhiriath Town" type="poi" x="4352" y="7744">
+   <properties>
+    <property name="displayName" value="Eryn Vorn Lodge"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="57" name="ME Misty Cave" type="poi" x="7080" y="6814">
+   <properties>
+    <property name="displayName" value="Mountain Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="58" name="ME Morannon" type="poi" x="10637" y="8474">
+   <properties>
+    <property name="displayName" value="Black Gate"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="59" name="ME Moria" type="poi" x="7107" y="5534">
+   <properties>
+    <property name="displayName" value="Moria"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="60" name="ME Mount Doom" type="poi" x="11523" y="9691">
+   <properties>
+    <property name="displayName" value="Mount Doom"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="61" name="ME Mountain Cave" type="poi" x="6653" y="9976">
+   <properties>
+    <property name="displayName" value="Mountain Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="62" name="ME Nurn Town" type="poi" x="12120" y="11273">
+   <properties>
+    <property name="displayName" value="Durthang Market"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="63" name="ME Nurn Town" type="poi" x="12422" y="11358">
+   <properties>
+    <property name="displayName" value="Morgai Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="64" name="ME Oasis" type="poi" x="11332" y="14126">
+   <properties>
+    <property name="displayName" value="Oasis"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="65" name="ME Old Forest" type="poi" x="4287" y="4942">
+   <properties>
+    <property name="displayName" value="Old Forest"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="66" name="ME Orc Camp Lithui" type="poi" x="13306" y="8346">
+   <properties>
+    <property name="displayName" value="Orc Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="67" name="ME Orc Camp Mordor" type="poi" x="12707" y="10137">
+   <properties>
+    <property name="displayName" value="Orc Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="68" name="ME Orc Hold Grey Mountains" type="poi" x="8895" y="1171">
+   <properties>
+    <property name="displayName" value="Orc-hold"/>
+    <property name="spriteIndex" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="69" name="ME Osgiliath" type="poi" x="9983" y="9510">
+   <properties>
+    <property name="displayName" value="Osgiliath"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="70" name="ME Paths of the Dead" type="poi" x="7859" y="9319">
+   <properties>
+    <property name="displayName" value="Paths of the Dead"/>
+    <property name="spriteIndex" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="71" name="ME Pelargir" type="poi" x="9350" y="10980">
+   <properties>
+    <property name="displayName" value="Pelargir"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="72" name="ME Rhun Town" type="poi" x="13471" y="7497">
+   <properties>
+    <property name="displayName" value="Wainrider Halt"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="73" name="ME Rohan Town" type="poi" x="8379" y="7367">
+   <properties>
+    <property name="displayName" value="Westfold Steading"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="74" name="ME Ruffian Camp" type="poi" x="4299" y="4790">
+   <properties>
+    <property name="displayName" value="Ruffian Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="75" name="ME Sea Cave" type="poi" x="7639" y="10254">
+   <properties>
+    <property name="displayName" value="Sea Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="76" name="ME Shadow Cave" type="poi" x="12863" y="11771">
+   <properties>
+    <property name="displayName" value="Cave of Shadows"/>
+    <property name="spriteIndex" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="77" name="ME Shire Town" type="poi" x="2916" y="5361">
+   <properties>
+    <property name="displayName" value="Bindbole Wood"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="78" name="ME Shire Town" type="poi" x="3139" y="5448">
+   <properties>
+    <property name="displayName" value="Newbury"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="79" name="ME Shire Town" type="poi" x="3221" y="4355">
+   <properties>
+    <property name="displayName" value="Bucklebury"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="80" name="ME Spider Cave" type="poi" x="9797" y="2596">
+   <properties>
+    <property name="displayName" value="Spider Hollow"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="81" name="ME Spider Nest" type="poi" x="9157" y="2856">
+   <properties>
+    <property name="displayName" value="Spider Nest"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="82" name="ME Tharbad" type="poi" x="5414" y="7178">
+   <properties>
+    <property name="displayName" value="Tharbad"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="83" name="ME Thorins Halls" type="poi" x="1551" y="3272">
+   <properties>
+    <property name="displayName" value="Thorin's Halls"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="84" name="ME Thranduils Halls" type="poi" x="10245" y="2295">
+   <properties>
+    <property name="displayName" value="Thranduil's Halls"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="85" name="ME Tolfalas" type="poi" x="8511" y="11917">
+   <properties>
+    <property name="displayName" value="Tolfalas"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="86" name="ME Trollshaws" type="poi" x="6305" y="3919">
+   <properties>
+    <property name="displayName" value="Trollshaws"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="87" name="ME Uruk Camp" type="poi" x="8541" y="8154">
+   <properties>
+    <property name="displayName" value="Uruk-hai Camp"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="88" name="ME Warg Den" type="poi" x="12019" y="3221">
+   <properties>
+    <property name="displayName" value="Warg Den"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="89" name="ME Weathertop" type="poi" x="5348" y="4446">
+   <properties>
+    <property name="displayName" value="Weathertop"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="90" name="ME Wilderland Town" type="poi" x="11560" y="3402">
+   <properties>
+    <property name="displayName" value="Riverside"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="91" name="ME Wilderland Town" type="poi" x="12742" y="3523">
+   <properties>
+    <property name="displayName" value="Upper Vale"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="92" name="ME Withered Heath" type="poi" x="10308" y="1115">
+   <properties>
+    <property name="displayName" value="Withered Heath"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="93" name="ME Wolf Den Eriador" type="poi" x="3034" y="3334">
+   <properties>
+    <property name="displayName" value="Wolf Den"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="94" name="ME Woodmen Town" type="poi" x="9851" y="5048">
+   <properties>
+    <property name="displayName" value="Woodmen-town"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="95" name="Mountain Capital" type="poi" x="11186" y="1805">
+   <properties>
+    <property name="displayName" value="Erebor"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="96" name="Plains Capital" type="poi" x="9525" y="9739">
+   <properties>
+    <property name="displayName" value="Minas Tirith"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="97" name="Spawn" type="poi" x="2953" y="4929">
+   <properties>
+    <property name="displayName" value="Wizard's Hollow"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="98" name="Swamp Capital" type="poi" x="7247" y="13032">
+   <properties>
+    <property name="displayName" value="Umbar"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

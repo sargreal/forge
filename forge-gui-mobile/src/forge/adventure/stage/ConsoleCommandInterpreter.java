@@ -389,6 +389,13 @@ public class ConsoleCommandInterpreter {
             System.out.println("World map exported to " + file);
             return "World map exported to " + file;
         });
+        // Dev helper (MiddleEarth fork): write the world (biomes, POIs, start, seed) as a Tiled map for world.json "worldMap".
+        registerCommand(new String[]{"exportWorldTmx"}, s -> {
+            String file = s.length > 0 ? s[0] : forge.localinstance.properties.ForgeConstants.USER_ADVENTURE_DIR + "world.tmx";
+            WorldSave.getCurrentSave().getWorld().exportWorldTmx(new com.badlogic.gdx.files.FileHandle(file));
+            System.out.println("World exported to " + file);
+            return "World exported to " + file;
+        });
         registerCommand(new String[]{"modifier", "list"}, s -> {
             ModifierData[] modifiers = Config.instance().getConfigData().modifiers;
             if (modifiers == null || modifiers.length == 0)

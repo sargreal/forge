@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """Render the Middle-earth biome map (one pixel per world tile) from region polygons, rivers and lakes.
 
+RETIRED (Phase 2b): the source of truth is now the Tiled world forge-gui/res/adventure/MiddleEarth/world/middleearth.tmx
+(world.json "worldMap"), edited by hand in Tiled; see docs/MiddleEarth/DEVELOPMENT.md "Editing the world in Tiled".
+Use this script ONLY to regenerate the world from scratch. That throws away every manual edit in the tmx:
+  1. run this script (writes biome_map.png and the plane data below),
+  2. in world.json replace "worldMap" with "biomeMap": "world/biome_map.png",
+  3. start a new game (tools/middleearth/game.sh smoke) and run the console command
+     exportWorldTmx <abs path>/forge-gui/res/adventure/MiddleEarth/world/middleearth.tmx
+  4. switch world.json back to "worldMap": "world/middleearth.tmx".
+
     python3 tools/middleearth/biomemap/make_biome_map.py            # write PNG + preview + plane data
     python3 tools/middleearth/biomemap/make_biome_map.py --no-data  # PNG + preview only
 
@@ -548,7 +557,9 @@ def write_data(files, names, bbox, poi_biome):
     sx, sy, _ = POI_ANCHORS["Spawn"]
     t = set_field(t, "playerStartPosX", fmt(sx))
     t = set_field(t, "playerStartPosY", fmt(1 - sy))
-    if '"biomeMap"' not in t:
+    if '"worldMap"' in t:
+        print("NOTE: world.json uses worldMap (middleearth.tmx); the game ignores biome_map.png until you re-export (see header)")
+    elif '"biomeMap"' not in t:
         t = t.replace('"biomesSprites"', '"biomeMap": "world/biome_map.png",\n\t"biomesSprites"', 1)
     open(p, "w").write(t)
     print("updated biome files, points_of_interest.json and world.json")

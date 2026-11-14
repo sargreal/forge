@@ -46,6 +46,8 @@ public class World implements Disposable, SaveFileContent {
     private PointOfInterestMap mapPoiIds;
     private BiomeTexture[] biomeTexture;
     private long seed;
+    /** Seed the world was generated with: the world map's "seed" if set, else {@link #seed}. 0 = unknown (loaded save). */
+    private long generationSeed;
     private final Random random = new Random();
     private boolean worldDataLoaded = false;
     private Texture globalTexture = null;
@@ -299,9 +301,12 @@ public class World implements Disposable, SaveFileContent {
      * the image is sampled nearest-neighbour if its size differs from the world). Each tile gets its own biome bit,
      * the first biome's bit (it underlies everything, as in random generation) and the bits of lower-index biomes within
      * 2 tiles, so that biome borders are drawn as transitions over the neighbouring biome instead of over the base.
-     * Returns null when no biome map is configured (random generation).
+     * With a Tiled world map (WorldData.worldMap) the tile's own biome comes from its "Biomes" layer instead.
+     * Returns null when neither is configured (random generation).
      */
-    private long[][] loadFixedBiomeMap() {
+    private long[][] loadFixedBiomeMap(WorldMapTmx worldMap) {
+        if (worldMap != null)
+            return buildBiomeMasks(worldMap.biomes);
         if (data.biomeMap == null || data.biomeMap.isEmpty())
             return null;
         Pixmap image = new Pixmap(Config.instance().getFile(data.biomeMap));
@@ -317,6 +322,11 @@ public class World implements Disposable, SaveFileContent {
         } finally {
             image.dispose();
         }
+        return buildBiomeMasks(own);
+    }
+
+    /** Bit masks from each tile's own biome index ([x][row], row 0 = north): own, biome 0 and lower biomes within 2 tiles. */
+    private long[][] buildBiomeMasks(int[][] own) {
         long[][] masks = new long[width][height];
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++) {
@@ -328,6 +338,93 @@ public class World implements Disposable, SaveFileContent {
                 masks[x][y] = mask;
             }
         return masks;
+    }
+
+    private void drawPoiMarker(TextureAtlas mapMarker, Pixmap mapMarkerPixmap, String type, float x, float y) {
+        TextureAtlas.AtlasRegion marker = mapMarker.findRegion(type);
+
+        if (marker != null) {
+            int xInPixels = (int) ((x / data.tileSize) * data.miniMapTileSize);
+            int yInPixels = (int) ((height - (y / data.tileSize)) * data.miniMapTileSize);
+            xInPixels -= (marker.getRegionWidth() / 2);
+            yInPixels -= (marker.getRegionHeight() / 2);
+            drawPixmapLater(mapMarkerPixmap, marker.getRegionX(), marker.getRegionY(),
+                    marker.getRegionWidth(), marker.getRegionHeight(), xInPixels, yInPixels, marker.getRegionWidth(), marker.getRegionHeight());
+        }
+    }
+
+    /**
+     * Fork (Middle-earth): reads WorldData.worldMap (Tiled .tmx, see WorldMapTmx), or returns null if none is set.
+     * Applies the map's start object to playerStartPosX/Y.
+     */
+    private WorldMapTmx loadWorldMap() {
+        if (data.worldMap == null || data.worldMap.isEmpty())
+            return null;
+        WorldMapTmx worldMap = WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), data.width, data.height);
+        if (worldMap.start != null) {
+            // +0.5 px so that (int)(fraction * size) gives back the exact pixel
+            data.playerStartPosX = (worldMap.start[0] + 0.5f) / (data.width * data.tileSize);
+            data.playerStartPosY = (data.height * data.tileSize - worldMap.start[1] + 0.5f) / (data.height * data.tileSize);
+        }
+        return worldMap;
+    }
+
+    /** Fork (Middle-earth): places the world map's POI objects at their exact positions instead of the random placement. */
+    private void placeWorldMapPois(WorldMapTmx worldMap, List<PointOfInterest> towns, List<PointOfInterest> notTowns, TextureAtlas mapMarker, Pixmap mapMarkerPixmap) {
+        for (WorldMapTmx.Poi object : worldMap.pois) {
+            PointOfInterestData poi = PointOfInterestData.getPointOfInterest(object.name);
+            if (poi == null) {
+                System.err.println("worldMap: POI object '" + object.name + "' has no entry in points_of_interest.json, skipped");
+                continue;
+            }
+            float x = object.x, y = height * data.tileSize - object.y;
+            PointOfInterest newPoint = new PointOfInterest(poi, new Vector2(x, y), random);
+            if (object.spriteIndex >= 0)
+                newPoint.setSpriteIndex(object.spriteIndex);
+            if (object.displayName != null && !object.displayName.isEmpty() && !object.displayName.equals(poi.getDisplayName()))
+                newPoint.setDisplayName(object.displayName);
+            clearTerrain((int) (x / data.tileSize), (int) (y / data.tileSize), 3);
+            mapPoiIds.add(newPoint);
+            drawPoiMarker(mapMarker, mapMarkerPixmap, poi.type, x, y);
+            if (poi.type != null && (poi.type.equals("town") || poi.type.equals("capital"))) {
+                if (!newPoint.hasDisplayName())
+                    newPoint.setDisplayName(poi.getDisplayName());
+                towns.add(newPoint);
+            } else {
+                notTowns.add(newPoint);
+            }
+        }
+    }
+
+    /**
+     * Fork (Middle-earth): writes the current world (each tile's own biome, all placed POIs with position, display name
+     * and sprite variant, the player start and the generation seed) as a Tiled map plus tileset. See WorldMapTmx.
+     */
+    public void exportWorldTmx(FileHandle file) {
+        int roadBit = data.GetBiomes().size();
+        int[][] own = new int[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                own[x][y] = highestBiome(biomeMap[x][y] & ~(1L << roadBit));
+        int mapHeightPx = height * data.tileSize;
+        List<WorldMapTmx.Poi> pois = new ArrayList<>();
+        for (PointOfInterest point : getAllPointOfInterest()) {
+            WorldMapTmx.Poi poi = new WorldMapTmx.Poi();
+            poi.name = point.getData().name;
+            poi.x = Math.round(point.getPosition().x);
+            poi.y = mapHeightPx - Math.round(point.getPosition().y);
+            poi.displayName = point.save().readString("displayName");
+            poi.spriteIndex = point.getSpriteIndex();
+            pois.add(poi);
+        }
+        float[] start = {(int) (data.playerStartPosX * width * data.tileSize), mapHeightPx - (int) (data.playerStartPosY * height * data.tileSize)};
+        long exportSeed = generationSeed;
+        if (exportSeed == 0) {
+            WorldMapTmx worldMap = data.worldMap == null || data.worldMap.isEmpty() ? null
+                    : WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), width, height);
+            exportSeed = worldMap != null && worldMap.seed != null ? worldMap.seed : seed;
+        }
+        WorldMapTmx.write(file, data, own, pois, start, exportSeed);
     }
 
     private long measureGenerationTime(String msg, long lastTime) {
@@ -344,6 +441,7 @@ public class World implements Disposable, SaveFileContent {
             long startTime = System.currentTimeMillis();
 
             loadWorldData();
+            WorldMapTmx worldMap = loadWorldMap();
 //////////////////
 ///////// initialize
 //////////////////
@@ -352,6 +450,9 @@ public class World implements Disposable, SaveFileContent {
                 seed = random.nextLong();
             }
             this.seed = seed;
+            if (worldMap != null && worldMap.seed != null)
+                seed = worldMap.seed; // fixed world: same generation for every save, the save keeps its own seed
+            generationSeed = seed;
             random.setSeed(seed);
             OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 
@@ -403,7 +504,7 @@ public class World implements Disposable, SaveFileContent {
 //////////////////
 ///////// calculation each biome position based on noise and radius (or from the fixed biome map image)
 //////////////////
-            long[][] fixedBiomes = loadFixedBiomeMap();
+            long[][] fixedBiomes = loadFixedBiomeMap(worldMap);
             for (BiomeData biome : data.GetBiomes()) {
 
                 biomeIndex[0]++;
@@ -506,7 +607,11 @@ public class World implements Disposable, SaveFileContent {
             Pixmap mapMarkerPixmap = texture.consumePixmap();
             clearTerrain((int) (data.width * data.playerStartPosX), (int) (data.height * data.playerStartPosY), 10);
             //otherPoints.add(new Rectangle(((float) data.width * data.playerStartPosX * (float) data.tileSize) - data.tileSize * 3, ((float) data.height * data.playerStartPosY * data.tileSize) - data.tileSize * 3, data.tileSize * 6, data.tileSize * 6));
-            boolean running = true;
+            boolean running = worldMap == null;
+            if (worldMap != null) {
+                mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
+                placeWorldMapPois(worldMap, towns, notTowns, mapMarker, mapMarkerPixmap);
+            }
             here:
             while (running) {
                 mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
@@ -584,16 +689,7 @@ public class World implements Disposable, SaveFileContent {
                                 clearTerrain((int) (x / data.tileSize), (int) (y / data.tileSize), 3);
                                 mapPoiIds.add(newPoint);
 
-                                TextureAtlas.AtlasRegion marker = mapMarker.findRegion(poi.type);
-
-                                if (marker != null) {
-                                    int xInPixels = (int) ((x / data.tileSize) * data.miniMapTileSize);
-                                    int yInPixels = (int) ((height - (y / data.tileSize)) * data.miniMapTileSize);
-                                    xInPixels -= (marker.getRegionWidth() / 2);
-                                    yInPixels -= (marker.getRegionHeight() / 2);
-                                    drawPixmapLater(mapMarkerPixmap, marker.getRegionX(), marker.getRegionY(),
-                                            marker.getRegionWidth(), marker.getRegionHeight(), xInPixels, yInPixels, marker.getRegionWidth(), marker.getRegionHeight());
-                                }
+                                drawPoiMarker(mapMarker, mapMarkerPixmap, poi.type, x, y);
 
 
                                 if (poi.type != null && (poi.type.equals("town") || poi.type.equals("capital"))) {

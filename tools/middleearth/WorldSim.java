@@ -6,6 +6,7 @@ import forge.adventure.data.BiomeData;
 import forge.adventure.data.PointOfInterestData;
 import forge.adventure.data.WorldData;
 import forge.adventure.world.OpenSimplexNoise;
+import forge.adventure.world.WorldMapTmx;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,6 +18,9 @@ import java.util.List;
 /**
  * Offline replica of World.generateNew (biome painting + POI placement) for layout work.
  * Honours world.json "biomeMap" (fixed layout from an image) like World.loadFixedBiomeMap.
+ * With world.json "worldMap" (Tiled world, Phase 2b) it reads biomes and POIs from the tmx through the engine's own
+ * WorldMapTmx parser and checks the fixed placement instead: POIs outside their biome, overlaps, missing POI entries,
+ * unreachable POIs. Exit code 1 if there are problems.
  * Usage: java -cp FORGE_JAR WorldSim.java <planeDir> <seed|0> <out.png|-> [runs]
  */
 public class WorldSim {
@@ -53,6 +57,11 @@ public class WorldSim {
         String biomeMapPath = new JsonReader().parse(new FileHandle(new File(planeDir, "world/world.json"))).getString("biomeMap", null);
         long[][] fixed = biomeMapPath == null ? null : loadFixedBiomeMap(new File(planeDir, biomeMapPath), biomes);
         if (fixed != null) System.out.println("biomeMap: " + biomeMapPath);
+        String worldMapPath = new JsonReader().parse(new FileHandle(new File(planeDir, "world/world.json"))).getString("worldMap", null);
+        if (worldMapPath != null) {
+            System.exit(checkWorldMap(data, biomes, allPois, new File(planeDir, worldMapPath), out) > 0 ? 1 : 0);
+            return;
+        }
 
         int totalReruns = 0, maxReruns = 0, totalUnreach = 0, runsWithUnreach = 0;
         Map<String, Integer> dropped = new TreeMap<>();
@@ -200,6 +209,10 @@ public class WorldSim {
         if (img.getWidth() != width || img.getHeight() != height)
             System.out.println("WARNING biomeMap is " + img.getWidth() + "x" + img.getHeight() + ", world is " + width + "x" + height);
         if (!unmatched.isEmpty()) System.out.println("WARNING biomeMap colours without a biome: " + unmatched.size());
+        return masks(own);
+    }
+
+    static long[][] masks(int[][] own) {
         long[][] masks = new long[width][height];
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++) {
@@ -210,6 +223,60 @@ public class WorldSim {
                 masks[x][y] = mask;
             }
         return masks;
+    }
+
+    /** world.json "worldMap": biomes and POIs from the tmx (engine parser), no random placement. Returns the problem count. */
+    static int checkWorldMap(WorldData data, List<BiomeData> biomes, Array<PointOfInterestData> allPois, File tmxFile, String out) throws Exception {
+        long t0 = System.currentTimeMillis();
+        WorldMapTmx tmx = WorldMapTmx.read(new FileHandle(tmxFile), biomes, width, height);
+        System.out.println("worldMap: " + tmxFile + " (" + tmx.mapWidth + "x" + tmx.mapHeight + ", seed " + tmx.seed + ", " + tmx.pois.size()
+                + " POI objects, start " + (tmx.start == null ? "missing" : Arrays.toString(tmx.start)) + ", parsed in " + (System.currentTimeMillis() - t0) + " ms)");
+        biomeMap = masks(tmx.biomes);
+        int problems = 0, tile = data.tileSize;
+        Map<String, Set<Integer>> listedIn = new HashMap<>();
+        for (int b = 0; b < biomes.size(); b++)
+            if (biomes.get(b).pointsOfInterest != null)
+                for (String n : biomes.get(b).pointsOfInterest) listedIn.computeIfAbsent(n, k -> new TreeSet<>()).add(b);
+        Map<String, PointOfInterestData> byName = new HashMap<>();
+        for (PointOfInterestData d : allPois) byName.putIfAbsent(d.name, d);
+        List<Placed> placed = new ArrayList<>();
+        for (WorldMapTmx.Poi o : tmx.pois) {
+            PointOfInterestData d = byName.get(o.name);
+            if (d == null) { System.out.println("  MISSING POI ENTRY: object '" + o.name + "' at " + o.x + "," + o.y); problems++; continue; }
+            float x = o.x / tile, y = height - o.y / tile; // tile coords, y up
+            int own = (int) x >= 0 && (int) x < width && (int) y > 0 && (int) y <= height ? tmx.biomes[(int) x][height - (int) y] : -1;
+            Set<Integer> allowed = listedIn.getOrDefault(o.name, Set.of());
+            if (!allowed.contains(own)) {
+                System.out.println("  OUTSIDE BIOME: " + o.name + " (" + o.displayName + ") at tile " + (int) x + "," + (height - (int) y) + " is in "
+                        + (own < 0 ? "nothing" : biomes.get(own).name) + ", listed in " + allowed.stream().map(i -> biomes.get(i).name).toList());
+                problems++;
+            }
+            placed.add(new Placed(o.name, o.displayName == null ? d.getDisplayName() : o.displayName, d.type, x, y, Math.max(own, 0)));
+        }
+        for (int i = 0; i < placed.size(); i++)
+            for (int j = i + 1; j < placed.size(); j++) {
+                Placed a = placed.get(i), b = placed.get(j);
+                if (Math.abs(a.x() - b.x()) < 2 && Math.abs(a.y() - b.y()) < 2) {
+                    System.out.println("  OVERLAP: " + a.label() + " and " + b.label() + " closer than 2 tiles");
+                    problems++;
+                }
+            }
+        // expected counts: every POI entry listed in a biome should be present (count per biome listing)
+        Map<String, Integer> expected = new TreeMap<>(), actual = new TreeMap<>();
+        for (BiomeData b : biomes) for (PointOfInterestData d : poisOf(b, allPois)) expected.merge(d.name, d.count, Integer::sum);
+        for (Placed p : placed) actual.merge(p.name(), 1, Integer::sum);
+        for (Map.Entry<String, Integer> e : expected.entrySet())
+            if (actual.getOrDefault(e.getKey(), 0) < e.getValue())
+                System.out.println("  note: " + e.getKey() + " placed " + actual.getOrDefault(e.getKey(), 0) + "x, biomes list it " + e.getValue() + "x");
+        if (tmx.start == null) { System.out.println("  NO START OBJECT"); problems++; }
+        int unreachable = reach(data, placed, true);
+        if (unreachable < 0) { System.out.println("  no Spawn POI, reachability not checked"); unreachable = 0; }
+        problems += unreachable;
+        if (!out.equals("-")) render(biomes, placed, out);
+        System.out.println("POIs placed: " + placed.size());
+        System.out.println("unreachable POIs=" + unreachable + " " + unreachNames + "; over land and town roads only: " + totalStrict + " " + strictNames);
+        System.out.println("problems: " + problems);
+        return problems;
     }
 
     static Map<String, Integer> unreachNames = new TreeMap<>();
