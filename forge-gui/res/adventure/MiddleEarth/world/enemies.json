@@ -31855,7 +31855,8 @@
       "BiomeColorless",
       "IdentityBlue",
       "IdentityBlack"
-    ]
+    ],
+    "scale": 0.7
   },
   {
     "name": "Brood of Shelob",
@@ -32672,7 +32673,8 @@
       "Large",
       "BiomeBlack",
       "IdentityBlack"
-    ]
+    ],
+    "scale": 0.9
   },
   {
     "name": "Black Rider",
@@ -33114,7 +33116,8 @@
       "BiomeRed",
       "IdentityBlack",
       "IdentityRed"
-    ]
+    ],
+    "scale": 0.6
   },
   {
     "name": "Ringwraith",
@@ -33259,7 +33262,8 @@
       "IdentityRed",
       "IdentityGreen"
     ],
-    "nameOverride": "Mûmak of Harad"
+    "nameOverride": "Mûmak of Harad",
+    "scale": 1.5
   },
   {
     "name": "Corsair Captain",
@@ -33567,7 +33571,8 @@
       "BiomeRed",
       "IdentityBlack",
       "IdentityRed"
-    ]
+    ],
+    "scale": 0.5
   },
   {
     "name": "The Mouth of Sauron",
@@ -33903,6 +33908,12 @@
     "life": 35,
     "rewards": [
       {
+        "type": "item",
+        "probability": 1,
+        "count": 1,
+        "itemName": "The Arkenstone"
+      },
+      {
         "type": "card",
         "probability": 1,
         "count": 1,
@@ -33966,7 +33977,8 @@
       "BiomeRed",
       "IdentityRed",
       "IdentityBlack"
-    ]
+    ],
+    "scale": 0.75
   },
   {
     "name": "Saruman",
@@ -33982,6 +33994,12 @@
     "speed": 22,
     "life": 30,
     "rewards": [
+      {
+        "type": "item",
+        "probability": 1,
+        "count": 1,
+        "itemName": "Palantir"
+      },
       {
         "type": "card",
         "probability": 1,
@@ -34065,6 +34083,12 @@
     "speed": 26,
     "life": 35,
     "rewards": [
+      {
+        "type": "item",
+        "probability": 1,
+        "count": 1,
+        "itemName": "The One Ring"
+      },
       {
         "type": "card",
         "probability": 1,
