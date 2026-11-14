@@ -92,8 +92,15 @@ Original plan: fill the biome `enemies` lists with ME enemies per region (all 43
 
 **Phase 2b ✅ (2026-11-14):** the world is now `MiddleEarth/world/middleearth.tmx` (49 KB). It holds a `Biomes` tile layer painted with `biomes.tsx` (one tile per biome), a `POI` object layer with all 97 placed POIs and their names, a `start` object and a `seed`, and it's exported once from the game with `exportWorldTmx`. Every new game builds the identical world (verified pixel- and byte-identical). The polygon script is retired; rerunning it would overwrite manual edits. How to edit: DEVELOPMENT.md §4.1, [notes](notes/phase2b-tiled-world.md).
 
+**Phase 2c ✅ (2026-11-15):** the world is a Tiled World `MiddleEarth/world/middleearth/middleearth.world` with 36 chunks of 150×150 tiles (`onlyShowAdjacentMaps`: Tiled loads at most 3×3 chunks, about ¼ of the old map). There's a generated `overview.tmx` (biomes as one image plus the user's reference image layer) for checking against the reference. Migration from the user's Tiled 1.12 save is lossless (incl. 38 hand-painted tiles); the round trip is byte-identical. See [notes](notes/phase2c-tiled-world-chunks.md) and DEVELOPMENT §4.1.
+
+**Phase 2d (planned, ~4–5 days):** fully editable world. Optional per-chunk layers `Terrain` (real terrain/structure tilesets), `Roads` and `Clutter` (sprite objects). When a layer is present, import skips that generation step; export writes every layer. Design in the 2c notes.
+
 **Phase 2 open items:**
-- Open and save the tmx once in real Tiled to confirm compatibility (Tiled isn't installed in the sandbox).
+- User: one Tiled open/edit/save round of the chunked world.
+- Optional: reference crops per chunk (a `Reference` layer the game ignores) for painting with the reference visible.
+- Moving a POI across chunks needs cut and paste in Tiled.
+- Decide whether the 400 KB reference jpg should ship in `forge-gui/res`.
 - Structures (mountains, Mordor) are anchored on the biome JSON bounding boxes. When painting a biome far outside its box, update `startPointX/Y` and `width/height` (a candidate for automation).
 - Optional `Roads` layer.
 - Distinct tilesets per region: Shire, Eriador, Rohan and Gondor all use the Green tileset, so their borders don't show.
@@ -130,6 +137,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 | Dev control API (dev only; off unless `-Dforge.devapi.port` / `FORGE_DEVAPI_PORT`): new package `forge.adventure.devapi` (`DevApi`, JSON writer; no HTTP code, so mobile-safe) and `forge-gui-mobile-dev` `forge.app.DevApiServer` (JDK HttpServer on 127.0.0.1). One line in `GameLauncher`. Small accessors: `MapStage.getMapActors()`, `AdventurePlayer.getCharacterFlags()/getQuestFlags()` (read-only), `NewGameScene.devApiStart(...)`. A few protected fields are read by reflection inside `DevApi`. | see [notes](notes/tooling-devapi.md) | Lets agents and tests drive and observe the game as text (`tools/middleearth/gamectl.py`, `tests/`). |
 | No invisible water crossings in fixed layouts: when `worldMap`/`biomeMap` is set, the hidden POI-to-nearest-town paths in `World.generateNew` no longer clear collision on pure water tiles (biome mask = base/ocean only). Visible roads still cross water. | `forge-gui-mobile/.../world/World.java` | Play-test: the player could walk across the Brandywine anywhere a hidden path crossed it. |
 | `god [seconds]` console command (default 3600): sprint + fly + hide for the duration, plus a full heal. For play-testing. | `ConsoleCommandInterpreter.java` | Play-test convenience. |
+| Chunked Tiled worlds: `WorldMapTmx.read` also accepts a Tiled `.world` (chunks parsed with the Phase 2b parser and assembled, with checks for gaps, overlaps, objects outside chunks, and a single seed/start). `WorldMapTmx.writeWorld` writes chunks + `.world` + tileset + a generated `overview.tmx`. `exportWorldTmx [dir\|x.world\|x.tmx] [chunkSize]`. A single `.tmx` still works. `generateNew` is unchanged. | `forge-gui-mobile/.../world/WorldMapTmx.java`, `World.java`, `ConsoleCommandInterpreter.java` | Phase 2c: Tiled performance (user feedback). |
 | `exportMap [file]` console command | `forge-gui-mobile/src/forge/adventure/stage/ConsoleCommandInterpreter.java` | Writes the whole generated world to a PNG for layout work and tests. |
 
 ## Known issues / backlog
@@ -160,6 +168,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | Phase 2c merged (Opus agent): chunked Tiled world plus overview with the user's reference image; check, WorldSim and determinism pass; `run_all.sh` ALL PASSED. Main jar rebuilt. |
 | 2026-11-15 | MEAR similarity check (`tools/middleearth/mear_similarity.py`), LTR Starter Kit reference decks verified against the user's official lists (identical, no re-measure needed), `docs/MiddleEarth/ARTWORK.md` (custom artwork how-to; plane-local pictures need an engine change). |
 | 2026-11-15 | Play-test fixes: (1) rivers were walkable wherever a hidden POI path crossed them; fixed in the engine (see Engine changes) and verified with the dev API: walking east at three Brandywine rows stops at the bank. WorldSim: 0 unreachable POIs. (3) New console command `god`. (2) The early Shire was too hard: the rank-0.5 spawn filter let Ranger of the North, Sharkey's Ruffians and Bill Ferny (difficulty 0.5) spawn from the start. The Shire now spawns Hobbit Troublemakers, Southern Ruffians and Wild Wolves, plus a rare Bill Ferny (spawnRate 0.4); Black Riders (0.8) only appear after 20 wins. `run_all.sh`: ALL PASSED. |
 | 2026-11-15 | Dev tooling merged (Opus agent): dev control API in the game, `gamectl.py` CLI/library, `tests/intro_walkthrough.py` regression test (passes; fails on the old quest 28), `tests/run_all.sh`, `game.sh smoke` on the API (~30 s). Duels: state, concede, autoplay. Coordinator re-ran `run_all.sh` on main: ALL PASSED. |
