@@ -1,0 +1,31 @@
+[metadata]
+Name=Smaug
+Comment=WP5 new. The Lonely Mountain's dragon: four Smaugs and lesser dragons, treasure and fire (boss).
+[Main]
+1 Cavern-Hoard Dragon|LTC
+2 Desolation of Smaug|HOB
+2 Dragon Hatchling|MEAR
+2 Dragon Whelp|MEAR
+2 Dragon's Hoard|MEAR
+2 Dragon-Cursed Halls|HOC
+3 Dragonlord's Servant|MEAR
+2 Dragonskull Summit|LTC
+2 Fireball|MEAR
+2 Furnace Whelp|MEAR
+1 Knollspine Dragon|LTC
+2 Last Light of Durin's Day|HOB
+2 Lightning Bolt|MEAR
+1 Scourge of the Throne|LTC
+1 Smaug the Impenetrable|HOC
+1 Smaug the Magnificent|HOB
+2 Smaug's Fury|HOB
+1 Smaug, Wicked Worm|HOB
+1 Smaug, the Great Calamity|HOB
+2 The Lonely Mountain|HOB
+2 The Misty Mountains Cold|HOB
+2 Thundermaw Hellkite|MEAR
+2 Volcanic Dragon|MEAR
+1 Wake the Dragon|LTC
+15 Mountain|LTR
+4 Swamp|LTR
+[Sideboard]

@@ -95,6 +95,11 @@ public class PlaneCheck {
         }
         info(biomes.size() + " biomes, " + usedEnemies.size() + " distinct enemies used");
 
+        // ---------- 2b. enemies referenced by POI maps, arenas and quests ----------
+        System.out.println("== POI map / arena / quest enemy references");
+        Set<String> mapEnemies = checkMapEnemyReferences(pois, enemies);
+        checkQuestEnemyTags(json, enemies);
+
         if (allowed.isEmpty()) {
             warn("no allowedEditions configured - skipping card pool checks");
             finish();
@@ -121,6 +126,35 @@ public class PlaneCheck {
             }
         }
         info(offPoolEnemies + " enemy decks contain off-pool cards");
+
+        System.out.println("== Enemy decks (enemies referenced by POI maps and arenas, not used by biomes)");
+        int offPoolMap = 0;
+        for (String name : mapEnemies) {
+            EnemyData e = enemyByRawName(enemies, name);
+            if (e == null || e.deck == null || usedEnemies.contains(e.getName())) continue;
+            for (String p : e.deck) {
+                if (p.endsWith(".json")) continue; // generated from the pool
+                if (reportDeck("map enemy " + name + " <" + p + ">", loadDeck(p), allowed) > 0) offPoolMap++;
+            }
+        }
+        info(offPoolMap + " map-referenced enemy decks contain off-pool cards");
+
+        // Decks that live in the plane itself are hand-made for it: off-pool cards there are errors.
+        System.out.println("== Plane-local enemy decks (must be fully in-pool)");
+        int planeDecks = 0;
+        Set<String> seenPlaneDecks = new HashSet<>();
+        if (enemies != null) for (EnemyData e : enemies) {
+            if (e.deck == null) continue;
+            for (String p : e.deck) {
+                FileHandle h = Config.instance().getFile(p);
+                if (h == null || !h.exists() || h.path().contains("/common/") || p.endsWith(".json") || !seenPlaneDecks.add(p)) continue;
+                planeDecks++;
+                int before = warnings;
+                int off = reportDeck("plane deck " + p + " (" + e.name + ")", loadDeck(p), allowed);
+                if (off > 0) { warnings = before; error("plane deck " + p + " has " + off + " off-pool card(s)"); }
+            }
+        }
+        info(planeDecks + " plane-local enemy decks checked");
 
         // ---------- 4. resolution ----------
         System.out.println("== Card resolution respects allowedEditions");
@@ -153,6 +187,110 @@ public class PlaneCheck {
         // ---------- 6. shops, items, heroes ----------
         checkShopsItemsHeroes(json, cd, pois, enemyByName, usedEnemies);
         finish();
+    }
+
+    /** WorldData.getEnemy: exact match on name first, then on getName() (nameOverride). */
+    static EnemyData enemyByRawName(Array<EnemyData> enemies, String n) {
+        if (enemies == null) return null;
+        for (EnemyData e : enemies) if (n.equals(e.name)) return e;
+        for (EnemyData e : enemies) if (n.equals(e.getName())) return e;
+        return null;
+    }
+
+    /**
+     * Walks every POI map (.tmx) and the maps reachable from it through "teleport" properties, and checks
+     * that every "enemy" object property and every arena "enemyPool" entry names an existing enemy
+     * (MapStage / ArenaScene look them up with WorldData.getEnemy). A missing map enemy is an ERROR, except
+     * when only surrounding whitespace differs from an existing name (upstream map typos such as "Goblin "):
+     * the game then picks a random biome enemy, so that is a WARN. Arena pools only need one valid name.
+     * @return the referenced names that exist
+     */
+    static Set<String> checkMapEnemyReferences(Array<PointOfInterestData> pois, Array<EnemyData> enemies) {
+        Set<String> found = new TreeSet<>();
+        if (pois == null) return found;
+        Map<String, Set<String>> missing = new TreeMap<>();
+        Set<String> visited = new HashSet<>();
+        int maps = 0, refs = 0;
+        for (PointOfInterestData p : pois) {
+            Deque<String> todo = new ArrayDeque<>();
+            todo.add(p.map);
+            while (!todo.isEmpty()) {
+                String path = todo.poll();
+                if (path == null || path.isEmpty()) continue;
+                FileHandle h = Config.instance().getFile(path);
+                if (h == null || !h.exists()) { error("POI " + p.name + ": map not found: " + path); continue; }
+                String key;
+                try { key = h.file().getCanonicalPath(); } catch (Exception ex) { key = h.path(); }
+                if (!visited.add(key)) continue;
+                maps++;
+                org.w3c.dom.Document doc;
+                try {
+                    doc = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(h.file());
+                } catch (Exception ex) { error("map " + path + ": cannot parse: " + ex.getMessage()); continue; }
+                org.w3c.dom.NodeList props = doc.getElementsByTagName("property");
+                for (int i = 0; i < props.getLength(); i++) {
+                    org.w3c.dom.Element pr = (org.w3c.dom.Element) props.item(i);
+                    String name = pr.getAttribute("name");
+                    String value = pr.hasAttribute("value") ? pr.getAttribute("value") : pr.getTextContent();
+                    if (value == null || value.isEmpty()) continue;
+                    String where = h.name() + " (" + p.name + ")";
+                    switch (name) {
+                        case "enemy" -> {
+                            refs++;
+                            if (enemyByRawName(enemies, value) != null) found.add(value);
+                            else missing.computeIfAbsent(value, k -> new TreeSet<>()).add(where);
+                        }
+                        case "arena" -> {
+                            ArenaData a;
+                            try { a = new Json().fromJson(ArenaData.class, value); }
+                            catch (Exception ex) { error("arena in " + where + ": cannot parse: " + ex.getMessage()); continue; }
+                            int ok = 0;
+                            if (a.enemyPool != null) for (String n : a.enemyPool) {
+                                refs++;
+                                if (enemyByRawName(enemies, n) != null) { ok++; found.add(n); }
+                                else warn("arena in " + where + ": unknown enemy '" + n + "' (skipped by the arena)");
+                            }
+                            if (ok == 0) error("arena in " + where + ": no valid enemy in enemyPool");
+                        }
+                        case "teleport" -> todo.add(value);
+                        default -> { }
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, Set<String>> m : missing.entrySet()) {
+            String n = m.getKey();
+            if (!n.trim().equals(n) && enemyByRawName(enemies, n.trim()) != null)
+                warn("map enemy '" + n + "' not found (whitespace typo of '" + n.trim() + "'; the game uses a random biome enemy) in " + m.getValue());
+            else
+                error("map enemy '" + n + "' does not exist in enemies.json, referenced in " + m.getValue());
+        }
+        info(maps + " maps, " + refs + " enemy references, " + found.size() + " distinct enemies found");
+        return found;
+    }
+
+    /** Every quest stage that targets enemies by tag must match at least one enemy. */
+    @SuppressWarnings("unchecked")
+    static void checkQuestEnemyTags(Json json, Array<EnemyData> enemies) {
+        Array<AdventureQuestData> quests;
+        try { quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS)); }
+        catch (Exception ex) { return; } // parse errors are reported in section 1
+        if (quests == null || enemies == null) return;
+        int stages = 0;
+        for (AdventureQuestData q : quests) {
+            if (q.stages == null) continue;
+            for (AdventureQuestStage s : q.stages) {
+                if (s.objective == null || (s.enemyTags.isEmpty() && s.enemyExcludeTags.isEmpty())) continue;
+                stages++;
+                boolean any = false;
+                for (EnemyData e : enemies) {
+                    List<String> t = Arrays.asList(e.questTags);
+                    if (t.containsAll(s.enemyTags) && Collections.disjoint(t, s.enemyExcludeTags)) { any = true; break; }
+                }
+                if (!any) error("quest " + q.getID() + " stage '" + s.name + "': no enemy has tags " + s.enemyTags + " without " + s.enemyExcludeTags);
+            }
+        }
+        info(stages + " quest stages target enemies by tag, all matched");
     }
 
     // =====================================================================================

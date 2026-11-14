@@ -1,0 +1,23 @@
+[metadata]
+Name=Hill Troll
+Comment=WP5 new. R/G trolls and giants that regenerate and fight (normal).
+[Main]
+3 Cudgel Troll|MEAR
+2 Giant Growth|MEAR
+3 Hagi Mob|MEAR
+2 Hill Giant|MEAR
+3 Icehide Troll|MEAR
+2 Olog-hai Crusher|LTR
+2 Prey Upon|MEAR
+2 Rampant Growth|LTC
+2 Rootbound Crag|MEAR
+2 Rugged Highlands|MEAR
+3 Shock|MEAR
+2 Stone Giant|MEAR
+3 Troll Ascetic|MEAR
+3 Troll Negotiations|HOB
+2 Two-Headed Giant|MEAR
+4 Uthden Troll|MEAR
+8 Forest|LTR
+12 Mountain|LTR
+[Sideboard]

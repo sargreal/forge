@@ -1,0 +1,22 @@
+[metadata]
+Name=Necromancer of Dol Guldur
+Comment=WP5 new. Servants of the Necromancer: mono-B skeletons, Death Baron and reanimation (hard).
+[Main]
+2 Animate Dead|MEAR
+2 Carrion Crow|MEAR
+2 Crow of Dark Tidings|MEAR
+3 Death Baron|MEAR
+2 Dread Rider|MEAR
+3 Drudge Skeletons|MEAR
+2 Gnashing of Teeth|HOB
+2 Gravedigger|MEAR
+2 Haunted Fengraf|MEAR
+2 Lord of the Undead|MEAR
+2 Murder|MEAR
+3 Persistent Specimen|MEAR
+4 Reassembling Skeleton|MEAR
+2 Sanitarium Skeleton|MEAR
+2 Sign in Blood|MEAR
+3 Tendrils of Corruption|MEAR
+22 Swamp|LTR
+[Sideboard]

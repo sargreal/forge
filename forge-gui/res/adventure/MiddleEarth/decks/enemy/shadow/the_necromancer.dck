@@ -1,0 +1,24 @@
+[metadata]
+Name=The Necromancer
+Comment=WP5 new. Sauron in Dol Guldur: skeleton hordes, Nazgûl and Sauron, the Necromancer (boss).
+[Main]
+2 Animate Dead|MEAR
+2 Barad-dûr|LTR
+3 Death Baron|MEAR
+2 Dread Rider|MEAR
+3 Drudge Skeletons|MEAR
+2 Gnashing of Teeth|HOB
+2 Grave Pact|MEAR
+2 Gravedigger|MEAR
+2 Haunted Fengraf|MEAR
+2 Hero's Downfall|MEAR
+2 Murder|MEAR
+4 Nazgûl|LTR
+4 Reassembling Skeleton|MEAR
+1 Sanguine Bond|LTC
+2 Sauron, the Necromancer|LTR
+2 Sign in Blood|MEAR
+2 Voracious Fell Beast|LTR
+1 Witch-king of Angmar|LTR
+20 Swamp|LTR
+[Sideboard]
