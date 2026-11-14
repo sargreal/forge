@@ -2,23 +2,19 @@
 Name=Mordor
 Comment=Middle-earth adventure starter deck (WP4). Easy, black: the Nazgul, orcs and fell beasts of Mordor.
 [Main]
-2 Haunt of the Dead Marshes|LTR
+3 Haunt of the Dead Marshes|LTR
 2 Easterling Vanguard|LTR
-1 Uruk-hai Berserker|LTR
+1 Duskhunter Bat|MEAR
 1 Gorbag of Minas Morgul|LTR
-2 Nazgûl|LTR
+2 Dirtwater Wraith|MEAR
+2 Front Porch Sentries|HOB
 2 Dunland Crebain|LTR
-1 Gothmog, Morgul Lieutenant|LTR
-1 Snarling Warg|LTR
+1 Rimebound Dead|MEAR
 1 Mirkwood Bats|LTR
-1 Cirith Ungol Patrol|LTR
-1 Dirtwater Wraith|MEAR
-1 Troll of Khazad-dûm|LTR
-1 Front Porch Sentries|HOB
-1 Claim the Precious|LTR
-1 Orcish Medicine|LTR
+1 Persistent Specimen|MEAR
 1 Mordor Trebuchet|LTR
-1 Mordor Muster|LTR
-1 Morgul-Knife Wound|LTR
-1 The Black Breath|LTR
+2 Drudge Skeletons|MEAR
+1 Nazgûl|LTR
+2 Sanitarium Skeleton|MEAR
+1 Duty-Bound Dead|MEAR
 17 Swamp|LTR
