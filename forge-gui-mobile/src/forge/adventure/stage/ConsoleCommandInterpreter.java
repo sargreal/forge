@@ -380,6 +380,22 @@ public class ConsoleCommandInterpreter {
             System.out.println("POI Names - Types\n" + String.join("\n", poiNames));
             return "POI lists dumped to stdout.";
         });
+        // Dev helper (MiddleEarth fork): play-test mode = sprint + fly + hide for a long time, plus a full heal.
+        registerCommand(new String[]{"god"}, s -> {
+            float seconds = 3600f;
+            if (s.length > 0) {
+                try {
+                    seconds = Float.parseFloat(s[0]);
+                } catch (Exception e) {
+                    return "Usage: god [seconds] (default 3600)";
+                }
+            }
+            currentGameStage().sprintFor(seconds);
+            currentGameStage().flyFor(seconds);
+            currentGameStage().hideFor(seconds);
+            Current.player().fullHeal();
+            return "God mode for " + (int) seconds + " s: double speed, walk through obstacles, enemies ignore you, healed.";
+        });
         // Dev helper (MiddleEarth fork): write the whole generated world's minimap image to a PNG.
         registerCommand(new String[]{"exportMap"}, s -> {
             com.badlogic.gdx.graphics.Pixmap image = WorldSave.getCurrentSave().getWorld().getBiomeImage();

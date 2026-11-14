@@ -115,6 +115,8 @@ $G errors                 # exceptions in the log
 $G stop
 ```
 
+Play-testing: press F9 and type `god` (or `god 600`): double speed, walk through obstacles, enemies ignore you, full heal. `debug map` lets you drag on the minimap to fast-travel.
+
 Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `exportWorldTmx [file]` (Tiled world, §4.1), `sanitize editions`.
 
 **Save data:** the game runs with `user.home=$OUT_DIR/home`, so settings and saves are in `.me-test/home/.forge/adventure/`. `check.sh` uses `.me-test/check-home`. Neither touches the real `~/.forge`.
