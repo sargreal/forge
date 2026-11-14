@@ -32469,7 +32469,7 @@
     "spawnRate": 1.0,
     "difficulty": 0.3,
     "speed": 24,
-    "life": 16,
+    "life": 13,
     "rewards": [
       {
         "type": "deckCard",
@@ -32591,7 +32591,7 @@
     "spawnRate": 1.0,
     "difficulty": 0.3,
     "speed": 25,
-    "life": 16,
+    "life": 13,
     "rewards": [
       {
         "type": "deckCard",
@@ -32734,9 +32734,9 @@
     "ai": "",
     "randomizeDeck": false,
     "spawnRate": 1.0,
-    "difficulty": 0.3,
+    "difficulty": 0.6,
     "speed": 18,
-    "life": 17,
+    "life": 14,
     "rewards": [
       {
         "type": "deckCard",
@@ -32805,8 +32805,8 @@
     "ai": "",
     "randomizeDeck": false,
     "flying": true,
-    "spawnRate": 1.0,
-    "difficulty": 0.3,
+    "spawnRate": 0.5,
+    "difficulty": 0.8,
     "speed": 34,
     "life": 15,
     "rewards": [
@@ -32866,10 +32866,10 @@
     ],
     "ai": "",
     "randomizeDeck": false,
-    "spawnRate": 1.0,
-    "difficulty": 0.3,
+    "spawnRate": 0.4,
+    "difficulty": 0.8,
     "speed": 30,
-    "life": 16,
+    "life": 14,
     "rewards": [
       {
         "type": "deckCard",
@@ -33310,7 +33310,7 @@
     "ai": "",
     "randomizeDeck": false,
     "spawnRate": 0.4,
-    "difficulty": 0.6,
+    "difficulty": 0.8,
     "speed": 28,
     "life": 20,
     "rewards": [
@@ -33456,7 +33456,7 @@
     "ai": "",
     "randomizeDeck": false,
     "spawnRate": 0.5,
-    "difficulty": 0.6,
+    "difficulty": 0.8,
     "speed": 22,
     "life": 22,
     "rewards": [
@@ -33614,7 +33614,7 @@
     "randomizeDeck": false,
     "flying": true,
     "spawnRate": 0.25,
-    "difficulty": 0.8,
+    "difficulty": 1,
     "speed": 34,
     "life": 24,
     "rewards": [
@@ -33924,7 +33924,7 @@
     "spawnRate": 0,
     "difficulty": 1,
     "speed": 22,
-    "life": 30,
+    "life": 35,
     "rewards": [
       {
         "type": "card",
@@ -34174,7 +34174,7 @@
     "spawnRate": 0,
     "difficulty": 1,
     "speed": 22,
-    "life": 30,
+    "life": 38,
     "rewards": [
       {
         "type": "item",
@@ -34851,7 +34851,7 @@
     "difficulty": 2,
     "speed": 10,
     "scale": 0.6,
-    "life": 30,
+    "life": 35,
     "rewards": [
       {
         "type": "deckCard",
@@ -35297,7 +35297,7 @@
     "spawnRate": 1,
     "difficulty": 0.1,
     "speed": 25,
-    "life": 12,
+    "life": 9,
     "rewards": [
       {
         "type": "deckCard",
@@ -35582,7 +35582,7 @@
     "spawnRate": 0.2,
     "difficulty": 2,
     "speed": 12,
-    "life": 32,
+    "life": 36,
     "rewards": [
       {
         "type": "deckCard",
@@ -35959,7 +35959,7 @@
     "spawnRate": 1,
     "difficulty": 0.5,
     "speed": 36,
-    "life": 16,
+    "life": 13,
     "rewards": [
       {
         "type": "deckCard",
@@ -36034,7 +36034,7 @@
     "spawnRate": 0.6,
     "difficulty": 1,
     "speed": 36,
-    "life": 22,
+    "life": 19,
     "rewards": [
       {
         "type": "deckCard",
@@ -36109,9 +36109,9 @@
     "ai": "",
     "randomizeDeck": true,
     "spawnRate": 1,
-    "difficulty": 0.1,
+    "difficulty": 0.3,
     "speed": 24,
-    "life": 13,
+    "life": 10,
     "rewards": [
       {
         "type": "deckCard",
@@ -36556,7 +36556,7 @@
     "spawnRate": 0.6,
     "difficulty": 1,
     "speed": 26,
-    "life": 22,
+    "life": 20,
     "rewards": [
       {
         "type": "deckCard",

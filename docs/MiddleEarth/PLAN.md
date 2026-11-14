@@ -22,9 +22,9 @@
 | D11 | **Usage budget for agents** (user): routine content work (decklists, enemy and shop JSON, data entry) runs on **Sonnet**. Opus is only for engine changes and hard debugging. At most **2 agents in parallel**, and each task is sized to finish in one run (resuming an agent re-reads its whole transcript). Agents commit checkpoints often and keep reports short. Small integration steps are done by the coordinator directly. Running agents are never switched mid-task. | 2026-11-14 |
 | D10 | MEAR follow-up (user): keep all 223 cards. Original dual lands and shock lands may be added. Prefer Tolkien names: cards whose names clearly don't fit get a Tolkien **flavor name**, using Forge's existing per-printing `${"flavorName": ...}` support (rules identity unchanged), or are swapped out. Tokens should get fitting art where it's cheap; small engine changes are OK, but avoid heavy workarounds. | 2026-11-14 |
 
-## Current status (after Wave 1: WP1, WP2 and WP3 merged)
+## Current status (Phase 1 complete, awaiting user play-test)
 
-`tools/middleearth/check.sh` → **0 errors, 743 warnings**. Almost all warnings are unknown or off-pool enemies, which Wave 2 replaces. `game.sh smoke` → new game, ME intro and overworld work. `WorldSim` → 0 placement reruns and 0 unreachable POIs over 20 seeds.
+`tools/middleearth/check.sh` → **0 errors, 2 warnings** (whitespace typos in upstream maps). `game.sh smoke` → new game, ME intro and overworld work. `WorldSim` → 0 placement reruns and 0 unreachable POIs over 20 seeds.
 
 | Area | State |
 | --- | --- |
@@ -32,7 +32,7 @@
 | World layout | ✅ 900×900 world with 43 biomes placed against the LotR map. Start in the Shire. Waste is down from about 40% to about 3%. No rivers or inland seas (needs Phase 2). |
 | Towns / POIs | ✅ 90 POIs (about 97 placed per world). Named towns and dungeons sit at their map positions. Middle-earth town name lists per region. |
 | Intro | ✅ "Welcome to Middle-earth" quest and tutorial. The wizard dialog is overridden through `MiddleEarth/languages/adventure-en-US.properties` (en-US only; the speaker title still reads "Adept Black Wizard"). |
-| Starter decks | 🟡 All in-pool. Constructed: 15 ME faction decks (Easy mono, Normal allied, Hard enemy pairs). Standard: official LTR Jumpstart packs. Pile: pool-filtered templates. Strength: 7/15 constructed decks on par, 5 too strong, 3 too weak. Tuning follow-up open. |
+| Starter decks | ✅ All in-pool. Constructed: 15 ME faction decks (Easy mono, Normal allied, Hard enemy pairs). Standard: official LTR Jumpstart packs. Pile: pool-filtered templates. All 15 constructed decks measure 42–59% against the LTR Starter Kits (round 2 tuning). |
 | Enemies | ✅ 532 in the plane's `enemies.json`: the common copy, 34 Shadow (WP5) + 15 re-themed generics, and 34 Free Peoples/wild (WP6, merged from `enemies-free.fragment.json` with `tools/middleearth/merge-enemies.py`). All 43 biomes spawn only ME enemies (61 distinct). Town/dungeon map enemies are re-themed too. 540 entries in total. |
 | Shops / items / heroes | ✅ 250 ME shops (all 243 shop names requested by the plane's maps exist), 107 items incl. 27 ME items (Sting, Mithril Coat, Andúril, The One Ring…), races Hobbit/Man/Elf/Dwarf/Wizard (reused sprites). |
 | Fixed Tiled world | ❌ Not started (Phase 2). |
@@ -58,7 +58,7 @@ Baseline before Phase 1: [worldmap-baseline.png](img/worldmap-baseline.png)
 - [x] Docs: this plan and DEVELOPMENT.md.
 - [x] Verified that issue #1 (printings from wrong sets) is solved by upstream's implementation. `check.sh` guards it.
 
-### Phase 1: Middle-earth content on the random generator
+### Phase 1: Middle-earth content on the random generator ✅ (2026-11-14, ready for play-testing)
 
 Use `Innistrad/` as the template. Phase 1 is split into work packages (WPs). Each WP is done by one agent in its own git worktree and branch, and the coordinator merges them. Every WP touches its own set of files (listed under "Owns"). An agent writes its report to `docs/MiddleEarth/notes/<wp>.md`. Only the coordinator edits this plan.
 
@@ -111,8 +111,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
-- Starter deck tuning (target 45–55%, `--g40`): weaken Mirkwood (74%), Corsairs of Umbar (71%), Rivendell (68%), Wilderland (68%) and Mordor (65%); strengthen the Shire (35%), Isengard (39%) and Lothlórien (39%). See `notes/wp4-starter-decks.md`.
-- WP5/WP6 have no notes files and no final strength runs: the agents hit the usage limit. Enemy decks were built and tuned by the agents but not re-measured after the last edits. Spot-check with `deckstrength.sh --enemy-life enemy:<Name>`.
+- Saruman's deck plays weak (56% even at 38 life; the AI handles control poorly). Rework the deck. See `notes/wp5-wp6-enemies.md`.
 - When `enemies-free.fragment.json` changes, regenerate with `python3 tools/middleearth/merge-enemies.py --base <enemies.json without the fragment> ...`. Simpler from now on: edit `enemies.json` directly and treat the fragment as historical.
 - Side quests are an interim copy of 34 generic Shandalar side quests (Kiora's and Teferi's quests dropped). Re-theme them in Phase 3. Without them, the town job boards crashed (NPE in `AdventureQuestController.getQuestNPCResponse` on an empty side-quest list).
 - The One Ring is currently sold in Umbar's black market (30,000 gold). It should become a unique boss or quest reward (WP5 / Phase 3). A "can't unequip" curse would need an engine change.
@@ -136,6 +135,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-14 | **Phase 1 complete.** Starter tuning round 2 (Sonnet agent): all 8 outliers are in the on-par band. All 68 new enemies measured (2,176 games). 17 outliers re-tuned through life/difficulty/spawnRate and re-measured. Report: `notes/wp5-wp6-enemies.md`. |
 | 2026-11-14 | Wave 3 map enemies (Sonnet agent): 170 generic map enemies → ME decks, 143 ME display names. Coordinator added 8 arena challengers missing upstream (Erebor, Umbar and Rivendell capitals). check: 0 errors, **2 warnings** (whitespace typos in upstream maps; the game falls back to a biome enemy). |
 | 2026-11-14 | WP4 merged (agent stopped mid-tuning; the coordinator checkpointed, re-measured and filled in the report). All 60 starter references point to `decks/starter/ME/`. check: 0 errors, 242 warnings. |
 | 2026-11-14 | WP2b merged (agent stopped at the usage limit; the coordinator checkpointed, rebuilt, tested and wrote the report): 66 Tolkien flavor names, 10 original dual lands, token art sources (engine change). Main jar rebuilt. |
