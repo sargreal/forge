@@ -1,6 +1,6 @@
 {
-"startPointX": 0.56,
-"startPointY": 0.58,
+"startPointX": 0.5656,
+"startPointY": 0.5567,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "rohan",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.22,
-"height": 0.22,
-"color": "59a650",
+"width": 0.1844,
+"height": 0.1689,
+"color": "a3c25a",
 "spriteNames": [
 	"Flower",
 	"PlainsTree",

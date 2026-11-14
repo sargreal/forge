@@ -1,6 +1,6 @@
 {
-"startPointX": 0.655,
-"startPointY": 0.375,
+"startPointX": 0.66,
+"startPointY": 0.3639,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "mirkwood_south",
@@ -19,9 +19,9 @@
 		"resolution": 8
 	}
 ],
-"width": 0.17,
-"height": 0.17,
-"color": "110903",
+"width": 0.1267,
+"height": 0.1478,
+"color": "2a3320",
 "spriteNames": [
 	"WoodTree",
 	"SwampTree2",

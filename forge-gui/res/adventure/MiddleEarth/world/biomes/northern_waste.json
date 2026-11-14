@@ -1,6 +1,6 @@
 {
-"startPointX": 0.62,
-"startPointY": -0.44,
+"startPointX": 0.5361,
+"startPointY": 0.03,
 "noiseWeight": 0.15,
 "distWeight": 1.0,
 "name": "northern_waste",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 1.2,
-"height": 1.2,
+"width": 0.9278,
+"height": 0.06,
 "color": "10a2e0",
 "spriteNames": [
 	"WasteRock",

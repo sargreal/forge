@@ -1,6 +1,6 @@
 {
-"startPointX": 0.785,
-"startPointY": 0.135,
+"startPointX": 0.7844,
+"startPointY": 0.1256,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "erebor",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.06,
-"height": 0.06,
-"color": "b63729",
+"width": 0.04,
+"height": 0.0511,
+"color": "d06030",
 "spriteNames": [
 	"MountainTree",
 	"MountainTree2",

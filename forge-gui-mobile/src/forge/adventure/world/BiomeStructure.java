@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import forge.adventure.data.BiomeStructureData;
 import forge.adventure.util.Config;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class BiomeStructure {
@@ -65,19 +66,19 @@ public class BiomeStructure {
         for (int i = 0; i < data.mappingInfo.length; i++) {
             colorIdMap.put(Integer.parseInt(data.mappingInfo[i].color, 16), i);
         }
-        for (int mx = 0; mx < targetWidth; mx += Math.min(targetWidth - mx, MAXIMUM_WAVEFUNCTIONSIZE)) {
-            for (int my = 0; my < targetWidth; my += Math.min(targetHeight - my, MAXIMUM_WAVEFUNCTIONSIZE)) {
-                OverlappingModel model = new OverlappingModel(sourceImage, data.N, Math.min(targetWidth - mx, MAXIMUM_WAVEFUNCTIONSIZE), Math.min(targetHeight - my, MAXIMUM_WAVEFUNCTIONSIZE), data.periodicInput, data.periodicOutput, data.symmetry, data.ground);
+        for (int[] row : dataMap)
+            Arrays.fill(row, -1);
+        if (targetWidth < data.N || targetHeight < data.N)
+            return;
+        for (int mx = 0; mx < targetWidth; mx += chunkSize(targetWidth - mx)) {
+            for (int my = 0; my < targetHeight; my += chunkSize(targetHeight - my)) {
+                OverlappingModel model = new OverlappingModel(sourceImage, data.N, chunkSize(targetWidth - mx), chunkSize(targetHeight - my), data.periodicInput, data.periodicOutput, data.symmetry, data.ground);
 
                 boolean suc = false;
                 for (int i = 0; i < 10 && !suc; i++)
                     suc = model.run((int) seed + (i * 5355) + mx * my, 0);
-                if (!suc) {
-                    for (int x = 0; x < dataMap.length; x++)
-                        for (int y = 0; y < dataMap[x].length; y++)
-                            dataMap[mx + x][my + y] = -1;
-                    return;
-                }
+                if (!suc)
+                    continue; // this chunk stays empty (-1); the old code indexed past the array here
                 image = model.graphics();
                 for (int x = 0; x < image.getWidth(); x++) {
 
@@ -103,6 +104,15 @@ public class BiomeStructure {
         }
 
 
+    }
+
+    /** Next chunk size: at most MAXIMUM_WAVEFUNCTIONSIZE and never leaving a last chunk smaller than N (OverlappingModel.graphics fails on it). */
+    private int chunkSize(int remaining) {
+        int size = Math.min(remaining, MAXIMUM_WAVEFUNCTIONSIZE);
+        int rest = remaining - size;
+        if (rest > 0 && rest < data.N)
+            size -= data.N - rest;
+        return size;
     }
 
     public void initialize() {

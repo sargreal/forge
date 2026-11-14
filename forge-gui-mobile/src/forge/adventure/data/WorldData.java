@@ -30,6 +30,8 @@ public class WorldData implements Serializable {
     public String biomesSprites;
     public float maxRoadDistance;
     public String[] biomesNames;
+    /** Optional (fork): image that fixes each tile's biome by colour (one pixel per tile, row 0 = north). Unset = random biome generation. */
+    public String biomeMap;
 
 
     private BiomeSprites sprites;

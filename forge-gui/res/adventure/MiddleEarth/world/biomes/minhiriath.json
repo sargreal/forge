@@ -1,6 +1,6 @@
 {
-"startPointX": 0.285,
-"startPointY": 0.45,
+"startPointX": 0.2861,
+"startPointY": 0.5072,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "minhiriath",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.19,
-"height": 0.19,
-"color": "59a650",
+"width": 0.2456,
+"height": 0.23,
+"color": "7bb663",
 "spriteNames": [
 	"DarkGras",
 	"Bush",

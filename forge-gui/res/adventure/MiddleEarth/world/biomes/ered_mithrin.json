@@ -1,6 +1,6 @@
 {
-"startPointX": 0.6,
-"startPointY": 0.075,
+"startPointX": 0.5928,
+"startPointY": 0.0783,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ered_mithrin",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.09,
-"height": 0.09,
-"color": "b63729",
+"width": 0.1211,
+"height": 0.05,
+"color": "a83020",
 "spriteNames": [
 	"MountainTree",
 	"MountainTree2",

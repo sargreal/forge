@@ -1,6 +1,6 @@
 {
-"startPointX": 0.575,
-"startPointY": 0.34,
+"startPointX": 0.5717,
+"startPointY": 0.2817,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "anduin_vale",
@@ -19,9 +19,9 @@
 		"resolution": 10
 	}
 ],
-"width": 0.26,
-"height": 0.26,
-"color": "59a650",
+"width": 0.0856,
+"height": 0.3833,
+"color": "66b35c",
 "spriteNames": [
 	"Flower",
 	"PlainsTree",
