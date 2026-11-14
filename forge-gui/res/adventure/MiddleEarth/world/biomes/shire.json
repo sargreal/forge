@@ -29,7 +29,7 @@
 	"DarkGras",
 	"Stump"
 ],
-"enemies": ["Hobbit Troublemaker", "Southern Ruffian", "Wild Wolves", "Bill Ferny", "Sharkey's Ruffian", "Black Rider", "Ranger of the North"],
+"enemies": ["Hobbit Troublemaker", "Southern Ruffian", "Wild Wolves", "Bill Ferny", "Black Rider"],
 "pointsOfInterest": [
 	"Spawn",
 	"Forest Capital",

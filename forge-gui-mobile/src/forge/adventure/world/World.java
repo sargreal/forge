@@ -751,6 +751,8 @@ public class World implements Disposable, SaveFileContent {
                 //allSortedTowns.add(Pair.of(current, towns.get(secondSmallestIndex)));
             }
             List<Pair<PointOfInterest, PointOfInterest>> allPOIPathsToNextTown = new ArrayList<>();
+            final boolean fixedLayout = (data.worldMap != null && !data.worldMap.isEmpty())
+                    || (data.biomeMap != null && !data.biomeMap.isEmpty());
             for (int i = 0; i < notTowns.size() - 1; i++) {
 
                 PointOfInterest poi = notTowns.get(i);
@@ -786,7 +788,10 @@ public class World implements Disposable, SaveFileContent {
                     int e2;
                     for (int i = 0; i < 1000; i++) {
                         if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
-                        if ((terrainMap[startX][height - startY] & collisionBit) != 0)//clear terrain if it has collision
+                        // Fork (Middle-earth): with a fixed layout, don't punch invisible fords through water
+                        // (tiles that only carry the base/ocean biome); rivers stay crossable at the drawn fords and roads.
+                        boolean keepWater = fixedLayout && biomeMap[startX][height - startY] == 1L;
+                        if (!keepWater && (terrainMap[startX][height - startY] & collisionBit) != 0)//clear terrain if it has collision
                             terrainMap[startX][height - startY] = 0;
 
                         if (startX == x1 && startY == y1)

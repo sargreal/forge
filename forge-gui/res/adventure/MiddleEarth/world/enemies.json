@@ -35226,7 +35226,7 @@
     ],
     "ai": "",
     "randomizeDeck": true,
-    "spawnRate": 1,
+    "spawnRate": 0.4,
     "difficulty": 0.5,
     "speed": 26,
     "life": 15,
