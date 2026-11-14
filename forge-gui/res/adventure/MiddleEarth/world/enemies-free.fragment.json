@@ -561,6 +561,12 @@
         "probability": 1,
         "count": 5,
         "addMaxCount": 5
+      },
+      {
+        "type": "item",
+        "probability": 0.2,
+        "count": 1,
+        "itemName": "Ent-draught"
       }
     ],
     "colors": "BG",
@@ -630,6 +636,12 @@
         "probability": 0.7,
         "count": 10,
         "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.05,
+        "count": 1,
+        "itemName": "Barrow-blade"
       }
     ],
     "colors": "B",
@@ -705,6 +717,12 @@
         "probability": 1,
         "count": 5,
         "addMaxCount": 5
+      },
+      {
+        "type": "item",
+        "probability": 0.5,
+        "count": 1,
+        "itemName": "Barrow-blade"
       }
     ],
     "colors": "B",
@@ -1426,6 +1444,12 @@
         "probability": 1,
         "count": 5,
         "addMaxCount": 5
+      },
+      {
+        "type": "item",
+        "probability": 0.3,
+        "count": 1,
+        "itemName": "Thror's Map"
       }
     ],
     "colors": "R",
@@ -1494,6 +1518,12 @@
         "probability": 0.7,
         "count": 10,
         "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.08,
+        "count": 1,
+        "itemName": "Ranger Blade"
       }
     ],
     "colors": "GW",
@@ -1631,6 +1661,12 @@
         "probability": 0.7,
         "count": 10,
         "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.08,
+        "count": 1,
+        "itemName": "Rohirrim Shield"
       }
     ],
     "colors": "RW",
@@ -1927,6 +1963,12 @@
         "probability": 0.7,
         "count": 10,
         "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.08,
+        "count": 1,
+        "itemName": "Bow of the Galadhrim"
       }
     ],
     "colors": "GU",
@@ -2141,6 +2183,12 @@
         "probability": 0.7,
         "count": 10,
         "addMaxCount": 70
+      },
+      {
+        "type": "item",
+        "probability": 0.08,
+        "count": 1,
+        "itemName": "Dwarven Axe"
       }
     ],
     "colors": "RW",
@@ -2368,6 +2416,12 @@
         "probability": 0.5,
         "count": 10,
         "addMaxCount": 40
+      },
+      {
+        "type": "item",
+        "probability": 0.1,
+        "count": 1,
+        "itemName": "Longbottom Leaf"
       }
     ],
     "colors": "GW",

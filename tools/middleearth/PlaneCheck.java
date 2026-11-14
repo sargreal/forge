@@ -39,6 +39,8 @@ import java.util.*;
 public class PlaneCheck {
     static int errors = 0, warnings = 0;
     static boolean verbose = false;
+    // --all-enemies: also check enemies no biome uses yet whose decks are plane-local (decks/enemy/...), e.g. a new fragment.
+    static boolean allEnemies = false;
 
     static void error(String m) { errors++; System.out.println("ERROR " + m); }
     static void warn(String m) { warnings++; System.out.println("WARN  " + m); }
@@ -46,6 +48,7 @@ public class PlaneCheck {
 
     public static void main(String[] args) throws Exception {
         for (String a : args) if (a.equals("-v")) verbose = true;
+        for (String a : args) if (a.equals("--all-enemies")) allEnemies = true;
         GuiBase.setInterface(new GuiMobile("./"));
         FModel.initialize(null, null);
 
@@ -94,6 +97,13 @@ public class PlaneCheck {
                 if (!poiNames.contains(p)) warn("biome " + b.name + ": unknown point of interest '" + p + "' (not placed)");
         }
         info(biomes.size() + " biomes, " + usedEnemies.size() + " distinct enemies used");
+        if (allEnemies) {
+            int extra = 0;
+            for (EnemyData e : enemyByName.values())
+                if (e.deck != null && e.deck.length > 0 && Arrays.stream(e.deck).allMatch(d -> d.startsWith("decks/enemy/"))
+                        && usedEnemies.add(e.getName())) extra++;
+            info("--all-enemies: " + extra + " more enemies with plane-local decks checked");
+        }
 
         if (allowed.isEmpty()) {
             warn("no allowedEditions configured - skipping card pool checks");
