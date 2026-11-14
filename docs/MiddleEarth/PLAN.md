@@ -134,6 +134,8 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
+- MEAR near-duplicates of pool cards (`notes/mear-similarity.md`): 11 tier-1 pairs. Recommended swaps await a user decision: Murder → Grasp of Darkness / Sengir Vampire, Cancel → Remand, Think Twice → Mulldrifter, Claustrophobia → another blue card. Also 13 tier-1 pairs inside MEAR itself.
+- Repo-shipped custom card art for flavor-named MEAR cards needs a small engine change (plane-local `card_pics`/`token_pics` checked first; see `ARTWORK.md`). Stopgap: symlink into `~/.cache/forge/pics/cards/MEAR`.
 - Spawn difficulty: overworld spawns are filtered by `difficulty <= rank` (rank 0.5 for the first 20 wins, then 1 / 2 / …). Our enemies use 0.1 = easy, 0.3–0.5 = normal (spawn from the start!), 0.6–1 = hard, and bosses. Regions near the start should list mostly 0.1 enemies. Review the other early regions (Eriador, Lindon) in play-testing. Sharkey's Ruffians currently spawn in no region.
 - Dev API gaps: no plane switch in `/newGame` (use `game.sh start <plane>`); overworld walking is straight-line (no pathfinding); no shop, deck-editor or inventory endpoints; no card-level duel control. See `notes/tooling-devapi.md`.
 - Saruman's deck plays weak (56% even at 38 life; the AI handles control poorly). Rework the deck. See `notes/wp5-wp6-enemies.md`.
@@ -142,7 +144,6 @@ Keep this list complete, because it is what makes upstream merges predictable.
 - The One Ring is currently sold in Umbar's black market (30,000 gold). It should become a unique boss or quest reward (WP5 / Phase 3). A "can't unequip" curse would need an engine change.
 - Hobbit and Wizard races reuse farmer/peasant and wizard enemy sprites with human portraits. Proper sprites need new art.
 - The wizard intro and the rune display names are en-US only (`MiddleEarth/languages/adventure-en-US.properties`).
-- The LTR Starter Kit decklists come from github.com/taw/magic-preconstructed-decks (citing the Wizards article of 2023-06-23). Do one check against the official page with web access.
 - Generated (`.json` template) decks break down under the restricted pool (`enemy:Troll` → 32× The Lonely Mountain). The current `*_e.json` starters pull in non-ME jumpstart cards, and `check.sh` skips generated decks.
 - Engine bugs found in WP3 (bug 1 was fixed in Phase 2a):
   2. `World.generateNew` road loops stop one short, so the last non-town POI gets no cleared path. Workaround: `dead_marshes` (open swamp) is the last biome.
@@ -159,6 +160,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | MEAR similarity check (`tools/middleearth/mear_similarity.py`), LTR Starter Kit reference decks verified against the user's official lists (identical, no re-measure needed), `docs/MiddleEarth/ARTWORK.md` (custom artwork how-to; plane-local pictures need an engine change). |
 | 2026-11-15 | Play-test fixes: (1) rivers were walkable wherever a hidden POI path crossed them; fixed in the engine (see Engine changes) and verified with the dev API: walking east at three Brandywine rows stops at the bank. WorldSim: 0 unreachable POIs. (3) New console command `god`. (2) The early Shire was too hard: the rank-0.5 spawn filter let Ranger of the North, Sharkey's Ruffians and Bill Ferny (difficulty 0.5) spawn from the start. The Shire now spawns Hobbit Troublemakers, Southern Ruffians and Wild Wolves, plus a rare Bill Ferny (spawnRate 0.4); Black Riders (0.8) only appear after 20 wins. `run_all.sh`: ALL PASSED. |
 | 2026-11-15 | Dev tooling merged (Opus agent): dev control API in the game, `gamectl.py` CLI/library, `tests/intro_walkthrough.py` regression test (passes; fails on the old quest 28), `tests/run_all.sh`, `game.sh smoke` on the API (~30 s). Duels: state, concede, autoplay. Coordinator re-ran `run_all.sh` on main: ALL PASSED. |
 | 2026-11-15 | Play-test fix: the intro portal couldn't be opened. The wizard's dialog *toggles* portal 78. Shandalar's prologue closes it first, but our rewritten prologue (WP3) only did that on the New Game+ branch, so "opening" it closed it (and NG+ players were locked in). The normal prologue path now closes the portal; NG+ leaves it open. The intro wizard ("Adept Black Wizard", re-themed to "Dol Guldur Adept" by the map-enemy pass) now displays as "Wandering Wizard". Verified in the GUI: prologue → wizard → portal → Shire. |
