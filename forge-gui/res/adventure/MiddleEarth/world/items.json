@@ -1,0 +1,1192 @@
+[
+ {
+  "name": "Challenge Coin",
+  "description": "A gold tournament token. Grants entry to a gold-tier event.",
+  "iconName": "ChallengeCoin"
+ },
+ {
+  "name": "Silver Challenge Coin",
+  "description": "A silver tournament token. Grants entry to a silver-tier event.",
+  "iconName": "SilverChallengeCoin"
+ },
+ {
+  "name": "Bronze Challenge Coin",
+  "description": "A bronze tournament token. Grants entry to a bronze-tier event.",
+  "iconName": "BronzeChallengeCoin"
+ },
+ {
+  "name": "Red Key",
+  "iconName": "RedKey",
+  "questItem": true,
+  "description": "A heavy iron key, warm to the touch. Dwarf-made."
+ },
+ {
+  "name": "Green Key",
+  "iconName": "GreenKey",
+  "questItem": true,
+  "description": "A small key carved from wood, smelling of pipe-weed."
+ },
+ {
+  "name": "Blue Key",
+  "iconName": "BlueKey",
+  "questItem": true,
+  "description": "A slender key of elven silver."
+ },
+ {
+  "name": "Black Key",
+  "iconName": "BlackKey",
+  "questItem": true,
+  "description": "A cold black key. It feels watched."
+ },
+ {
+  "name": "White Key",
+  "iconName": "WhiteKey",
+  "questItem": true,
+  "description": "A white key bearing the sign of the Tree."
+ },
+ {
+  "name": "Strange Key",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A key of strange make. Moon-letters run along its shaft."
+ },
+ {
+  "name": "Basement Key",
+  "iconName": "RedKey",
+  "questItem": true
+ },
+ {
+  "name": "Outer Gate Key",
+  "iconName": "RedKey",
+  "questItem": true
+ },
+ {
+  "name": "Rusty Old Key",
+  "iconName": "StrangeKey",
+  "questItem": true
+ },
+ {
+  "name": "Torturer's Key",
+  "iconName": "StrangeKey",
+  "questItem": true
+ },
+ {
+  "name": "Cultist's Key",
+  "iconName": "StrangeKey",
+  "questItem": true
+ },
+ {
+  "name": "First Shard",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A shard of a broken seal, found in the deeps."
+ },
+ {
+  "name": "Second Shard",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A shard of a broken seal, found in the deeps."
+ },
+ {
+  "name": "Third Shard",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A shard of a broken seal, found in the deeps."
+ },
+ {
+  "name": "Fourth Shard",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A shard of a broken seal, found in the deeps."
+ },
+ {
+  "name": "Fifth Shard",
+  "iconName": "StrangeKey",
+  "questItem": true,
+  "description": "A shard of a broken seal, found in the deeps."
+ },
+ {
+  "name": "Colorless rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "description": "Rune of the Hollow. Returns you to the Wizard's Hollow in the Shire.",
+  "commandOnUse": "teleport to poi Spawn",
+  "iconName": "ColorlessRune",
+  "questItem": true,
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "White rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "effect": {
+   "name": ""
+  },
+  "description": "Rune of the White Tree. Teleports you to Minas Tirith.",
+  "commandOnUse": "teleport to poi \"Plains Capital\"",
+  "iconName": "WhiteRune",
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "Black rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "effect": {
+   "name": ""
+  },
+  "description": "Rune of the Corsairs. Teleports you to Umbar.",
+  "commandOnUse": "teleport to poi \"Swamp Capital\"",
+  "iconName": "BlackRune",
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "Blue rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "effect": {
+   "name": ""
+  },
+  "description": "Rune of Imladris. Teleports you to Rivendell.",
+  "commandOnUse": "teleport to poi \"Island Capital\"",
+  "iconName": "BlueRune",
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "Red rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "effect": {
+   "name": ""
+  },
+  "description": "Rune of Durin. Teleports you to Erebor.",
+  "commandOnUse": "teleport to poi \"Mountain Capital\"",
+  "iconName": "RedRune",
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "Green rune",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability2",
+  "effect": {
+   "name": ""
+  },
+  "description": "Rune of the Shire. Teleports you to Hobbiton.",
+  "commandOnUse": "teleport to poi \"Forest Capital\"",
+  "iconName": "GreenRune",
+  "shardsNeeded": 1,
+  "cost": 100
+ },
+ {
+  "name": "White Staff",
+  "equipmentSlot": "Ability1",
+  "usableOnWorldMap": true,
+  "usableInPoi": true,
+  "effect": {
+   "name": ""
+  },
+  "description": "A healer's staff of the Houses of Healing. Restores half your life.",
+  "commandOnUse": "heal percent 0.5",
+  "iconName": "WhiteStaff",
+  "questItem": true,
+  "shardsNeeded": 5,
+  "cost": 5000
+ },
+ {
+  "name": "Black Staff",
+  "equipmentSlot": "Ability1",
+  "usableOnWorldMap": true,
+  "usableInPoi": false,
+  "effect": {
+   "name": ""
+  },
+  "description": "A staff of shadow. Hides you from the servants of the Enemy for a while.",
+  "commandOnUse": "hide 10",
+  "iconName": "BlackStaff",
+  "questItem": true,
+  "shardsNeeded": 5,
+  "cost": 5000
+ },
+ {
+  "name": "Blue Staff",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability1",
+  "effect": {
+   "name": ""
+  },
+  "description": "A staff of the Eagles. Lets you fly over the land for a while.",
+  "commandOnUse": "fly 10",
+  "iconName": "BlueStaff",
+  "questItem": true,
+  "shardsNeeded": 5,
+  "cost": 5000
+ },
+ {
+  "name": "Red Staff",
+  "usableOnWorldMap": true,
+  "equipmentSlot": "Ability1",
+  "effect": {
+   "name": ""
+  },
+  "description": "A staff of wizard's fire. Banishes the nearest enemy on the overworld.",
+  "commandOnUse": "remove enemy nearest",
+  "iconName": "RedStaff",
+  "questItem": true,
+  "shardsNeeded": 5,
+  "cost": 5000
+ },
+ {
+  "name": "Green Staff",
+  "equipmentSlot": "Ability1",
+  "usableOnWorldMap": true,
+  "usableInPoi": true,
+  "effect": {
+   "name": ""
+  },
+  "description": "A staff of Radagast. Doubles your speed for a while.",
+  "commandOnUse": "sprint 10",
+  "iconName": "GreenStaff",
+  "questItem": true,
+  "shardsNeeded": 5,
+  "cost": 5000
+ },
+ {
+  "name": "Manasight Amulet",
+  "equipmentSlot": "Neck",
+  "effect": {
+   "colorView": true
+  },
+  "description": "A pendant with a small seeing-stone. Shows the colours of foes on the map.",
+  "iconName": "RelicAmulet",
+  "cost": 4000
+ },
+ {
+  "name": "Leather Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "LeatherBoots",
+  "cost": 500,
+  "effect": {
+   "moveSpeed": 1.15
+  },
+  "description": "Sturdy boots for the long road."
+ },
+ {
+  "name": "Sandals",
+  "equipmentSlot": "Boots",
+  "iconName": "Sandals",
+  "cost": 100,
+  "effect": {
+   "moveSpeed": 1.1
+  },
+  "description": "Light footwear. Most hobbits would rather go barefoot."
+ },
+ {
+  "name": "Aladdin's Ring",
+  "equipmentSlot": "Right",
+  "cost": 1500,
+  "iconName": "AladdinsRing",
+  "effect": {
+   "startBattleWithCard": [
+    "Aladdin's Ring"
+   ]
+  },
+  "description": "A ring of lesser make, wrought by elven-smiths in their apprenticeship."
+ },
+ {
+  "name": "Axt",
+  "equipmentSlot": "Left",
+  "iconName": "SteelAxt",
+  "cost": 2500,
+  "effect": {
+   "startBattleWithCard": [
+    "Bonesplitter"
+   ]
+  },
+  "description": "A woodsman's axe, well balanced."
+ },
+ {
+  "name": "Basilisk Collar",
+  "equipmentSlot": "Neck",
+  "cost": 25000,
+  "description": "A spiked collar from the kennels of Barad-dur.",
+  "iconName": "BasiliskCollar",
+  "effect": {
+   "lifeModifier": 1,
+   "changeStartCards": -1,
+   "startBattleWithCard": [
+    "Basilisk Collar"
+   ]
+  }
+ },
+ {
+  "name": "Battle Standard",
+  "equipmentSlot": "Left",
+  "iconName": "BattleStandard",
+  "cost": 1500,
+  "effect": {
+   "lifeModifier": -1,
+   "startBattleWithCard": [
+    "r_1_1_goblin"
+   ]
+  },
+  "description": "A tattered orc banner. Goblins rally to it."
+ },
+ {
+  "name": "Blood Vial",
+  "equipmentSlot": "Right",
+  "iconName": "Blood",
+  "cost": 1000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_a_blood_draw"
+   ]
+  },
+  "description": "A vial of dark draught brewed in Dol Guldur."
+ },
+ {
+  "name": "Bronze Sword",
+  "equipmentSlot": "Left",
+  "iconName": "BronzeSword",
+  "cost": 2500,
+  "effect": {
+   "startBattleWithCard": [
+    "Bronze Sword"
+   ]
+  },
+  "description": "An old bronze blade from the barrows of the Dunedain."
+ },
+ {
+  "name": "Dagger",
+  "equipmentSlot": "Left",
+  "iconName": "Dagger",
+  "cost": 2000,
+  "effect": {
+   "startBattleWithCard": [
+    "Spare Dagger"
+   ]
+  },
+  "description": "A long knife of the Rangers."
+ },
+ {
+  "name": "Dark Amulet",
+  "equipmentSlot": "Neck",
+  "cost": 3000,
+  "iconName": "DarkAmulet",
+  "effect": {
+   "startBattleWithCard": [
+    "Necropolis of Azar"
+   ]
+  },
+  "description": "An amulet of the Necromancer. It whispers at night."
+ },
+ {
+  "name": "Dark Armor",
+  "equipmentSlot": "Body",
+  "cost": 3000,
+  "iconName": "DarkArmor",
+  "effect": {
+   "startBattleWithCard": [
+    "Skeletal Snake"
+   ],
+   "lifeModifier": -2
+  },
+  "description": "Black mail forged in the smithies of Mordor."
+ },
+ {
+  "name": "Dark Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "DarkBoots",
+  "cost": 2000,
+  "effect": {
+   "startBattleWithCard": [
+    "Clattering Augur"
+   ],
+   "lifeModifier": -2,
+   "moveSpeed": 1.3
+  },
+  "description": "Boots of a Morgul scout. Quick, but they chill the blood."
+ },
+ {
+  "name": "Dark Shield",
+  "equipmentSlot": "Right",
+  "iconName": "DarkShield",
+  "cost": 2500,
+  "effect": {
+   "startBattleWithCard": [
+    "Barrier of Bones"
+   ],
+   "lifeModifier": -3
+  },
+  "description": "A shield of bone and black iron from Minas Morgul."
+ },
+ {
+  "name": "Death Ring",
+  "equipmentSlot": "Right",
+  "iconName": "DeathRing",
+  "cost": 3500,
+  "effect": {
+   "startBattleWithCardInCommandZone": [
+    "Death Ring"
+   ]
+  },
+  "description": "A ring taken from a barrow-wight's hand."
+ },
+ {
+  "name": "Disrupting Scepter",
+  "equipmentSlot": "Left",
+  "iconName": "DisruptingScepter",
+  "cost": 2500,
+  "effect": {
+   "startBattleWithCard": [
+    "Disrupting Scepter"
+   ]
+  },
+  "description": "A sceptre once borne by a steward of Arnor."
+ },
+ {
+  "name": "Dungeon Map",
+  "equipmentSlot": "Right",
+  "iconName": "DungeonMap",
+  "cost": 12000,
+  "effect": {
+   "startBattleWithCard": [
+    "Dungeon Map"
+   ]
+  },
+  "description": "A map of old tunnels and secret doors."
+ },
+ {
+  "name": "Evil Ankh",
+  "equipmentSlot": "Right",
+  "description": "A cursed charm of the Witch-king's realm.",
+  "cost": 25000,
+  "iconName": "EvilAnkh",
+  "effect": {
+   "lifeModifier": 1,
+   "changeStartCards": -1,
+   "startBattleWithCard": [
+    "Ankh of Mishra"
+   ]
+  }
+ },
+ {
+  "name": "Gold Armor",
+  "equipmentSlot": "Body",
+  "iconName": "GoldArmor",
+  "cost": 15000,
+  "effect": {
+   "lifeModifier": 4
+  },
+  "description": "Gilded armour of the Tower Guard."
+ },
+ {
+  "name": "Gold Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "GoldBoots",
+  "cost": 10000,
+  "effect": {
+   "lifeModifier": 2,
+   "moveSpeed": 1.3
+  },
+  "description": "Gilded greaves of the Citadel."
+ },
+ {
+  "name": "Gold Shield",
+  "equipmentSlot": "Right",
+  "iconName": "GoldShield",
+  "cost": 13000,
+  "effect": {
+   "lifeModifier": 3
+  },
+  "description": "A shield bearing the White Tree in gold."
+ },
+ {
+  "name": "Jandor's Ring",
+  "equipmentSlot": "Right",
+  "iconName": "JandorsRing",
+  "cost": 2500,
+  "effect": {
+   "startBattleWithCard": [
+    "Jandor's Ring"
+   ]
+  },
+  "description": "A dwarven ring of carved stone."
+ },
+ {
+  "name": "Lightbringers Boots",
+  "equipmentSlot": "Boots",
+  "cost": 8000,
+  "effect": {
+   "opponent": {
+    "lifeModifier": 5
+   },
+   "startBattleWithCard": [
+    "Ajani's Mantra"
+   ]
+  },
+  "description": "Boots of a herald of the West.",
+  "iconName": "LightBoots"
+ },
+ {
+  "name": "Mad Staff",
+  "equipmentSlot": "Left",
+  "iconName": "MadStaff",
+  "cost": 4000,
+  "effect": {
+   "startBattleWithCard": [
+    "Power Struggle"
+   ]
+  },
+  "description": "A twisted staff of a fallen wizard."
+ },
+ {
+  "name": "Ring of Immortals",
+  "equipmentSlot": "Right",
+  "iconName": "RingofImmortals",
+  "cost": 4000,
+  "effect": {
+   "startBattleWithCard": [
+    "Ring of Immortals"
+   ]
+  },
+  "description": "A ring of the Nine Rings' lesser kin. Do not wear it long."
+ },
+ {
+  "name": "Staff of the Demoncaller",
+  "equipmentSlot": "Left",
+  "description": "A staff that calls up fire and shadow from the deep.",
+  "cost": 25000,
+  "iconName": "DemonCallerStaff",
+  "effect": {
+   "lifeModifier": 3,
+   "startBattleWithCardInCommandZone": [
+    "Staff of the Demoncaller Effect"
+   ]
+  }
+ },
+ {
+  "name": "Steel Shield",
+  "equipmentSlot": "Right",
+  "iconName": "SteelShield",
+  "cost": 6500,
+  "effect": {
+   "startBattleWithCard": [
+    "w_0_3_wall_defender"
+   ]
+  },
+  "description": "A heavy round shield of the Rohirrim."
+ },
+ {
+  "name": "Treasure",
+  "equipmentSlot": "Right",
+  "iconName": "Treasure",
+  "cost": 5000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_a_treasure_sac"
+   ]
+  },
+  "description": "A handful of dragon-gold."
+ },
+ {
+  "name": "Steel Armor",
+  "equipmentSlot": "Body",
+  "cost": 5000,
+  "iconName": "SteelArmor",
+  "effect": {
+   "lifeModifier": 3
+  },
+  "description": "Good steel mail from Dale."
+ },
+ {
+  "name": "Iron Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "IronBoots",
+  "cost": 2000,
+  "effect": {
+   "moveSpeed": 1.2
+  }
+ },
+ {
+  "name": "Iron Shield",
+  "equipmentSlot": "Right",
+  "iconName": "IronShield",
+  "cost": 6500,
+  "effect": {
+   "lifeModifier": 2
+  }
+ },
+ {
+  "name": "Iron Armor",
+  "equipmentSlot": "Body",
+  "cost": 3000,
+  "iconName": "IronArmor",
+  "effect": {
+   "lifeModifier": 2
+  }
+ },
+ {
+  "name": "Steel Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "SteelBoots",
+  "cost": 4500,
+  "effect": {
+   "lifeModifier": 1,
+   "moveSpeed": 1.2
+  }
+ },
+ {
+  "name": "Steel Sword",
+  "equipmentSlot": "Left",
+  "iconName": "SteelSword",
+  "cost": 4500,
+  "effect": {
+   "startBattleWithCard": [
+    "Greatsword"
+   ]
+  }
+ },
+ {
+  "name": "Life Amulet",
+  "equipmentSlot": "Neck",
+  "iconName": "LifeAmulet",
+  "cost": 4000,
+  "effect": {
+   "lifeModifier": 2
+  },
+  "description": "A pendant blessed by the healers of Gondor."
+ },
+ {
+  "name": "Kite Shield",
+  "equipmentSlot": "Right",
+  "iconName": "KiteShield",
+  "cost": 1500,
+  "effect": {
+   "startBattleWithCard": [
+    "Kite Shield"
+   ]
+  },
+  "description": "A kite shield of the Swan Knights of Dol Amroth."
+ },
+ {
+  "name": "Mirror Shield",
+  "equipmentSlot": "Right",
+  "cost": 2500,
+  "iconName": "MirrorShield",
+  "effect": {
+   "startBattleWithCard": [
+    "Mirror Shield"
+   ]
+  },
+  "description": "A polished elven shield."
+ },
+ {
+  "name": "Heavy Arbalest",
+  "equipmentSlot": "Left",
+  "iconName": "HeavyArbalest",
+  "cost": 1500,
+  "effect": {
+   "startBattleWithCard": [
+    "Heavy Arbalest"
+   ]
+  },
+  "description": "A dwarven crossbow from the Iron Hills."
+ },
+ {
+  "name": "Wood Bow",
+  "equipmentSlot": "Left",
+  "iconName": "WoodBow",
+  "cost": 1000,
+  "effect": {
+   "startBattleWithCard": [
+    "Fyndhorn Bow"
+   ]
+  },
+  "description": "A simple bow of yew."
+ },
+ {
+  "name": "Heart-Piercer",
+  "equipmentSlot": "Left",
+  "iconName": "CompositeBow",
+  "cost": 2000,
+  "effect": {
+   "startBattleWithCard": [
+    "Heart-Piercer Bow"
+   ]
+  },
+  "description": "A long bow of the Woodmen."
+ },
+ {
+  "name": "Unerring Sling",
+  "equipmentSlot": "Left",
+  "iconName": "UnerringSling",
+  "cost": 4000,
+  "effect": {
+   "startBattleWithCard": [
+    "Unerring Sling"
+   ]
+  },
+  "description": "A hobbit's sling. Hobbits are deadly with stones."
+ },
+ {
+  "name": "Spell Book",
+  "iconName": "SpellBook",
+  "equipmentSlot": "Left",
+  "cost": 8000,
+  "effect": {
+   "changeStartCards": 1
+  },
+  "description": "A book of lore from the archives of Minas Tirith."
+ },
+ {
+  "name": "Traveler's Amulet",
+  "equipmentSlot": "Neck",
+  "iconName": "TravelersAmulet",
+  "cost": 5000,
+  "effect": {
+   "startBattleWithCard": [
+    "Traveler's Amulet"
+   ]
+  },
+  "description": "A charm of the Grey Pilgrim's making."
+ },
+ {
+  "name": "Mithril Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "MithrilBoots",
+  "cost": 10000,
+  "effect": {
+   "lifeModifier": 2,
+   "moveSpeed": 1.3
+  },
+  "description": "Light boots with mithril-ringed soles."
+ },
+ {
+  "name": "Cursed Ring",
+  "equipmentSlot": "Right",
+  "iconName": "CursedRing",
+  "cost": 4000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_0_1_a_goblin_construct_noblock_ping",
+    "c_0_1_a_goblin_construct_noblock_ping",
+    "c_0_1_a_goblin_construct_noblock_ping"
+   ]
+  },
+  "description": "A ring with a cruel goblin-curse on it."
+ },
+ {
+  "name": "Snack",
+  "equipmentSlot": "Right",
+  "iconName": "Cheese",
+  "cost": 1000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_a_food_sac"
+   ]
+  },
+  "description": "A hobbit-sized packed lunch."
+ },
+ {
+  "name": "Charm",
+  "equipmentSlot": "Right",
+  "iconName": "Clue",
+  "cost": 3000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_a_clue_draw"
+   ]
+  },
+  "description": "A lucky token from the Green Dragon inn."
+ },
+ {
+  "name": "Change",
+  "equipmentSlot": "Right",
+  "iconName": "GoldStack",
+  "cost": 5000,
+  "effect": {
+   "startBattleWithCard": [
+    "c_a_gold_sac"
+   ]
+  },
+  "description": "A purse of silver pennies."
+ },
+ {
+  "name": "Fortune Coin",
+  "equipmentSlot": "Left",
+  "effect": {
+   "name": "",
+   "goldModifier": 0.85,
+   "cardRewardBonus": 1
+  },
+  "description": "A lucky coin of the Master of Lake-town.",
+  "iconName": "FortuneCoin",
+  "cost": 10000
+ },
+ {
+  "name": "Robes of Omniscience",
+  "equipmentSlot": "Body",
+  "iconName": "RobesOfOmniscience",
+  "cost": 10000,
+  "effect": {
+   "lifeModifier": -6,
+   "changeStartCards": 2
+  },
+  "description": "Robes of an Istar. Much is seen, little is borne."
+ },
+ {
+  "name": "Sting",
+  "equipmentSlot": "Left",
+  "iconName": "Dagger",
+  "cost": 4000,
+  "unique": true,
+  "description": "Bilbo's elven blade. It glows blue when orcs are near.",
+  "effect": {
+   "startBattleWithCard": [
+    "Sting, the Glinting Dagger"
+   ]
+  }
+ },
+ {
+  "name": "Mithril Coat",
+  "equipmentSlot": "Body",
+  "iconName": "MithrilArmor",
+  "cost": 15000,
+  "unique": true,
+  "description": "Dwarf-mail, light as a feather and hard as dragon-scales.",
+  "effect": {
+   "lifeModifier": 5
+  }
+ },
+ {
+  "name": "Elven Cloak",
+  "equipmentSlot": "Body",
+  "iconName": "Conjurer's Mantle",
+  "cost": 4000,
+  "unique": true,
+  "description": "A grey cloak of Lorien. The wearer is hard to see in wood or on stone.",
+  "effect": {
+   "lifeModifier": 2,
+   "moveSpeed": 1.1
+  }
+ },
+ {
+  "name": "Lembas",
+  "equipmentSlot": "Right",
+  "iconName": "Clue",
+  "cost": 2500,
+  "unique": false,
+  "description": "Elvish waybread. One bite keeps a traveller on his feet all day.",
+  "effect": {
+   "lifeModifier": 1,
+   "startBattleWithCard": [
+    "Lembas"
+   ]
+  }
+ },
+ {
+  "name": "Phial of Galadriel",
+  "equipmentSlot": "Neck",
+  "iconName": "TravelersAmulet",
+  "cost": 8000,
+  "unique": true,
+  "description": "The light of Earendil's star. A light in dark places.",
+  "effect": {
+   "startBattleWithCard": [
+    "Phial of Galadriel"
+   ]
+  }
+ },
+ {
+  "name": "Anduril",
+  "equipmentSlot": "Left",
+  "iconName": "FlameSword",
+  "cost": 14000,
+  "unique": true,
+  "description": "Narsil reforged, the Flame of the West. The dead answer to its bearer.",
+  "effect": {
+   "lifeModifier": 1,
+   "startBattleWithCard": [
+    "Andúril, Flame of the West"
+   ]
+  }
+ },
+ {
+  "name": "Horn of Gondor",
+  "equipmentSlot": "Right",
+  "iconName": "PipersCharm",
+  "cost": 7000,
+  "unique": true,
+  "description": "The great horn of Boromir. Its call brings aid from far away.",
+  "effect": {
+   "startBattleWithCard": [
+    "Horn of Gondor"
+   ]
+  }
+ },
+ {
+  "name": "Dwarven Axe",
+  "equipmentSlot": "Left",
+  "iconName": "GarrukAxe",
+  "cost": 3500,
+  "unique": false,
+  "description": "A broad-bladed axe of Erebor. Baruk Khazad!",
+  "effect": {
+   "startBattleWithCard": [
+    "Gimli's Axe"
+   ]
+  }
+ },
+ {
+  "name": "Ent-draught",
+  "equipmentSlot": "Right",
+  "iconName": "Status",
+  "cost": 5000,
+  "unique": false,
+  "description": "A draught from Treebeard's stone jars. You feel taller and stronger.",
+  "effect": {
+   "lifeModifier": 3
+  }
+ },
+ {
+  "name": "Palantir",
+  "equipmentSlot": "Right",
+  "iconName": "ChickenEgg",
+  "cost": 10000,
+  "unique": true,
+  "description": "A seeing-stone of Numenor. You see far, but the Eye looks back.",
+  "effect": {
+   "colorView": true,
+   "changeStartCards": 1,
+   "lifeModifier": -2
+  }
+ },
+ {
+  "name": "The One Ring",
+  "equipmentSlot": "Neck",
+  "iconName": "RingofRenewal",
+  "cost": 30000,
+  "unique": true,
+  "description": "Cursed. Its burden grows with every use, and the Nine hunt its bearer.",
+  "effect": {
+   "lifeModifier": -3,
+   "startBattleWithCard": [
+    "The One Ring"
+   ],
+   "opponent": {
+    "startBattleWithCard": [
+     "Nazgûl"
+    ]
+   }
+  }
+ },
+ {
+  "name": "Glamdring",
+  "equipmentSlot": "Left",
+  "iconName": "SteelSword",
+  "cost": 9000,
+  "unique": true,
+  "description": "The Foe-hammer of Gondolin, Gandalf's sword.",
+  "effect": {
+   "startBattleWithCard": [
+    "Glamdring, Foe-hammer"
+   ]
+  }
+ },
+ {
+  "name": "Orcrist",
+  "equipmentSlot": "Left",
+  "iconName": "BronzeSword",
+  "cost": 9000,
+  "unique": true,
+  "description": "The Goblin-cleaver, Thorin's sword from the trolls' hoard.",
+  "effect": {
+   "startBattleWithCard": [
+    "Orcrist, Goblin-cleaver"
+   ]
+  }
+ },
+ {
+  "name": "Barrow-blade",
+  "equipmentSlot": "Left",
+  "iconName": "Dagger",
+  "cost": 2000,
+  "unique": false,
+  "description": "A blade of Westernesse, wound with spells against the Witch-king.",
+  "effect": {
+   "startBattleWithCard": [
+    "Barrow-Blade"
+   ]
+  }
+ },
+ {
+  "name": "Bow of the Galadhrim",
+  "equipmentSlot": "Left",
+  "iconName": "CompositeBow",
+  "cost": 3000,
+  "unique": true,
+  "description": "A long bow of the elves of Lorien, strung with elf-hair.",
+  "effect": {
+   "startBattleWithCard": [
+    "Galadhrim Bow"
+   ]
+  }
+ },
+ {
+  "name": "The Arkenstone",
+  "equipmentSlot": "Right",
+  "iconName": "Treasure",
+  "cost": 25000,
+  "unique": true,
+  "description": "The Heart of the Mountain. Its holder grows sick with greed.",
+  "effect": {
+   "lifeModifier": -2,
+   "startBattleWithCard": [
+    "The Arkenstone"
+   ]
+  }
+ },
+ {
+  "name": "Thror's Map",
+  "equipmentSlot": "Right",
+  "iconName": "DungeonMap",
+  "cost": 3000,
+  "unique": true,
+  "description": "Thror's map of the Lonely Mountain, with moon-letters on it.",
+  "effect": {
+   "startBattleWithCard": [
+    "Thrór's Map"
+   ]
+  }
+ },
+ {
+  "name": "The Black Arrow",
+  "equipmentSlot": "Left",
+  "iconName": "HeavyArbalest",
+  "cost": 5000,
+  "unique": true,
+  "description": "An heirloom arrow of the line of Girion. It has never failed Bard.",
+  "effect": {
+   "startBattleWithCard": [
+    "The Black Arrow"
+   ]
+  }
+ },
+ {
+  "name": "Elfstone",
+  "equipmentSlot": "Neck",
+  "iconName": "MoxEmerald",
+  "cost": 6000,
+  "unique": true,
+  "description": "A green stone set in a silver eagle. Hope of the Dunedain.",
+  "effect": {
+   "lifeModifier": 2,
+   "colorView": true
+  }
+ },
+ {
+  "name": "Evenstar",
+  "equipmentSlot": "Neck",
+  "iconName": "MoxPearl",
+  "cost": 8000,
+  "unique": true,
+  "description": "Arwen's jewel, a token of a choice made out of love.",
+  "effect": {
+   "lifeModifier": 4
+  }
+ },
+ {
+  "name": "Longbottom Leaf",
+  "equipmentSlot": "Right",
+  "iconName": "GreenLeaf",
+  "cost": 1500,
+  "unique": false,
+  "description": "The finest pipe-weed in the Southfarthing. Starts the battle with a Food.",
+  "effect": {
+   "lifeModifier": 1,
+   "startBattleWithCard": [
+    "c_a_food_sac"
+   ]
+  }
+ },
+ {
+  "name": "Frying Pan",
+  "equipmentSlot": "Left",
+  "iconName": "FarmersTools",
+  "cost": 2500,
+  "unique": true,
+  "description": "Sam's frying pan. Surprisingly good against trolls and orcs alike.",
+  "effect": {
+   "startBattleWithCard": [
+    "Field-Tested Frying Pan"
+   ]
+  }
+ },
+ {
+  "name": "Hobbit Feet",
+  "equipmentSlot": "Boots",
+  "iconName": "Sandals",
+  "cost": 800,
+  "unique": true,
+  "description": "Leathery soles and thick curly hair. No boots needed.",
+  "effect": {
+   "moveSpeed": 1.15,
+   "lifeModifier": 1
+  }
+ },
+ {
+  "name": "Ranger Boots",
+  "equipmentSlot": "Boots",
+  "iconName": "MetallicBoots",
+  "cost": 6000,
+  "unique": true,
+  "description": "Worn boots of a Ranger of the North. They know every hidden path.",
+  "effect": {
+   "moveSpeed": 1.25,
+   "startBattleWithCard": [
+    "Trailblazer's Boots"
+   ]
+  }
+ },
+ {
+  "name": "Ranger Blade",
+  "equipmentSlot": "Left",
+  "iconName": "BronzeSword",
+  "cost": 2500,
+  "unique": false,
+  "description": "A plain sword of the Dunedain.",
+  "effect": {
+   "startBattleWithCard": [
+    "Dúnedain Blade"
+   ]
+  }
+ },
+ {
+  "name": "Rohirrim Shield",
+  "equipmentSlot": "Right",
+  "iconName": "KiteShield",
+  "cost": 3500,
+  "unique": false,
+  "description": "A green shield with the white horse of the Mark.",
+  "effect": {
+   "lifeModifier": 2
+  }
+ },
+ {
+  "name": "Wizard Staff",
+  "equipmentSlot": "Left",
+  "iconName": "WildMagusStaff",
+  "cost": 5000,
+  "unique": true,
+  "description": "A gnarled staff in the Istari's manner.",
+  "effect": {
+   "startBattleWithCard": [
+    "Wizard's Staff"
+   ]
+  }
+ }
+]
