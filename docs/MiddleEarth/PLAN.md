@@ -29,7 +29,7 @@
 | Area | State |
 | --- | --- |
 | Card pool | ✅ LTR, LTC, HOB, HOC, PLTC and the custom reprint set MEAR (233 cards, 66 with Tolkien flavor names, incl. the 10 original duals; all tokens have art). |
-| World layout | ✅ 900×900 world with 43 biomes placed against the LotR map. Start in the Shire. Waste is down from about 40% to about 3%. No rivers or inland seas (needs Phase 2). |
+| World layout | ✅ Fixed layout from a biome map (Phase 2a): 43 regions plus ocean, rivers, lakes/seas and fords, start in the Shire. |
 | Towns / POIs | ✅ 90 POIs (about 97 placed per world). Named towns and dungeons sit at their map positions. Middle-earth town name lists per region. |
 | Intro | ✅ "Welcome to Middle-earth" quest and tutorial. The wizard dialog is overridden through `MiddleEarth/languages/adventure-en-US.properties` (en-US only; the speaker title still reads "Adept Black Wizard"). |
 | Starter decks | ✅ All in-pool. Constructed: 15 ME faction decks (Easy mono, Normal allied, Hard enemy pairs). Standard: official LTR Jumpstart packs. Pile: pool-filtered templates. All 15 constructed decks measure 42–59% against the LTR Starter Kits (round 2 tuning). |
@@ -84,7 +84,20 @@ Use `Innistrad/` as the template. Phase 1 is split into work packages (WPs). Eac
 **Wave 3 (integration):** ✅ biome enemy lists done by the coordinator (see change log). ✅ Generic enemies in common town/dungeon maps re-themed: 170 get ME decks, 143 get ME display names ([notes](notes/wave3-map-enemies.md), `tools/middleearth/retheme-map-enemies.py`). 8 missing capital-arena challengers added.
 
 Original plan: fill the biome `enemies` lists with ME enemies per region (all 43 biomes; the 15 biomes added in WP3 hold verbatim copies of their parent region's Shandalar list), run a full smoke run, and play-test.
-### Phase 2: Fixed Tiled world (issue #2), can run in parallel
+### Phase 2: Fixed world layout (issue #2)
+
+**Phase 2a ✅ (2026-11-14):** the fixed layout comes from a biome map image, not tile-by-tile Tiled maps. `tools/middleearth/biomemap/make_biome_map.py` renders `MiddleEarth/world/biome_map.png` (900×900) from named region polygons, rivers (Anduin, Brandywine, Hoarwell, Loudwater, Greyflood, Isen, Entwash, River Running, Forest River, Lhûn), lakes and seas (Evendim, Long Lake, Nen Hithoel, Rhûn, Nurnen), the coasts, and 14 fords plus the High Pass. The script also rewrites the biome colours, bounding boxes, the 52 named POI anchors and the start position. Edit the polygons, rerun the script, then run WorldSim and smoke. See [notes](notes/phase2a-biome-map.md).
+
+![world map phase 2a](img/worldmap-phase2a.png)
+
+**Phase 2 open items:**
+- Should hand-painting be supported (an overlay PNG)? Today the script overwrites the map.
+- Distinct tilesets per region: Shire, Eriador, Rohan and Gondor all use the Green tileset, so their borders don't show.
+- Review the proportions (Lindon width, Rhûn, the Harad coast).
+- Optional minor rivers.
+- Bridge tiles: hidden POI paths can cross water without a visible bridge.
+
+Original plan (superseded by 2a):
 
 The approach from issue #2: load the Tiled world into the existing `World` data structures instead of abstracting `World`/`WorldStage`.
 
@@ -107,6 +120,8 @@ Keep this list complete, because it is what makes upstream merges predictable.
 | --- | --- | --- |
 | Per-card art source for reprint editions: an edition entry may carry `${"artSet": "M10", "artNum": "185"}`. Download URLs (cardforge, Scryfall, art crop, sleeve) are built from that printing, while the image is cached under the reprint's own key. | `forge-core/.../card/CardEdition.java` (`EditionEntry.hasArtSource/getArtSourceSet/getArtSourceNumber`), `forge-gui/.../util/ImageFetcher.java` (`getArtSourcePrinting`) | Lets MEAR (D5) show a chosen existing printing's art without new artwork (WP2). |
 | Token art sources: `[tokens]` lines in an edition file accept `${"artSet", "artNum"}` (the token's collector number in the source set). The Scryfall token URL is built from that set's token; the image is cached under the original key. | `forge-core/.../card/CardEdition.java` (`parseTokenParams`, token `EditionEntry` params), `forge-gui/.../util/ImageFetcher.java` (`getTokenArtSource`) | Lets MEAR tokens show existing token art (WP2b, D10). |
+| Fixed biome layout: optional `WorldData.biomeMap` (image). `World.loadFixedBiomeMap()` assigns each tile's biome by exact pixel colour = biome `color` (row 0 = north; unmatched colours → first biome), with lower-index neighbours within 2 tiles for border transitions. One branch in `generateNew`; random generation is unchanged when unset. Limit: 64 biomes (bit mask). | `forge-gui-mobile/.../data/WorldData.java`, `.../world/World.java` | Phase 2a: geographically faithful Middle-earth with rivers and seas. |
+| `BiomeStructure.initialize` fixes: the height loop was bounded by width (infinite loop for non-square biomes); `chunkSize()` never leaves chunks smaller than N (1-px chunks crashed `OverlappingModel` in a worker thread and `generateNew` waited forever); a failed structure leaves its chunk empty instead of indexing out of bounds. | `forge-gui-mobile/.../world/BiomeStructure.java` | Engine bug 1 from WP3, plus bugs found in Phase 2a. |
 | `exportMap [file]` console command | `forge-gui-mobile/src/forge/adventure/stage/ConsoleCommandInterpreter.java` | Writes the whole generated world to a PNG for layout work and tests. |
 
 ## Known issues / backlog
@@ -119,8 +134,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 - The wizard intro and the rune display names are en-US only (`MiddleEarth/languages/adventure-en-US.properties`).
 - The LTR Starter Kit decklists come from github.com/taw/magic-preconstructed-decks (citing the Wizards article of 2023-06-23). Do one check against the official page with web access.
 - Generated (`.json` template) decks break down under the restricted pool (`enemy:Troll` → 32× The Lonely Mountain). The current `*_e.json` starters pull in non-ME jumpstart cards, and `check.sh` skips generated decks.
-- Engine bugs found in WP3. They are not fixed; workarounds are in the data:
-  1. `BiomeStructure.initialize` uses the width as the bound of the height loop, so a biome with structures that is wider than tall loops forever. Workaround: square biomes.
+- Engine bugs found in WP3 (bug 1 was fixed in Phase 2a):
   2. `World.generateNew` road loops stop one short, so the last non-town POI gets no cleared path. Workaround: `dead_marshes` (open swamp) is the last biome.
   3. A POI with `radiusFactor` 0 always lands on the biome centre, and if that spot is taken the whole placement reruns.
   4. A POI that can't be placed in its biome after 500 tries is dropped silently.
@@ -135,6 +149,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-14 | Phase 2a merged (Opus agent): fixed biome-map world with rivers and seas, `BiomeStructure` fixes (engine), WorldSim and PlaneCheck support for biomeMap. check: 0 errors, 2 warnings. WorldSim: 0 reruns/dropped/unreachable. Gen time ~2.9 s (unchanged). Main jar rebuilt. |
 | 2026-11-14 | **Phase 1 complete.** Starter tuning round 2 (Sonnet agent): all 8 outliers are in the on-par band. All 68 new enemies measured (2,176 games). 17 outliers re-tuned through life/difficulty/spawnRate and re-measured. Report: `notes/wp5-wp6-enemies.md`. |
 | 2026-11-14 | Wave 3 map enemies (Sonnet agent): 170 generic map enemies → ME decks, 143 ME display names. Coordinator added 8 arena challengers missing upstream (Erebor, Umbar and Rivendell capitals). check: 0 errors, **2 warnings** (whitespace typos in upstream maps; the game falls back to a biome enemy). |
 | 2026-11-14 | WP4 merged (agent stopped mid-tuning; the coordinator checkpointed, re-measured and filled in the report). All 60 starter references point to `decks/starter/ME/`. check: 0 errors, 242 warnings. |
