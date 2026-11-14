@@ -97,7 +97,7 @@ EOF
     "$0" skip-dialog 12
     "$0" console leave; sleep 4
     "$0" shot "$OUT_DIR/smoke-overworld.png" >/dev/null
-    "$0" console "exportMap $OUT_DIR/smoke-worldmap.png"; sleep 2
+    "$0" console "exportMap $OUT_DIR/smoke-worldmap.png" "exportWorldTmx $OUT_DIR/smoke-world.tmx"; sleep 3
     echo "screenshots: $OUT_DIR/smoke-overworld.png $OUT_DIR/smoke-worldmap.png"
     echo "POI placement retries: $(grep -c 'Can not place POI' "$LOG" || true)"
     "$0" errors ;;
