@@ -575,6 +575,9 @@ public class MapDialog {
                     if (condition.not) return false;
                 }
             }
+            if (condition.flag != null) { //Fork (Middle-earth): unset flags read as 0, see FlagCondition.
+                if (condition.flag.eval(stage) == condition.not) return false;
+            }
             if (condition.checkMapFlag != null && !condition.checkMapFlag.isEmpty()) {
                 if (!stage.checkQuestFlag(condition.checkMapFlag)) {
                     if (!condition.not) return false;

@@ -1499,6 +1499,7 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         } else {
             characterFlags.put(key, (byte) 1);
         }
+        AdventureQuestController.instance().updateQuestsCharacterFlag(key, getCharacterFlag(key)); //Fork: advance wakes flag stages like set
     }
 
     /** Read-only view for the dev API (forge.adventure.devapi). */
@@ -1534,6 +1535,7 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         } else {
             questFlags.put(key, (byte) 1);
         }
+        AdventureQuestController.instance().updateQuestsQuestFlag(key, getQuestFlag(key)); //Fork: advance wakes flag stages like set
     }
 
     public boolean checkQuestFlag(String key) {

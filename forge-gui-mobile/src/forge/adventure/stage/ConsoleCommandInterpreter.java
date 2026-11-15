@@ -486,6 +486,31 @@ public class ConsoleCommandInterpreter {
             MapStage.getInstance().resetQuestFlags();
             return "All local quest flags have been reset.";
         });
+        // Fork (Middle-earth): read and write quest/character/map flags, and evaluate a FlagCondition (play-testing, tests).
+        registerCommand(new String[]{"flag", "set"}, s -> {
+            if (s.length < 3) return "Usage: flag set <quest|character|map> <key> <value>";
+            int v;
+            try { v = Integer.parseInt(s[2]); } catch (Exception e) { return "Can not convert " + s[2] + " to number"; }
+            return setFlag(s[0], s[1], v, false);
+        });
+        registerCommand(new String[]{"flag", "advance"}, s -> {
+            if (s.length < 2) return "Usage: flag advance <quest|character|map> <key>";
+            return setFlag(s[0], s[1], 0, true);
+        });
+        registerCommand(new String[]{"flag", "get"}, s -> {
+            if (s.length < 2) return "Usage: flag get <quest|character|map> <key>";
+            String scope = FlagCondition.normalizeScope(s[0]);
+            if (scope == null) return "Unknown scope " + s[0];
+            return scope + ":" + s[1] + " = " + FlagCondition.flagValue(scope, s[1], null);
+        });
+        registerCommand(new String[]{"flag", "check"}, s -> {
+            try {
+                FlagCondition[] c = FlagCondition.parse(String.join(" ", s));
+                return String.valueOf(FlagCondition.allHold(c));
+            } catch (IllegalArgumentException e) {
+                return e.getMessage();
+            }
+        });
         registerCommand(new String[]{"dumpEnemyDeckColors"}, s -> {
             for (EnemyData E : new Array.ArrayIterator<>(WorldData.getAllEnemies())) {
                 Deck D = E.generateDeck(Current.player().isFantasyMode(), Current.player().isUsingCustomDeck() || Current.player().isHardorInsaneDifficulty());
@@ -677,5 +702,28 @@ public class ConsoleCommandInterpreter {
             
             return "Exit the map to reset it.";
         });
+    }
+
+    /** Fork (Middle-earth): console flag write; fires the same quest updates as the dialog actions. */
+    private static String setFlag(String scopeName, String key, int value, boolean advance) {
+        String scope = FlagCondition.normalizeScope(scopeName);
+        if (scope == null) return "Unknown scope " + scopeName + " (quest, character, map)";
+        switch (scope) {
+            case "map":
+                if (!MapStage.getInstance().isInMap()) return "Map flags only inside a map.";
+                if (advance) MapStage.getInstance().advanceQuestFlag(key);
+                else MapStage.getInstance().setQuestFlag(key, value);
+                break;
+            case "character":
+                if (advance) Current.player().advanceCharacterFlag(key);
+                else Current.player().setCharacterFlag(key, value);
+                break;
+            default:
+                if (advance) Current.player().advanceQuestFlag(key);
+                else Current.player().setQuestFlag(key, value);
+        }
+        if (MapStage.getInstance().isInMap())
+            forge.adventure.util.AdventureQuestController.instance().showQuestDialogs(MapStage.getInstance());
+        return scope + ":" + key + " = " + FlagCondition.flagValue(scope, key, null);
     }
 }
