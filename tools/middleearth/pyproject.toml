@@ -1,0 +1,17 @@
+# Python environment for the Middle-earth dev tools (uv).
+#   uv sync --project tools/middleearth          # create .venv with the dependencies
+#   uv run --project tools/middleearth python tools/middleearth/worldmap/make_reference_crops.py
+# Scripts that need third-party packages also carry PEP 723 inline metadata, so plain
+#   uv run tools/middleearth/worldmap/make_reference_crops.py
+# works without any setup. All other tools (gamectl.py, deckstrength.py, mear_similarity.py, tests/) are
+# standard library only.
+[project]
+name = "middleearth-tools"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "pillow>=10",
+]
+
+[tool.uv]
+package = false

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pillow>=10"]
+# ///
 """Render the Middle-earth biome map (one pixel per world tile) from region polygons, rivers and lakes.
 
 RETIRED (Phase 2b): the source of truth is now the Tiled world forge-gui/res/adventure/MiddleEarth/world/middleearth/middleearth.world

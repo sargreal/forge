@@ -47,6 +47,16 @@ Notes for the cloud sandbox:
 - The script forces `-Dmaven.resolver.transport=wagon`. Maven's default HTTP transport drops jar downloads behind the sandbox proxy.
 - After any change under `forge-gui-mobile/src` you must rebuild. Data-only changes under `forge-gui/res` don't need a rebuild, because the game reads `../forge-gui/res` at runtime.
 
+### Python tools (uv)
+
+Most Python tools (`gamectl.py`, `deckstrength.py`, `mear_similarity.py`, `tests/`) use only the standard library. The two map scripts need Pillow and declare it inline (PEP 723), so with [uv](https://docs.astral.sh/uv/) no setup is needed:
+
+```bash
+uv run tools/middleearth/worldmap/make_reference_crops.py   # fetches Pillow into a cached env automatically
+```
+
+For a persistent environment (IDE, REPL): `uv sync --project tools/middleearth` creates `tools/middleearth/.venv` (gitignored), then `uv run --project tools/middleearth python <script>`.
+
 ## 3. Testing
 
 There are two layers of tests, and both must pass (or not get worse) before you commit.
@@ -245,7 +255,7 @@ Layers of a chunk, bottom to top: `Biomes` (tiles), `Roads` (tiles), `Clutter` (
 5. **Seed:** the map property `seed` is on `chunk_0_0.tmx` (Map → Map Properties) and nowhere else.
 6. **Roads** (Phase 2d-1): tile layer `Roads`, painted with the single tile of the `roads` tileset (the game's road texture). Every non-empty cell is a road tile: the game draws the road there, and the tile gets no terrain variant, decoration or collision (it is walkable, also across water). Erase cells to remove a road. Roads should end at towns; nothing checks that they connect. The hidden POI-to-town paths (invisible, they only clear mountain/forest collision) are still generated from the POI positions.
 7. **Clutter** (Phase 2d-1): object layer `Clutter`, one tile object per tree, rock, reed, shell… (about 50,000 in the world, 1,500–2,300 per land chunk). Pick a tile from the `clutter` tileset (Tiled shows the real sprite) and place it with **Insert Tile** (T); move, copy (Ctrl+D) or delete objects as usual. The object position is the sprite's bottom-left corner, like POIs; the tile property `sprite` (e.g. `WoodTree`, `MountainRock`) is what the game reads. A plain object with a `sprite` property works too. Clutter has no collision in the game; the generator never puts it on roads or structures, but you may. Note: the tileset has several variants per sprite (`variant` property). The game ignores the chosen tile and picks the variant from the position, so after moving an object the game may draw another variant of the same sprite; a re-export shows the variant the game uses.
-8. **Reference** (Phase 2d-1): each chunk has a hidden image layer `Reference` (opacity 0.5) with its crop of the reference map (`docs/MiddleEarth/reference/chunks/chunk_<c>_<r>.png`, 16 px per tile, so it lines up 1:1 with the tiles). Toggle its visibility in the Layers panel while painting. The game ignores it, and the reference image is not shipped with the game. The crops are cut from the overview's placement (step 9): after moving the overview's `Reference` layer (or replacing the image), rerun `python3 tools/middleearth/worldmap/make_reference_crops.py` (Pillow, ~6 s); the chunk files don't change.
+8. **Reference** (Phase 2d-1): each chunk has a hidden image layer `Reference` (opacity 0.5) with its crop of the reference map (`docs/MiddleEarth/reference/chunks/chunk_<c>_<r>.png`, 16 px per tile, so it lines up 1:1 with the tiles). Toggle its visibility in the Layers panel while painting. The game ignores it, and the reference image is not shipped with the game. The crops are cut from the overview's placement (step 9): after moving the overview's `Reference` layer (or replacing the image), rerun `uv run tools/middleearth/worldmap/make_reference_crops.py` (~6 s; see "Python tools (uv)"); the chunk files don't change.
 9. **Checking against the reference map:** open `overview.tmx` (not part of the world). One grid cell = one chunk, 1 px = 1 world tile. Layers: `Biomes` (image of the biome colours, locked), `Reference` (the image layer with `docs/MiddleEarth/reference/map-of-middle-earth.jpg`, opacity 0.6; move it with the Offset properties or the Select Layer tool, then save), `Chunks` (chunk names) and `POI` (labels). The overview is **generated and not read back**: change biomes and POIs in the chunks, then re-export (below) to refresh it. Only the `Reference` layer survives a re-export.
 10. Save (keep the layer format base64 zlib, or CSV), then run `tools/middleearth/check.sh` (0 errors; it also checks that the chunks tile the world, that objects stay inside their chunk, that Clutter objects name existing sprites and that the Roads layers have the map's size), WorldSim (`problems: 0`; it uses the Roads layers for reachability) and `game.sh smoke`; look at `.me-test/smoke-worldmap.png`.
 
