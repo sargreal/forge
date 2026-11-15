@@ -30,6 +30,8 @@ public class ItemData implements Serializable, Cloneable {
     public String commandOnUse;
     public int shardsNeeded;
     public DialogData dialogOnUse;
+    public boolean locked;               //Fork (run 2): can't be unequipped or dropped (while lockCondition holds)
+    public FlagCondition lockCondition;  //Fork (run 2): optional; locked only while it holds
 
 
     public ItemData()
@@ -51,6 +53,8 @@ public class ItemData implements Serializable, Cloneable {
         commandOnUse      = cpy.commandOnUse;
         shardsNeeded      = cpy.shardsNeeded;
         dialogOnUse       = cpy.dialogOnUse;
+        locked            = cpy.locked;
+        lockCondition     = cpy.lockCondition;
     }
 
     public Sprite sprite() {
@@ -70,7 +74,20 @@ public class ItemData implements Serializable, Cloneable {
             result += effect.getDescription();
         if(shardsNeeded != 0)
             result +=  shardsNeeded+" [+Shards]";
+        if (isLocked())
+            result += "\n[RED]Locked: it can't be unequipped or dropped.[]";
         return result;
+    }
+
+    /**
+     * Fork (run 2): true while the item can't be unequipped, replaced in its slot or dropped. Read from the current
+     * item definition (items.json) when there is one, because saves keep a snapshot of each item.
+     */
+    public boolean isLocked() {
+        ItemData def = name == null ? null : ItemListData.getItem(name);
+        boolean isLocked = def != null ? def.locked : locked;
+        FlagCondition condition = def != null ? def.lockCondition : lockCondition;
+        return isLocked && (condition == null || condition.eval());
     }
 
     public String getName() {

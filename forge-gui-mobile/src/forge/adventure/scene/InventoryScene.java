@@ -264,10 +264,8 @@ public class InventoryScene extends UIScene {
         if (itemLocation.get(selected) == null)
             return;
         ItemData data = itemLocation.get(selected).getRight();
-        if (data != null) {
-            data.isEquipped = false;
-            Current.player().removeItem(data);
-        }
+        if (data != null)
+            Current.player().dropItem(data); //fork (run 2): refused for locked items
         updateInventory();
 
     }
@@ -435,7 +433,8 @@ public class InventoryScene extends UIScene {
             ItemData data = itemLocation.get(actor).getRight();
             if (data == null) return;
 
-            deleteButton.setDisabled(data.questItem);
+            boolean locked = data.isLocked(); //fork (run 2)
+            deleteButton.setDisabled(data.questItem || locked);
 
             boolean isInPoi = MapStage.getInstance().isInMap();
             useButton.setDisabled(!(isInPoi && data.usableInPoi || !isInPoi && data.usableOnWorldMap));
@@ -455,9 +454,11 @@ public class InventoryScene extends UIScene {
                     TextraButton button = (TextraButton) equipButton;
                     Long id = Current.player().itemInSlot(data.equipmentSlot);
                     if (id != null && id.equals(data.longID) && data.isEquipped) {
-                        button.setText("Unequip");
+                        button.setText(locked ? "Locked" : "Unequip");
+                        equipButton.setDisabled(locked);
                     } else {
                         button.setText(Forge.getLocalizer().getMessage("lblEquip"));
+                        equipButton.setDisabled(Current.player().isSlotLocked(data));
                     }
                     button.layout();
                 }

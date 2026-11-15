@@ -163,6 +163,8 @@ public final class DevApi {
                 return gl(() -> duel(true), 5000);
             case "/duel/popup":
                 return gl(DevApi::duelPopupOk, 5000);
+            case "/inventory":
+                return gl(() -> inventory(a), 5000);
             default:
                 throw new ApiException("unknown endpoint " + method + " " + path);
         }
@@ -979,6 +981,42 @@ public final class DevApi {
         }
         Map<String, Object> r = ok();
         r.put("path", path);
+        return r;
+    }
+
+    // ------------------------------------------------------------------ inventory (fork, run 2)
+
+    /**
+     * {action: list|equip|unequip|drop|sell, item}: the Inventory's equip toggle and delete button (the same
+     * AdventurePlayer methods). The engine has no item selling; "sell" only reports whether the item could be parted with.
+     */
+    private static Object inventory(JsonValue a) {
+        AdventurePlayer p = AdventurePlayer.current();
+        String action = a.getString("action", "list");
+        Map<String, Object> r = ok();
+        if (!"list".equals(action)) {
+            String name = a.getString("item", "");
+            forge.adventure.data.ItemData it = null;
+            for (forge.adventure.data.ItemData i : p.getItems())
+                if (i != null && name.equalsIgnoreCase(i.name) && (it == null || i.isEquipped)) it = i;
+            if (it == null) throw new ApiException("no item " + name + " in the inventory");
+            boolean done;
+            switch (action) {
+                case "equip": done = it.isEquipped || (p.equip(it) && it.isEquipped); break;
+                case "unequip": done = !it.isEquipped || (p.equip(it) && !it.isEquipped); break;
+                case "drop": done = p.dropItem(it); break;
+                case "sell":
+                    if (it.isLocked()) { done = false; break; }
+                    throw new ApiException("the engine has no item selling (the Inventory can only drop)");
+                default: throw new ApiException("unknown action " + action + " (list, equip, unequip, drop, sell)");
+            }
+            r.put("action", action);
+            r.put("done", done);
+        }
+        List<Object> items = new ArrayList<>();
+        for (forge.adventure.data.ItemData i : p.getItems())
+            if (i != null) items.add(m("name", i.name, "slot", i.equipmentSlot, "equipped", i.isEquipped, "locked", i.isLocked(), "questItem", i.questItem));
+        r.put("items", items);
         return r;
     }
 

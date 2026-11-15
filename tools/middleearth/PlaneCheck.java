@@ -1318,6 +1318,19 @@ public class PlaneCheck {
             if (!catchAll) warn("origins: no visible origin without races/colors; unmatched characters get the upstream start (Spawn, quest 28)");
             info(cd.origins.length + " origins");
         }
+        // Fork run 2: locked items, item dialogs
+        Array<ItemData> items = json.fromJson(Array.class, ItemData.class, Config.instance().getFile(Paths.ITEMS));
+        if (items != null) for (ItemData it : items) {
+            String w = "item " + it.name;
+            checkDialogConditions(it.dialogOnUse, w + " dialogOnUse");
+            if (it.lockCondition != null) {
+                conds++;
+                flagProblems(w + " lockCondition", it.lockCondition);
+                if (!it.locked) warn(w + ": lockCondition without locked: true does nothing");
+            }
+            if (it.locked && (it.equipmentSlot == null || it.equipmentSlot.isEmpty()))
+                warn(w + ": locked but no equipmentSlot (only dropping is blocked)");
+        }
         // Fork run 2: config.json statusFlags (HUD) and flagEffects (duel effects by flag)
         if (cd.statusFlags != null) for (int i = 0; i < cd.statusFlags.length; i++) {
             ConfigData.StatusFlag f = cd.statusFlags[i];

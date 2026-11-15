@@ -223,20 +223,27 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
                 ensureDeckLoadoutsSize();
                 deckLoadouts.set(selectedDeckIndex, new HashMap<>(equippedItems));
 
-                // Clear current equipment
+                // Clear current equipment (fork, run 2: locked items stay equipped in every loadout)
+                HashMap<String, Long> lockedItems = new HashMap<>();
+                for (Map.Entry<String, Long> entry : equippedItems.entrySet()) {
+                    ItemData item = getItemFromInventory(entry.getValue());
+                    if (item != null && item.isLocked())
+                        lockedItems.put(entry.getKey(), entry.getValue());
+                }
                 for (ItemData item : inventoryItems) {
-                    if (item != null) {
+                    if (item != null && !lockedItems.containsValue(item.longID)) {
                         item.isEquipped = false;
                     }
                 }
                 equippedItems.clear();
+                equippedItems.putAll(lockedItems);
 
                 // Restore loadout for new deck (if any)
                 HashMap<String, Long> newLoadout = deckLoadouts.get(slot);
                 if (newLoadout != null) {
                     for (Map.Entry<String, Long> entry : newLoadout.entrySet()) {
                         ItemData item = getItemFromInventory(entry.getValue());
-                        if (item != null) {
+                        if (item != null && !lockedItems.containsKey(entry.getKey())) {
                             item.isEquipped = true;
                             equippedItems.put(entry.getKey(), entry.getValue());
                         }
@@ -1252,7 +1259,7 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         Array<ItemData> items = new Array<>();
         for (Long id : equippedItems.values()) {
             ItemData item = getEquippedItem(id);
-            if (item == null)
+            if (item == null || item.isLocked()) //fork (run 2): locked items never crack (cracking unequips)
                 continue;
             if (isHardorInsaneDifficulty()) {
                 items.add(item);
@@ -1269,7 +1276,7 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
     public boolean hasEquippedItem() {
         for (Long id : equippedItems.values()) {
             ItemData item = getEquippedItem(id);
-            if (item == null)
+            if (item == null || item.isLocked()) //fork (run 2)
                 continue;
             if (isHardorInsaneDifficulty()) {
                 return true;
@@ -1400,8 +1407,12 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         }
     }
 
-    public void equip(ItemData item) {
+    /** Toggles the item in its slot. Fork (run 2): refused (false) when that would take off a locked item. */
+    public boolean equip(ItemData item) {
         Long itemID = equippedItems.get(item.equipmentSlot);
+        ItemData current = getItemFromInventory(itemID);
+        if (current != null && current.isEquipped && current.isLocked())
+            return false; //unequip or replace a locked item
         if (itemID != null && itemID.equals(item.longID)) {
             item.isEquipped = false;
             equippedItems.remove(item.equipmentSlot);
@@ -1410,6 +1421,24 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
             equippedItems.put(item.equipmentSlot, item.longID);
         }
         onEquipmentChange.emit();
+        return true;
+    }
+
+    /** Fork (run 2): the item in {@code item}'s slot is locked, so equipping {@code item} is refused. */
+    public boolean isSlotLocked(ItemData item) {
+        if (item == null || item.equipmentSlot == null)
+            return false;
+        ItemData current = getItemFromInventory(equippedItems.get(item.equipmentSlot));
+        return current != null && current.isEquipped && current.isLocked();
+    }
+
+    /** Fork (run 2): drops an item from the inventory (the Inventory's delete button); refused for locked items. */
+    public boolean dropItem(ItemData item) {
+        if (item == null || item.isLocked())
+            return false;
+        item.isEquipped = false;
+        removeItem(item);
+        return true;
     }
 
     public Long itemInSlot(String key) {
@@ -1467,6 +1496,13 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         if (item.unique && hasItem(name))
             return false;
         inventoryItems.add(item);
+        //Fork (run 2): a locked item with a slot puts itself on (unless that slot holds another locked item)
+        if (item.equipmentSlot != null && !item.equipmentSlot.isEmpty() && item.isLocked() && !isSlotLocked(item)) {
+            ItemData current = getItemFromInventory(equippedItems.get(item.equipmentSlot));
+            if (current != null)
+                current.isEquipped = false;
+            equip(item);
+        }
         if (updateEvent)
             AdventureQuestController.instance().updateItemReceived(item);
         return true;
