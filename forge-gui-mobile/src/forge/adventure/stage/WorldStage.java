@@ -205,10 +205,11 @@ public class WorldStage extends GameStage implements SaveFileContent {
                     currentMob.getActionAnimationDuration(CharacterSprite.AnimationTypes.Attack, 0.5f));
             startPause(resultAnimationDuration, () -> {
                 currentMob.resetCollisionHeight();
-                boolean defeated = Current.player().defeated();
+                boolean noPenalty = AdventureQuestController.instance().handleDefeatBy(currentMob.getData()); //Fork (run 2): onDefeat
+                boolean defeated = !noPenalty && Current.player().defeated();
                 AdventureQuestController.instance().updateQuestsLose(currentMob);
                 AdventureQuestController.instance().showQuestDialogs(MapStage.getInstance());
-                boolean defeatedFromBoss = currentMob.getData().boss && !isArena;
+                boolean defeatedFromBoss = !noPenalty && currentMob.getData().boss && !isArena;
                 WorldStage.this.removeEnemy(currentMob);
                 currentMob = null;
                 if (defeated) {

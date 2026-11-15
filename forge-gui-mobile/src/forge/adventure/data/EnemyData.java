@@ -52,6 +52,15 @@ public class EnemyData implements Serializable {
     public boolean ignoreGlobalEffect = false;
     public boolean ignoreBiomeEffect = false;
     public boolean ignoreDungeonEffect = false;
+    public DefeatData onDefeat; //Fork (run 2): what losing to this enemy does (no penalty, story actions)
+
+    /** Fork (run 2): {@code onDefeat}: losing to this enemy can skip the life/gold penalty and run dialog actions. */
+    public static class DefeatData implements Serializable {
+        private static final long serialVersionUID = -6150418253960231337L;
+        public boolean noPenalty = false;      //no life/gold loss, no respawn, no run-modifier card loss, the player stays where they are
+        public DialogData.ActionData[] action; //run after the duel (set flags, issueQuest, runCommand...)
+        public DialogData dialog;              //shown after the duel (needs options to be shown; its actions run too)
+    }
 
     public EnemyData() {
     }
@@ -85,6 +94,7 @@ public class EnemyData implements Serializable {
         ignoreGlobalEffect  = enemyData.ignoreGlobalEffect;
         ignoreBiomeEffect   = enemyData.ignoreBiomeEffect;
         ignoreDungeonEffect = enemyData.ignoreDungeonEffect;
+        onDefeat        = enemyData.onDefeat;
         if (enemyData.scale == 0.0f) {
             scale = 1.0f;
         }

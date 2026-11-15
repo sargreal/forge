@@ -203,7 +203,8 @@ public class DuelScene extends ForgeScene {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<PaperCard> modifierLosses = winner || eventData != null ? Collections.emptyList() : loseModifierCards();
+        boolean noPenalty = enemy.getData().onDefeat != null && enemy.getData().onDefeat.noPenalty; //Fork (run 2)
+        List<PaperCard> modifierLosses = winner || eventData != null || noPenalty ? Collections.emptyList() : loseModifierCards();
         String enemyName = enemy.getName();
         String insult = enemy.getBossInsult();
         boolean showMessages = enemy.getData().boss || (enemy.getData().copyPlayerDeck && Current.player().isUsingCustomDeck());

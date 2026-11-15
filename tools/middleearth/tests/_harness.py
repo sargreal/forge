@@ -51,3 +51,63 @@ def main(run, plane="MiddleEarth"):
     finally:
         if started and not keep:
             subprocess.run([GAME_SH, "stop"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def duel_with_spawn(g, enemy, timeout=60):
+    """Overworld: spawns `enemy` by name (console), walks into it, hands the human seat to the AI and returns the duel
+    state once turn 1 has begun (conceding during the coin flip can hang the game)."""
+    s = g.state()
+    check(s["location"].get("where") == "overworld", "duel_with_spawn needs the overworld: %s" % s["location"])
+    out = g.console("spawn enemy '%s'" % enemy).get("output", "")
+    check("Spawn" in out, "could not spawn %s: %s" % (enemy, out))
+    t_end = time.time() + timeout
+    while time.time() < t_end:
+        s = g.state()
+        if s["scene"] == "DuelScene":
+            break
+        es = [o for o in s.get("objects", []) if o["type"] == "enemy" and o.get("enemy") == enemy]
+        check(es, "spawned %s not on the map" % enemy)
+        g.walk(es[0]["x"], es[0]["y"], unit="px", timeout_ms=4000)
+    else:
+        raise Fail("no duel with %s" % enemy)
+    autoplaying = False
+    while time.time() < t_end:  # the AI plays the human seat (mulligans too) until turn 1 has begun
+        st = g.state()
+        if st.get("duelPopup"):  # boss intro
+            try:
+                g.call("/duel/popup", {})
+            except gamectl.ApiError:
+                pass
+            time.sleep(0.5)
+            continue
+        d = st.get("duel") or {}
+        if d.get("players") and not autoplaying:
+            g.duel("autoplay")
+            autoplaying = True
+        if autoplaying and d.get("turn", 0) >= 1:  # past the coin flip and mulligans
+            return d
+        time.sleep(0.5)
+    raise Fail("duel with %s did not load" % enemy)
+
+
+def leave_duel(g, timeout=60):
+    """Waits until the duel scene is gone, clicking through boss popups (modal dialogs). Returns the state."""
+    t_end = time.time() + timeout
+    while time.time() < t_end:
+        s = g.state()
+        if s.get("duelPopup"):  # boss insult after a loss
+            try:
+                g.call("/duel/popup", {})
+            except gamectl.ApiError:
+                pass
+            time.sleep(0.5)
+        elif s.get("modal"):
+            try:
+                g.choose(0)
+            except gamectl.ApiError:
+                pass
+        elif s["scene"] != "DuelScene" and not s.get("transition") and not s.get("frozen"):
+            time.sleep(2.5)  # the stage applies the result after the hit animation
+            return g.state()
+        time.sleep(0.5)
+    raise Fail("still in the duel after %ss" % timeout)

@@ -157,6 +157,23 @@ public class AdventureQuestController implements Serializable {
     public PointOfInterest mostRecentPOI;
     private final List<EnemySprite> enemySpriteList= new ArrayList<>();
     private int nextQuestID = 0;
+    /**
+     * Fork (run 2): queues an enemy's {@code onDefeat} actions and dialog; the next {@link #showQuestDialogs} shows or
+     * runs them. Returns true when the loss must skip the normal defeat penalty.
+     */
+    public boolean handleDefeatBy(EnemyData enemy) {
+        if (enemy == null || enemy.onDefeat == null)
+            return false;
+        if (enemy.onDefeat.action != null && enemy.onDefeat.action.length > 0) {
+            DialogData actions = new DialogData();
+            actions.action = enemy.onDefeat.action;
+            dialogQueue.add(actions);
+        }
+        if (enemy.onDefeat.dialog != null)
+            dialogQueue.add(enemy.onDefeat.dialog);
+        return enemy.onDefeat.noPenalty;
+    }
+
     public void showQuestDialogs(GameStage stage) {
         List<AdventureQuestData> finishedQuests = new ArrayList<>();
         for (AdventureQuestData quest : Current.player().getQuests()) {

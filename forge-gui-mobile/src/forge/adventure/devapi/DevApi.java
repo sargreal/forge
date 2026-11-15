@@ -161,6 +161,8 @@ public final class DevApi {
                 return gl(() -> duel(false), 5000);
             case "/duel/autoplay":
                 return gl(() -> duel(true), 5000);
+            case "/duel/popup":
+                return gl(DevApi::duelPopupOk, 5000);
             default:
                 throw new ApiException("unknown endpoint " + method + " " + path);
         }
@@ -287,7 +289,11 @@ public final class DevApi {
         Map<String, Object> modal = modalDialog(scene);
         if (modal != null) st.put("modal", modal);
         if (scene instanceof RewardScene) st.put("reward", reward());
-        if (scene instanceof DuelScene) st.put("duel", duelState());
+        if (scene instanceof DuelScene) {
+            st.put("duel", duelState());
+            forge.toolbox.FOptionPane popup = duelPopup();
+            if (popup != null) st.put("duelPopup", true); //boss intro/insult: /duel/popup presses OK
+        }
         if (!gameLoaded())
             return st;
         st.put("frozen", Forge.advFreezePlayerControls);
@@ -1000,8 +1006,21 @@ public final class DevApi {
         r.put("players", players);
         r.put("turn", g.getPhaseHandler().getTurn());
         r.put("phase", String.valueOf(g.getPhaseHandler().getPhase()));
-        r.put("gameOver", g.isGameOver());
+        r.put("gameOver", g.getAge() == forge.game.GameStage.GameOver); //not isGameOver(): it locks the Game, which deadlocks with a concede during the coin flip
         return r;
+    }
+
+    /** The DuelScene's boss intro/insult popup (an FOptionPane, not a scene2d dialog) while it is shown. */
+    private static forge.toolbox.FOptionPane duelPopup() {
+        Object o = field(DuelScene.instance(), "bossDialogue");
+        return o instanceof forge.toolbox.FOptionPane && ((forge.toolbox.FOptionPane) o).isVisible() ? (forge.toolbox.FOptionPane) o : null;
+    }
+
+    private static Object duelPopupOk() {
+        forge.toolbox.FOptionPane p = duelPopup();
+        if (p == null) throw new ApiException("no duel popup open");
+        p.setResult(0);
+        return ok();
     }
 
     private static List<String> cardNames(Iterable<forge.game.card.Card> cards) {

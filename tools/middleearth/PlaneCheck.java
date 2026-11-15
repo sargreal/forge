@@ -1255,7 +1255,19 @@ public class PlaneCheck {
         }
         Array<ShopData> shops = json.fromJson(Array.class, ShopData.class, Config.instance().getFile(Paths.SHOPS));
         if (shops != null) for (ShopData sh : shops) if (sh.rewards != null) checkRewardConditions(sh.rewards.toArray(RewardData.class), "shop " + sh.name);
-        for (EnemyData e : enemyByName.values()) checkRewardConditions(e.rewards, "enemy " + e.getName());
+        for (EnemyData e : enemyByName.values()) {
+            checkRewardConditions(e.rewards, "enemy " + e.getName());
+            if (e.onDefeat == null) continue; // Fork run 2: non-fatal loss
+            String w = "enemy " + e.getName() + " onDefeat";
+            boolean acts = e.onDefeat.action != null && e.onDefeat.action.length > 0;
+            if (!e.onDefeat.noPenalty && !acts && e.onDefeat.dialog == null) warn(w + ": does nothing");
+            if (acts) for (DialogData.ActionData a : e.onDefeat.action) if (a != null) checkDialogAction(a, w);
+            if (e.onDefeat.dialog != null) {
+                checkDialogConditions(e.onDefeat.dialog, w + ".dialog");
+                if (e.onDefeat.dialog.options == null || e.onDefeat.dialog.options.length == 0)
+                    warn(w + ".dialog: a dialog without options is not shown (only its actions run)");
+            }
+        }
         Array<AdventureQuestData> quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS));
         Set<String> questIds = new HashSet<>();
         if (quests != null) for (AdventureQuestData q : quests) {
