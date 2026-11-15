@@ -1198,7 +1198,33 @@ public class PlaneCheck {
         if (d == null) return;
         if (d.condition != null) for (DialogData.ConditionData c : d.condition)
             if (c != null) flagProblems(where + " condition.flag", c.flag);
+        if (d.action != null) for (DialogData.ActionData a : d.action) if (a != null) checkDialogAction(a, where);
         if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
+    }
+
+    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag, runCommand, endGame. */
+    static void checkDialogAction(DialogData.ActionData a, String where) {
+        String[] names = {"addQuestFlag", "addCharacterFlag", "addMapFlag"};
+        DialogData.ActionData.FlagAdd[] adds = {a.addQuestFlag, a.addCharacterFlag, a.addMapFlag};
+        for (int i = 0; i < adds.length; i++) {
+            DialogData.ActionData.FlagAdd f = adds[i];
+            if (f == null) continue;
+            String w = where + " action " + names[i];
+            if (f.key == null || f.key.isEmpty()) error(w + ": missing 'key'");
+            if (f.min > f.max) error(w + ": min " + f.min + " > max " + f.max);
+            if (f.min < Byte.MIN_VALUE || f.max > Byte.MAX_VALUE) warn(w + ": min/max outside -128..127 (the flag range caps them)");
+            if (f.val == 0) warn(w + ": val 0 does nothing");
+        }
+        if (a.endGame != null) {
+            if ((a.endGame.title == null || a.endGame.title.isEmpty()) && (a.endGame.text == null || a.endGame.text.isEmpty()))
+                error(where + " action endGame: needs a title or text");
+            if (a.endGame.image != null && !a.endGame.image.isEmpty() && !Config.instance().getFile(a.endGame.image).exists())
+                error(where + " action endGame: image '" + a.endGame.image + "' not found");
+        }
+        if (a.runCommand != null && !a.runCommand.trim().isEmpty() && !forge.adventure.stage.ConsoleCommandInterpreter.isDataCommand(a.runCommand)) {
+            String m = where + " action runCommand '" + a.runCommand + "': not on the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS), the game refuses it";
+            if (where.startsWith("enemy Test ")) info(m + " (test fixture)"); else error(m);
+        }
     }
 
     static void checkRewardConditions(RewardData[] rewards, String where) {
@@ -1239,7 +1265,19 @@ public class PlaneCheck {
         }
         Array<ShopData> shops = json.fromJson(Array.class, ShopData.class, Config.instance().getFile(Paths.SHOPS));
         if (shops != null) for (ShopData sh : shops) if (sh.rewards != null) checkRewardConditions(sh.rewards.toArray(RewardData.class), "shop " + sh.name);
-        for (EnemyData e : enemyByName.values()) checkRewardConditions(e.rewards, "enemy " + e.getName());
+        for (EnemyData e : enemyByName.values()) {
+            checkRewardConditions(e.rewards, "enemy " + e.getName());
+            if (e.onDefeat == null) continue; // Fork run 2: non-fatal loss
+            String w = "enemy " + e.getName() + " onDefeat";
+            boolean acts = e.onDefeat.action != null && e.onDefeat.action.length > 0;
+            if (!e.onDefeat.noPenalty && !acts && e.onDefeat.dialog == null) warn(w + ": does nothing");
+            if (acts) for (DialogData.ActionData a : e.onDefeat.action) if (a != null) checkDialogAction(a, w);
+            if (e.onDefeat.dialog != null) {
+                checkDialogConditions(e.onDefeat.dialog, w + ".dialog");
+                if (e.onDefeat.dialog.options == null || e.onDefeat.dialog.options.length == 0)
+                    warn(w + ".dialog: a dialog without options is not shown (only its actions run)");
+            }
+        }
         Array<AdventureQuestData> quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS));
         Set<String> questIds = new HashSet<>();
         if (quests != null) for (AdventureQuestData q : quests) {
@@ -1247,6 +1285,11 @@ public class PlaneCheck {
             String w = "quest " + q.getID();
             checkDialogConditions(q.offerDialog, w); checkDialogConditions(q.prologue, w); checkDialogConditions(q.epilogue, w);
             checkDialogConditions(q.failureDialog, w); checkDialogConditions(q.declinedDialog, w);
+            if (q.condition != null) { // Fork run 2: side-quest pool condition
+                conds++;
+                flagProblems(w + " condition", q.condition);
+                if (q.storyQuest) warn(w + ": condition only filters the side-quest pool; story quests ignore it");
+            }
             if (q.stages != null) for (AdventureQuestStage st : q.stages) {
                 checkDialogConditions(st.prologue, w); checkDialogConditions(st.epilogue, w); checkDialogConditions(st.failureDialog, w);
                 if (st.condition == null) continue;
@@ -1290,6 +1333,41 @@ public class PlaneCheck {
             if (!catchAll) warn("origins: no visible origin without races/colors; unmatched characters get the upstream start (Spawn, quest 28)");
             info(cd.origins.length + " origins");
         }
+        // Fork run 2: locked items, item dialogs
+        Array<ItemData> items = json.fromJson(Array.class, ItemData.class, Config.instance().getFile(Paths.ITEMS));
+        if (items != null) for (ItemData it : items) {
+            String w = "item " + it.name;
+            checkDialogConditions(it.dialogOnUse, w + " dialogOnUse");
+            if (it.lockCondition != null) {
+                conds++;
+                flagProblems(w + " lockCondition", it.lockCondition);
+                if (!it.locked) warn(w + ": lockCondition without locked: true does nothing");
+            }
+            if (it.locked && (it.equipmentSlot == null || it.equipmentSlot.isEmpty()))
+                warn(w + ": locked but no equipmentSlot (only dropping is blocked)");
+        }
+        // Fork run 2: config.json statusFlags (HUD) and flagEffects (duel effects by flag)
+        if (cd.statusFlags != null) for (int i = 0; i < cd.statusFlags.length; i++) {
+            ConfigData.StatusFlag f = cd.statusFlags[i];
+            String w = "config statusFlags[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.flag == null || f.flag.isEmpty()) error(w + ": missing 'flag'");
+            if (FlagCondition.normalizeScope(f.scope) == null) error(w + ": unknown scope '" + f.scope + "' (quest, character, map)");
+            if (f.max < 0 || f.max > Byte.MAX_VALUE) warn(w + ": max " + f.max + " is outside 0..127 (flags are bytes)");
+            if (f.showWhen != null) { conds++; flagProblems(w + ".showWhen", f.showWhen); }
+            if (f.icon != null && !f.icon.isEmpty() && f.icon.contains("]")) error(w + ": icon must be a plain skin icon name");
+        }
+        if (cd.flagEffects != null) for (int i = 0; i < cd.flagEffects.length; i++) {
+            ConfigData.FlagEffect f = cd.flagEffects[i];
+            String w = "config flagEffects[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.effect == null) error(w + ": missing 'effect'");
+            else checkEffectCards(w, f.effect);
+            if (f.condition == null) warn(w + ": no condition (always applies)");
+            else { conds++; flagProblems(w + ".condition", f.condition); }
+        }
+        if (cd.statusFlags != null || cd.flagEffects != null)
+            info((cd.statusFlags == null ? 0 : cd.statusFlags.length) + " statusFlags, " + (cd.flagEffects == null ? 0 : cd.flagEffects.length) + " flagEffects");
         info(conds + " flag conditions on biomes, POIs and quest stages checked");
     }
 }

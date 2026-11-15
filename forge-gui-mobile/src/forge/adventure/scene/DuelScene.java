@@ -203,7 +203,8 @@ public class DuelScene extends ForgeScene {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<PaperCard> modifierLosses = winner || eventData != null ? Collections.emptyList() : loseModifierCards();
+        boolean noPenalty = enemy.getData().onDefeat != null && enemy.getData().onDefeat.noPenalty; //Fork (run 2)
+        List<PaperCard> modifierLosses = winner || eventData != null || noPenalty ? Collections.emptyList() : loseModifierCards();
         String enemyName = enemy.getName();
         String insult = enemy.getBossInsult();
         boolean showMessages = enemy.getData().boss || (enemy.getData().copyPlayerDeck && Current.player().isUsingCustomDeck());
@@ -517,6 +518,13 @@ public class DuelScene extends ForgeScene {
             if (advPlayer.getBlessing() != null) {
                 playerEffects.add(advPlayer.getBlessing());
                 if (advPlayer.getBlessing().opponent != null) oppEffects.add(advPlayer.getBlessing().opponent);
+            }
+        }
+        //Fork (run 2): config.json flagEffects are written for the player; their opponent block goes to the enemies.
+        if (eventData == null && Config.instance().getConfigData().flagEffects != null) {
+            for (ConfigData.FlagEffect fe : Config.instance().getConfigData().flagEffects) {
+                if (fe != null && fe.effect != null && (fe.condition == null || fe.condition.eval()))
+                    addEffect(playerEffects, oppEffects, fe.effect);
             }
         }
         //Every layer is written for the enemies, as dungeon effects always were, so its opponent block goes to the player.

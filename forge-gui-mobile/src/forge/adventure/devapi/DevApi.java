@@ -40,6 +40,7 @@ import forge.adventure.scene.Scene;
 import forge.adventure.scene.TileMapScene;
 import forge.adventure.scene.UIScene;
 import forge.adventure.stage.ConsoleCommandInterpreter;
+import forge.adventure.stage.GameHUD;
 import forge.adventure.stage.GameStage;
 import forge.adventure.stage.MapStage;
 import forge.adventure.stage.WorldStage;
@@ -160,6 +161,10 @@ public final class DevApi {
                 return gl(() -> duel(false), 5000);
             case "/duel/autoplay":
                 return gl(() -> duel(true), 5000);
+            case "/duel/popup":
+                return gl(DevApi::duelPopupOk, 5000);
+            case "/inventory":
+                return gl(() -> inventory(a), 5000);
             default:
                 throw new ApiException("unknown endpoint " + method + " " + path);
         }
@@ -286,7 +291,11 @@ public final class DevApi {
         Map<String, Object> modal = modalDialog(scene);
         if (modal != null) st.put("modal", modal);
         if (scene instanceof RewardScene) st.put("reward", reward());
-        if (scene instanceof DuelScene) st.put("duel", duelState());
+        if (scene instanceof DuelScene) {
+            st.put("duel", duelState());
+            forge.toolbox.FOptionPane popup = duelPopup();
+            if (popup != null) st.put("duelPopup", true); //boss intro/insult: /duel/popup presses OK
+        }
         if (!gameLoaded())
             return st;
         st.put("frozen", Forge.advFreezePlayerControls);
@@ -304,12 +313,31 @@ public final class DevApi {
             st.put("quests", quests());
             st.put("questFlags", AdventurePlayer.current().getQuestFlags());
             st.put("characterFlags", AdventurePlayer.current().getCharacterFlags());
+            st.put("statusFlags", statusFlags());
         } catch (Exception e) {
             st.put("questsError", e.toString());
         }
         Map<String, Object> dlg = gameDialog();
         if (dlg != null) st.put("dialog", dlg);
         return st;
+    }
+
+    /** Fork (run 2): config.json statusFlags: value, whether shown, and the HUD label text. */
+    private static List<Object> statusFlags() {
+        List<Object> out = new ArrayList<>();
+        forge.adventure.data.ConfigData.StatusFlag[] cfg = Config.instance().getConfigData().statusFlags;
+        if (cfg == null) return out;
+        List<String> hud = GameHUD.instance == null ? null : GameHUD.instance.getStatusFlagTexts();
+        int i = 0;
+        for (forge.adventure.data.ConfigData.StatusFlag f : cfg) {
+            if (f == null || f.flag == null || f.flag.isEmpty()) continue;
+            String text = GameHUD.statusFlagText(f);
+            out.add(m("flag", f.flag, "scope", forge.adventure.data.FlagCondition.normalizeScope(f.scope), "label", f.label,
+                    "value", forge.adventure.data.FlagCondition.flagValue(f.scope, f.flag, null), "max", f.max,
+                    "visible", text != null, "hud", hud != null && i < hud.size() ? hud.get(i) : null));
+            i++;
+        }
+        return out;
     }
 
     private static Map<String, Object> player() {
@@ -956,6 +984,42 @@ public final class DevApi {
         return r;
     }
 
+    // ------------------------------------------------------------------ inventory (fork, run 2)
+
+    /**
+     * {action: list|equip|unequip|drop|sell, item}: the Inventory's equip toggle and delete button (the same
+     * AdventurePlayer methods). The engine has no item selling; "sell" only reports whether the item could be parted with.
+     */
+    private static Object inventory(JsonValue a) {
+        AdventurePlayer p = AdventurePlayer.current();
+        String action = a.getString("action", "list");
+        Map<String, Object> r = ok();
+        if (!"list".equals(action)) {
+            String name = a.getString("item", "");
+            forge.adventure.data.ItemData it = null;
+            for (forge.adventure.data.ItemData i : p.getItems())
+                if (i != null && name.equalsIgnoreCase(i.name) && (it == null || i.isEquipped)) it = i;
+            if (it == null) throw new ApiException("no item " + name + " in the inventory");
+            boolean done;
+            switch (action) {
+                case "equip": done = it.isEquipped || (p.equip(it) && it.isEquipped); break;
+                case "unequip": done = !it.isEquipped || (p.equip(it) && !it.isEquipped); break;
+                case "drop": done = p.dropItem(it); break;
+                case "sell":
+                    if (it.isLocked()) { done = false; break; }
+                    throw new ApiException("the engine has no item selling (the Inventory can only drop)");
+                default: throw new ApiException("unknown action " + action + " (list, equip, unequip, drop, sell)");
+            }
+            r.put("action", action);
+            r.put("done", done);
+        }
+        List<Object> items = new ArrayList<>();
+        for (forge.adventure.data.ItemData i : p.getItems())
+            if (i != null) items.add(m("name", i.name, "slot", i.equipmentSlot, "equipped", i.isEquipped, "locked", i.isLocked(), "questItem", i.questItem));
+        r.put("items", items);
+        return r;
+    }
+
     // ------------------------------------------------------------------ duel
 
     private static HostedMatch hostedMatch() {
@@ -971,13 +1035,39 @@ public final class DevApi {
         for (Player p : g.getPlayers())
             players.add(m("name", p.getName(), "life", p.getLife(), "human", p.getController() instanceof PlayerControllerHuman,
                     "ai", p.getController() instanceof PlayerControllerAi, "hand", p.getCardsIn(forge.game.zone.ZoneType.Hand).size(),
-                    "library", p.getCardsIn(forge.game.zone.ZoneType.Library).size()));
+                    "library", p.getCardsIn(forge.game.zone.ZoneType.Library).size(),
+                    "startingLife", p.getStartingLife(), "ringTempted", p.getNumRingTemptedYou(),
+                    "ringBearer", p.getRingBearer() == null ? null : p.getRingBearer().getName(),
+                    "battlefield", cardNames(p.getCardsIn(forge.game.zone.ZoneType.Battlefield)),
+                    "command", cardNames(p.getCardsIn(forge.game.zone.ZoneType.Command))));
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("players", players);
         r.put("turn", g.getPhaseHandler().getTurn());
         r.put("phase", String.valueOf(g.getPhaseHandler().getPhase()));
-        r.put("gameOver", g.isGameOver());
+        r.put("gameOver", g.getAge() == forge.game.GameStage.GameOver); //not isGameOver(): it locks the Game, which deadlocks with a concede during the coin flip
         return r;
+    }
+
+    /** The DuelScene's boss intro/insult popup (an FOptionPane, not a scene2d dialog) while it is shown. */
+    private static forge.toolbox.FOptionPane duelPopup() {
+        Object o = field(DuelScene.instance(), "bossDialogue");
+        return o instanceof forge.toolbox.FOptionPane && ((forge.toolbox.FOptionPane) o).isVisible() ? (forge.toolbox.FOptionPane) o : null;
+    }
+
+    private static Object duelPopupOk() {
+        forge.toolbox.FOptionPane p = duelPopup();
+        if (p == null) throw new ApiException("no duel popup open");
+        p.setResult(0);
+        return ok();
+    }
+
+    private static List<String> cardNames(Iterable<forge.game.card.Card> cards) {
+        List<String> out = new ArrayList<>();
+        for (forge.game.card.Card c : cards) {
+            if (out.size() >= 40) { out.add("..."); break; }
+            out.add(c.getName());
+        }
+        return out;
     }
 
     private static Object duel(boolean autoplay) {

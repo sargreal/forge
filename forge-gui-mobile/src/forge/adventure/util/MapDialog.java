@@ -20,11 +20,13 @@ import forge.adventure.character.CharacterSprite;
 import forge.adventure.character.EnemySprite;
 import forge.adventure.data.AdventureQuestData;
 import forge.adventure.data.DialogData;
+import forge.adventure.data.FlagCondition;
 import forge.adventure.data.RewardData;
 import forge.adventure.player.AdventurePlayer;
 import forge.adventure.scene.TileMapScene;
 import forge.adventure.stage.GameHUD;
 import forge.adventure.scene.RewardScene;
+import forge.adventure.stage.ConsoleCommandInterpreter;
 import forge.adventure.stage.MapStage;
 import forge.adventure.world.WorldSave;
 import forge.card.ColorSet;
@@ -446,6 +448,20 @@ public class MapDialog {
             }
             if (E.advanceMapFlag != null && !E.advanceMapFlag.isEmpty()) { //Increase a given local quest flag by 1.
                 stage.advanceQuestFlag(E.advanceMapFlag);
+            }
+            //Fork (run 2): signed, clamped adds; they wake flag stages like set*.
+            if (E.addQuestFlag != null && E.addQuestFlag.key != null && !E.addQuestFlag.key.isEmpty())
+                FlagCondition.addFlag("quest", E.addQuestFlag.key, E.addQuestFlag.val, E.addQuestFlag.min, E.addQuestFlag.max);
+            if (E.addCharacterFlag != null && E.addCharacterFlag.key != null && !E.addCharacterFlag.key.isEmpty())
+                FlagCondition.addFlag("character", E.addCharacterFlag.key, E.addCharacterFlag.val, E.addCharacterFlag.min, E.addCharacterFlag.max);
+            if (E.addMapFlag != null && E.addMapFlag.key != null && !E.addMapFlag.key.isEmpty())
+                FlagCondition.addFlag("map", E.addMapFlag.key, E.addMapFlag.val, E.addMapFlag.min, E.addMapFlag.max);
+            if (E.runCommand != null && !E.runCommand.trim().isEmpty()) //Fork (run 2): allow-listed console command
+                ConsoleCommandInterpreter.getInstance().runFromData(E.runCommand);
+            if (E.endGame != null) { //Fork (run 2): ending screen once this dialog is closed
+                if (E.endGame.flag != null && !E.endGame.flag.isEmpty())
+                    Current.player().setCharacterFlag(E.endGame.flag, 1);
+                stage.showEndingDialogWhenFree(E.endGame.title, E.endGame.text, E.endGame.image);
             }
             if (E.setEffect != null) { //Replace current effects.
                 EnemySprite EN = stage.getEnemyByID(parentID);

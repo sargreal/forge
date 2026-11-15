@@ -42,6 +42,8 @@ import forge.Forge;
 import forge.adventure.character.EnemySprite;
 import forge.adventure.character.CharacterSprite;
 import forge.adventure.data.AdventureQuestData;
+import forge.adventure.data.ConfigData;
+import forge.adventure.data.FlagCondition;
 import forge.adventure.data.ItemData;
 import forge.adventure.player.AdventurePlayer;
 import forge.adventure.scene.DeckSelectScene;
@@ -107,6 +109,11 @@ public class GameHUD extends Stage {
     private final Vector2 touchDownDirection = new Vector2();
     private final Vector2 touchDraggedDirection = new Vector2();
     private int viewWidth = 150;
+    //Fork (run 2): config.json statusFlags readouts, polled in act()
+    private final Array<ConfigData.StatusFlag> statusFlags = new Array<>();
+    private final Array<TypingLabel> statusFlagLabels = new Array<>();
+    private final Array<String> statusFlagShown = new Array<>();
+    private float statusFlagTimer = 0f;
     private int viewHeight = 150;
 
     private GameHUD(GameStage gameStage) {
@@ -245,6 +252,7 @@ public class GameHUD extends Stage {
         hudGroup.addActor(shards);
         hudGroup.addActor(money);
         hudGroup.addActor(blank);
+        addStatusFlagLabels();
         ui.addActor(hudGroup);
         //MENU
         menuGroup.addActor(deckActor);
@@ -274,6 +282,67 @@ public class GameHUD extends Stage {
         if (Forge.advFreezePlayerControls)
             return;
         Forge.switchScene(QuestLogScene.instance(Forge.getCurrentScene()));
+    }
+
+    /** Fork (run 2): one label per config.json statusFlags entry, continuing the life/shards/gold column. */
+    private void addStatusFlagLabels() {
+        ConfigData.StatusFlag[] config = Config.instance().getConfigData().statusFlags;
+        if (config == null)
+            return;
+        float step = money.getY() - shards.getY(); //continue the life/shards/gold column past the gold label
+        if (step == 0)
+            step = -14;
+        for (ConfigData.StatusFlag f : config) {
+            if (f == null || f.flag == null || f.flag.isEmpty())
+                continue;
+            TypingLabel label = Controls.newTypingLabel("");
+            label.setBounds(money.getX(), money.getY() + step * (statusFlags.size + 1), Math.max(money.getWidth(), 64), money.getHeight());
+            label.skipToTheEnd();
+            label.setVisible(false);
+            statusFlags.add(f);
+            statusFlagLabels.add(label);
+            statusFlagShown.add(null);
+            hudGroup.addActor(label);
+        }
+    }
+
+    /** Fork (run 2): the HUD text of a status flag, or null while it is hidden (by {@code hidden} or {@code showWhen}). */
+    public static String statusFlagText(ConfigData.StatusFlag f) {
+        if (f == null || f.hidden || f.flag == null)
+            return null;
+        if (f.showWhen != null && !f.showWhen.eval())
+            return null;
+        int value = FlagCondition.flagValue(f.scope, f.flag, null);
+        String label = f.label == null ? f.flag : f.label;
+        String icon = f.icon == null || f.icon.isEmpty() ? "" : "[+" + f.icon + "]";
+        return "[%95]" + icon + label + " " + value + (f.max > 0 ? "/" + f.max : "");
+    }
+
+    private void updateStatusFlags(float delta) {
+        if (statusFlags.isEmpty())
+            return;
+        statusFlagTimer -= delta;
+        if (statusFlagTimer > 0)
+            return;
+        statusFlagTimer = 0.25f;
+        for (int i = 0; i < statusFlags.size; i++) {
+            String text = statusFlagText(statusFlags.get(i));
+            TypingLabel label = statusFlagLabels.get(i);
+            label.setVisible(text != null);
+            if (text != null && !text.equals(statusFlagShown.get(i))) {
+                label.setText(text);
+                label.skipToTheEnd();
+            }
+            statusFlagShown.set(i, text);
+        }
+    }
+
+    /** Fork (run 2), dev API: the status flag labels as shown (null = hidden), in config order. */
+    public java.util.List<String> getStatusFlagTexts() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (int i = 0; i < statusFlagLabels.size; i++)
+            out.add(statusFlagLabels.get(i).isVisible() ? statusFlagShown.get(i) : null);
+        return out;
     }
 
     public static GameHUD getInstance() {
@@ -666,6 +735,8 @@ public class GameHUD extends Stage {
         updateBGM();
 
         updateAudioFades(delta);
+
+        updateStatusFlags(delta);
 
         if (!mapGroup.isVisible())
             return;

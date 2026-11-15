@@ -126,6 +126,32 @@ public class ConsoleCommandInterpreter {
         return currentCommand.function.apply(parameters);
     }
 
+    /**
+     * Fork (run 2): the commands a dialog action {@code runCommand} may run (plane data only). Debug, file-writing,
+     * reset and cheat commands (god, exportMap, resetQuests, leave, crack, give boosters...) are not on it.
+     */
+    public static final String[] DATA_COMMANDS = {"teleport to", "spawn enemy", "give gold", "give shards", "give item",
+            "give card", "give quest", "flag set", "flag advance", "flag add", "heal", "fullHeal", "hide", "sprint", "remove enemy"};
+
+    /** Fork (run 2): true when {@code text} starts with an allow-listed command path ({@link #DATA_COMMANDS}). */
+    public static boolean isDataCommand(String text) {
+        if (text == null) return false;
+        String t = text.trim().replaceAll("\\s+", " ");
+        for (String c : DATA_COMMANDS)
+            if (t.equals(c) || t.startsWith(c + " ")) return true;
+        return false;
+    }
+
+    /** Fork (run 2): runs a command from plane data (dialog action runCommand); refuses commands off the allowlist. */
+    public String runFromData(String text) {
+        if (!isDataCommand(text)) {
+            String msg = "runCommand refused (not allowed from data): " + text;
+            System.err.println(msg);
+            return msg;
+        }
+        return command(text.trim());
+    }
+
     void registerCommand(String[] path, Function<String[], String> function) {
         if (path.length == 0) return;
         Command currentCommand = root;
@@ -496,6 +522,22 @@ public class ConsoleCommandInterpreter {
         registerCommand(new String[]{"flag", "advance"}, s -> {
             if (s.length < 2) return "Usage: flag advance <quest|character|map> <key>";
             return setFlag(s[0], s[1], 0, true);
+        });
+        registerCommand(new String[]{"flag", "add"}, s -> { //Fork (run 2): signed, clamped add
+            if (s.length < 3) return "Usage: flag add <quest|character|map> <key> <delta> [min] [max]";
+            int d, lo = Byte.MIN_VALUE, hi = Byte.MAX_VALUE;
+            try {
+                d = Integer.parseInt(s[2]);
+                if (s.length > 3) lo = Integer.parseInt(s[3]);
+                if (s.length > 4) hi = Integer.parseInt(s[4]);
+            } catch (Exception e) { return "Can not convert the numbers"; }
+            String scope = FlagCondition.normalizeScope(s[0]);
+            if (scope == null) return "Unknown scope " + s[0] + " (quest, character, map)";
+            Integer v = FlagCondition.addFlag(scope, s[1], d, lo, hi);
+            if (v == null) return "Map flags only inside a map.";
+            if (MapStage.getInstance().isInMap())
+                forge.adventure.util.AdventureQuestController.instance().showQuestDialogs(MapStage.getInstance());
+            return scope + ":" + s[1] + " = " + v;
         });
         registerCommand(new String[]{"flag", "get"}, s -> {
             if (s.length < 2) return "Usage: flag get <quest|character|map> <key>";

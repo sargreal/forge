@@ -93,6 +93,35 @@ public class FlagCondition implements Serializable {
         return "character".equals(s) ? p.getCharacterFlag(key) : p.getQuestFlag(key);
     }
 
+    /** Fork (run 2): {@code current + delta} clamped to {@code [min, max]} and to the byte range -128..127. */
+    public static int clampedAdd(int current, int delta, int min, int max) {
+        int lo = Math.max(Byte.MIN_VALUE, Math.min(min, max));
+        int hi = Math.min(Byte.MAX_VALUE, Math.max(min, max));
+        long v = (long) current + delta;
+        return (int) Math.max(lo, Math.min(hi, v));
+    }
+
+    /**
+     * Fork (run 2): adds a signed delta to a flag, clamped (never wraps), through the normal set methods, so flag
+     * quest stages wake like after {@code set*Flag}. Map flags need the player to be in a map. Returns the new value,
+     * or null when the scope is unknown or a map flag is written outside a map.
+     */
+    public static Integer addFlag(String scope, String key, int delta, int min, int max) {
+        String s = normalizeScope(scope);
+        if (s == null || key == null || key.isEmpty()) return null;
+        int v = clampedAdd(flagValue(s, key, null), delta, min, max);
+        if ("map".equals(s)) {
+            MapStage m = MapStage.getInstance();
+            if (m == null || !m.isInMap()) return null;
+            m.setQuestFlag(key, v);
+        } else if ("character".equals(s)) {
+            Current.player().setCharacterFlag(key, v);
+        } else {
+            Current.player().setQuestFlag(key, v);
+        }
+        return v;
+    }
+
     /** quest | character | map, or null when unknown. Null/empty means quest. */
     public static String normalizeScope(String scope) {
         if (scope == null || scope.isEmpty()) return "quest";

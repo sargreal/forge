@@ -971,6 +971,7 @@
   "iconName": "RingofRenewal",
   "cost": 30000,
   "unique": true,
+  "locked": true,
   "description": "Cursed. Its burden grows with every use, and the Nine hunt its bearer.",
   "effect": {
    "lifeModifier": -3,
@@ -1188,5 +1189,14 @@
     "Wizard's Staff"
    ]
   }
+ },
+ {
+  "name": "Test Cursed Band",
+  "equipmentSlot": "Neck",
+  "iconName": "RingofRenewal",
+  "cost": 1,
+  "description": "Test fixture: locked while the character flag test_lock is set.",
+  "locked": true,
+  "lockCondition": { "scope": "character", "key": "test_lock", "op": ">=", "val": 1 }
  }
 ]

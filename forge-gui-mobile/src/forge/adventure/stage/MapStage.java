@@ -881,8 +881,17 @@ public class MapStage extends GameStage {
                     player.setPosition(positions.peek());
                 }
                 currentMob.freezeMovement();
+                boolean noPenalty = AdventureQuestController.instance().handleDefeatBy(currentMob.getData()); //Fork (run 2): onDefeat
                 AdventureQuestController.instance().updateQuestsLose(currentMob);
                 AdventureQuestController.instance().showQuestDialogs(MapStage.this);
+                if (noPenalty) { //the player stays in the map; the enemy leaves for this visit
+                    currentMob.remove();
+                    actors.removeValue(currentMob, true);
+                    enemies.remove(currentMob);
+                    MapStage.this.stop();
+                    currentMob = null;
+                    return;
+                }
                 boolean defeated = Current.player().defeated();
                 //If hardcore mode is added, check and redirect to game over screen here
                 if (canFailDungeon && !defeated)

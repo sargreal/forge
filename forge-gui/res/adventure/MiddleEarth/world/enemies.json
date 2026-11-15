@@ -37427,5 +37427,41 @@
       "IdentityGreen",
       "IdentityBlue"
     ]
+  },
+  {
+    "name": "Test Boss Loss",
+    "sprite": "sprites/enemy/beast/smallmammals/badger.atlas",
+    "deck": [
+      "decks/enemy/free/wild_bears.dck"
+    ],
+    "ai": "",
+    "boss": true,
+    "bossInsult": "Test fixture: the boss laughs.",
+    "spawnRate": 0,
+    "difficulty": 0.1,
+    "speed": 15,
+    "scale": 0.8,
+    "life": 20,
+    "rewards": [
+      { "type": "gold", "probability": 1, "count": 1 }
+    ],
+    "colors": "G",
+    "questTags": [ "Test" ],
+    "onDefeat": {
+      "noPenalty": true,
+      "action": [
+        { "setQuestFlag": { "key": "test_boss_lost", "val": 1 } },
+        { "addQuestFlag": { "key": "test_boss_corruption", "val": 5, "min": 0, "max": 100 } },
+        { "runCommand": "give gold 7" },
+        { "runCommand": "resetQuests" }
+      ],
+      "dialog": {
+        "text": "Test fixture: you lost, but the story goes on.",
+        "options": [
+          { "name": "(Continue)", "action": [ { "setQuestFlag": { "key": "test_boss_dialog", "val": 1 } },
+            { "endGame": { "title": "Test ending", "text": "Test fixture: the tale ends here.", "flag": "test_game_ended" } } ] }
+        ]
+      }
+    }
   }
 ]

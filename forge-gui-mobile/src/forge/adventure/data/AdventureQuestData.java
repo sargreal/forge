@@ -21,6 +21,8 @@ import java.util.*;
 import static forge.adventure.util.AdventureQuestController.QuestStatus.*;
 
 public class AdventureQuestData implements Serializable {
+    // Fork (run 2): pinned to the default UID the class had before the fork added `condition`, so saves keep loading.
+    private static final long serialVersionUID = -859190699184917225L;
 
     private int id;
 
@@ -61,6 +63,7 @@ public class AdventureQuestData implements Serializable {
     public boolean isTracked = false;
     public boolean autoTrack = false;
     public String sourceID = "";
+    public FlagCondition condition; //Fork (run 2): side quests are only offered by town quest boards while this holds
 
     public String getName() {
         return name;
@@ -78,6 +81,7 @@ public class AdventureQuestData implements Serializable {
         name = data.name;
         description = data.description;
         synopsis = data.synopsis;
+        condition = data.condition;
         offerDialog = new DialogData(data.offerDialog);
         prologue = new DialogData(data.prologue);
         epilogue = new DialogData(data.epilogue);

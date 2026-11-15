@@ -177,6 +177,51 @@ public abstract class GameStage extends Stage {
         showDialog();
     }
 
+    /**
+     * Fork (run 2), dialog action endGame: a closing screen (optional picture, title, text) with "Continue playing" or
+     * "Main menu" (the adventure start screen, like the menu button). Waits until the current dialog is closed.
+     */
+    public void showEndingDialogWhenFree(String title, String text, String image) {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                if (dialogOnlyInput || !(Forge.getCurrentScene() instanceof forge.adventure.scene.HudScene)) //a dialog, reward or duel is up
+                    showEndingDialogWhenFree(title, text, image);
+                else
+                    showEndingDialog(title, text, image);
+            }
+        }, 0.4f);
+    }
+
+    public void showEndingDialog(String title, String text, String image) {
+        dialog.getTitleTable().clear();
+        dialog.getContentTable().clear();
+        dialog.getButtonTable().clear();
+        dialog.clearListeners();
+        if (image != null && !image.isEmpty()) {
+            com.badlogic.gdx.files.FileHandle f = Config.instance().getFile(image);
+            if (f != null && f.exists()) {
+                Image picture = new Image(Forge.getAssets().getTexture(f));
+                picture.setScaling(Scaling.fit);
+                dialog.getContentTable().add(picture).height(100).width(250f).row();
+            }
+        }
+        if (title != null && !title.isEmpty())
+            dialog.getContentTable().add(Controls.newTextraLabel("[%120][GOLD]" + title)).row();
+        TypingLabel L = Controls.newTypingLabel(text == null ? "" : text);
+        L.setWrap(true);
+        L.skipToTheEnd();
+        dialog.getContentTable().add(L).width(250f);
+        dialog.getButtonTable().add(Controls.newTextButton("Continue playing", this::hideDialog)).width(120f);
+        dialog.getButtonTable().add(Controls.newTextButton("Main menu", () -> {
+            hideDialog();
+            openMenu();
+        })).width(120f);
+        dialog.setKeepWithinStage(true);
+        setDialogStage(GameHUD.getInstance());
+        showDialog();
+    }
+
     public void showImageDialog(String message, FBufferedImage fb, Runnable runnable) {
         dialog.getContentTable().clear();
         dialog.getButtonTable().clear();
