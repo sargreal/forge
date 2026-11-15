@@ -400,6 +400,13 @@ public class WorldStage extends GameStage implements SaveFileContent {
     }
 
     public void enterSpawnPOI(){
+        enterSpawnPOI("Spawn");
+    }
+
+    private String spawnPOIName = "Spawn"; //Fork (Middle-earth): the origin's start POI; null starts on the world map
+
+    public void enterSpawnPOI(String poiName){
+        spawnPOIName = poiName;
         enterSpawnPOI = true; //On a new game, we want to automatically enter spawn POI the player overlaps with.
         showGlobalEffectDialog = true;
         shownBiomeEffect = null;
@@ -458,7 +465,7 @@ public class WorldStage extends GameStage implements SaveFileContent {
         getPlayerSprite().setMovementDirection(Vector2.Zero);
         if (enterSpawnPOI) {
             enterSpawnPOI = false;
-            PointOfInterest poi = Current.world().findPointsOfInterest("Spawn");
+            PointOfInterest poi = spawnPOIName == null ? null : Current.world().findPointsOfInterest(spawnPOIName);
             if (poi != null) { //shouldn't be null
                 WorldStage.getInstance().loadPOI(poi);
                 // adjust player sprite to prevent triggering the poi collision point when leaving the spawn on New Game

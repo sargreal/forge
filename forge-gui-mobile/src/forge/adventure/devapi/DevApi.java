@@ -320,6 +320,8 @@ public final class DevApi {
         r.put("maxLife", p.getMaxLife());
         r.put("gold", p.getGold());
         r.put("shards", p.getShards());
+        r.put("origin", p.getOriginName());
+        r.put("respawnPOI", p.getRespawnPOI());
         Deck d = p.getSelectedDeck();
         if (d != null) r.put("deck", m("name", d.getName(), "size", d.getMain().countAll()));
         try {
@@ -643,7 +645,7 @@ public final class DevApi {
             NewGameScene ng = NewGameScene.instance();
             if (Forge.getCurrentScene() != ng) Forge.switchScene(ng);
             return ng.devApiStart(a.getString("name", null), a.getString("race", null), a.getString("gender", null),
-                    a.getString("difficulty", null), a.getString("mode", null), a.getString("colors", null));
+                    a.getString("difficulty", null), a.getString("mode", null), a.getString("colors", null), a.getString("origin", null));
         }, 30000);
         if (err != null) throw new ApiException(err);
         // wait until the first map is shown

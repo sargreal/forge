@@ -136,6 +136,8 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         deckLoadouts.clear();
         characterFlags.clear();
         questFlags.clear();
+        originName = null;
+        respawnPOI = null;
         quests.clear();
         events.clear();
         cards.clear();
@@ -619,6 +621,9 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
             deck.getOrCreate(DeckSection.Commander).addAll(commanderCards.getFilteredPool(isValid));
             unsupportedCards.addAll(commanderCards.getFilteredPool(isUnsupported).toFlatList());
         }
+        //Fork (Middle-earth): origin (config.json origins) and its respawn POI; absent in older saves.
+        originName = data.containsKey("originName") ? data.readString("originName") : null;
+        respawnPOI = data.containsKey("respawnPOI") ? data.readString("respawnPOI") : null;
         if (data.containsKey("modifierNames") && data.containsKey("modifierValues")) {
             String[] names = (String[]) data.readObject("modifierNames");
             String[] values = (String[]) data.readObject("modifierValues");
@@ -900,6 +905,8 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
 
         data.storeObject("blessing", blessing);
 
+        if (originName != null) data.store("originName", originName); //Fork (Middle-earth)
+        if (respawnPOI != null) data.store("respawnPOI", respawnPOI);
         // Save character flags.
         ArrayList<String> characterFlagsKey = new ArrayList<>();
         ArrayList<Byte> characterFlagsValue = new ArrayList<>();
@@ -1482,6 +1489,24 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
 
     public void removeBooster(Deck booster) {
         boostersOwned.removeValue(booster, true);
+    }
+
+    //Fork (Middle-earth): the origin chosen at new game (config.json origins) and where defeat respawns the player.
+    private String originName;
+    private String respawnPOI;
+
+    public String getOriginName() {
+        return originName;
+    }
+
+    public void setOrigin(String originName, String respawnPOI) {
+        this.originName = originName;
+        this.respawnPOI = respawnPOI;
+    }
+
+    /** The POI (points_of_interest.json name) where defeat respawns the player: the origin's, else "Spawn". */
+    public String getRespawnPOI() {
+        return respawnPOI == null || respawnPOI.isEmpty() ? "Spawn" : respawnPOI;
     }
 
     //Permanent character flags
