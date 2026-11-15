@@ -119,6 +119,10 @@ The approach from issue #2: load the Tiled world into the existing `World` data 
 
 ### Phase 3: Story and quests
 
+Concept in progress: [STORY.md](STORY.md) (decisions S1–S6: the War of the Ring, the margins of the canon, calendar acts, both allegiances, rare canon cameos, a corruption meter).
+
+Original notes:
+
 - A main quest along the Fellowship's route (Shire → Bree → Rivendell → Moria → Lothlórien → Rohan/Gondor → Mordor).
 - Side quests per region. Possibly a separate *The Hobbit* storyline (Erebor, Smaug).
 - Bosses with unique rewards. The One Ring is a cursed item.
@@ -168,6 +172,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | STORY.md v0.1 (story concept with the user's decisions S1–S6). Phase 2d-1 started (roads, clutter, reference crops). |
 | 2026-11-15 | Phase 2c merged (Opus agent): chunked Tiled world plus overview with the user's reference image; check, WorldSim and determinism pass; `run_all.sh` ALL PASSED. Main jar rebuilt. |
 | 2026-11-15 | MEAR similarity check (`tools/middleearth/mear_similarity.py`), LTR Starter Kit reference decks verified against the user's official lists (identical, no re-measure needed), `docs/MiddleEarth/ARTWORK.md` (custom artwork how-to; plane-local pictures need an engine change). |
 | 2026-11-15 | Play-test fixes: (1) rivers were walkable wherever a hidden POI path crossed them; fixed in the engine (see Engine changes) and verified with the dev API: walking east at three Brandywine rows stops at the bank. WorldSim: 0 unreachable POIs. (3) New console command `god`. (2) The early Shire was too hard: the rank-0.5 spawn filter let Ranger of the North, Sharkey's Ruffians and Bill Ferny (difficulty 0.5) spawn from the start. The Shire now spawns Hobbit Troublemakers, Southern Ruffians and Wild Wolves, plus a rare Bill Ferny (spawnRate 0.4); Black Riders (0.8) only appear after 20 wins. `run_all.sh`: ALL PASSED. |
