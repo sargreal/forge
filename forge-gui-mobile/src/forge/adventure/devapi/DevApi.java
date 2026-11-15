@@ -356,6 +356,8 @@ public final class DevApi {
             loc.put("worldTiles", m("w", Current.world().getWidthInTiles(), "h", Current.world().getHeightInTiles()));
             Vector2 c = new Vector2(pl.getX() + pl.getWidth() / 2, pl.getY() + pl.getHeight() / 2);
             loc.put("biome", GameScene.instance().getBiomeByPosition(c));
+            forge.adventure.data.BiomeData bd = GameScene.instance().getBiomeDataByPosition(c);
+            if (bd != null) loc.put("biomeEnemies", bd.getEffectiveEnemyNames()); //after enemyOverrides
             try {
                 loc.put("locationName", clean(GameScene.instance().getAdventurePlayerLocation(true, false)));
             } catch (Exception ignored) {
@@ -419,7 +421,7 @@ public final class DevApi {
             float d = poi.getPosition().dst(p);
             if (d > radius) continue;
             out.add(m("type", "poi", "id", poi.getID(), "name", poi.getData().name, "displayName", poi.getDisplayName(),
-                    "poiType", poi.getData().type, "x", poi.getPosition().x, "y", poi.getPosition().y, "dist", Math.round(d)));
+                    "poiType", poi.getData().type, "active", poi.getActive(), "x", poi.getPosition().x, "y", poi.getPosition().y, "dist", Math.round(d)));
         }
         for (Actor a : ws.getSpriteGroup().getChildren()) {
             if (!(a instanceof EnemySprite)) continue;

@@ -30,6 +30,10 @@ public class PointOfInterestData implements Serializable {
     public String[] questTags = new String[0];
     public DialogData.ActionData.QuestFlag[] questFlagsToActivate = new DialogData.ActionData.QuestFlag[0];
     public String displayName;
+    /** Fork (Middle-earth): the POI is hidden (not drawn, not enterable) once any of these quest flags is >= val. */
+    public DialogData.ActionData.QuestFlag[] questFlagsToDeactivate = new DialogData.ActionData.QuestFlag[0];
+    /** Fork (Middle-earth): the POI is only active while this flag condition holds. */
+    public FlagCondition condition;
 
 
 
@@ -72,6 +76,8 @@ public class PointOfInterestData implements Serializable {
         questTags = other.questTags.clone();
         displayName= other.displayName;
         questFlagsToActivate = other.questFlagsToActivate;
+        questFlagsToDeactivate = other.questFlagsToDeactivate;
+        condition = other.condition;
     }
 
     public String getDisplayName() {
