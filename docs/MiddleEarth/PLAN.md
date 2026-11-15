@@ -96,7 +96,7 @@ Original plan: fill the biome `enemies` lists with ME enemies per region (all 43
 
 **Phase 2d-1 ✅ (2026-11-15):** `Roads` and `Clutter` layers in every chunk (2,360 road tiles, 50,586 clutter objects with real sprites). The game builds the identical world from them; deleting a layer regenerates that part from the seed. The reference image moved to `docs/MiddleEarth/reference/`, with 36 per-chunk crops as hidden `Reference` layers (`tools/middleearth/worldmap/make_reference_crops.py`). World folder 4.3 MB. See [notes](notes/phase2d1-roads-clutter.md).
 
-**Phase 2d-2 (next, ~2.5–3 days):** a `Terrain` layer (layer id 6); skipping noise/structure generation per map (also saves ~2 s of world generation).
+**Phase 2d-2 (postponed: the user may model terrain by hand):** a `Terrain` layer (layer id 6); skipping noise/structure generation per map (also saves ~2 s of world generation).
 
 **Phase 2d design:** fully editable world. Optional per-chunk layers `Terrain` (real terrain/structure tilesets), `Roads` and `Clutter` (sprite objects). When a layer is present, import skips that generation step; export writes every layer. Design in the 2c notes.
 
@@ -150,14 +150,14 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
-- MEAR near-duplicates of pool cards (`notes/mear-similarity.md`): 11 tier-1 pairs. Recommended swaps await a user decision: Murder → Grasp of Darkness / Sengir Vampire, Cancel → Remand, Think Twice → Mulldrifter, Claustrophobia → another blue card. Also 13 tier-1 pairs inside MEAR itself.
+- MEAR near-duplicates (`notes/mear-similarity.md`): the 4 recommended swaps are done (2026-11-15). The 13 near-identical pairs inside MEAR are kept for now.
 - Repo-shipped custom card art for flavor-named MEAR cards needs a small engine change (plane-local `card_pics`/`token_pics` checked first; see `ARTWORK.md`). Stopgap: symlink into `~/.cache/forge/pics/cards/MEAR`.
 - Spawn difficulty: overworld spawns are filtered by `difficulty <= rank` (rank 0.5 for the first 20 wins, then 1 / 2 / …). Our enemies use 0.1 = easy, 0.3–0.5 = normal (spawn from the start!), 0.6–1 = hard, and bosses. Regions near the start should list mostly 0.1 enemies. Review the other early regions (Eriador, Lindon) in play-testing. Sharkey's Ruffians currently spawn in no region.
 - Dev API gaps: no plane switch in `/newGame` (use `game.sh start <plane>`); overworld walking is straight-line (no pathfinding); no shop, deck-editor or inventory endpoints; no card-level duel control. See `notes/tooling-devapi.md`.
 - Saruman's deck plays weak (56% even at 38 life; the AI handles control poorly). Rework the deck. See `notes/wp5-wp6-enemies.md`.
 - When `enemies-free.fragment.json` changes, regenerate with `python3 tools/middleearth/merge-enemies.py --base <enemies.json without the fragment> ...`. Simpler from now on: edit `enemies.json` directly and treat the fragment as historical.
 - Side quests are an interim copy of 34 generic Shandalar side quests (Kiora's and Teferi's quests dropped). Re-theme them in Phase 3. Without them, the town job boards crashed (NPE in `AdventureQuestController.getQuestNPCResponse` on an empty side-quest list).
-- The One Ring is currently sold in Umbar's black market (30,000 gold). It should become a unique boss or quest reward (WP5 / Phase 3). A "can't unequip" curse would need an engine change.
+- The One Ring is no longer sold anywhere; it becomes a late-game quest reward (STORY S9). A "can't unequip" curse would need an engine change.
 - Hobbit and Wizard races reuse farmer/peasant and wizard enemy sprites with human portraits. Proper sprites need new art.
 - The wizard intro and the rune display names are en-US only (`MiddleEarth/languages/adventure-en-US.properties`).
 - Generated (`.json` template) decks break down under the restricted pool (`enemy:Troll` → 32× The Lonely Mountain). The current `*_e.json` starters pull in non-ME jumpstart cards, and `check.sh` skips generated decks.
@@ -176,6 +176,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | User decisions: MEAR swaps applied (Murder → Grasp of Darkness, Cancel → Remand, Think Twice → Mulldrifter, Claustrophobia → Frost Lynx "Snow-beast of Forochel"); 21 ME decks now use the official-set twins instead (Bilbo's Deadly Slice, Saruman's Trickery, Plunder the Trollshaws, Enchanted River's Grasp), so deck strength is unchanged. The One Ring was removed from Umbar's shop. STORY.md v0.2 (S7–S11). Phase 2d-2 terrain postponed. check: 0 errors. |
 | 2026-11-15 | Phase 2d-1 merged (Opus agent): Roads/Clutter layers, per-chunk reference crops, reference image moved to docs. Identical world, byte-identical round trip; `run_all.sh` ALL PASSED. Main jar rebuilt. |
 | 2026-11-15 | STORY.md v0.1 (story concept with the user's decisions S1–S6). Phase 2d-1 started (roads, clutter, reference crops). |
 | 2026-11-15 | Phase 2c merged (Opus agent): chunked Tiled world plus overview with the user's reference image; check, WorldSim and determinism pass; `run_all.sh` ALL PASSED. Main jar rebuilt. |

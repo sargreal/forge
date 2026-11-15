@@ -1,6 +1,6 @@
 # Middle-earth Adventure: Story Concept
 
-> **Draft v0.1, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
+> **Draft v0.2, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
 
 ## Decisions so far
 
@@ -12,6 +12,11 @@
 | S4 | **Canon cameos** are real events at the canonical time and place, and rare (not every other quest). They never contradict the books. | 2026-11-15 |
 | S5 | **Corruption meter:** in, and visible at first. It can be hidden or disabled later if it feels too explicit. | 2026-11-15 |
 | S6 | **Custom cards** are designed once the storyline is clear (follows PLAN D8). | 2026-11-15 |
+| S7 | **Shadow victory is personal**, within the canon (option 1): the Shadow player wins their own story in the vacuum after Sauron's fall. **No lesser ring as the final prize**: when the One is destroyed the others lose their power. Lesser rings can still be mid-game sources of temptation, but their power ends with the One. | 2026-11-15 |
+| S8 | **Too much corruption on the Free side** makes the player fall. Their story turns into a Shadow ending (see S9). ❓ *Coordinator's reading of the user's note; to be confirmed.* | 2026-11-15 |
+| S9 | **The One Ring is a late-game quest reward**, never a shop item. Two paths: (a) a deeply corrupted Free player takes it from Frodo, as Saruman tried; (b) a Shadow player tracks Frodo down and takes it by force. Very late game only. **Once you hold it, Sauron hunts you**: the endgame becomes survival and pursuit. These are deliberate, non-canon branches that a player only enters through their own choices. | 2026-11-15 |
+| S10 | **First origins:** Hobbit of the Shire (Free) and Dunlending (Shadow). | 2026-11-15 |
+| S11 | **Card rewards stay as they are** (by enemy, not by allegiance): a Hobbit enemy doesn't drop orcs. | 2026-11-15 |
 
 ## Pillars
 
@@ -57,13 +62,13 @@ A start origin is picked by **race plus starter colour**, and it sets the start 
 | Easterling / Haradrim / Corsair | Shadow | Rhûn / Harad / Umbar | the muster of Mordor |
 | *Rohan / Gondor* | Free | Edoras / Minas Tirith | later, act II hubs |
 
-**Start small:** one Free origin and one Shadow origin first, e.g. **Hobbit of the Shire** and **Dunlending**. ❓
+**Start small (S10):** **Hobbit of the Shire** (Free) and **Dunlending** (Shadow).
 
-### How can the Shadow "win"? ❓
+### How can the Shadow "win"? (decided: S7–S9)
 The canon says Sauron falls, and S4 says not to contradict it. Options:
 
-1. **A personal victory within canon (recommended as the main path).** The Shadow player doesn't win the War; they win *their own story*. Survive the master's fall and seize what's left: become lord of Dunland after Saruman's ruin, take Umbar's fleet, escape with the Mouth of Sauron's hoard, or claim one of the lesser rings. Canon stays intact, and the ending is about power in the vacuum. That's very Tolkien (Saruman's own fall).
-2. **A secret "Shadow triumphant" ending (optional, clearly non-canon).** At maximum corruption, plus a hidden questline (e.g. capturing Gollum and delivering him to Barad-dûr before Mount Doom), the endgame branches into a framed "what if" ending, like a dark page of the Red Book. It breaks S4 on purpose, so only behind a deliberate choice.
+1. **A personal victory within canon (recommended as the main path).** The Shadow player doesn't win the War; they win *their own story*. Survive the master's fall and seize what's left: become lord of Dunland after Saruman's ruin, take Umbar's fleet, or escape with the Mouth of Sauron's hoard. (A lesser ring isn't a final prize; S7.) Canon stays intact, and the ending is about power in the vacuum. That's very Tolkien (Saruman's own fall).
+2. **The Ring branches (S8, S9, non-canon by deliberate choice).** A fallen Free player takes the Ring from Frodo, or a Shadow player tracks Frodo down and takes it. Holding it means Sauron hunts you: a survival and pursuit endgame. ❓ What "winning" looks like with the Ring (escape, mastery, being caught) is still to be designed.
 3. **Act victories.** Within acts, the Shadow side wins its own battles (raids, sieges of minor places) that canon doesn't describe. These are fine with both 1 and 2.
 
 ## Corruption: the Shadow meter (S5)
@@ -71,7 +76,7 @@ The canon says Sauron falls, and S4 says not to contradict it. Options:
 Built on LTR's own mechanic, **"the Ring tempts you"**.
 
 - **Sources:**
-  - **Lesser rings:** a **Ring of the Seven** (Thrór's ring, lost in Dol Guldur) as a central quest object for both sides.
+  - **Lesser rings** (mid-game only; they lose their power when the One is destroyed, S7): e.g. a **Ring of the Seven** (Thrór's ring, lost in Dol Guldur) as a quest object for both sides.
   - Using a **palantír**.
   - A **Morgul wound**.
   - Dark bargains and cruel choices in quests.
@@ -81,17 +86,17 @@ Built on LTR's own mechanic, **"the Ring tempts you"**.
   - Nazgûl and Gollum start following you.
   - Elves and Ents refuse to trade or talk.
   - Shadow factions open up.
-  - At the top, the endgame branch from option 2.
+  - At the top, a Free player falls (S8) and the Ring branch opens (S9).
 - **Cleansing** (Free side): Athelas and healers (Elrond, the Houses of Healing), Lembas, Galadriel's mirror. It's limited, so it's never free.
 - **For a Shadow player the same meter is "the favour of the Eye":** advancement and danger at once (the Eye notices you).
-- **The One Ring itself is never a pocket item.** It appears only as rumour and pursuit (act III). The current shop item "The One Ring" goes away or becomes a quest-locked replica/vision. ❓
+- **The One Ring** is only reachable through the late-game branches of S9 and isn't sold anywhere (removed from Umbar's shop on 2026-11-15; the item still exists for quests and the console). Before that it appears only as rumour and pursuit.
 
 ## Where Magic gets weird, and how we handle it
 
 | Weirdness | Handling |
 | --- | --- |
 | Casting canon heroes who are elsewhere | Cards are tales (pillar 5). Enemy decks rarely use Free Peoples legends. |
-| A Shadow player casting Frodo, or a Free player casting Sauron | Allowed mechanically. In fiction it's "a tale of your enemy's strength" (flavour text and reward wording only). Optionally, starter and reward pools lean on allegiance. ❓ |
+| A Shadow player casting Frodo, or a Free player casting Sauron | Allowed mechanically. In fiction it's "a tale of your enemy's strength" (flavour text and reward wording only). Reward pools stay as they are (S11). |
 | A Hobbit beating a Balrog | Boss encounters are framed as escapes, delays or holding actions in dialogue ("you held the bridge long enough"). The canon kill stays canon (Gandalf). |
 | The One Ring card in decks | It stays a card (it's in LTR). In fiction it's a *tale of the Ring*. The real Ring never comes into the player's hands. |
 | Fighting allies (Free Peoples duelists) | Framed as tests, contests of skill and honour duels (already the case for Rangers, Rohirrim and Elves). |
@@ -103,6 +108,6 @@ Built on LTR's own mechanic, **"the Ring tempts you"**.
 
 ## Next steps
 
-1. Settle the ❓ points: the first two origins, the Shadow "win" option, the One Ring item, and allegiance-leaning card pools.
+1. Confirm S8, and design what "winning" with the Ring looks like (S9).
 2. **Engine capability audit:** what the quest system supports today (stages, flags, dialogs, map flags, POI changes) and what world-state switching per act needs (biome enemy lists per flag, town variants, shop stock per flag). That tells us which parts are data and which need engine work.
 3. Then: write act I for the first two origins in detail (quest list, cameo, hub), and plan the work packages.

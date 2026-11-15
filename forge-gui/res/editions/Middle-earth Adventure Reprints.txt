@@ -185,8 +185,8 @@ Type=Other
 155 R Wrath of God @Kev Walker ${"artSet": "10E", "artNum": "61", "flavorName": "Wrath of the Valar"}
 # --- Staples: Blue ---
 156 C Boomerang @Arnie Swekel ${"artSet": "10E", "artNum": "70", "flavorName": "Flood of the Bruinen"}
-157 C Cancel @Mark Poole ${"artSet": "TSP", "artNum": "51"}
-158 C Claustrophobia @Ryan Pancoast ${"artSet": "ISD", "artNum": "48", "flavorName": "Trapped in the Barrow"}
+157 C Remand @Zoltan Boros ${"artSet": "MM2", "artNum": "55"}
+158 C Frost Lynx @Izzy ${"artSet": "M20", "artNum": "62", "flavorName": "Snow-beast of Forochel"}
 159 C Divination @Howard Lyon ${"artSet": "M10", "artNum": "49"}
 160 C Essence Scatter @Jon Foster ${"artSet": "M10", "artNum": "51"}
 161 C Frost Breath @Mike Bierek ${"artSet": "M12", "artNum": "54"}
@@ -194,7 +194,7 @@ Type=Other
 163 C Negate @Jeremy Jarvis ${"artSet": "MOR", "artNum": "43"}
 164 C Prodigal Sorcerer @Eric Deschamps ${"artSet": "EMA", "artNum": "67"}
 165 C Sea Gate Oracle @Daniel Ljunggren ${"artSet": "ROE", "artNum": "85", "flavorName": "Seer of the Grey Havens"}
-166 C Think Twice @Jim Nelson ${"artSet": "TSP", "artNum": "86"}
+166 C Mulldrifter @Eric Fortune ${"artSet": "CMD", "artNum": "52"}
 167 C Unsummon @Ron Spencer ${"artSet": "10E", "artNum": "122"}
 168 U Counterspell @Mark Poole ${"artSet": "LEA", "artNum": "54"}
 169 U Fog Bank @Howard Lyon ${"artSet": "M13", "artNum": "52"}
@@ -207,7 +207,7 @@ Type=Other
 175 C Doom Blade @Chippy ${"artSet": "M10", "artNum": "93"}
 176 C Drain Life @Douglas Shuler ${"artSet": "LEA", "artNum": "105"}
 177 C Duress @Lawrence Snelly ${"artSet": "USG", "artNum": "132"}
-178 C Murder @Allen Williams ${"artSet": "M13", "artNum": "101"}
+178 C Grasp of Darkness @Johann Bodin ${"artSet": "SOM", "artNum": "65"}
 179 C Sign in Blood @Howard Lyon ${"artSet": "M10", "artNum": "112"}
 180 C Tendrils of Corruption @Vance Kovacs ${"artSet": "M10", "artNum": "114"}
 181 C Terror @Adam Rex ${"artSet": "10E", "artNum": "182"}
