@@ -39,6 +39,16 @@ export DISPLAY=":$DISPLAY_NUM" DISPLAY_NUM FORGE_DEVAPI_PORT="$API_PORT"
 GAMECTL="python3 $ROOT/tools/middleearth/gamectl.py"
 mkdir -p "$OUT_DIR"
 
+# Stop the game started from this OUT_DIR and wait until it has really exited (and released the dev API port),
+# so a following start or test never talks to a dying instance.
+stop_game() {
+  [ -f "$PIDFILE" ] || return 0
+  local pid; pid=$(cat "$PIDFILE"); rm -f "$PIDFILE"
+  kill "$pid" 2>/dev/null || return 0
+  for _ in $(seq 1 100); do kill -0 "$pid" 2>/dev/null || return 0; sleep 0.2; done
+  kill -9 "$pid" 2>/dev/null || true; sleep 0.5
+}
+
 need() { command -v "$1" >/dev/null 2>&1 || { echo "missing tool: $1 (apt-get install -y $2)" >&2; exit 1; }; }
 
 cmd="${1:-help}"; shift || true
@@ -57,7 +67,7 @@ case "$cmd" in
     need Xvfb xvfb; need xdotool xdotool; need import imagemagick
     plane="${1:-MiddleEarth}"
     pgrep -f "Xvfb :$DISPLAY_NUM" >/dev/null || { Xvfb ":$DISPLAY_NUM" -screen 0 "${SCREEN}x24" >/dev/null 2>&1 & sleep 1; }
-    [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null || true
+    stop_game
     # Isolated game home (saves, settings) per OUT_DIR so parallel runs don't collide.
     settings="$GAME_HOME/.forge/adventure/settings.json"; mkdir -p "$(dirname "$settings")"
     api=1; [ -z "${NO_DEVAPI:-}" ] || api=0
@@ -135,6 +145,6 @@ EOF
     import -window root "$f"; echo "$f" ;;
   errors) grep -n -E 'Exception|Caused by|SEVERE|Can not place POI' "$LOG" | grep -v -E 'releases.atom|RSSReader' || echo "no exceptions" ;;
   log) tail -n "${1:-40}" "$LOG" ;;
-  stop) [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null; rm -f "$PIDFILE"; pkill -f "Xvfb :$DISPLAY_NUM" || true ;;
+  stop) stop_game; pkill -f "Xvfb :$DISPLAY_NUM" || true ;;
   *) sed -n 2,28p "$0" ;;
 esac

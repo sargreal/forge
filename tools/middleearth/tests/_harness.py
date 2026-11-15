@@ -82,6 +82,12 @@ def duel_with_spawn(g, enemy, timeout=60, attempts=3):
     restored and it tries again."""
     for attempt in range(attempts):
         s = g.state()
+        if s["location"].get("where") != "overworld":
+            # a previous attempt walked into a POI next to the start (e.g. Hobbiton): step back out first
+            step("in %s, leaving to the overworld" % (s["location"].get("poi") or {}).get("displayName", s["location"]))
+            g.console("leave")
+            time.sleep(2)
+            s = g.state()
         check(s["location"].get("where") == "overworld", "duel_with_spawn needs the overworld: %s" % s["location"])
         before = s["player"]
         g.console("remove enemy all")  # so no wandering enemy gets in the way
@@ -94,6 +100,12 @@ def duel_with_spawn(g, enemy, timeout=60, attempts=3):
             s = g.state()
             if s["scene"] == "DuelScene":
                 break
+            if s["location"].get("where") != "overworld":  # walked into a town/dungeon on the way
+                g.console("leave")
+                time.sleep(2)
+                g.console("remove enemy all")
+                g.console("spawn enemy '%s'" % enemy)
+                continue
             es = [o for o in s.get("objects", []) if o["type"] == "enemy" and o.get("enemy") == enemy]
             if not es:  # gone (despawned or out of reach): spawn it again next to the player
                 g.console("spawn enemy '%s'" % enemy)
@@ -105,7 +117,11 @@ def duel_with_spawn(g, enemy, timeout=60, attempts=3):
             g.teleport(es[0]["x"] + dx, es[0]["y"] + dy, unit="px")
             g.walk(es[0]["x"], es[0]["y"], unit="px", timeout_ms=4000)
         else:
-            raise Fail("no duel with %s" % enemy)
+            # no duel within this attempt (walk blocked by terrain/clutter, enemy wandered off): try again
+            # from a fresh spawn instead of failing the whole test
+            step("no duel with %s within %ds (attempt %d/%d), retrying" % (enemy, timeout, attempt + 1, attempts))
+            g.console("remove enemy all")
+            continue
         d = _start_duel(g, timeout)
         names = [p["name"] for p in d["players"]]
         if enemy in names:
