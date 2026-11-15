@@ -229,6 +229,8 @@ public class WorldSim {
     static int checkWorldMap(WorldData data, List<BiomeData> biomes, Array<PointOfInterestData> allPois, File tmxFile, String out) throws Exception {
         long t0 = System.currentTimeMillis();
         WorldMapTmx tmx = WorldMapTmx.read(new FileHandle(tmxFile), biomes, width, height);
+        roadsDefined = tmx.roadsDefined; // Phase 2d-1: maps with a Roads layer take their roads from it
+        roadLayer = tmx.roads;
         System.out.println("worldMap: " + tmxFile + " (" + tmx.mapWidth + "x" + tmx.mapHeight + ", seed " + tmx.seed + ", " + tmx.pois.size()
                 + " POI objects, start " + (tmx.start == null ? "missing" : Arrays.toString(tmx.start)) + ", parsed in " + (System.currentTimeMillis() - t0) + " ms)");
         biomeMap = masks(tmx.biomes);
@@ -287,10 +289,13 @@ public class WorldSim {
     static Map<String, Integer> unreachNames = new TreeMap<>();
     static boolean[][] walk;
 
-    static void line(int x0, int y0, int x1, int y1) { // world tile coords, y up (Bresenham as in World.java)
+    static boolean[][] roadsDefined, roadLayer; // [x][row] from the world map's Roads layers, or null
+
+    static void line(int x0, int y0, int x1, int y1, boolean road) { // world tile coords, y up (Bresenham as in World.java)
         int dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, err = dx - dy;
         for (int i = 0; i < 1000; i++) {
-            if (x0 >= 0 && y0 > 0 && x0 < width && y0 <= height) walk[x0][height - y0] = true;
+            if (x0 >= 0 && y0 > 0 && x0 < width && y0 <= height && !(road && roadsDefined != null && roadsDefined[x0][height - y0]))
+                walk[x0][height - y0] = true;
             if (x0 == x1 && y0 == y1) break;
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x0 += sx; } else if (e2 < dx) { err += dx; y0 += sy; }
@@ -311,8 +316,10 @@ public class WorldSim {
                 if (d > data.maxRoadDistance) continue;
                 if (d < bd) { bd = d; best = j; }
             }
-            if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y());
+            if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y(), true);
         }
+        if (roadsDefined != null) // road tiles of the Roads layers (towns' 3x3 squares included)
+            for (int x = 0; x < width; x++) for (int y = 0; y < height; y++) if (roadsDefined[x][y] && roadLayer[x][y]) walk[x][y] = true;
         totalStrict += unreachable(placed, strictNames, verbose ? "  not reachable over land and roads only: " : null); // stricter: no hidden POI paths
         for (int i = 0; i < others.size() - 1; i++) {
             Placed c = others.get(i); int best = -1; float bd = Float.MAX_VALUE;
@@ -320,7 +327,7 @@ public class WorldSim {
                 float d = (float) Math.hypot(c.x() - towns.get(j).x(), c.y() - towns.get(j).y());
                 if (d < bd) { bd = d; best = j; }
             }
-            if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y());
+            if (best >= 0) line((int) c.x(), (int) c.y(), (int) towns.get(best).x(), (int) towns.get(best).y(), false);
         }
         return unreachable(placed, unreachNames, verbose ? "  UNREACHABLE " : null);
     }

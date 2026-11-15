@@ -396,11 +396,37 @@ public class World implements Disposable, SaveFileContent {
         }
     }
 
+    /** Fork (Middle-earth) Phase 2d-1: puts the Clutter layer objects into mapObjectIds, in the generator's order. */
+    private void placeWorldMapClutter(WorldMapTmx worldMap, double heightPx) {
+        List<WorldMapTmx.Sprite> sprites = new ArrayList<>();
+        for (WorldMapTmx.Clutter c : worldMap.clutter)
+            sprites.add(new WorldMapTmx.Sprite(c.sprite, (float) c.x, (float) (heightPx - c.y)));
+        sprites.sort(WorldMapTmx.SPRITE_ORDER);
+        for (WorldMapTmx.Sprite s : sprites) {
+            BiomeSpriteData sprite = s.name == null ? null : data.GetBiomeSprites().getSpriteData(s.name);
+            if (sprite == null) {
+                System.err.println("worldMap: Clutter object with unknown sprite '" + s.name + "' at " + s.x + "," + s.yUp + ", skipped");
+                continue;
+            }
+            int key = mapObjectIds.containsKey(sprite.key()) ? mapObjectIds.intKey(sprite.key()) : mapObjectIds.put(sprite.key(), sprite, data.GetBiomeSprites());
+            mapObjectIds.putPosition(key, new Vector2(s.x, s.yUp));
+        }
+    }
+
+    private static boolean allTrue(boolean[][] flags) {
+        for (boolean[] column : flags)
+            for (boolean b : column)
+                if (!b)
+                    return false;
+        return true;
+    }
+
     /**
      * Fork (Middle-earth): writes the current world (each tile's own biome, all placed POIs with position, display name
      * and sprite variant, the player start and the generation seed) as a Tiled map plus tileset. See WorldMapTmx.
      * A {@code .tmx} file gives one map; anything else is a directory (or a {@code .world} file) for a Tiled world of
      * chunks of {@code chunkSize} tiles (0 = as the current worldMap, else 150) plus the overview.
+     * Phase 2d-1: also the road tiles (Roads layer) and every clutter sprite (Clutter layer).
      */
     public void exportWorldTmx(FileHandle file, int chunkSize) {
         int roadBit = data.GetBiomes().size();
@@ -420,6 +446,15 @@ public class World implements Disposable, SaveFileContent {
             pois.add(poi);
         }
         float[] start = {(int) (data.playerStartPosX * width * data.tileSize), mapHeightPx - (int) (data.playerStartPosY * height * data.tileSize)};
+        // Phase 2d-1: the Roads and Clutter layers hold the current roads and clutter, whether generated or read from the layers
+        WorldMapTmx.Layers layers = new WorldMapTmx.Layers();
+        layers.roads = new boolean[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                layers.roads[x][y] = (biomeMap[x][y] & (1L << roadBit)) != 0;
+        layers.clutter = new ArrayList<>();
+        for (Pair<Vector2, Integer> object : mapObjectIds.allPositions())
+            layers.clutter.add(new WorldMapTmx.Sprite(mapObjectIds.get(object.getValue()).name, object.getKey().x, object.getKey().y));
         long exportSeed = generationSeed;
         boolean tmx = "tmx".equalsIgnoreCase(file.extension());
         WorldMapTmx worldMap = null;
@@ -428,7 +463,7 @@ public class World implements Disposable, SaveFileContent {
         if (exportSeed == 0)
             exportSeed = worldMap != null && worldMap.seed != null ? worldMap.seed : seed;
         if (tmx) {
-            WorldMapTmx.write(file, data, own, pois, start, exportSeed);
+            WorldMapTmx.write(file, data, own, pois, start, exportSeed, layers);
             return;
         }
         // Phase 2c: a Tiled world (chunks + overview) into the directory, or next to the given .world file
@@ -436,7 +471,7 @@ public class World implements Disposable, SaveFileContent {
         if (chunkSize <= 0)
             chunkSize = worldMap != null && !worldMap.chunks.isEmpty() ? worldMap.chunks.get(0).width : WorldMapTmx.DEFAULT_CHUNK_SIZE;
         WorldMapTmx.writeWorld(worldFile ? file.parent() : file, worldFile ? file.nameWithoutExtension() : file.name(),
-                data, own, pois, start, exportSeed, chunkSize);
+                data, own, pois, start, exportSeed, chunkSize, layers);
     }
 
     private long measureGenerationTime(String msg, long lastTime) {
@@ -728,6 +763,8 @@ public class World implements Disposable, SaveFileContent {
 ///////// sort towns and build roads in between
 //////////////////
             List<Pair<PointOfInterest, PointOfInterest>> allSortedTowns = new ArrayList<>();
+            // Fork (Middle-earth) Phase 2d-1: tiles of maps with a "Roads" layer take their roads from it, not from the town lines
+            final boolean[][] roadsDefined = worldMap != null ? worldMap.roadsDefined : null;
 
             HashSet<Long> usedEdges = new HashSet<>();//edge is first 32 bits id of first id and last 32 bits id of second
             for (int i = 0; i < towns.size() - 1; i++) {
@@ -826,7 +863,7 @@ public class World implements Disposable, SaveFileContent {
             futuresArray = futures.toArray(new CompletableFuture<?>[0]);
             CompletableFuture.allOf(futuresArray).join();
             futures.clear();
-            for (Pair<PointOfInterest, PointOfInterest> townPair : allSortedTowns) {
+            for (Pair<PointOfInterest, PointOfInterest> townPair : roadsDefined != null && allTrue(roadsDefined) ? List.<Pair<PointOfInterest, PointOfInterest>>of() : allSortedTowns) {
                 futures.add(CompletableFuture.supplyAsync(()-> {
                     int startX = (int) townPair.getKey().getTilePosition(data.tileSize).x;
                     int startY = (int) townPair.getKey().getTilePosition(data.tileSize).y;
@@ -835,6 +872,7 @@ public class World implements Disposable, SaveFileContent {
                     for (int x = startX - 1; x < startX + 2; x++) {
                         for (int y = startY - 1; y < startY + 2; y++) {
                             if (x < 0 || y < 0 || x >= width || y >= height) continue;
+                            if (roadsDefined != null && roadsDefined[x][height - y - 1]) continue;
                             biomeMap[x][height - y - 1] |= (1L << biomeIndex[0]);
                             terrainMap[x][height - y - 1] = 0;
                         }
@@ -847,8 +885,10 @@ public class World implements Disposable, SaveFileContent {
                     int e2;
                     for (int i = 0; i < 1000; i++) {
                         if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
-                        biomeMap[startX][height - startY] |= (1L << biomeIndex[0]);
-                        terrainMap[startX][height - startY] = 0;
+                        if (roadsDefined == null || !roadsDefined[startX][height - startY]) {
+                            biomeMap[startX][height - startY] |= (1L << biomeIndex[0]);
+                            terrainMap[startX][height - startY] = 0;
+                        }
 
                         if (startX == x1 && startY == y1)
                             break;
@@ -870,6 +910,13 @@ public class World implements Disposable, SaveFileContent {
             futuresArray = futures.toArray(new CompletableFuture<?>[0]);
             CompletableFuture.allOf(futuresArray).join();
             futures.clear();
+            if (roadsDefined != null) // as a generated road: road bit, no terrain, decoration or collision
+                for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
+                        if (roadsDefined[x][y] && worldMap.roads[x][y]) {
+                            biomeMap[x][y] |= (1L << biomeIndex[0]);
+                            terrainMap[x][y] = 0;
+                        }
             currentTime[0] = measureGenerationTime("roads", currentTime[0]);
 
 //////////////////
@@ -940,7 +987,12 @@ public class World implements Disposable, SaveFileContent {
 ///////// distribute small rocks and trees across the map
 //////////////////
             mapObjectIds = new SpritesDataMap(getChunkSize(), data.tileSize, data.width / getChunkSize());
-            for (int x = 0; x < width; x++) {
+            // Fork (Middle-earth) Phase 2d-1: maps with a "Clutter" layer take their sprites from it. The random placement
+            // still runs (and draws the same random numbers) while any map lacks the layer, so those keep their usual clutter.
+            final boolean[][] clutterDefined = worldMap != null ? worldMap.clutterDefined : null;
+            final double heightPx = (double) height * data.tileSize;
+            final boolean generateClutter = clutterDefined == null || !allTrue(clutterDefined);
+            for (int x = 0; generateClutter && x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     int invertedHeight = height - y - 1;
                     int currentBiome = highestBiome(biomeMap[x][invertedHeight]);
@@ -954,6 +1006,13 @@ public class World implements Disposable, SaveFileContent {
                         double spriteNoise = (noise.eval(x / (double) width * noiseZoom * sprite.resolution, y / (double) invertedHeight * noiseZoom * sprite.resolution) + 1) / 2;
                         if (spriteNoise >= sprite.startArea && spriteNoise <= sprite.endArea) {
                             if (random.nextFloat() <= sprite.density) {
+                                float spriteX = (((float) x) + .25f + random.nextFloat() / 2) * data.tileSize;
+                                float spriteY = (((float) y + .25f) - random.nextFloat() / 2) * data.tileSize;
+                                if (clutterDefined != null) {
+                                    int[] tile = WorldMapTmx.tileOf(spriteX, heightPx - spriteY, data.tileSize, width, height);
+                                    if (clutterDefined[tile[0]][tile[1]])
+                                        break; // that map's Clutter layer decides
+                                }
                                 String spriteKey = sprite.key();
                                 int key;
                                 if (!mapObjectIds.containsKey(spriteKey)) {
@@ -962,13 +1021,15 @@ public class World implements Disposable, SaveFileContent {
                                 } else {
                                     key = mapObjectIds.intKey(spriteKey);
                                 }
-                                mapObjectIds.putPosition(key, new Vector2((((float) x) + .25f + random.nextFloat() / 2) * data.tileSize, (((float) y + .25f) - random.nextFloat() / 2) * data.tileSize));
+                                mapObjectIds.putPosition(key, new Vector2(spriteX, spriteY));
                                 break;//only on sprite per point
                             }
                         }
                     }
                 }
             }
+            if (clutterDefined != null)
+                placeWorldMapClutter(worldMap, heightPx);
             mapMarkerPixmap.dispose();
             biomeImage = pix;
             measureGenerationTime("sprites", currentTime[0]);

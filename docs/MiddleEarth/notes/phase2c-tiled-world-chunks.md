@@ -15,7 +15,7 @@ Everything is in `MiddleEarth/world/middleearth/`. `world.json` → `"worldMap":
 | `chunk_0_0.tmx` map properties | `seed`: the world-level properties live on chunk_0_0. This is a plain map property that Tiled edits normally (Map → Map Properties). The `.world` format has no properties of its own that Tiled reliably keeps on save, and a separate meta file couldn't be edited in Tiled. The reader takes `seed` from any chunk; if more than one chunk sets it, the reader logs it and `check.sh` reports an error. |
 | `biomes.tsx` + `biomes.png` | The biome tileset, unchanged (moved here from `world/`). |
 | `overview.tmx` + `overview.png` | Generated overview, see below. |
-| `map-of-middle-earth.jpg` | The user's reference image (commit `bc65e3002`), moved here from `world/`. |
+| `map-of-middle-earth.jpg` | The user's reference image (commit `bc65e3002`), moved here from `world/`. Since Phase 2d-1 it is in `docs/MiddleEarth/reference/` (not shipped), see [phase2d1-roads-clutter.md](phase2d1-roads-clutter.md). |
 
 **Chunk size.** 150 divides 900, so all chunks have the same size. Each chunk has 22,500 tiles, 1/36 of the old map. With `onlyShowAdjacentMaps` Tiled shows at most 3×3 chunks = 202,500 tiles (450×450), a quarter of the old 810,000, and only one chunk (22,500 tiles) is the editable document. 100×100 chunks (81 maps) would make the neighbourhood smaller (90,000 tiles) but would mean many more files and border crossings for POIs and painting. 225×225 (16 maps) would give 455,000 tiles in the neighbourhood, more than half of the old map. 150 is the middle ground. To change it later, run `exportWorldTmx <dir> <size>`; the edge chunks may then be smaller.
 
