@@ -1,6 +1,6 @@
 # Middle-earth Adventure: Story Concept
 
-> **Draft v0.2, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
+> **Draft v0.3, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
 
 ## Decisions so far
 
@@ -13,10 +13,11 @@
 | S5 | **Corruption meter:** in, and visible at first. It can be hidden or disabled later if it feels too explicit. | 2026-11-15 |
 | S6 | **Custom cards** are designed once the storyline is clear (follows PLAN D8). | 2026-11-15 |
 | S7 | **Shadow victory is personal**, within the canon (option 1): the Shadow player wins their own story in the vacuum after Sauron's fall. **No lesser ring as the final prize**: when the One is destroyed the others lose their power. Lesser rings can still be mid-game sources of temptation, but their power ends with the One. | 2026-11-15 |
-| S8 | **Too much corruption on the Free side** makes the player fall. Their story turns into a Shadow ending (see S9). ❓ *Coordinator's reading of the user's note; to be confirmed.* | 2026-11-15 |
+| S8 | **Too much corruption on the Free side** makes the player fall. Their story turns into a Shadow ending (see S9). (Confirmed by the user.) | 2026-11-15 |
 | S9 | **The One Ring is a late-game quest reward**, never a shop item. Two paths: (a) a deeply corrupted Free player takes it from Frodo, as Saruman tried; (b) a Shadow player tracks Frodo down and takes it by force. Very late game only. **Once you hold it, Sauron hunts you**: the endgame becomes survival and pursuit. These are deliberate, non-canon branches that a player only enters through their own choices. | 2026-11-15 |
 | S10 | **First origins:** Hobbit of the Shire (Free) and Dunlending (Shadow). | 2026-11-15 |
 | S11 | **Card rewards stay as they are** (by enemy, not by allegiance): a Hobbit enemy doesn't drop orcs. | 2026-11-15 |
+| S12 | **The Ring endgame** is a final confrontation, possibly a **boss duel against Sauron himself**. Several dark endings, depending on the outcome and on corruption (see "Ring endgame" below). | 2026-11-15 |
 
 ## Pillars
 
@@ -68,8 +69,23 @@ A start origin is picked by **race plus starter colour**, and it sets the start 
 The canon says Sauron falls, and S4 says not to contradict it. Options:
 
 1. **A personal victory within canon (recommended as the main path).** The Shadow player doesn't win the War; they win *their own story*. Survive the master's fall and seize what's left: become lord of Dunland after Saruman's ruin, take Umbar's fleet, or escape with the Mouth of Sauron's hoard. (A lesser ring isn't a final prize; S7.) Canon stays intact, and the ending is about power in the vacuum. That's very Tolkien (Saruman's own fall).
-2. **The Ring branches (S8, S9, non-canon by deliberate choice).** A fallen Free player takes the Ring from Frodo, or a Shadow player tracks Frodo down and takes it. Holding it means Sauron hunts you: a survival and pursuit endgame. ❓ What "winning" looks like with the Ring (escape, mastery, being caught) is still to be designed.
+2. **The Ring branches (S8, S9, non-canon by deliberate choice).** A fallen Free player takes the Ring from Frodo, or a Shadow player tracks Frodo down and takes it. Holding it means Sauron hunts you: a survival and pursuit endgame. The endgame is decided in S12; see "Ring endgame" below.
 3. **Act victories.** Within acts, the Shadow side wins its own battles (raids, sieges of minor places) that canon doesn't describe. These are fine with both 1 and 2.
+
+## Ring endgame (S12)
+
+The player holds the One Ring (S9) and Sauron hunts them. A pursuit phase (Nazgûl, the Eye's servants, Gollum) leads to a **final confrontation, ideally a boss duel against Sauron**. First sketch of the endings; several dark endings are intended:
+
+| Outcome | Corruption | Ending (draft) |
+| --- | --- | --- |
+| Win the duel | high | **The new Dark Lord**: you master the Ring and take Sauron's place. The darkest "triumph". |
+| Win the duel | lower | **The Ring-lord's burden**: you defeat Sauron but the Ring is now yours to carry; an ambiguous ending (rule, hide it, or cast it away). ❓ |
+| Lose the duel | high | **Sauron's general**: you lose the Ring, but Sauron sees your value and raises you as a captain of Mordor (in the spirit of the Witch-king or the Mouth of Sauron). |
+| Lose the duel | lower | **Cast down**: you lose the Ring and are broken or imprisoned, a Gollum-like ending. ❓ |
+| *(Free side, never took the Ring)* | — | The canon victory, seen from your margin of the War (the main Free ending). |
+| *(Shadow side, never took the Ring)* | — | The personal victory in the vacuum after Sauron's fall (S7). |
+
+Open ❓: the corruption thresholds between the rows; whether the "won" endings are reachable by Free and Shadow players alike; how hard the Sauron duel should be (deck, life, special rules such as "the Ring tempts you" every turn).
 
 ## Corruption: the Shadow meter (S5)
 
@@ -108,6 +124,6 @@ Built on LTR's own mechanic, **"the Ring tempts you"**.
 
 ## Next steps
 
-1. Confirm S8, and design what "winning" with the Ring looks like (S9).
+1. Refine the Ring endgame table (S12) when act III is designed.
 2. **Engine capability audit:** what the quest system supports today (stages, flags, dialogs, map flags, POI changes) and what world-state switching per act needs (biome enemy lists per flag, town variants, shop stock per flag). That tells us which parts are data and which need engine work.
 3. Then: write act I for the first two origins in detail (quest list, cameo, hub), and plan the work packages.
