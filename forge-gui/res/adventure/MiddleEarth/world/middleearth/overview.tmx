@@ -6,7 +6,7 @@
  <imagelayer id="1" name="Biomes" locked="1">
   <image source="overview.png" width="900" height="900"/>
  </imagelayer>
- <imagelayer id="2" name="Reference" opacity="0.6" offsetx="-361.25" offsety="38.73">
+ <imagelayer id="2" name="Reference" opacity="0.6" offsetx="-328.481" offsety="35.089">
   <image source="../../../../../../docs/MiddleEarth/reference/map-of-middle-earth.jpg" width="1600" height="900"/>
  </imagelayer>
  <objectgroup id="3" name="Chunks" locked="1">
