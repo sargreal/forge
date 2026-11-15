@@ -89,12 +89,20 @@ def duel_with_spawn(g, enemy, timeout=60, attempts=3):
         out = g.console("spawn enemy '%s'" % enemy).get("output", "")
         check("Spawn" in out, "could not spawn %s: %s" % (enemy, out))
         t_end = time.time() + timeout
+        tries = 0
         while time.time() < t_end:
             s = g.state()
             if s["scene"] == "DuelScene":
                 break
             es = [o for o in s.get("objects", []) if o["type"] == "enemy" and o.get("enemy") == enemy]
-            check(es, "spawned %s not on the map" % enemy)
+            if not es:  # gone (despawned or out of reach): spawn it again next to the player
+                g.console("spawn enemy '%s'" % enemy)
+                time.sleep(0.5)
+                continue
+            # step next to it first, so the walk is short and no new spawn gets in between
+            dx, dy = [(-24, 0), (24, 0), (0, -24), (0, 24)][tries % 4]  # another side if one is blocked
+            tries += 1
+            g.teleport(es[0]["x"] + dx, es[0]["y"] + dy, unit="px")
             g.walk(es[0]["x"], es[0]["y"], unit="px", timeout_ms=4000)
         else:
             raise Fail("no duel with %s" % enemy)

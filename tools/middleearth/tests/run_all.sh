@@ -12,7 +12,8 @@ JAR="${FORGE_JAR:-$(ls "$ROOT"/forge-gui-mobile-dev/target/forge-gui-mobile-dev-
 mkdir -p "$ROOT/.me-test/check-home"
 (cd "$ROOT/forge-gui" && java -Duser.home="$ROOT/.me-test/check-home" -Djava.awt.headless=true -cp "$JAR" \
   "$ROOT/tools/middleearth/FlagConditionCheck.java" 2>/dev/null | grep -E "^(OK|FAIL)") || fail=1
-for t in "$HERE"/intro_walkthrough.py "$HERE"/origin_start.py "$HERE"/flags_and_world_state.py; do
+for t in "$HERE"/intro_walkthrough.py "$HERE"/origin_start.py "$HERE"/flags_and_world_state.py \
+         "$HERE"/corruption.py "$HERE"/boss_loss.py "$HERE"/locked_item.py; do
   echo "== $(basename "$t")"
   python3 "$t" || fail=1
 done
