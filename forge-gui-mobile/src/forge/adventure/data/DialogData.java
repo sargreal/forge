@@ -150,5 +150,6 @@ public class DialogData implements Serializable {
         public QueryQuestFlag getQuestFlag = null; //Check for value of a flag { <flagID>, <comparison>, <value> }
         public QueryQuestFlag getMapFlag = null;   //Check for a local dungeon flag ("map flag").
         public boolean not = false;                //Reverse the result of a condition ("actorID":"XX" + "not":true => true if XX is not in the map.)
+        public FlagCondition flag = null;          //Fork (Middle-earth): shared flag condition (unset flags read as 0), see FlagCondition.
     }
 }

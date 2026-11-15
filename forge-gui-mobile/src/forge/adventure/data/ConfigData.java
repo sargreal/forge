@@ -42,5 +42,6 @@ public class ConfigData {
     public boolean enableExtraBattleBackgroundsByDefault;
     public EffectData globalEffect;
     public ModifierData[] modifiers; //Optional rules the player can turn on at new game.
+    public OriginData[] origins; //Fork (Middle-earth): game starts by race/colour; none = upstream start (Spawn, quest 28).
 
 }

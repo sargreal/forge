@@ -19,6 +19,7 @@ import com.github.tommyettinger.textra.TextraButton;
 import com.github.tommyettinger.textra.TextraLabel;
 import com.github.tommyettinger.textra.TypingLabel;
 import forge.Forge;
+import forge.adventure.data.OriginData;
 import forge.adventure.data.ModifierData;
 import forge.adventure.data.DialogData;
 import forge.adventure.data.DifficultyData;
@@ -346,6 +347,18 @@ public class NewGameScene extends MenuScene {
      * colors by color id ("W") or color-id name. Returns an error message, or null when the game is starting.
      */
     public String devApiStart(String name, String raceName, String genderName, String difficultyName, String modeName, String colors) {
+        return devApiStart(name, raceName, genderName, difficultyName, modeName, colors, null);
+    }
+
+    public String devApiStart(String name, String raceName, String genderName, String difficultyName, String modeName, String colors, String originName) {
+        if (originName != null) {
+            if (OriginData.byName(originName) == null) {
+                StringBuilder names = new StringBuilder();
+                for (OriginData o : OriginData.all()) names.append(names.length() > 0 ? "," : "").append(o.name);
+                return "unknown origin " + originName + ", available: " + names;
+            }
+            devApiOrigin = originName;
+        }
         if (modeName != null) {
             int m = -1;
             for (int i = 0; i < modes.size; i++)
@@ -386,6 +399,19 @@ public class NewGameScene extends MenuScene {
     }
 
     boolean started = false;
+    private String devApiOrigin; //Fork (Middle-earth): origin forced by the dev API (also hidden ones)
+
+    private String selectedRaceName() {
+        Array<String> races = HeroListData.instance().getRaces();
+        int r = race.getCurrentIndex();
+        return r >= 0 && r < races.size ? races.get(r) : null;
+    }
+
+    private String selectedColorId() {
+        String[] ids = Config.instance().colorIds();
+        int c = colorId.getCurrentIndex();
+        return ids != null && c >= 0 && c < ids.length ? ids[c] : null;
+    }
 
     public boolean start() {
         if (started)
@@ -408,10 +434,10 @@ public class NewGameScene extends MenuScene {
             AdventurePlayer.current().setModifiers(chosenModifiers);
             GamePlayerUtil.getGuiPlayer().setName(selectedName.getText());
             SoundSystem.instance.changeBackgroundTrack();
-            WorldStage.getInstance().enterSpawnPOI();
-            if (AdventurePlayer.current().getQuests().stream().noneMatch(q -> q.getID() == 28)) {
-                AdventurePlayer.current().addQuest("28", true); //Temporary link to Shandalar main questline
-            }
+            //Fork (Middle-earth): config.json origins choose start POI, intro quest and flags; none = Spawn + quest 28.
+            OriginData origin = devApiOrigin != null ? OriginData.byName(devApiOrigin) : OriginData.select(selectedRaceName(), selectedColorId());
+            devApiOrigin = null;
+            OriginData.beginNewGame(origin);
             Forge.switchScene(GameScene.instance());
         };
         Forge.setTransitionScreen(new TransitionScreen(runnable, null, false, true, Forge.getLocalizer().getMessage("lblGeneratingWorld")));

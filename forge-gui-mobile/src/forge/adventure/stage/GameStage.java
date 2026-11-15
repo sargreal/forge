@@ -713,7 +713,8 @@ public abstract class GameStage extends Stage {
     }
 
     public void resetPlayerLocation() {
-        PointOfInterest poi = Current.world().findPointsOfInterest("Spawn");
+        PointOfInterest respawn = Current.world().findPointsOfInterest(Current.player().getRespawnPOI()); //Fork: origin respawn POI, default "Spawn"
+        final PointOfInterest poi = respawn != null ? respawn : Current.world().findPointsOfInterest("Spawn");
         if (poi != null) {
             Forge.advFreezePlayerControls = true;
             PlayerSprite playerSprite = getPlayerSprite();

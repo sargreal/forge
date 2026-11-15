@@ -59,6 +59,7 @@ public class RewardData implements Serializable {
     public Deck cardPack;
     public String sourceDeck;
     public String minDate;
+    public FlagCondition condition; //Fork (Middle-earth): the entry gives nothing unless this holds (checked when generated)
 
     public RewardData() { }
 
@@ -78,6 +79,7 @@ public class RewardData implements Serializable {
         editions         = rewardData.editions == null ? null : rewardData.editions.clone();
         colors           = rewardData.colors == null ? null : rewardData.colors.clone();
         rarity           = rewardData.rarity == null ? null : rewardData.rarity.clone();
+        condition        = rewardData.condition;
         subTypes         = rewardData.subTypes == null ? null : rewardData.subTypes.clone();
         cardTypes        = rewardData.cardTypes == null ? null : rewardData.cardTypes.clone();
         superTypes       = rewardData.superTypes == null ? null : rewardData.superTypes.clone();
@@ -177,6 +179,8 @@ public class RewardData implements Serializable {
         if (allCards==null)
             initializeAllCards();
         Array<Reward> ret=new Array<>();
+        if (condition != null && !condition.eval())
+            return ret; //Fork (Middle-earth): flag-conditioned reward entry
 
         if (probability == 0 || rewardRandom.nextFloat() <= probability) {
             if(type == null || type.isEmpty())

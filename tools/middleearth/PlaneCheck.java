@@ -1,6 +1,7 @@
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.ObjectMap;
 import forge.GuiMobile;
 import forge.adventure.data.*;
 import forge.adventure.util.CardUtil;
@@ -116,6 +117,7 @@ public class PlaneCheck {
         System.out.println("== POI map / arena / quest enemy references");
         Set<String> mapEnemies = checkMapEnemyReferences(pois, enemies);
         checkQuestEnemyTags(json, enemies);
+        checkStoryData(json, cd, biomes, enemyByName, pois);
 
         if (allowed.isEmpty()) {
             warn("no allowedEditions configured - skipping card pool checks");
@@ -503,6 +505,19 @@ public class PlaneCheck {
                     if (value == null || value.isEmpty()) continue;
                     String where = h.name() + " (" + p.name + ")";
                     switch (name) {
+                        case "spawnCondition" -> {
+                            try {
+                                for (String prob : FlagCondition.validate("spawnCondition", FlagCondition.parse(value)))
+                                    error(where + ": " + prob);
+                            } catch (IllegalArgumentException ex) { error(where + ": " + ex.getMessage() + " (ignored by the game)"); }
+                        }
+                        case "dialog", "defeatDialog" -> {
+                            try {
+                                Json dj = new Json();
+                                DialogData[] dd = value.trim().startsWith("[") ? dj.fromJson(DialogData[].class, value) : new DialogData[]{dj.fromJson(DialogData.class, value)};
+                                for (DialogData d : dd) checkDialogConditions(d, where + " " + name);
+                            } catch (Exception ignored) { } // dialog syntax is not this check's business
+                        }
                         case "enemy" -> {
                             refs++;
                             if (enemyByRawName(enemies, value) != null) found.add(value);
@@ -1169,5 +1184,112 @@ public class PlaneCheck {
             error(path + " (" + src + "): " + t.getMessage());
             return null;
         }
+    }
+
+    // ---------- story engine (fork): flag conditions, enemyOverrides, reward/POI conditions, origins ----------
+    static void flagProblems(String where, FlagCondition c) {
+        if (c == null) return;
+        List<String> out = new ArrayList<>();
+        c.validate(where, out);
+        for (String p : out) error(p);
+    }
+
+    static void checkDialogConditions(DialogData d, String where) {
+        if (d == null) return;
+        if (d.condition != null) for (DialogData.ConditionData c : d.condition)
+            if (c != null) flagProblems(where + " condition.flag", c.flag);
+        if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
+    }
+
+    static void checkRewardConditions(RewardData[] rewards, String where) {
+        if (rewards == null) return;
+        for (RewardData r : rewards) if (r != null) {
+            flagProblems(where + " reward condition", r.condition);
+            checkRewardConditions(r.cardUnion, where);
+            checkRewardConditions(r.rotation, where);
+        }
+    }
+
+    static void checkStoryData(Json json, ConfigData cd, List<BiomeData> biomes, Map<String, EnemyData> enemyByName, Array<PointOfInterestData> pois) {
+        System.out.println("== Story data (flag conditions, enemyOverrides, origins)");
+        int conds = 0;
+        for (BiomeData b : biomes) {
+            if (b.enemyOverrides == null) continue;
+            for (int i = 0; i < b.enemyOverrides.length; i++) {
+                BiomeData.EnemyOverride o = b.enemyOverrides[i];
+                String w = "biome " + b.name + " enemyOverrides[" + i + "]";
+                if (o == null) { error(w + ": empty"); continue; }
+                conds++;
+                if (o.condition == null) warn(w + ": no condition (always applies)");
+                flagProblems(w + ".condition", o.condition);
+                String mode = o.mode == null ? "replace" : o.mode.toLowerCase(Locale.ROOT);
+                if (!Set.of("replace", "add", "remove").contains(mode)) error(w + ": unknown mode '" + o.mode + "' (replace, add, remove)");
+                if (o.enemies == null || o.enemies.length == 0) { if (!mode.equals("remove")) warn(w + ": no enemies"); }
+                else for (String e : o.enemies)
+                    if (!enemyByName.containsKey(e)) error(w + ": unknown enemy '" + e + "'");
+            }
+        }
+        Set<String> poiNames = new HashSet<>();
+        if (pois != null) for (PointOfInterestData p : pois) {
+            poiNames.add(p.name);
+            if (p.questFlagsToDeactivate != null) for (DialogData.ActionData.QuestFlag f : p.questFlagsToDeactivate)
+                if (f == null || f.key == null || f.key.isEmpty()) error("POI " + p.name + ": questFlagsToDeactivate entry without key");
+            if (p.condition != null) { conds++; flagProblems("POI " + p.name + " condition", p.condition); }
+            if (!p.active) warn("POI " + p.name + ": active = false (never shown)");
+        }
+        Array<ShopData> shops = json.fromJson(Array.class, ShopData.class, Config.instance().getFile(Paths.SHOPS));
+        if (shops != null) for (ShopData sh : shops) if (sh.rewards != null) checkRewardConditions(sh.rewards.toArray(RewardData.class), "shop " + sh.name);
+        for (EnemyData e : enemyByName.values()) checkRewardConditions(e.rewards, "enemy " + e.getName());
+        Array<AdventureQuestData> quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS));
+        Set<String> questIds = new HashSet<>();
+        if (quests != null) for (AdventureQuestData q : quests) {
+            questIds.add(String.valueOf(q.getID()));
+            String w = "quest " + q.getID();
+            checkDialogConditions(q.offerDialog, w); checkDialogConditions(q.prologue, w); checkDialogConditions(q.epilogue, w);
+            checkDialogConditions(q.failureDialog, w); checkDialogConditions(q.declinedDialog, w);
+            if (q.stages != null) for (AdventureQuestStage st : q.stages) {
+                checkDialogConditions(st.prologue, w); checkDialogConditions(st.epilogue, w); checkDialogConditions(st.failureDialog, w);
+                if (st.condition == null) continue;
+                conds++;
+                flagProblems(w + " stage " + st.id + " condition", st.condition);
+                String obj = String.valueOf(st.objective);
+                if (!Set.of("QuestFlag", "CharacterFlag", "MapFlag").contains(obj))
+                    warn(w + " stage " + st.id + ": condition is only used by QuestFlag/CharacterFlag/MapFlag stages, not " + obj);
+            }
+        }
+        if (cd.origins != null) {
+            com.badlogic.gdx.utils.JsonValue heroes = new com.badlogic.gdx.utils.JsonReader().parse(Config.instance().getFile(Paths.HEROES));
+            Set<String> races = new HashSet<>();
+            for (com.badlogic.gdx.utils.JsonValue h = heroes.get("heroes").child; h != null; h = h.next) races.add(h.getString("name", "?"));
+            Set<String> colorIds = cd.colorIds == null ? Set.of() : new HashSet<>(Arrays.asList(cd.colorIds));
+            Set<String> listed = new HashSet<>();
+            for (BiomeData b : biomes) if (b.pointsOfInterest != null) listed.addAll(Arrays.asList(b.pointsOfInterest));
+            Set<String> names = new HashSet<>();
+            boolean catchAll = false;
+            for (int i = 0; i < cd.origins.length; i++) {
+                OriginData o = cd.origins[i];
+                String w = "origin " + (o == null || o.name == null ? "#" + i : "'" + o.name + "'");
+                if (o == null) { error(w + ": empty"); continue; }
+                if (o.name == null || o.name.isEmpty()) error(w + ": no name");
+                else if (!names.add(o.name.toLowerCase(Locale.ROOT))) error(w + ": duplicate name");
+                if (o.races != null) for (String r : o.races) if (!races.contains(r)) error(w + ": unknown race '" + r + "' (heroes.json)");
+                if (o.colors != null) for (String c : o.colors) if (!colorIds.contains(c)) error(w + ": unknown colour id '" + c + "' (config colorIds)");
+                for (String poi : new String[]{o.startPOI, o.respawnPOI}) {
+                    if (poi == null || poi.isEmpty()) continue;
+                    if (!poiNames.contains(poi)) error(w + ": unknown POI '" + poi + "'");
+                    else if (!listed.contains(poi)) warn(w + ": POI '" + poi + "' is listed by no biome (not placed)");
+                }
+                if (o.startPosition != null && o.startPosition.length != 2) error(w + ": startPosition must be [x, y] (tiles)");
+                if (o.introQuest != null && !o.introQuest.isEmpty() && !questIds.contains(o.introQuest.trim()))
+                    error(w + ": unknown introQuest " + o.introQuest);
+                for (ObjectMap<String, Integer> m : Arrays.asList(o.characterFlags, o.questFlags))
+                    if (m != null) for (ObjectMap.Entry<String, Integer> e : m)
+                        if (e.value == null || e.value < Byte.MIN_VALUE || e.value > Byte.MAX_VALUE) error(w + ": flag " + e.key + " = " + e.value + " is outside -128..127");
+                if (!o.hidden && (o.races == null || o.races.length == 0) && (o.colors == null || o.colors.length == 0)) catchAll = true;
+            }
+            if (!catchAll) warn("origins: no visible origin without races/colors; unmatched characters get the upstream start (Spawn, quest 28)");
+            info(cd.origins.length + " origins");
+        }
+        info(conds + " flag conditions on biomes, POIs and quest stages checked");
     }
 }

@@ -59,6 +59,8 @@ public class AdventureQuestStage implements Serializable {
     private transient List<Integer> _parsedPrerequisiteNames;
     private transient List<PointOfInterest> validPOIs;
     public boolean allowInactivePOI = false;
+    /** Fork (Middle-earth): for QuestFlag/CharacterFlag/MapFlag objectives, complete when this holds (instead of mapFlag >= mapFlagValue). */
+    public FlagCondition condition;
 
     public UUID stageID;
 
@@ -238,6 +240,7 @@ public class AdventureQuestStage implements Serializable {
         this.deliveryItem = other.deliveryItem;
         this.worldMapOK = other.worldMapOK;
         this.allowInactivePOI = other.allowInactivePOI;
+        this.condition = other.condition;
     }
 
 
@@ -265,9 +268,20 @@ public class AdventureQuestStage implements Serializable {
         return validPOIs;
     }
 
+    /** Fork (Middle-earth): true when this is a flag stage with a {@link #condition} that holds now. */
+    public boolean flagConditionHolds() {
+        return condition != null && (objective == QuestFlag || objective == CharacterFlag || objective == MapFlag) && condition.eval();
+    }
+
     public AdventureQuestController.QuestStatus handleEvent(AdventureQuestEvent event) {
         if (objective == Fetch && hasRequiredFetchItems()) {
             status = COMPLETE;
+            return status;
+        }
+        if (condition != null && (objective == QuestFlag || objective == CharacterFlag || objective == MapFlag)) {
+            //Fork (Middle-earth): any event (and stage activation) re-checks the condition, so a flag that already holds completes the stage too.
+            if (flagConditionHolds())
+                status = COMPLETE;
             return status;
         }
 
