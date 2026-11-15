@@ -58,6 +58,7 @@ def duel_with_spawn(g, enemy, timeout=60):
     state once turn 1 has begun (conceding during the coin flip can hang the game)."""
     s = g.state()
     check(s["location"].get("where") == "overworld", "duel_with_spawn needs the overworld: %s" % s["location"])
+    g.console("remove enemy all")  # so no wandering enemy gets in the way
     out = g.console("spawn enemy '%s'" % enemy).get("output", "")
     check("Spawn" in out, "could not spawn %s: %s" % (enemy, out))
     t_end = time.time() + timeout
@@ -82,6 +83,8 @@ def duel_with_spawn(g, enemy, timeout=60):
             continue
         d = st.get("duel") or {}
         if d.get("players") and not autoplaying:
+            names = [p["name"] for p in d["players"]]
+            check(enemy in names, "duel against %s instead of %s" % (names, enemy))
             g.duel("autoplay")
             autoplaying = True
         if autoplaying and d.get("turn", 0) >= 1:  # past the coin flip and mulligans

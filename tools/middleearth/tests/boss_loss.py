@@ -4,7 +4,8 @@
 1. A normal enemy (Badger): conceding costs life and gold as before.
 2. The fixture enemy "Test Boss Loss" (boss, `onDefeat.noPenalty`): conceding costs nothing, the player is not
    respawned, the `onDefeat.action`s run (setQuestFlag, addQuestFlag) and the `onDefeat.dialog` is shown; its option
-   runs its action.
+   runs its action. `runCommand` runs an allow-listed command (give gold 7) and refuses another (resetQuests, which
+   would wipe the quest flags just set).
 
 Usage: tools/middleearth/tests/boss_loss.py [--keep]  (own game unless one answers; DISPLAY_NUM)
 """
@@ -52,7 +53,7 @@ def run(g):
     g.wait("dialogOpen", 15000)
     s = g.state()
     p1 = s["player"]
-    check(p1["life"] == p0["life"] and p1["gold"] == p0["gold"], "onDefeat.noPenalty: %s -> %s" % (p0, p1))
+    check(p1["life"] == p0["life"] and p1["gold"] == p0["gold"] + 7, "onDefeat.noPenalty (+7 gold from runCommand): %s -> %s" % (p0, p1))
     check(s["location"].get("where") == "overworld", "no respawn expected: %s" % s["location"])
     pos1 = s["location"]["pos"]["px"]
     check(abs(pos1["x"] - pos0["x"]) < 200 and abs(pos1["y"] - pos0["y"]) < 200, "player moved: %s -> %s" % (pos0, pos1))

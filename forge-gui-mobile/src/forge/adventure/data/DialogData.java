@@ -96,6 +96,7 @@ public class DialogData implements Serializable {
         public FlagAdd addQuestFlag;      //Fork (run 2): add a signed value to a quest flag, clamped.
         public FlagAdd addCharacterFlag;  //Fork (run 2): same for a character flag.
         public FlagAdd addMapFlag;        //Fork (run 2): same for a map flag (in a map only).
+        public String runCommand;         //Fork (run 2): a console command from the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS).
 
         public RewardData[] grantRewards = new RewardData[0];   //launch a RewardScene with the provided data.
         public RewardData[] grantRewardsChoice = new RewardData[0];   //launch a RewardScene choice with the provided data.
@@ -138,6 +139,7 @@ public class DialogData implements Serializable {
             addQuestFlag = other.addQuestFlag;
             addCharacterFlag = other.addCharacterFlag;
             addMapFlag = other.addMapFlag;
+            runCommand = other.runCommand;
         }
     }
 

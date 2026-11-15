@@ -37451,7 +37451,9 @@
       "noPenalty": true,
       "action": [
         { "setQuestFlag": { "key": "test_boss_lost", "val": 1 } },
-        { "addQuestFlag": { "key": "test_boss_corruption", "val": 5, "min": 0, "max": 100 } }
+        { "addQuestFlag": { "key": "test_boss_corruption", "val": 5, "min": 0, "max": 100 } },
+        { "runCommand": "give gold 7" },
+        { "runCommand": "resetQuests" }
       ],
       "dialog": {
         "text": "Test fixture: you lost, but the story goes on.",

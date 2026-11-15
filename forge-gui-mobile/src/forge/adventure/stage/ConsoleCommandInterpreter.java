@@ -126,6 +126,32 @@ public class ConsoleCommandInterpreter {
         return currentCommand.function.apply(parameters);
     }
 
+    /**
+     * Fork (run 2): the commands a dialog action {@code runCommand} may run (plane data only). Debug, file-writing,
+     * reset and cheat commands (god, exportMap, resetQuests, leave, crack, give boosters...) are not on it.
+     */
+    public static final String[] DATA_COMMANDS = {"teleport to", "spawn enemy", "give gold", "give shards", "give item",
+            "give card", "give quest", "flag set", "flag advance", "flag add", "heal", "fullHeal", "hide", "sprint", "remove enemy"};
+
+    /** Fork (run 2): true when {@code text} starts with an allow-listed command path ({@link #DATA_COMMANDS}). */
+    public static boolean isDataCommand(String text) {
+        if (text == null) return false;
+        String t = text.trim().replaceAll("\\s+", " ");
+        for (String c : DATA_COMMANDS)
+            if (t.equals(c) || t.startsWith(c + " ")) return true;
+        return false;
+    }
+
+    /** Fork (run 2): runs a command from plane data (dialog action runCommand); refuses commands off the allowlist. */
+    public String runFromData(String text) {
+        if (!isDataCommand(text)) {
+            String msg = "runCommand refused (not allowed from data): " + text;
+            System.err.println(msg);
+            return msg;
+        }
+        return command(text.trim());
+    }
+
     void registerCommand(String[] path, Function<String[], String> function) {
         if (path.length == 0) return;
         Command currentCommand = root;

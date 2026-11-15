@@ -1202,7 +1202,7 @@ public class PlaneCheck {
         if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
     }
 
-    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag. */
+    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag, runCommand. */
     static void checkDialogAction(DialogData.ActionData a, String where) {
         String[] names = {"addQuestFlag", "addCharacterFlag", "addMapFlag"};
         DialogData.ActionData.FlagAdd[] adds = {a.addQuestFlag, a.addCharacterFlag, a.addMapFlag};
@@ -1214,6 +1214,10 @@ public class PlaneCheck {
             if (f.min > f.max) error(w + ": min " + f.min + " > max " + f.max);
             if (f.min < Byte.MIN_VALUE || f.max > Byte.MAX_VALUE) warn(w + ": min/max outside -128..127 (the flag range caps them)");
             if (f.val == 0) warn(w + ": val 0 does nothing");
+        }
+        if (a.runCommand != null && !a.runCommand.trim().isEmpty() && !forge.adventure.stage.ConsoleCommandInterpreter.isDataCommand(a.runCommand)) {
+            String m = where + " action runCommand '" + a.runCommand + "': not on the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS), the game refuses it";
+            if (where.startsWith("enemy Test ")) info(m + " (test fixture)"); else error(m);
         }
     }
 

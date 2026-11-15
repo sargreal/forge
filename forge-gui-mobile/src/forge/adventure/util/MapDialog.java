@@ -26,6 +26,7 @@ import forge.adventure.player.AdventurePlayer;
 import forge.adventure.scene.TileMapScene;
 import forge.adventure.stage.GameHUD;
 import forge.adventure.scene.RewardScene;
+import forge.adventure.stage.ConsoleCommandInterpreter;
 import forge.adventure.stage.MapStage;
 import forge.adventure.world.WorldSave;
 import forge.card.ColorSet;
@@ -455,6 +456,8 @@ public class MapDialog {
                 FlagCondition.addFlag("character", E.addCharacterFlag.key, E.addCharacterFlag.val, E.addCharacterFlag.min, E.addCharacterFlag.max);
             if (E.addMapFlag != null && E.addMapFlag.key != null && !E.addMapFlag.key.isEmpty())
                 FlagCondition.addFlag("map", E.addMapFlag.key, E.addMapFlag.val, E.addMapFlag.min, E.addMapFlag.max);
+            if (E.runCommand != null && !E.runCommand.trim().isEmpty()) //Fork (run 2): allow-listed console command
+                ConsoleCommandInterpreter.getInstance().runFromData(E.runCommand);
             if (E.setEffect != null) { //Replace current effects.
                 EnemySprite EN = stage.getEnemyByID(parentID);
                 EN.effect = E.setEffect;
