@@ -497,6 +497,22 @@ public class ConsoleCommandInterpreter {
             if (s.length < 2) return "Usage: flag advance <quest|character|map> <key>";
             return setFlag(s[0], s[1], 0, true);
         });
+        registerCommand(new String[]{"flag", "add"}, s -> { //Fork (run 2): signed, clamped add
+            if (s.length < 3) return "Usage: flag add <quest|character|map> <key> <delta> [min] [max]";
+            int d, lo = Byte.MIN_VALUE, hi = Byte.MAX_VALUE;
+            try {
+                d = Integer.parseInt(s[2]);
+                if (s.length > 3) lo = Integer.parseInt(s[3]);
+                if (s.length > 4) hi = Integer.parseInt(s[4]);
+            } catch (Exception e) { return "Can not convert the numbers"; }
+            String scope = FlagCondition.normalizeScope(s[0]);
+            if (scope == null) return "Unknown scope " + s[0] + " (quest, character, map)";
+            Integer v = FlagCondition.addFlag(scope, s[1], d, lo, hi);
+            if (v == null) return "Map flags only inside a map.";
+            if (MapStage.getInstance().isInMap())
+                forge.adventure.util.AdventureQuestController.instance().showQuestDialogs(MapStage.getInstance());
+            return scope + ":" + s[1] + " = " + v;
+        });
         registerCommand(new String[]{"flag", "get"}, s -> {
             if (s.length < 2) return "Usage: flag get <quest|character|map> <key>";
             String scope = FlagCondition.normalizeScope(s[0]);

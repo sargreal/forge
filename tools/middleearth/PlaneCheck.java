@@ -1198,7 +1198,23 @@ public class PlaneCheck {
         if (d == null) return;
         if (d.condition != null) for (DialogData.ConditionData c : d.condition)
             if (c != null) flagProblems(where + " condition.flag", c.flag);
+        if (d.action != null) for (DialogData.ActionData a : d.action) if (a != null) checkDialogAction(a, where);
         if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
+    }
+
+    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag. */
+    static void checkDialogAction(DialogData.ActionData a, String where) {
+        String[] names = {"addQuestFlag", "addCharacterFlag", "addMapFlag"};
+        DialogData.ActionData.FlagAdd[] adds = {a.addQuestFlag, a.addCharacterFlag, a.addMapFlag};
+        for (int i = 0; i < adds.length; i++) {
+            DialogData.ActionData.FlagAdd f = adds[i];
+            if (f == null) continue;
+            String w = where + " action " + names[i];
+            if (f.key == null || f.key.isEmpty()) error(w + ": missing 'key'");
+            if (f.min > f.max) error(w + ": min " + f.min + " > max " + f.max);
+            if (f.min < Byte.MIN_VALUE || f.max > Byte.MAX_VALUE) warn(w + ": min/max outside -128..127 (the flag range caps them)");
+            if (f.val == 0) warn(w + ": val 0 does nothing");
+        }
     }
 
     static void checkRewardConditions(RewardData[] rewards, String where) {

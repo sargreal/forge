@@ -20,6 +20,7 @@ import forge.adventure.character.CharacterSprite;
 import forge.adventure.character.EnemySprite;
 import forge.adventure.data.AdventureQuestData;
 import forge.adventure.data.DialogData;
+import forge.adventure.data.FlagCondition;
 import forge.adventure.data.RewardData;
 import forge.adventure.player.AdventurePlayer;
 import forge.adventure.scene.TileMapScene;
@@ -447,6 +448,13 @@ public class MapDialog {
             if (E.advanceMapFlag != null && !E.advanceMapFlag.isEmpty()) { //Increase a given local quest flag by 1.
                 stage.advanceQuestFlag(E.advanceMapFlag);
             }
+            //Fork (run 2): signed, clamped adds; they wake flag stages like set*.
+            if (E.addQuestFlag != null && E.addQuestFlag.key != null && !E.addQuestFlag.key.isEmpty())
+                FlagCondition.addFlag("quest", E.addQuestFlag.key, E.addQuestFlag.val, E.addQuestFlag.min, E.addQuestFlag.max);
+            if (E.addCharacterFlag != null && E.addCharacterFlag.key != null && !E.addCharacterFlag.key.isEmpty())
+                FlagCondition.addFlag("character", E.addCharacterFlag.key, E.addCharacterFlag.val, E.addCharacterFlag.min, E.addCharacterFlag.max);
+            if (E.addMapFlag != null && E.addMapFlag.key != null && !E.addMapFlag.key.isEmpty())
+                FlagCondition.addFlag("map", E.addMapFlag.key, E.addMapFlag.val, E.addMapFlag.min, E.addMapFlag.max);
             if (E.setEffect != null) { //Replace current effects.
                 EnemySprite EN = stage.getEnemyByID(parentID);
                 EN.effect = E.setEffect;

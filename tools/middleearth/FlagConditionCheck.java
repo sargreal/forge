@@ -61,6 +61,18 @@ public class FlagConditionCheck {
         p.setQuestFlag("big", 300);
         ok(p.getQuestFlag("big") == 44, "set casts to byte (300 -> 44), documented");
 
+        // --- run 2: signed, clamped add (never wraps) ---
+        ok(FlagCondition.clampedAdd(5, -10, 0, 100) == 0, "clamp at min");
+        ok(FlagCondition.clampedAdd(95, 10, 0, 100) == 100, "clamp at max");
+        ok(FlagCondition.clampedAdd(120, 50, -128, 127) == 127, "clamp at the byte range");
+        ok(FlagCondition.clampedAdd(0, 50, 0, 300) == 50 && FlagCondition.clampedAdd(100, 100, 0, 300) == 127, "max above 127 is capped at 127");
+        ok(FlagCondition.clampedAdd(-120, -50, -1000, 0) == -128, "min below -128 is capped at -128");
+        ok(FlagCondition.addFlag("quest", "corr", 7, 0, 100) == 7 && p.getQuestFlag("corr") == 7, "addFlag from unset");
+        ok(FlagCondition.addFlag("quest", "corr", -3, 0, 100) == 4, "addFlag negative");
+        ok(FlagCondition.addFlag("quest", "corr", -30, 0, 100) == 0 && !p.checkQuestFlag("corr"), "addFlag to 0 deletes the flag");
+        ok(FlagCondition.addFlag("character", "cc", 200, 0, 127) == 127 && p.getCharacterFlag("cc") == 127, "addFlag character clamps at 127");
+        ok(FlagCondition.addFlag("bogus", "x", 1, 0, 1) == null, "addFlag unknown scope");
+
         // --- validation ---
         List<String> probs = FlagCondition.validate("c", FlagCondition.parse("[{\"key\":\"x\",\"op\":\"=>\"},{\"scope\":\"moon\",\"key\":\"y\"},{\"op\":\"=\"},{\"key\":\"z\",\"val\":128}]"));
         ok(probs.size() == 4, "4 validation problems, got " + probs);

@@ -67,6 +67,14 @@ public class DialogData implements Serializable {
             public String key;
             public int val;
         }
+        /** Fork (run 2): signed, clamped add: {key, val (delta), min, max}; min/max default to the byte range. */
+        static public class FlagAdd implements Serializable {
+            private static final long serialVersionUID = 4710393127464412871L;
+            public String key;
+            public int val;
+            public int min = Byte.MIN_VALUE;
+            public int max = Byte.MAX_VALUE;
+        }
         public String removeItem;         //Remove item name from inventory.
         public String addItem;            //Add item name to inventory.
         public int addLife = 0;           //Gives the player X health. Negative to take.
@@ -85,6 +93,9 @@ public class DialogData implements Serializable {
         public QuestFlag setCharacterFlag;    //Set quest flag.
         public QuestFlag setQuestFlag;    //Set quest flag.
         public QuestFlag setMapFlag;      //Set map flag.
+        public FlagAdd addQuestFlag;      //Fork (run 2): add a signed value to a quest flag, clamped.
+        public FlagAdd addCharacterFlag;  //Fork (run 2): same for a character flag.
+        public FlagAdd addMapFlag;        //Fork (run 2): same for a map flag (in a map only).
 
         public RewardData[] grantRewards = new RewardData[0];   //launch a RewardScene with the provided data.
         public RewardData[] grantRewardsChoice = new RewardData[0];   //launch a RewardScene choice with the provided data.
@@ -124,6 +135,9 @@ public class DialogData implements Serializable {
             issueQuest = other.issueQuest;
             addMapReputation = other.addMapReputation;
             POIReference = other.POIReference;
+            addQuestFlag = other.addQuestFlag;
+            addCharacterFlag = other.addCharacterFlag;
+            addMapFlag = other.addMapFlag;
         }
     }
 
