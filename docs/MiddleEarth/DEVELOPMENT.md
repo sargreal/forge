@@ -47,6 +47,16 @@ Notes for the cloud sandbox:
 - The script forces `-Dmaven.resolver.transport=wagon`. Maven's default HTTP transport drops jar downloads behind the sandbox proxy.
 - After any change under `forge-gui-mobile/src` you must rebuild. Data-only changes under `forge-gui/res` don't need a rebuild, because the game reads `../forge-gui/res` at runtime.
 
+### Python tools (uv)
+
+Most Python tools (`gamectl.py`, `deckstrength.py`, `mear_similarity.py`, `tests/`) use only the standard library. The two map scripts need Pillow and declare it inline (PEP 723), so with [uv](https://docs.astral.sh/uv/) no setup is needed:
+
+```bash
+uv run tools/middleearth/worldmap/make_reference_crops.py   # fetches Pillow into a cached env automatically
+```
+
+For a persistent environment (IDE, REPL): `uv sync --project tools/middleearth` creates `tools/middleearth/.venv` (gitignored), then `uv run --project tools/middleearth python <script>`.
+
 ## 3. Testing
 
 There are two layers of tests, and both must pass (or not get worse) before you commit.
@@ -65,6 +75,7 @@ tools/middleearth/check.sh Innistrad # check another plane for comparison
 2. **References**: duplicate biome names are an error. Enemy or POI names in biomes that don't exist are warnings, because the game silently ignores them.
 3. **Card pool**: starter decks and the decks of every enemy the plane spawns are measured against `allowedEditions`. A card is *off-pool* if it has no printing in an allowed set.
 4. **Printing resolution**: the unique card pool and the reprint replacement (`ensureAllowedEdition`) only give allowed printings. This guards issue #1.
+5. **Story data** (§4.2): every flag condition (dialog `flag`, stage `condition`, reward and POI `condition`, `spawnCondition` in maps) has a key, a known scope and op and a byte value; `enemyOverrides` name known enemies and modes; origins name known races, colour ids, POIs and intro quests. Unknown flag *keys* are fine.
 
 The exit code is non-zero on errors. Warnings are the content backlog. Track their count in PLAN.md.
 
@@ -117,7 +128,7 @@ $G stop
 
 Play-testing: press F9 and type `god` (or `god 600`): double speed, walk through obstacles, enemies ignore you, full heal. `debug map` lets you drag on the minimap to fast-travel.
 
-Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `exportWorldTmx [file]` (Tiled world, §4.1), `sanitize editions`.
+Useful console commands: `leave` (exit a POI), `teleport to X Y`, `fly 30`, `hide 60`, `spawn enemy <name>`, `give card <name>`, `give set LTR`, `listPOI`, `exportMap [file]`, `exportWorldTmx [file]` (Tiled world, §4.1), `sanitize editions`, `teleport to poi 'Forest Capital'`, `flag set|advance|get|check …` (flags and flag conditions, §4.2).
 
 **Save data:** the game runs with `user.home=$OUT_DIR/home`, so settings and saves are in `.me-test/home/.forge/adventure/`. `check.sh` uses `.me-test/check-home`. Neither touches the real `~/.forge`.
 
@@ -189,8 +200,8 @@ $G screenshot /abs/path/x.png                # for humans
 
 | Endpoint | Body | Does |
 | --- | --- | --- |
-| `/state` | `{radius?}` | Scene, transition flag, plane; player (life/max, gold, shards, deck name and size, difficulty); location (`map` file + POI or `overworld` + biome), position (px and tile); quests with their current stage; quest, character and map flags; the open `dialog` (speaker, text, options with index/label/enabled); a `modal` UI dialog; the `reward` screen (type, items); the `duel` (players, life, AI flag, turn, phase); `objects`: in a map every actor (id, type enemy/portal/entry/dialog/reward/shop, name/enemy, state of portals, target map, inactive/hidden/deleted, position, distance); on the overworld POIs and enemies within `radius` px (default 30 tiles), nearest first. |
-| `/newGame` | `{plane?, name?, race?, gender?, difficulty?, colors?, mode?}` | Starts a new game with these choices through `NewGameScene` (nothing else clicked) and returns when the first map is shown. Values are names: difficulty `Easy/Normal/Hard…`, mode `Standard/Constructed/Chaos/Pile/Custom/Precon…`, colors a color id (`W`) or its name, gender `male/female`. `plane` only checks: the plane is fixed at startup (`game.sh start <plane>`). |
+| `/state` | `{radius?}` | Scene, transition flag, plane; player (life/max, gold, shards, deck name and size, difficulty, origin, respawnPOI); location (`map` file + POI or `overworld` + biome), position (px and tile); quests with their current stage; quest, character and map flags; the open `dialog` (speaker, text, options with index/label/enabled); a `modal` UI dialog; the `reward` screen (type, items); the `duel` (players, life, AI flag, turn, phase); `objects`: in a map every actor (id, type enemy/portal/entry/dialog/reward/shop, name/enemy, state of portals, target map, inactive/hidden/deleted, position, distance); on the overworld POIs (with `active`) and enemies within `radius` px (default 30 tiles), nearest first. On the overworld `location.biomeEnemies` is the biome's enemy list after `enemyOverrides`. |
+| `/newGame` | `{plane?, name?, race?, gender?, difficulty?, colors?, mode?, origin?}` | Starts a new game with these choices through `NewGameScene` (nothing else clicked) and returns when the first map is shown. Values are names: difficulty `Easy/Normal/Hard…`, mode `Standard/Constructed/Chaos/Pile/Custom/Precon…`, colors a color id (`W`) or its name, gender `male/female`. `plane` only checks: the plane is fixed at startup (`game.sh start <plane>`). `origin` forces a `config.json` origin by name, hidden ones included (§4.2). |
 | `/dialog/choose` | `{index}` | Clicks option N of the open map/quest dialog (or a modal dialog) like a tap. Disabled options are refused. |
 | `/dialog/close` | `{}` | Hides the dialog without choosing (like the console's hack; quest chains may not continue). |
 | `/reward/accept` | `{}` | Presses "done" on the reward screen until it closes. |
@@ -215,7 +226,7 @@ g.choose(0)
 portal = g.objects(id=78)[0]; assert portal["state"] == "closed"
 ```
 
-Put new GUI tests in `tools/middleearth/tests/` and list them in `tests/run_all.sh` (`check.sh` + every GUI test; exit code ≠ 0 on failure). A test starts its own game with `game.sh start` when none answers on its port, and stops it at the end (`--keep` leaves it running for inspection).
+Put new GUI tests in `tools/middleearth/tests/` and list them in `tests/run_all.sh` (`check.sh`, the headless unit checks `tools/middleearth/FlagConditionCheck.java`, then every GUI test: `intro_walkthrough.py`, `origin_start.py`, `flags_and_world_state.py`; exit code ≠ 0 on failure). `tests/_harness.py` has the shared start/stop/assert code for new tests. A test starts its own game with `game.sh start` when none answers on its port, and stops it at the end (`--keep` leaves it running for inspection).
 
 ## 4. Plane data: how-to
 
@@ -244,7 +255,7 @@ Layers of a chunk, bottom to top: `Biomes` (tiles), `Roads` (tiles), `Clutter` (
 5. **Seed:** the map property `seed` is on `chunk_0_0.tmx` (Map → Map Properties) and nowhere else.
 6. **Roads** (Phase 2d-1): tile layer `Roads`, painted with the single tile of the `roads` tileset (the game's road texture). Every non-empty cell is a road tile: the game draws the road there, and the tile gets no terrain variant, decoration or collision (it is walkable, also across water). Erase cells to remove a road. Roads should end at towns; nothing checks that they connect. The hidden POI-to-town paths (invisible, they only clear mountain/forest collision) are still generated from the POI positions.
 7. **Clutter** (Phase 2d-1): object layer `Clutter`, one tile object per tree, rock, reed, shell… (about 50,000 in the world, 1,500–2,300 per land chunk). Pick a tile from the `clutter` tileset (Tiled shows the real sprite) and place it with **Insert Tile** (T); move, copy (Ctrl+D) or delete objects as usual. The object position is the sprite's bottom-left corner, like POIs; the tile property `sprite` (e.g. `WoodTree`, `MountainRock`) is what the game reads. A plain object with a `sprite` property works too. Clutter has no collision in the game; the generator never puts it on roads or structures, but you may. Note: the tileset has several variants per sprite (`variant` property). The game ignores the chosen tile and picks the variant from the position, so after moving an object the game may draw another variant of the same sprite; a re-export shows the variant the game uses.
-8. **Reference** (Phase 2d-1): each chunk has a hidden image layer `Reference` (opacity 0.5) with its crop of the reference map (`docs/MiddleEarth/reference/chunks/chunk_<c>_<r>.png`, 16 px per tile, so it lines up 1:1 with the tiles). Toggle its visibility in the Layers panel while painting. The game ignores it, and the reference image is not shipped with the game. The crops are cut from the overview's placement (step 9): after moving the overview's `Reference` layer (or replacing the image), rerun `python3 tools/middleearth/worldmap/make_reference_crops.py` (Pillow, ~6 s); the chunk files don't change.
+8. **Reference** (Phase 2d-1): each chunk has a hidden image layer `Reference` (opacity 0.5) with its crop of the reference map (`docs/MiddleEarth/reference/chunks/chunk_<c>_<r>.png`, 16 px per tile, so it lines up 1:1 with the tiles). Toggle its visibility in the Layers panel while painting. The game ignores it, and the reference image is not shipped with the game. The crops are cut from the overview's placement (step 9): after moving the overview's `Reference` layer (or replacing the image), rerun `uv run tools/middleearth/worldmap/make_reference_crops.py` (~6 s; see "Python tools (uv)"); the chunk files don't change.
 9. **Checking against the reference map:** open `overview.tmx` (not part of the world). One grid cell = one chunk, 1 px = 1 world tile. Layers: `Biomes` (image of the biome colours, locked), `Reference` (the image layer with `docs/MiddleEarth/reference/map-of-middle-earth.jpg`, opacity 0.6; move it with the Offset properties or the Select Layer tool, then save), `Chunks` (chunk names) and `POI` (labels). The overview is **generated and not read back**: change biomes and POIs in the chunks, then re-export (below) to refresh it. Only the `Reference` layer survives a re-export.
 10. Save (keep the layer format base64 zlib, or CSV), then run `tools/middleearth/check.sh` (0 errors; it also checks that the chunks tile the world, that objects stay inside their chunk, that Clutter objects name existing sprites and that the Roads layers have the map's size), WorldSim (`problems: 0`; it uses the Roads layers for reachability) and `game.sh smoke`; look at `.me-test/smoke-worldmap.png`.
 
@@ -253,6 +264,137 @@ Layers of a chunk, bottom to top: `Biomes` (tiles), `Roads` (tiles), `Clutter` (
 Still generated at world creation, from `seed` (so it is the same in every new game): terrain variants (the noise-picked tile variants of each biome), WFC structures (mountains, forests, Mordor), the hidden paths from POIs to the nearest town, the biome transition borders, and roads/clutter of chunks that lack the layer. Changing `seed` gives different terrain and structures but the same layout, roads and clutter. Overworld enemy spawns stay random (they use the global random), and dungeon and town interiors keep varying per save (they are seeded from the save's own seed, which a world map does not replace). A `Terrain` layer for terrain variants and structures is planned (Phase 2d-2, see the phase2d1 notes).
 
 To write the world back from a running game (e.g. after changes to the export, or to refresh `overview.tmx`), use the console: `exportWorldTmx /abs/path/forge-gui/res/adventure/MiddleEarth/world/middleearth` (a directory or a `.world` file; optional second argument: chunk size, default = the current chunk size). It rewrites the `.world`, all chunks (with the current roads and clutter), the three tilesets and the overview, and keeps the overview's `Reference` layer and each chunk's `Reference` layer (a chunk without one gets the default, pointing at its crop in `docs/`). `exportWorldTmx file.tmx` still writes one single map (a single `.tmx` in `worldMap` keeps working, layers included).
+
+### 4.2 Story data reference
+
+Fork features for story content (engine run 1, see [notes/story-engine-run1.md](notes/story-engine-run1.md)). Everything here is optional: without these fields a plane behaves exactly as upstream. `check.sh` validates all of it.
+
+#### Flags
+
+| Kind | Lives | Set (dialog actions) | Read |
+| --- | --- | --- | --- |
+| quest | player, wiped by New Game+ / `resetQuests` | `setQuestFlag {key,val}`, `advanceQuestFlag: "key"` | scope `quest` |
+| character | player, permanent | `setCharacterFlag`, `advanceCharacterFlag` | scope `character` |
+| map | one POI map (its `PointOfInterestChanges`) | `setMapFlag`, `advanceMapFlag` | scope `map` (0 outside that map) |
+
+- Values are **bytes, -128..127**, stored as `Byte` in the save (the format is unchanged). `set` casts (`300` becomes `44`) and `advance` wraps (`127 + 1 = -128`). Keep meters well inside the range.
+- **Setting a quest or character flag to 0 deletes it**, so "0" and "unset" are the same value. (Map flags keep a 0 entry; the old `checkMapFlag` sees it as set.)
+- `advanceQuestFlag` / `advanceCharacterFlag` now wake `QuestFlag` / `CharacterFlag` stages exactly like `set*` (they used to be silent).
+- Console (F9 or `gamectl.py console`): `flag set <quest|character|map> <key> <value>`, `flag advance <scope> <key>`, `flag get <scope> <key>`, `flag check '<condition JSON>'` (single quotes around the JSON). They fire the same quest updates as the dialog actions.
+
+#### Flag conditions (`FlagCondition`)
+
+One JSON format used everywhere below:
+
+```json
+{ "scope": "character", "key": "act", "op": ">=", "val": 2 }
+{ "key": "metGandalf" }                                    // quest flag is set (default op "!=", val 0)
+{ "scope": "map", "key": "gateOpen", "op": "=", "val": 1, "not": true }
+{ "any": [ { "scope": "character", "key": "allegiance", "op": "=", "val": 2 },
+           { "key": "corruption", "op": ">=", "val": 6 } ] }
+[ { "key": "act", "op": ">=", "val": 2 }, { "key": "act", "op": "<", "val": 4 } ]   // array = all
+```
+
+- `scope`: `quest` (default), `character`, `map`. `op`: `=` `!=` `<` `<=` `>` `>=` (the upstream names `EQUALS`, `LESSTHAN`, `MORETHAN`, `LE_THAN`, `ME_THAN` work too). `val`: -128..127.
+- **An unset flag reads as 0.** `not` inverts the whole node, so `{"key":"x","op":"<","val":3,"not":true}` is false for an unset `x`. Groups: `all` (AND) and `any` (OR) nest.
+- **Pitfall: the upstream dialog conditions `getQuestFlag` / `getCharacterFlag` / `getMapFlag` keep their old meaning** (always false when the flag is unset, even with `not`). 69 upstream conditions rely on that, so it is not changed. Use the new `flag` field for new content.
+- **Pitfall: `colorIdentity` (dialog condition) is inverted** (true when the player does *not* have the colours). Shandalar Old Border's intro uses it with `not: true`, so it stays as is. Write `"colorIdentity": "B", "not": true` to mean "the player is black".
+
+Where conditions go:
+
+| Where | Field | Effect |
+| --- | --- | --- |
+| Dialog `condition[]` entry (map dialogs, quest dialogs, items) | `"flag": {…}` | ANDed with the entry's other checks; the entry's own `not` inverts it too. |
+| Quest stage with objective `QuestFlag`, `CharacterFlag` or `MapFlag` | `"condition": {…}` | Replaces `mapFlag >= mapFlagValue`: the stage completes as soon as the condition holds, also if it already holds when the stage activates. It completes wherever the player is (no POI check). |
+| Biome | `enemyOverrides[].condition` | see below |
+| Reward entry (shops, enemy drops, chests, `grantRewards`) | `"condition": {…}` | The entry gives nothing unless it holds. |
+| POI (`points_of_interest.json`) | `"condition": {…}` | The POI is shown and enterable only while it holds. |
+| Tiled map object | property `spawnCondition` (string) | The object is not created unless it holds. |
+
+```json
+{ "condition": [ { "flag": { "scope": "character", "key": "allegiance", "op": "=", "val": 2 } } ],
+  "name": "We do not serve your kind.", "text": "…" }
+```
+
+#### Biome `enemyOverrides`
+
+```json
+"enemies": ["Hobbit Troublemaker", "Southern Ruffian", "Wild Wolves"],
+"enemyOverrides": [
+  { "condition": { "scope": "character", "key": "act", "op": ">=", "val": 2 }, "mode": "add",     "enemies": ["Black Rider"] },
+  { "condition": { "scope": "character", "key": "act", "op": ">=", "val": 3 }, "mode": "replace", "enemies": ["Uruk-hai Warband", "Wild Wolves"] },
+  { "condition": { "scope": "character", "key": "allegiance", "op": "=", "val": 2 }, "mode": "remove", "enemies": ["Uruk-hai Warband"] }
+]
+```
+
+- **Every matching entry is applied, in list order**, to the biome's `enemies`: `add` appends, `replace` (default) discards everything before it, `remove` deletes names. So write acts in ascending order; a later matching `replace` wins. An entry without `condition` always applies.
+- Evaluated on every spawn tick (overworld spawns and the random-enemy fallback in maps); the cached list is rebuilt when the set of matching entries changes. Spawn weight, difficulty and the quest extra spawns work as before.
+- Unknown enemy names are `check.sh` errors (in the plain `enemies` list they stay warnings).
+- `gamectl.py state` shows the current list as `biomeEnemies`.
+
+#### Reward `condition`
+
+```json
+{ "type": "item", "count": 1, "itemName": "Lembas",
+  "condition": { "scope": "character", "key": "act", "op": ">=", "val": 2 } }
+```
+
+- Checked when the entry is generated. **Shop stock is generated on the first visit of the shop per map visit** (and on restock) from the shop's seed, then kept until the player leaves the map; a flag change shows on the next entry into the town.
+- Bought cards are remembered by stock index. A skipped entry shifts the indices (and the random draws) of the entries after it, so put conditioned entries **at the end** of a shop's `rewards`.
+
+#### POIs: appear and disappear
+
+```json
+{ "name": "ME Helms Deep", …,
+  "questFlagsToActivate":   [ { "key": "act", "val": 2 } ],
+  "questFlagsToDeactivate": [ { "key": "act", "val": 4 } ],
+  "condition": { "scope": "character", "key": "allegiance", "op": "!=", "val": 2 } }
+```
+
+- `questFlagsToActivate` (upstream): active only while every quest flag is `>= val`. `questFlagsToDeactivate` (fork): hidden once any quest flag is `>= val`. `condition` (fork): active only while it holds. An inactive POI is not drawn and cannot be entered.
+- `"active": false` is now honoured (the POI is never shown); upstream ignored it and no plane sets it.
+- Upstream quirk, unchanged: `questFlagsToActivate` is copied into the save at world creation and **not read back on load**, so after loading a save the POI is always active. The fork fields are read from `points_of_interest.json` each time and survive loads; prefer `condition` (`{"key":"act","op":">=","val":2}`) for new content.
+
+#### `spawnCondition` on map objects
+
+Any Tiled object with a `type` (enemy, dialog NPC, shop, inn, portal, entry, reward/chest, quest, arena, collision…) can carry a string property `spawnCondition` with a flag condition (object or array). The object is skipped when the map is loaded if it does not hold. Map flags read this map's flags.
+
+```xml
+<object id="63" template="../../obj/shop.tx" x="216" y="290">
+  <properties>
+    <property name="commonShopList" value="GreenItems"/>
+    <property name="spawnCondition" value="{&quot;scope&quot;:&quot;character&quot;,&quot;key&quot;:&quot;allegiance&quot;,&quot;op&quot;:&quot;!=&quot;,&quot;val&quot;:2}"/>
+  </properties>
+</object>
+```
+
+(In Tiled just type `{"scope":"character","key":"allegiance","op":"!=","val":2}`; the editor escapes it.)
+
+- Maps are rebuilt on every entry, so changes show the next time the player enters. To change a map while the player is inside, keep using `activateMapObject` / `deleteMapObject`.
+- Use it for act variants of one town map (two NPC objects with opposite conditions), cameo NPCs, and inns or shops that refuse Shadow players. Don't condition the `entry` the player arrives through.
+- A malformed condition is logged and ignored (the object spawns); `check.sh` reports it as an error.
+
+#### Origins (`config.json` → `origins[]`)
+
+```json
+"origins": [
+  { "name": "Dunland", "races": ["Dunlending"], "colors": ["B", "R"],
+    "startPOI": "ME Dunland Town", "respawnPOI": "ME Dunland Town", "introQuest": "60",
+    "characterFlags": { "allegiance": 2, "origin": 2 }, "questFlags": { "act": 1 } },
+  { "name": "Wizard's Hollow", "startPOI": "Spawn", "introQuest": "28" }
+]
+```
+
+- At new game the **first non-`hidden` origin whose `races` (heroes.json race names) and `colors` (config `colorIds`) match** the character creation choice is used; an empty list matches everything. Keep a catch-all entry last.
+- It sets the flags, then enters `startPOI` (a `points_of_interest.json` name; the first placed POI of that name) with the intro dialogs of `introQuest`. Without `startPOI`, `startPosition: [x, y]` (world tiles, y grows north) starts on the world map; with neither, `Spawn`.
+- `respawnPOI` (default: `startPOI`) replaces `Spawn` as the place a defeat at 0 life sends the player. The origin name and respawn POI are saved (`originName`, `respawnPOI`); older saves fall back to `Spawn`.
+- New Game+ restarts the save's origin (saves without one: `Spawn` + quest 28).
+- **No `origins` = upstream start** (POI `Spawn`, quest 28). The same applies when no origin matches.
+- `hidden: true` origins are only used by name: `gamectl.py newgame --origin Test` (dev API `/newGame {origin}`). Middle-earth has `Wizard's Hollow` (today's start) and the hidden test origin `Test` (Hobbiton, fixture quest 9001).
+
+#### Test fixtures in the plane data
+
+These exist only for `tests/origin_start.py` and `tests/flags_and_world_state.py` and are inert in normal play, because nothing sets `test_*` flags: the hidden origin `Test` and quest 9001 (`storyQuest`, issued only by that origin), `enemyOverrides` in `biomes/shire.json` (`test_enemy_override`), Lembas in the `GreenItems` shop (`test_shop`), and `questFlagsToDeactivate` / `condition` on `Forest Capital` (`test_hide_poi`, `test_hide_poi_c`). The `spawnCondition` test patches `common/.../forest_capital.tmx` while it runs and restores it.
 
 ## 5. Keeping in sync with upstream
 

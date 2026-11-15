@@ -140,6 +140,17 @@ public class PointOfInterest implements Serializable, SaveFileContent {
                 return false;
             }
         }
+        //Fork (Middle-earth): read from the POI data (not the save), so they also work in saves made before they were added.
+        if (data != null) {
+            if (!data.active)
+                return false;
+            if (data.questFlagsToDeactivate != null)
+                for (DialogData.ActionData.QuestFlag flag : data.questFlagsToDeactivate)
+                    if (Current.player().getQuestFlag(flag.key) >= flag.val)
+                        return false;
+            if (data.condition != null && !data.condition.eval())
+                return false;
+        }
         return true;
     }
 

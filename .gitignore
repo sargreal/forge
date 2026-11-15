@@ -104,3 +104,5 @@ __pycache__
 forge-gui/tools/build
 forge-gui-ios/robovm.properties
 /.me-test/
+/tools/middleearth/.venv/
+/tools/middleearth/uv.lock

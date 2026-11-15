@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.github.tommyettinger.textra.TextraButton;
 import com.github.tommyettinger.textra.TextraLabel;
 import forge.Forge;
+import forge.adventure.data.OriginData;
 import forge.adventure.data.DifficultyData;
 import forge.adventure.player.AdventurePlayer;
 import forge.adventure.stage.WorldStage;
@@ -322,9 +323,9 @@ public class SaveLoadScene extends UIScene {
                                 Current.player().resetQuestFlags();
                                 Current.player().setCharacterFlag("newGamePlus", 1);
                                 Current.player().removeAllQuestItems();
-                                AdventurePlayer.current().addQuest("28", true);
                                 WorldSave.getCurrentSave().clearBookmarks();
-                                WorldStage.getInstance().enterSpawnPOI();
+                                //Fork (Middle-earth): New Game+ restarts the save's origin; saves without one: Spawn + quest 28.
+                                OriginData.beginNewGame(OriginData.byName(Current.player().getOriginName()));
                                 SoundSystem.instance.changeBackgroundTrack();
                                 Forge.switchScene(GameScene.instance());
                             } else {

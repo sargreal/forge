@@ -320,6 +320,8 @@ public final class DevApi {
         r.put("maxLife", p.getMaxLife());
         r.put("gold", p.getGold());
         r.put("shards", p.getShards());
+        r.put("origin", p.getOriginName());
+        r.put("respawnPOI", p.getRespawnPOI());
         Deck d = p.getSelectedDeck();
         if (d != null) r.put("deck", m("name", d.getName(), "size", d.getMain().countAll()));
         try {
@@ -356,6 +358,8 @@ public final class DevApi {
             loc.put("worldTiles", m("w", Current.world().getWidthInTiles(), "h", Current.world().getHeightInTiles()));
             Vector2 c = new Vector2(pl.getX() + pl.getWidth() / 2, pl.getY() + pl.getHeight() / 2);
             loc.put("biome", GameScene.instance().getBiomeByPosition(c));
+            forge.adventure.data.BiomeData bd = GameScene.instance().getBiomeDataByPosition(c);
+            if (bd != null) loc.put("biomeEnemies", bd.getEffectiveEnemyNames()); //after enemyOverrides
             try {
                 loc.put("locationName", clean(GameScene.instance().getAdventurePlayerLocation(true, false)));
             } catch (Exception ignored) {
@@ -419,7 +423,7 @@ public final class DevApi {
             float d = poi.getPosition().dst(p);
             if (d > radius) continue;
             out.add(m("type", "poi", "id", poi.getID(), "name", poi.getData().name, "displayName", poi.getDisplayName(),
-                    "poiType", poi.getData().type, "x", poi.getPosition().x, "y", poi.getPosition().y, "dist", Math.round(d)));
+                    "poiType", poi.getData().type, "active", poi.getActive(), "x", poi.getPosition().x, "y", poi.getPosition().y, "dist", Math.round(d)));
         }
         for (Actor a : ws.getSpriteGroup().getChildren()) {
             if (!(a instanceof EnemySprite)) continue;
@@ -641,7 +645,7 @@ public final class DevApi {
             NewGameScene ng = NewGameScene.instance();
             if (Forge.getCurrentScene() != ng) Forge.switchScene(ng);
             return ng.devApiStart(a.getString("name", null), a.getString("race", null), a.getString("gender", null),
-                    a.getString("difficulty", null), a.getString("mode", null), a.getString("colors", null));
+                    a.getString("difficulty", null), a.getString("mode", null), a.getString("colors", null), a.getString("origin", null));
         }, 30000);
         if (err != null) throw new ApiException(err);
         // wait until the first map is shown

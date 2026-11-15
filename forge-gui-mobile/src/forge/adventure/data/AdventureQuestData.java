@@ -438,7 +438,7 @@ public class AdventureQuestData implements Serializable {
             if (s.getStatus() == INACTIVE){
                 s.checkPrerequisites(getCompletedStageIDs());
                 if (s.getStatus() == ACTIVE) {
-                    if (s.hasRequiredFetchItems()) {
+                    if (s.hasRequiredFetchItems() || s.flagConditionHolds()) {
                         s.handleEvent(new AdventureQuestEvent());
                     }
                     AdventureQuestController.instance().addQuestSprites(s);

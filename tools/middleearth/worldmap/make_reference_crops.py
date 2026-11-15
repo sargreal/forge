@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pillow>=10"]
+# ///
 """Cut the reference map into one crop per chunk of the Tiled world (Phase 2d-1).
 
 The reference image (docs/MiddleEarth/reference/map-of-middle-earth.jpg) is placed in the generated

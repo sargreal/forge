@@ -167,6 +167,11 @@
   ],
   "starterEditionNames": [
 	  "Lord of the Rings"
-	]
+	],
+  "origins": [
+    { "name": "Wizard's Hollow", "startPOI": "Spawn", "introQuest": "28" },
+    { "name": "Test", "hidden": true, "startPOI": "Forest Capital", "respawnPOI": "Forest Capital", "introQuest": "9001",
+      "characterFlags": { "test_origin": 1 }, "questFlags": { "test_origin_q": 3 } }
+  ]
 }
 
