@@ -96,6 +96,15 @@ public class SpritesDataMap implements SaveFileContent {
         return mapObjects[chunkX][chunkY];
     }
 
+    /** Fork (Middle-earth): every placed sprite of all chunks (for exportWorldTmx). */
+    public List<Pair<Vector2, Integer>> allPositions() {
+        List<Pair<Vector2, Integer>> result = new ArrayList<>();
+        for (List<Pair<Vector2, Integer>>[] column : mapObjects)
+            for (List<Pair<Vector2, Integer>> chunk : column)
+                result.addAll(chunk);
+        return result;
+    }
+
 
     @Override
     public void load(SaveFileData data) {

@@ -257,6 +257,8 @@ public class PlaneCheck {
      * biome, every POI object references an existing POI entry. Overall: exactly one start object, one seed, and every POI
      * that the biomes list is present. For a .world also: the chunks tile the world exactly (no gaps or overlaps, same
      * size as world.json) and every object lies inside its chunk (checked by the engine reader, WorldMapTmx.problems).
+     * Phase 2d-1 layers: Roads (layer size = map size, cells use the road tile), Clutter (every object names a known
+     * map sprite, lies in its chunk), Reference (crop image exists; warning only, the crops live in docs/).
      */
     static void checkWorldMap(WorldData world, List<BiomeData> biomes, Array<PointOfInterestData> pois) {
         if (world.biomeMap != null) info("worldMap set: biomeMap " + world.biomeMap + " is ignored by the game");
@@ -290,6 +292,7 @@ public class PlaneCheck {
             for (String p : read.problems) error("worldMap: " + p);
             if (read.mapWidth != world.width || read.mapHeight != world.height)
                 error("worldMap: the chunks cover " + read.mapWidth + "x" + read.mapHeight + " tiles, world is " + world.width + "x" + world.height);
+            checkWorldMapLayers(world, read);
             int sizeOf0 = read.chunks.isEmpty() ? 0 : read.chunks.get(0).width;
             layout = read.chunks.size() + " chunks of " + sizeOf0 + " tiles, " + read.mapWidth + "x" + read.mapHeight;
             FileHandle overview = f.parent().child(forge.adventure.world.WorldMapTmx.OVERVIEW_NAME + ".tmx");
@@ -319,6 +322,29 @@ public class PlaneCheck {
         }
         info("worldMap " + world.worldMap + ": " + layout + ", seed " + seed + ", " + painted.size() + "/" + biomes.size() + " biomes painted, "
                 + placed.values().stream().mapToInt(Integer::intValue).sum() + " POI objects (" + placed.size() + " distinct), " + starts[0] + " start");
+        info("worldMap layers: Roads in " + layerMaps[0] + " maps (" + roadTiles + " road tiles), Clutter in " + layerMaps[1] + " maps ("
+                + clutterObjects + " objects), Reference in " + layerMaps[2] + " maps" + (missingCrops > 0 ? " (" + missingCrops + " crop images not found)" : "")
+                + "; maps without a Roads/Clutter layer get generated roads/clutter");
+    }
+
+    // Phase 2d-1 layer statistics (over all maps of the world)
+    static int[] layerMaps = new int[3];
+    static int roadTiles, clutterObjects, missingCrops;
+
+    /** Phase 2d-1: checks on the assembled layers (engine reader): clutter on road tiles and outside the world. */
+    static void checkWorldMapLayers(WorldData world, forge.adventure.world.WorldMapTmx read) {
+        if (read.clutterDefined == null) return;
+        int onRoad = 0, outside = 0;
+        for (forge.adventure.world.WorldMapTmx.Clutter c : read.clutter) {
+            if (c.x < -forge.adventure.world.WorldMapTmx.CLUTTER_TOLERANCE || c.x > world.width * world.tileSize
+                    || c.y < 0 || c.y > world.height * world.tileSize + forge.adventure.world.WorldMapTmx.CLUTTER_TOLERANCE) { outside++; continue; }
+            // the tile the generator would have placed it from: column floor(x), row of the nearest tile border in y (y-up)
+            double rowUp = Math.round((world.height * world.tileSize - c.y) / world.tileSize);
+            int[] t = forge.adventure.world.WorldMapTmx.tileOf(c.x, (world.height - 1 - rowUp) * world.tileSize, world.tileSize, world.width, world.height);
+            if (read.roads != null && read.roadsDefined[t[0]][t[1]] && read.roads[t[0]][t[1]]) onRoad++;
+        }
+        if (outside > 0) error("worldMap: " + outside + " Clutter objects lie outside the world (the game drops them)");
+        if (onRoad > 0) info("worldMap: " + onRoad + " Clutter objects stand on road tiles (the generator never puts clutter on roads)");
     }
 
     /** The overview's Reference image layer: its image file should exist (it is optional). */
@@ -342,6 +368,8 @@ public class PlaneCheck {
         String seed = forge.adventure.world.WorldMapTmx.properties(map).get("seed");
         if (seed != null) seeds.add(seed.trim());
         Map<Integer, String> gidToBiome = new HashMap<>();
+        Map<Integer, String> gidToSprite = new HashMap<>();
+        Set<Integer> roadGids = new HashSet<>();
         for (com.badlogic.gdx.utils.XmlReader.Element ts : map.getChildrenByName("tileset")) {
             int first = ts.getIntAttribute("firstgid", 1);
             com.badlogic.gdx.utils.XmlReader.Element tileset = ts;
@@ -354,7 +382,13 @@ public class PlaneCheck {
                 if (image != null && !tsx.parent().child(image.getAttribute("source")).exists()) error("worldMap: tileset image " + image.getAttribute("source") + " not found");
             }
             for (com.badlogic.gdx.utils.XmlReader.Element tile : tileset.getChildrenByName("tile")) {
-                String biome = forge.adventure.world.WorldMapTmx.properties(tile).get("biome");
+                Map<String, String> tileProps = forge.adventure.world.WorldMapTmx.properties(tile);
+                if (tileProps.containsKey("sprite")) gidToSprite.put(first + tile.getIntAttribute("id"), tileProps.get("sprite"));
+                if ("true".equals(tileProps.get("road"))) roadGids.add(first + tile.getIntAttribute("id"));
+                com.badlogic.gdx.utils.XmlReader.Element tileImage = tile.getChildByName("image");
+                if (tileImage != null && source != null && !f.parent().child(source).parent().child(tileImage.getAttribute("source", "")).exists())
+                    error("worldMap " + label + ": tileset " + source + " tile " + tile.getAttribute("id") + ": image " + tileImage.getAttribute("source", "") + " not found");
+                String biome = tileProps.get("biome");
                 if (biome == null) continue;
                 if (!biomeNames.contains(biome)) error("worldMap " + label + ": tileset tile " + tile.getAttribute("id") + " names unknown biome '" + biome + "'");
                 gidToBiome.put(first + tile.getIntAttribute("id"), biome);
@@ -371,6 +405,45 @@ public class PlaneCheck {
             String b = gidToBiome.get(e.getKey());
             if (b == null) error("worldMap " + label + ": gid " + e.getKey() + " (" + e.getValue() + " tiles) maps to no biome (the game uses the first biome)");
             else painted.add(b);
+        }
+        // Phase 2d-1 layers
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("layer")) {
+            if (!forge.adventure.world.WorldMapTmx.ROADS_LAYER.equals(layer.getAttribute("name", ""))) continue;
+            layerMaps[0]++;
+            if (layer.getIntAttribute("width", w) != w || layer.getIntAttribute("height", h) != h)
+                error("worldMap " + label + ": Roads layer is " + layer.getIntAttribute("width", w) + "x" + layer.getIntAttribute("height", h) + ", the map " + w + "x" + h);
+            int[] roads;
+            try { roads = forge.adventure.world.WorldMapTmx.decodeLayer(layer, w * h); } catch (Exception e) { error("worldMap " + label + ": Roads layer: " + e.getMessage()); continue; }
+            Set<Integer> other = new TreeSet<>();
+            for (int g : roads) {
+                g &= 0x0FFFFFFF;
+                if (g == 0) continue;
+                roadTiles++;
+                if (!roadGids.contains(g)) other.add(g);
+            }
+            if (!other.isEmpty()) warn("worldMap " + label + ": Roads layer uses gids " + other + " that are not the road tile (they count as road)");
+        }
+        Set<String> spriteNames = new HashSet<>();
+        if (world.GetBiomeSprites() != null && world.GetBiomeSprites().sprites != null)
+            for (BiomeSpriteData sd : world.GetBiomeSprites().sprites) spriteNames.add(sd.name);
+        for (com.badlogic.gdx.utils.XmlReader.Element group : map.getChildrenByName("objectgroup")) {
+            if (!forge.adventure.world.WorldMapTmx.CLUTTER_LAYER.equals(group.getAttribute("name", ""))) continue;
+            layerMaps[1]++;
+            Map<String, Integer> unknown = new TreeMap<>();
+            for (com.badlogic.gdx.utils.XmlReader.Element o : group.getChildrenByName("object")) {
+                clutterObjects++;
+                String sprite = forge.adventure.world.WorldMapTmx.properties(o).get("sprite");
+                if (sprite == null) sprite = gidToSprite.get((int) (Long.parseLong(o.getAttribute("gid", "0")) & 0x0FFFFFFFL));
+                if (sprite == null) unknown.merge("(no sprite: object " + o.getAttribute("id", "?") + ")", 1, Integer::sum);
+                else if (!spriteNames.contains(sprite)) unknown.merge(sprite, 1, Integer::sum);
+            }
+            if (!unknown.isEmpty()) error("worldMap " + label + ": Clutter objects with unknown sprites (skipped by the game): " + unknown);
+        }
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("imagelayer")) {
+            if (!forge.adventure.world.WorldMapTmx.REFERENCE_LAYER.equals(layer.getAttribute("name", ""))) continue;
+            layerMaps[2]++;
+            com.badlogic.gdx.utils.XmlReader.Element image = layer.getChildByName("image");
+            if (image != null && !image.getAttribute("source", "").isEmpty() && !f.parent().child(image.getAttribute("source")).exists()) missingCrops++;
         }
         for (com.badlogic.gdx.utils.XmlReader.Element group : map.getChildrenByName("objectgroup")) {
             if (!forge.adventure.world.WorldMapTmx.POI_LAYER.equals(group.getAttribute("name", ""))) continue;
