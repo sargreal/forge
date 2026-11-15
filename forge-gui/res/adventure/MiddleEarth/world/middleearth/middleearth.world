@@ -43,6 +43,20 @@
             "y": 0
         },
         {
+            "fileName": "chunk_6_0.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 0
+        },
+        {
+            "fileName": "chunk_7_0.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 0
+        },
+        {
             "fileName": "chunk_0_1.tmx",
             "height": 2400,
             "width": 2400,
@@ -82,6 +96,20 @@
             "height": 2400,
             "width": 2400,
             "x": 12000,
+            "y": 2400
+        },
+        {
+            "fileName": "chunk_6_1.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 2400
+        },
+        {
+            "fileName": "chunk_7_1.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
             "y": 2400
         },
         {
@@ -127,6 +155,20 @@
             "y": 4800
         },
         {
+            "fileName": "chunk_6_2.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 4800
+        },
+        {
+            "fileName": "chunk_7_2.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 4800
+        },
+        {
             "fileName": "chunk_0_3.tmx",
             "height": 2400,
             "width": 2400,
@@ -166,6 +208,20 @@
             "height": 2400,
             "width": 2400,
             "x": 12000,
+            "y": 7200
+        },
+        {
+            "fileName": "chunk_6_3.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 7200
+        },
+        {
+            "fileName": "chunk_7_3.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
             "y": 7200
         },
         {
@@ -211,6 +267,20 @@
             "y": 9600
         },
         {
+            "fileName": "chunk_6_4.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 9600
+        },
+        {
+            "fileName": "chunk_7_4.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 9600
+        },
+        {
             "fileName": "chunk_0_5.tmx",
             "height": 2400,
             "width": 2400,
@@ -251,6 +321,132 @@
             "width": 2400,
             "x": 12000,
             "y": 12000
+        },
+        {
+            "fileName": "chunk_6_5.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 12000
+        },
+        {
+            "fileName": "chunk_7_5.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 12000
+        },
+        {
+            "fileName": "chunk_0_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 0,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_1_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 2400,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_2_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 4800,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_3_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 7200,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_4_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 9600,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_5_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 12000,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_6_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_7_6.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 14400
+        },
+        {
+            "fileName": "chunk_0_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 0,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_1_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 2400,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_2_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 4800,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_3_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 7200,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_4_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 9600,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_5_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 12000,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_6_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 14400,
+            "y": 16800
+        },
+        {
+            "fileName": "chunk_7_7.tmx",
+            "height": 2400,
+            "width": 2400,
+            "x": 16800,
+            "y": 16800
         }
     ],
     "onlyShowAdjacentMaps": true,

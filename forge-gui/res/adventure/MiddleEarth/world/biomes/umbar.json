@@ -1,6 +1,6 @@
 {
-"startPointX": 0.505,
-"startPointY": 0.9189,
+"startPointX": 0.378750,
+"startPointY": 0.814175,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "umbar",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.1967,
-"height": 0.0956,
+"width": 0.147525,
+"height": 0.071700,
 "color": "d9cc7a",
 "spriteNames": [
 	"Cactus",

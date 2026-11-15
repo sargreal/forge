@@ -1,6 +1,6 @@
 {
-"startPointX": 0.5922,
-"startPointY": 0.8261,
+"startPointX": 0.444150,
+"startPointY": 0.744575,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "tolfalas",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.0311,
-"height": 0.0278,
+"width": 0.023325,
+"height": 0.020850,
 "color": "85cc7a",
 "spriteNames": [
 	"Shell",

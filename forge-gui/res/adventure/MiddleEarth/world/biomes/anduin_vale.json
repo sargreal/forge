@@ -1,6 +1,6 @@
 {
-"startPointX": 0.5717,
-"startPointY": 0.2817,
+"startPointX": 0.428775,
+"startPointY": 0.336275,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "anduin_vale",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.0856,
-"height": 0.3833,
+"width": 0.064200,
+"height": 0.287475,
 "color": "66b35c",
 "spriteNames": [
 	"Flower",

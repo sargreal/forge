@@ -1,6 +1,6 @@
 {
-"startPointX": 0.8628,
-"startPointY": 0.815,
+"startPointX": 0.647100,
+"startPointY": 0.736250,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ephel_duath_2",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.2744,
-"height": 0.0478,
+"width": 0.205800,
+"height": 0.035850,
 "color": "822618",
 "spriteNames": [
 	"MountainTree",

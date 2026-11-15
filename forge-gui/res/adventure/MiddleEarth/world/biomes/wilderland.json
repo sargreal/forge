@@ -1,6 +1,6 @@
 {
-"startPointX": 0.75,
-"startPointY": 0.315,
+"startPointX": 0.562500,
+"startPointY": 0.361250,
 "noiseWeight": 0.5,
 "distWeight": 0.9,
 "name": "wilderland",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.5,
-"height": 0.5478,
+"width": 0.375000,
+"height": 0.410850,
 "color": "4e9945",
 "spriteNames": [
 	"DarkGras",

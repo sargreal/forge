@@ -1,8 +1,8 @@
 {
-	"width": 900,
-	"height": 900,
-	"playerStartPosX": 0.205,
-	"playerStartPosY": 0.655,
+	"width": 1200,
+	"height": 1200,
+	"playerStartPosX": 0.15375,
+	"playerStartPosY": 0.61625,
 	"noiseZoomBiome": 30,
 	"miniMapTileSize": 4,
 	"tileSize": 16,

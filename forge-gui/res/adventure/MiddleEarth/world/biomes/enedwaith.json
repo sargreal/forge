@@ -1,6 +1,6 @@
 {
-"startPointX": 0.3911,
-"startPointY": 0.5633,
+"startPointX": 0.293325,
+"startPointY": 0.547475,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "enedwaith",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.22,
-"height": 0.2867,
+"width": 0.165000,
+"height": 0.215025,
 "color": "9a9a9a",
 "spriteNames": [
 	"WasteRock",
