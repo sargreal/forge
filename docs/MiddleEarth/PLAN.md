@@ -122,7 +122,7 @@ The approach from issue #2: load the Tiled world into the existing `World` data 
 
 ### Phase 3: Story and quests
 
-Concept in progress: [STORY.md](STORY.md) (decisions S1–S6: the War of the Ring, the margins of the canon, calendar acts, both allegiances, rare canon cameos, a corruption meter).
+Concept in progress: [STORY.md](STORY.md). Engine audit: [notes/story-engine-audit.md](notes/story-engine-audit.md). Quests, flags, POI appearance, cameos, boss rules, Ring rewards and pursuit are data; acts, origins, the corruption HUD, a non-fatal boss loss, an equip-locked Ring and non-hostile enemies need about 5 days of small engine additions. (decisions S1–S6: the War of the Ring, the margins of the canon, calendar acts, both allegiances, rare canon cameos, a corruption meter).
 
 Original notes:
 
@@ -176,6 +176,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | Story engine audit (Sonnet agent, read-only): feature → data/engine table and 5 recommended engine additions (FlagCondition + flag fixes, flag-conditioned world state, `spawnCondition`, origins table, corruption package; ~5 days). |
 | 2026-11-15 | STORY.md v0.3: S8 confirmed; S12 Ring endgame (Sauron boss duel, several dark endings). |
 | 2026-11-15 | User decisions: MEAR swaps applied (Murder → Grasp of Darkness, Cancel → Remand, Think Twice → Mulldrifter, Claustrophobia → Frost Lynx "Snow-beast of Forochel"); 21 ME decks now use the official-set twins instead (Bilbo's Deadly Slice, Saruman's Trickery, Plunder the Trollshaws, Enchanted River's Grasp), so deck strength is unchanged. The One Ring was removed from Umbar's shop. STORY.md v0.2 (S7–S11). Phase 2d-2 terrain postponed. check: 0 errors. |
 | 2026-11-15 | Phase 2d-1 merged (Opus agent): Roads/Clutter layers, per-chunk reference crops, reference image moved to docs. Identical world, byte-identical round trip; `run_all.sh` ALL PASSED. Main jar rebuilt. |
