@@ -65,7 +65,7 @@ tools/middleearth/check.sh Innistrad # check another plane for comparison
 2. **References**: duplicate biome names are an error. Enemy or POI names in biomes that don't exist are warnings, because the game silently ignores them.
 3. **Card pool**: starter decks and the decks of every enemy the plane spawns are measured against `allowedEditions`. A card is *off-pool* if it has no printing in an allowed set.
 4. **Printing resolution**: the unique card pool and the reprint replacement (`ensureAllowedEdition`) only give allowed printings. This guards issue #1.
-5. **Story data** (§4.2): every flag condition (dialog `flag`, stage `condition`, reward and POI `condition`, `spawnCondition` in maps) has a key, a known scope and op and a byte value; `enemyOverrides` name known enemies and modes; origins name known races, colour ids, POIs and intro quests. Unknown flag *keys* are fine.
+5. **Story data** (§4.2): every flag condition (dialog `flag`, stage `condition`, reward and POI `condition`, `spawnCondition` in maps) has a key, a known scope and op and a byte value; `enemyOverrides` name known enemies and modes; origins name known races, colour ids, POIs and intro quests. Unknown flag *keys* are fine. Run 2 adds: the `add*Flag` actions (key, min ≤ max), `runCommand` against the allowlist, `endGame` (title or text, image exists) in every dialog (maps, quests, item `dialogOnUse`, enemy `onDefeat`), config `statusFlags` and `flagEffects`, item `locked`/`lockCondition`, quest `condition`.
 
 The exit code is non-zero on errors. Warnings are the content backlog. Track their count in PLAN.md.
 
@@ -190,7 +190,7 @@ $G screenshot /abs/path/x.png                # for humans
 
 | Endpoint | Body | Does |
 | --- | --- | --- |
-| `/state` | `{radius?}` | Scene, transition flag, plane; player (life/max, gold, shards, deck name and size, difficulty, origin, respawnPOI); location (`map` file + POI or `overworld` + biome), position (px and tile); quests with their current stage; quest, character and map flags; the open `dialog` (speaker, text, options with index/label/enabled); a `modal` UI dialog; the `reward` screen (type, items); the `duel` (players, life, AI flag, turn, phase); `objects`: in a map every actor (id, type enemy/portal/entry/dialog/reward/shop, name/enemy, state of portals, target map, inactive/hidden/deleted, position, distance); on the overworld POIs (with `active`) and enemies within `radius` px (default 30 tiles), nearest first. On the overworld `location.biomeEnemies` is the biome's enemy list after `enemyOverrides`. |
+| `/state` | `{radius?}` | Scene, transition flag, plane; player (life/max, gold, shards, deck name and size, difficulty, origin, respawnPOI); location (`map` file + POI or `overworld` + biome), position (px and tile); quests with their current stage; quest, character and map flags; the open `dialog` (speaker, text, options with index/label/enabled); a `modal` UI dialog; the `reward` screen (type, items); the `duel` (players, life, AI flag, turn, phase); `objects`: in a map every actor (id, type enemy/portal/entry/dialog/reward/shop, name/enemy, state of portals, target map, inactive/hidden/deleted, position, distance); on the overworld POIs (with `active`) and enemies within `radius` px (default 30 tiles), nearest first. On the overworld `location.biomeEnemies` is the biome's enemy list after `enemyOverrides`. `statusFlags`: each config status flag with `value`, `visible` and `hud` (the HUD label text, null while hidden). In a duel each player also has `startingLife`, `ringTempted`, `ringBearer`, `battlefield` and `command` (card names). |
 | `/newGame` | `{plane?, name?, race?, gender?, difficulty?, colors?, mode?, origin?}` | Starts a new game with these choices through `NewGameScene` (nothing else clicked) and returns when the first map is shown. Values are names: difficulty `Easy/Normal/Hard…`, mode `Standard/Constructed/Chaos/Pile/Custom/Precon…`, colors a color id (`W`) or its name, gender `male/female`. `plane` only checks: the plane is fixed at startup (`game.sh start <plane>`). `origin` forces a `config.json` origin by name, hidden ones included (§4.2). |
 | `/dialog/choose` | `{index}` | Clicks option N of the open map/quest dialog (or a modal dialog) like a tap. Disabled options are refused. |
 | `/dialog/close` | `{}` | Hides the dialog without choosing (like the console's hack; quest chains may not continue). |
@@ -202,7 +202,9 @@ $G screenshot /abs/path/x.png                # for humans
 | `/key` | `{key, holdMs?}` | Raw key event to the current input processor (libGDX key names: `Escape`, `Enter`, `F9`, `W`). Movement keys are polled, so use `walkTo`, not `/key`, to move. |
 | `/wait` | `{condition, timeoutMs}` | Polls until: `scene=<Class>`, `dialogOpen`, `dialogClosed`, `onOverworld`, `inMap[=<map file substring>]`, `quest=<id>`, `questStage=<questId>:<stageId>` or `questStage=<stage name text>`, `rewardOpen`, `duel`, `idle`. Returns `ok:false` on timeout. |
 | `/screenshot` | `{path}` | Writes a PNG of the game window. |
-| `/duel/concede`, `/duel/autoplay` | `{}` | In a duel: concede, or hand the human seat to Forge's AI (the AI then plays the whole game). |
+| `/duel/concede`, `/duel/autoplay` | `{}` | In a duel: concede, or hand the human seat to Forge's AI (the AI then plays the whole game). Concede after turn 1 has begun: conceding during the coin flip can hang the game. |
+| `/duel/popup` | `{}` | Presses OK on the duel's boss intro/insult popup (`/state` shows `duelPopup: true` while it is up). |
+| `/inventory` | `{action?: list\|equip\|unequip\|drop\|sell, item?}` | The Inventory's equip toggle and delete button by item name; returns `done` and the item list (`name`, `slot`, `equipped`, `locked`, `questItem`). The engine has no item selling: `sell` is refused for locked items and an error otherwise. |
 
 **Writing a test:** import the client and assert on `/state`. See `tools/middleearth/tests/intro_walkthrough.py` (≈35 s, about 15 API calls):
 
@@ -216,7 +218,7 @@ g.choose(0)
 portal = g.objects(id=78)[0]; assert portal["state"] == "closed"
 ```
 
-Put new GUI tests in `tools/middleearth/tests/` and list them in `tests/run_all.sh` (`check.sh`, the headless unit checks `tools/middleearth/FlagConditionCheck.java`, then every GUI test: `intro_walkthrough.py`, `origin_start.py`, `flags_and_world_state.py`; exit code ≠ 0 on failure). `tests/_harness.py` has the shared start/stop/assert code for new tests. A test starts its own game with `game.sh start` when none answers on its port, and stops it at the end (`--keep` leaves it running for inspection).
+Put new GUI tests in `tools/middleearth/tests/` and list them in `tests/run_all.sh` (`check.sh`, the headless unit checks `tools/middleearth/FlagConditionCheck.java`, then every GUI test: `intro_walkthrough.py`, `origin_start.py`, `flags_and_world_state.py`, `corruption.py`, `boss_loss.py`, `locked_item.py`; exit code ≠ 0 on failure). `tests/_harness.py` has the shared start/stop/assert code for new tests, and `duel_with_spawn(g, enemy)` / `leave_duel(g)` to fight a named enemy on the world map. A test starts its own game with `game.sh start` when none answers on its port, and stops it at the end (`--keep` leaves it running for inspection).
 
 ## 4. Plane data: how-to
 
@@ -257,20 +259,30 @@ To write the world back from a running game (e.g. after changes to the export, o
 
 ### 4.2 Story data reference
 
-Fork features for story content (engine run 1, see [notes/story-engine-run1.md](notes/story-engine-run1.md)). Everything here is optional: without these fields a plane behaves exactly as upstream. `check.sh` validates all of it.
+Fork features for story content (engine runs 1 and 2, see [notes/story-engine-run1.md](notes/story-engine-run1.md) and [notes/story-engine-run2.md](notes/story-engine-run2.md)). Everything here is optional: without these fields a plane behaves exactly as upstream. `check.sh` validates all of it.
 
 #### Flags
 
 | Kind | Lives | Set (dialog actions) | Read |
 | --- | --- | --- | --- |
-| quest | player, wiped by New Game+ / `resetQuests` | `setQuestFlag {key,val}`, `advanceQuestFlag: "key"` | scope `quest` |
-| character | player, permanent | `setCharacterFlag`, `advanceCharacterFlag` | scope `character` |
-| map | one POI map (its `PointOfInterestChanges`) | `setMapFlag`, `advanceMapFlag` | scope `map` (0 outside that map) |
+| quest | player, wiped by New Game+ / `resetQuests` | `setQuestFlag {key,val}`, `advanceQuestFlag: "key"`, `addQuestFlag {key,val,min,max}` | scope `quest` |
+| character | player, permanent | `setCharacterFlag`, `advanceCharacterFlag`, `addCharacterFlag` | scope `character` |
+| map | one POI map (its `PointOfInterestChanges`) | `setMapFlag`, `advanceMapFlag`, `addMapFlag` | scope `map` (0 outside that map) |
 
-- Values are **bytes, -128..127**, stored as `Byte` in the save (the format is unchanged). `set` casts (`300` becomes `44`) and `advance` wraps (`127 + 1 = -128`). Keep meters well inside the range.
+- Values are **bytes, -128..127**, stored as `Byte` in the save (the format is unchanged). `set` casts (`300` becomes `44`) and `advance` wraps (`127 + 1 = -128`). **Use `add*Flag` for meters**: it never wraps (below).
 - **Setting a quest or character flag to 0 deletes it**, so "0" and "unset" are the same value. (Map flags keep a 0 entry; the old `checkMapFlag` sees it as set.)
 - `advanceQuestFlag` / `advanceCharacterFlag` now wake `QuestFlag` / `CharacterFlag` stages exactly like `set*` (they used to be silent).
-- Console (F9 or `gamectl.py console`): `flag set <quest|character|map> <key> <value>`, `flag advance <scope> <key>`, `flag get <scope> <key>`, `flag check '<condition JSON>'` (single quotes around the JSON). They fire the same quest updates as the dialog actions.
+- Console (F9 or `gamectl.py console`): `flag set <quest|character|map> <key> <value>`, `flag advance <scope> <key>`, `flag add <scope> <key> <delta> [min] [max]`, `flag get <scope> <key>`, `flag check '<condition JSON>'` (single quotes around the JSON). They fire the same quest updates as the dialog actions.
+
+#### Signed, clamped add (`addQuestFlag`, `addCharacterFlag`, `addMapFlag`)
+
+```json
+{ "addQuestFlag": { "key": "corruption", "val": 3, "min": 0, "max": 100 } }     // +3, at most 100
+{ "addQuestFlag": { "key": "corruption", "val": -2, "min": 0, "max": 100 } }    // cleansing: -2, at least 0
+```
+
+- Dialog actions (map, quest and item dialogs, enemy `onDefeat`). `val` is the signed delta; `min`/`max` default to -128/127 and are capped to that range, so the value **clamps instead of wrapping**. An unset flag counts as 0.
+- It writes through `set*Flag`, so `QuestFlag`/`CharacterFlag`/`MapFlag` stages and their `condition` wake exactly as after a set; reaching 0 deletes a quest/character flag. `addMapFlag` only works inside a map.
 
 #### Flag conditions (`FlagCondition`)
 
@@ -300,6 +312,10 @@ Where conditions go:
 | Reward entry (shops, enemy drops, chests, `grantRewards`) | `"condition": {…}` | The entry gives nothing unless it holds. |
 | POI (`points_of_interest.json`) | `"condition": {…}` | The POI is shown and enterable only while it holds. |
 | Tiled map object | property `spawnCondition` (string) | The object is not created unless it holds. |
+| `config.json` `statusFlags[]` | `showWhen` | The HUD readout is shown only while it holds (run 2). |
+| `config.json` `flagEffects[]` | `condition` | The effect applies to the player's duels while it holds (run 2). |
+| Item (`items.json`) | `lockCondition` | A `locked` item is locked only while it holds (run 2). |
+| Quest (`quests.json`) | `condition` | Quest boards offer the side quest only while it holds (run 2). |
 
 ```json
 { "condition": [ { "flag": { "scope": "character", "key": "allegiance", "op": "=", "val": 2 } } ],
@@ -382,9 +398,95 @@ Any Tiled object with a `type` (enemy, dialog NPC, shop, inn, portal, entry, rew
 - **No `origins` = upstream start** (POI `Spawn`, quest 28). The same applies when no origin matches.
 - `hidden: true` origins are only used by name: `gamectl.py newgame --origin Test` (dev API `/newGame {origin}`). Middle-earth has `Wizard's Hollow` (today's start) and the hidden test origin `Test` (Hobbiton, fixture quest 9001).
 
+#### HUD status flags (`config.json` → `statusFlags[]`)
+
+```json
+"statusFlags": [
+  { "flag": "corruption", "label": "Shadow", "max": 100,
+    "showWhen": { "key": "corruption", "op": ">", "val": 0 } }
+]
+```
+
+- Each entry is a small label in the game HUD, below life, shards and gold (one row per entry): `[icon]label value[/max]`. It updates live (polled 4× a second), on the world map and in POI maps.
+- Fields: `flag` (key, required), `scope` (`quest` default, `character`, `map`), `label` (default: the key), `icon` (optional skin icon name, written as `[+icon]`, e.g. `Shards`), `max` (> 0 shows `/max`), `hidden: true` (switch it off without deleting it), `showWhen` (a flag condition; hidden while it is false).
+- Generic: any plane can show any flag. **No `statusFlags` = nothing shown.** Middle-earth shows the corruption meter ("Shadow", quest flag `corruption`, 0..100) once it is above 0 (STORY S5). To hide it later, set `"hidden": true` or a `showWhen` on a setting flag.
+- `/state` → `statusFlags` (value, visible, HUD text).
+
+#### Duel effects by flag (`config.json` → `flagEffects[]`)
+
+```json
+"flagEffects": [
+  { "condition": { "key": "corruption", "op": ">=", "val": 40 },
+    "effect": { "lifeModifier": -2, "startBattleScript": ["DB$ RingTemptsYou | SpellDescription$ The Ring tempts you."] } },
+  { "condition": { "key": "corruption", "op": ">=", "val": 80 },
+    "effect": { "startBattleScript": ["DB$ RingTemptsYou"], "opponent": { "lifeModifier": 5 } } }
+]
+```
+
+- At every duel start, **every entry whose condition holds** adds its `effect` (an `EffectData`, as for items, `globalEffect` or enemies) to the **player**; its `opponent` block goes to the enemies. Tiers stack: write them as `>=` thresholds.
+- Applied with the other layers (equipment, blessing, global, modifiers, biome, dungeon, enemy). Not in events/arenas with event rules (like run modifiers).
+- `"DB$ RingTemptsYou"` in `startBattleScript` **works** (verified in a duel, `tests/corruption.py`): the player gets "The Ring" emblem in the command zone and chooses a ring-bearer when they have a creature; each line in the array is one script run after mulligans, so two lines tempt twice.
+
+#### Non-fatal loss (enemy `onDefeat`)
+
+```json
+{ "name": "Sauron, the Eye", "boss": true, …,
+  "onDefeat": {
+    "noPenalty": true,
+    "action": [ { "setQuestFlag": { "key": "sauronWon", "val": 1 } }, { "issueQuest": "71" } ],
+    "dialog": { "text": "The Eye holds you. You live, because it wills it.",
+                "options": [ { "name": "(Kneel)", "action": [ { "addQuestFlag": { "key": "corruption", "val": 20, "max": 100 } } ] } ] } } }
+```
+
+- A field of the enemy (`enemies.json`), so it works for world-map spawns, quest hunters and map enemies alike. Losing to it queues `action` (run at once, like an action-only dialog) and then `dialog` (needs `options`, else only its actions run) with the quest dialogs.
+- `noPenalty: true`: no life/gold loss, no respawn at 0 life, no boss "defeated" popup, no run-modifier card loss. On the world map the enemy is removed as usual; in a map the player stays in the map and the enemy is removed for this visit (no dungeon exit). The boss insult popup still shows (`bossInsult` text). Without `noPenalty` the actions run on top of the normal penalty.
+- Normal enemies are unchanged. Quest `Defeat`/`Hunt` stages still fail on a loss and show their `failureDialog`.
+- Why on the enemy and not on the quest stage: the penalty is applied by the post-duel code, which knows the enemy, not the stage; the Sauron/Ring duels are the same encounter wherever they happen; stage-level loss handling (`failureDialog`) already exists for quest branching.
+
+#### Locked items (`items.json` → `locked`, `lockCondition`)
+
+```json
+{ "name": "The One Ring", "equipmentSlot": "Neck", "unique": true, "locked": true,
+  "lockCondition": { "scope": "character", "key": "ringBearer", "op": "=", "val": 1 }, … }
+```
+
+- While locked (`locked: true` and `lockCondition`, if any, holds): it can't be unequipped, replaced in its slot by another item, dropped (Inventory delete button disabled, the equip button reads "Locked"), it never cracks after a defeat, and it stays equipped across deck loadout switches. The item description ends with a red "Locked" line.
+- **Getting a locked item equips it** (replacing the item in its slot, unless that one is locked too).
+- Dialog `removeItem` still removes it: that is how the story takes it away (Sauron takes the Ring).
+- The engine has no item selling, so there is nothing to block there.
+- The lock is read from `items.json` each time (saves keep a copy of each item), so changing the data affects existing saves.
+- The One Ring is `locked: true` (STORY S9).
+
+#### `runCommand` (dialog action)
+
+```json
+{ "runCommand": "teleport to poi 'ME Rivendell'" }
+{ "runCommand": "spawn enemy 'Black Rider'" }
+```
+
+- Runs one console command from plane data. **Allowlist** (`ConsoleCommandInterpreter.DATA_COMMANDS`): `teleport to` (incl. `teleport to poi`), `spawn enemy`, `give gold|shards|item|card|quest`, `flag set|advance|add`, `heal`, `fullHeal`, `hide`, `sprint`, `remove enemy`. Anything else is refused and logged; `check.sh` reports it as an error.
+- Risks: commands skip the normal rules (no cost checks, no quest bookkeeping beyond what the command does); `teleport to poi` enters the POI with a transition while the dialog closes; `give card` ignores the card pool. Prefer the dedicated actions (`addItem`, `addGold`, `issueQuest`, `set*Flag`) where one exists. Never add debug, file-writing or reset commands (`god`, `exportMap`, `resetQuests`, `leave`…) to the allowlist. Item `commandOnUse` (upstream) is not restricted.
+
+#### Quest `condition` (side-quest pool)
+
+```json
+{ "id": 120, "name": "Orc raiders on the road", "condition": { "scope": "character", "key": "allegiance", "op": "!=", "val": 2 }, … }
+```
+
+- Town quest boards only offer side quests whose `condition` holds (no condition = always). If no side quest's condition holds, the board falls back to the whole pool (an empty pool crashes it).
+- Story quests ignore it (they are issued by dialogs, which have their own conditions).
+
+#### Ending screen (`endGame` dialog action)
+
+```json
+{ "endGame": { "title": "The New Dark Lord", "text": "The Eye is shut. Yours opens.", "image": "ui/endings/dark_lord.png", "flag": "ending" } }
+```
+
+- Sets the character flag `flag` (default `gameEnded`; empty = none) to 1 at once, then, once the current dialog is closed, shows a closing screen: optional picture, title, text, and **Continue playing** or **Main menu** (the adventure start screen, like the menu button; the game is not saved for you). Later content can check the flag. Use one flag per ending (or set an `ending` flag with `setCharacterFlag` in the same action list).
+
 #### Test fixtures in the plane data
 
-These exist only for `tests/origin_start.py` and `tests/flags_and_world_state.py` and are inert in normal play, because nothing sets `test_*` flags: the hidden origin `Test` and quest 9001 (`storyQuest`, issued only by that origin), `enemyOverrides` in `biomes/shire.json` (`test_enemy_override`), Lembas in the `GreenItems` shop (`test_shop`), and `questFlagsToDeactivate` / `condition` on `Forest Capital` (`test_hide_poi`, `test_hide_poi_c`). The `spawnCondition` test patches `common/.../forest_capital.tmx` while it runs and restores it.
+These exist only for the tests and are inert in normal play, because nothing sets `test_*` flags (run 2: `flagEffects` entry on `test_flag_effect`, item `Test Cursed Band` (`test_lock`, not sold anywhere), enemy `Test Boss Loss` (`spawnRate` 0, in no biome; its `onDefeat` also runs a refused `runCommand` and an `endGame` with flag `test_game_ended`)). Run 1: the hidden origin `Test` and quest 9001 (`storyQuest`, issued only by that origin), `enemyOverrides` in `biomes/shire.json` (`test_enemy_override`), Lembas in the `GreenItems` shop (`test_shop`), and `questFlagsToDeactivate` / `condition` on `Forest Capital` (`test_hide_poi`, `test_hide_poi_c`). The `spawnCondition` test patches `common/.../forest_capital.tmx` while it runs and restores it.
 
 ## 5. Keeping in sync with upstream
 
