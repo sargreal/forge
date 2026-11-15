@@ -6,6 +6,7 @@
    respawned, the `onDefeat.action`s run (setQuestFlag, addQuestFlag) and the `onDefeat.dialog` is shown; its option
    runs its action. `runCommand` runs an allow-listed command (give gold 7) and refuses another (resetQuests, which
    would wipe the quest flags just set).
+3. The dialog option's `endGame` action sets its flag and shows the ending screen; "Continue playing" returns to the game.
 
 Usage: tools/middleearth/tests/boss_loss.py [--keep]  (own game unless one answers; DISPLAY_NUM)
 """
@@ -63,6 +64,19 @@ def run(g):
     g.choose(0)
     check(g.state()["questFlags"].get("test_boss_dialog") == 1, "onDefeat dialog option action did not run")
     step("boss loss without penalty: life %d, gold %d, flags %s" % (p1["life"], p1["gold"], s["questFlags"]))
+
+    # the option also has an endGame action: flag at once, ending screen once the dialog is closed
+    g.wait("dialogOpen", 10000)
+    s = g.state()
+    d = s.get("dialog") or {}
+    check(s["characterFlags"].get("test_game_ended") == 1, "endGame flag: %s" % s["characterFlags"])
+    check("tale ends here" in d.get("text", ""), "ending screen text: %s" % d)
+    labels = [o["label"] for o in d.get("options", [])]
+    check(labels == ["Continue playing", "Main menu"], "ending screen options: %s" % labels)
+    g.choose(0)
+    s = g.state()
+    check(not s.get("dialog") and s["scene"] == "GameScene", "continue playing: %s %s" % (s["scene"], s.get("dialog")))
+    step("endGame: flag set, ending screen, continue playing")
 
 
 if __name__ == "__main__":

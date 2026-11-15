@@ -97,6 +97,7 @@ public class DialogData implements Serializable {
         public FlagAdd addCharacterFlag;  //Fork (run 2): same for a character flag.
         public FlagAdd addMapFlag;        //Fork (run 2): same for a map flag (in a map only).
         public String runCommand;         //Fork (run 2): a console command from the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS).
+        public EndGameData endGame;       //Fork (run 2): sets a character flag and shows a closing screen (continue / main menu).
 
         public RewardData[] grantRewards = new RewardData[0];   //launch a RewardScene with the provided data.
         public RewardData[] grantRewardsChoice = new RewardData[0];   //launch a RewardScene choice with the provided data.
@@ -140,7 +141,17 @@ public class DialogData implements Serializable {
             addCharacterFlag = other.addCharacterFlag;
             addMapFlag = other.addMapFlag;
             runCommand = other.runCommand;
+            endGame = other.endGame;
         }
+    }
+
+    /** Fork (run 2): the {@code endGame} action. */
+    static public class EndGameData implements Serializable {
+        private static final long serialVersionUID = 6203914770130911846L;
+        public String title;
+        public String text;
+        public String image;               //optional picture, a plane file path (Config.getFile)
+        public String flag = "gameEnded";  //character flag set to 1 when the action runs (empty: none)
     }
 
     static public class ConditionData implements Serializable {

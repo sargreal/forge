@@ -458,6 +458,11 @@ public class MapDialog {
                 FlagCondition.addFlag("map", E.addMapFlag.key, E.addMapFlag.val, E.addMapFlag.min, E.addMapFlag.max);
             if (E.runCommand != null && !E.runCommand.trim().isEmpty()) //Fork (run 2): allow-listed console command
                 ConsoleCommandInterpreter.getInstance().runFromData(E.runCommand);
+            if (E.endGame != null) { //Fork (run 2): ending screen once this dialog is closed
+                if (E.endGame.flag != null && !E.endGame.flag.isEmpty())
+                    Current.player().setCharacterFlag(E.endGame.flag, 1);
+                stage.showEndingDialogWhenFree(E.endGame.title, E.endGame.text, E.endGame.image);
+            }
             if (E.setEffect != null) { //Replace current effects.
                 EnemySprite EN = stage.getEnemyByID(parentID);
                 EN.effect = E.setEffect;

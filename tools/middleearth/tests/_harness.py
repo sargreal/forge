@@ -53,26 +53,11 @@ def main(run, plane="MiddleEarth"):
             subprocess.run([GAME_SH, "stop"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-def duel_with_spawn(g, enemy, timeout=60):
-    """Overworld: spawns `enemy` by name (console), walks into it, hands the human seat to the AI and returns the duel
-    state once turn 1 has begun (conceding during the coin flip can hang the game)."""
-    s = g.state()
-    check(s["location"].get("where") == "overworld", "duel_with_spawn needs the overworld: %s" % s["location"])
-    g.console("remove enemy all")  # so no wandering enemy gets in the way
-    out = g.console("spawn enemy '%s'" % enemy).get("output", "")
-    check("Spawn" in out, "could not spawn %s: %s" % (enemy, out))
+def _start_duel(g, timeout):
+    """Waits for the duel to load, clicks the boss intro, hands the human seat to the AI and waits for turn 1."""
     t_end = time.time() + timeout
-    while time.time() < t_end:
-        s = g.state()
-        if s["scene"] == "DuelScene":
-            break
-        es = [o for o in s.get("objects", []) if o["type"] == "enemy" and o.get("enemy") == enemy]
-        check(es, "spawned %s not on the map" % enemy)
-        g.walk(es[0]["x"], es[0]["y"], unit="px", timeout_ms=4000)
-    else:
-        raise Fail("no duel with %s" % enemy)
     autoplaying = False
-    while time.time() < t_end:  # the AI plays the human seat (mulligans too) until turn 1 has begun
+    while time.time() < t_end:
         st = g.state()
         if st.get("duelPopup"):  # boss intro
             try:
@@ -83,14 +68,47 @@ def duel_with_spawn(g, enemy, timeout=60):
             continue
         d = st.get("duel") or {}
         if d.get("players") and not autoplaying:
-            names = [p["name"] for p in d["players"]]
-            check(enemy in names, "duel against %s instead of %s" % (names, enemy))
             g.duel("autoplay")
             autoplaying = True
-        if autoplaying and d.get("turn", 0) >= 1:  # past the coin flip and mulligans
+        if autoplaying and d.get("turn", 0) >= 1:  # past the coin flip and mulligans (conceding earlier can hang)
             return d
         time.sleep(0.5)
-    raise Fail("duel with %s did not load" % enemy)
+    raise Fail("duel did not load")
+
+
+def duel_with_spawn(g, enemy, timeout=60, attempts=3):
+    """Overworld: spawns `enemy` by name (console), walks into it, hands the human seat to the AI and returns the duel
+    state once turn 1 has begun. If a wandering enemy gets there first, that duel is conceded, life and gold are
+    restored and it tries again."""
+    for attempt in range(attempts):
+        s = g.state()
+        check(s["location"].get("where") == "overworld", "duel_with_spawn needs the overworld: %s" % s["location"])
+        before = s["player"]
+        g.console("remove enemy all")  # so no wandering enemy gets in the way
+        g.console("hide 60")           # and none walks up to the player meanwhile
+        out = g.console("spawn enemy '%s'" % enemy).get("output", "")
+        check("Spawn" in out, "could not spawn %s: %s" % (enemy, out))
+        t_end = time.time() + timeout
+        while time.time() < t_end:
+            s = g.state()
+            if s["scene"] == "DuelScene":
+                break
+            es = [o for o in s.get("objects", []) if o["type"] == "enemy" and o.get("enemy") == enemy]
+            check(es, "spawned %s not on the map" % enemy)
+            g.walk(es[0]["x"], es[0]["y"], unit="px", timeout_ms=4000)
+        else:
+            raise Fail("no duel with %s" % enemy)
+        d = _start_duel(g, timeout)
+        names = [p["name"] for p in d["players"]]
+        if enemy in names:
+            return d
+        step("a wandering enemy got there first (%s): conceding, retrying" % names)
+        g.duel("concede")
+        after = leave_duel(g)["player"]
+        g.console("heal full")
+        if after["gold"] < before["gold"]:
+            g.console("give gold %d" % (before["gold"] - after["gold"]))
+    raise Fail("no duel with %s after %d attempts" % (enemy, attempts))
 
 
 def leave_duel(g, timeout=60):

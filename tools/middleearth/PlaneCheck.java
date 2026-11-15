@@ -1202,7 +1202,7 @@ public class PlaneCheck {
         if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
     }
 
-    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag, runCommand. */
+    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag, runCommand, endGame. */
     static void checkDialogAction(DialogData.ActionData a, String where) {
         String[] names = {"addQuestFlag", "addCharacterFlag", "addMapFlag"};
         DialogData.ActionData.FlagAdd[] adds = {a.addQuestFlag, a.addCharacterFlag, a.addMapFlag};
@@ -1214,6 +1214,12 @@ public class PlaneCheck {
             if (f.min > f.max) error(w + ": min " + f.min + " > max " + f.max);
             if (f.min < Byte.MIN_VALUE || f.max > Byte.MAX_VALUE) warn(w + ": min/max outside -128..127 (the flag range caps them)");
             if (f.val == 0) warn(w + ": val 0 does nothing");
+        }
+        if (a.endGame != null) {
+            if ((a.endGame.title == null || a.endGame.title.isEmpty()) && (a.endGame.text == null || a.endGame.text.isEmpty()))
+                error(where + " action endGame: needs a title or text");
+            if (a.endGame.image != null && !a.endGame.image.isEmpty() && !Config.instance().getFile(a.endGame.image).exists())
+                error(where + " action endGame: image '" + a.endGame.image + "' not found");
         }
         if (a.runCommand != null && !a.runCommand.trim().isEmpty() && !forge.adventure.stage.ConsoleCommandInterpreter.isDataCommand(a.runCommand)) {
             String m = where + " action runCommand '" + a.runCommand + "': not on the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS), the game refuses it";

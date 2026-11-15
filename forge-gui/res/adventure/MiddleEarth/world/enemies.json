@@ -37458,7 +37458,8 @@
       "dialog": {
         "text": "Test fixture: you lost, but the story goes on.",
         "options": [
-          { "name": "(Continue)", "action": [ { "setQuestFlag": { "key": "test_boss_dialog", "val": 1 } } ] }
+          { "name": "(Continue)", "action": [ { "setQuestFlag": { "key": "test_boss_dialog", "val": 1 } },
+            { "endGame": { "title": "Test ending", "text": "Test fixture: the tale ends here.", "flag": "test_game_ended" } } ] }
         ]
       }
     }
