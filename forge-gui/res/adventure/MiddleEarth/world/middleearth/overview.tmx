@@ -7,7 +7,7 @@
   <image source="overview.png" width="900" height="900"/>
  </imagelayer>
  <imagelayer id="2" name="Reference" offsetx="-218.25" offsety="38.73" opacity="0.6">
-  <image source="map-of-middle-earth.jpg" width="1600" height="900"/>
+  <image source="../../../../../../docs/MiddleEarth/reference/map-of-middle-earth.jpg" width="1600" height="900"/>
  </imagelayer>
  <objectgroup id="3" name="Chunks" locked="1">
   <object id="1" name="chunk_0_0.tmx" x="0" y="0" width="150" height="150"/>
