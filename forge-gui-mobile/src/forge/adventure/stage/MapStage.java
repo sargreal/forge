@@ -401,11 +401,21 @@ public class MapStage extends GameStage {
         if (difficultyData.spawnRank == 2 && !spawnHard) return false;
         if (difficultyData.spawnRank == 1 && !spawnNorm) return false;
         if (difficultyData.spawnRank == 0 && !spawnEasy) return false;
-        if (prop.containsKey("spawnCondition") && !prop.get("spawnCondition").toString().isEmpty()){
-
-        }
-
+        //Fork (Middle-earth): "spawnCondition" is checked for every object type in loadObjects (spawnConditionHolds).
         return true;
+    }
+
+    /** Fork (Middle-earth): the Tiled property "spawnCondition" (FlagCondition JSON); malformed ones are logged and ignored. */
+    private boolean spawnConditionHolds(MapProperties prop, int id) {
+        Object c = prop.get("spawnCondition");
+        if (c == null || c.toString().trim().isEmpty())
+            return true;
+        try {
+            return FlagCondition.allHold(FlagCondition.parse(c.toString()), this);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Map object " + id + ": " + e.getMessage());
+            return true;
+        }
     }
 
     private void loadObjects(MapLayer layer, String sourceMap, String currentMap) {
@@ -417,6 +427,8 @@ public class MapStage extends GameStage {
             if (type != null) {
                 int id = prop.get("id", int.class);
                 if (changes.isObjectDeleted(id))
+                    continue;
+                if (!spawnConditionHolds(prop, id))
                     continue;
 
                 boolean hidden = !obj.isVisible(); //Check if the object is invisible.
