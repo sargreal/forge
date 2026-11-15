@@ -7355,6 +7355,12 @@
    {
     "type": "life",
     "count": 1
+   },
+   {
+    "type": "item",
+    "count": 1,
+    "itemName": "Lembas",
+    "condition": { "scope": "character", "key": "test_shop", "op": ">=", "val": 1 }
    }
   ]
  },

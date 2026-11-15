@@ -506,6 +506,8 @@ public class ConsoleCommandInterpreter {
         registerCommand(new String[]{"flag", "check"}, s -> {
             try {
                 FlagCondition[] c = FlagCondition.parse(String.join(" ", s));
+                List<String> problems = FlagCondition.validate("condition", c);
+                if (!problems.isEmpty()) return String.join("; ", problems);
                 return String.valueOf(FlagCondition.allHold(c));
             } catch (IllegalArgumentException e) {
                 return e.getMessage();

@@ -30,6 +30,11 @@
 	"Stump"
 ],
 "enemies": ["Hobbit Troublemaker", "Southern Ruffian", "Wild Wolves", "Bill Ferny", "Black Rider"],
+"enemyOverrides": [
+	{ "condition": { "scope": "character", "key": "test_enemy_override", "op": ">=", "val": 1 }, "mode": "add", "enemies": ["Badger"] },
+	{ "condition": { "scope": "character", "key": "test_enemy_override", "op": ">=", "val": 2 }, "mode": "replace", "enemies": ["Wild Wolves", "Badger"] },
+	{ "condition": { "scope": "character", "key": "test_enemy_override", "op": ">=", "val": 3 }, "mode": "remove", "enemies": ["Wild Wolves"] }
+],
 "pointsOfInterest": [
 	"Spawn",
 	"Forest Capital",

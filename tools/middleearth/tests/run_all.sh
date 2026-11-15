@@ -6,7 +6,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fail=0
 echo "== check.sh"
 "$HERE/../check.sh" || fail=1
-for t in "$HERE"/intro_walkthrough.py; do
+for t in "$HERE"/intro_walkthrough.py "$HERE"/origin_start.py "$HERE"/flags_and_world_state.py; do
   echo "== $(basename "$t")"
   python3 "$t" || fail=1
 done

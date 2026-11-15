@@ -8628,5 +8628,6 @@
    "waste_town_identity",
    "waste_town_tribal"
   ]
- }
+ },
+ {"id": 9001, "isTemplate": true, "storyQuest": true, "name": "Test origin (fixture)", "description": "Test fixture for tools/middleearth/tests/origin_start.py. Only the hidden 'Test' origin issues it.", "stages": [{"id": 1, "name": "Advance test_origin_adv twice", "description": "QuestFlag stage woken by advanceQuestFlag.", "objective": "QuestFlag", "anyPOI": true, "worldMapOK": true, "mapFlag": "test_origin_adv", "mapFlagValue": 2}, {"id": 2, "name": "Condition already holds", "description": "CharacterFlag stage with a flag condition that holds on activation.", "objective": "CharacterFlag", "anyPOI": true, "worldMapOK": true, "prerequisiteIDs": [1], "condition": {"scope": "character", "key": "test_origin", "op": ">=", "val": 1}}]}
 ]

@@ -7,7 +7,7 @@ The game must run with the dev API enabled: `tools/middleearth/game.sh start` do
 
 CLI examples:
   gamectl.py state                 # short summary; --json for raw data, --radius PX for overworld objects
-  gamectl.py newgame --plane MiddleEarth --difficulty Normal --colors W --mode Constructed
+  gamectl.py newgame --plane MiddleEarth --difficulty Normal --colors W --mode Constructed [--origin Test]
   gamectl.py choose 0              # dialog option 0
   gamectl.py close                 # close the dialog
   gamectl.py walk 12 30            # walk to tile (12,30); --px for pixels
@@ -238,7 +238,7 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("state"); p.add_argument("--radius", type=float, default=0)
     p = sub.add_parser("newgame")
-    for k in ("plane", "name", "race", "gender", "difficulty", "colors", "mode"):
+    for k in ("plane", "name", "race", "gender", "difficulty", "colors", "mode", "origin"):
         p.add_argument("--" + k)
     p = sub.add_parser("choose"); p.add_argument("index", type=int)
     sub.add_parser("close")
@@ -264,7 +264,7 @@ def main(argv=None):
             return 0
         if c == "newgame":
             r = g.new_game(plane=a.plane, name=a.name, race=a.race, gender=a.gender, difficulty=a.difficulty,
-                           colors=a.colors, mode=a.mode)
+                           colors=a.colors, mode=a.mode, origin=a.origin)
         elif c == "choose":
             r = g.choose(a.index)
         elif c == "close":
