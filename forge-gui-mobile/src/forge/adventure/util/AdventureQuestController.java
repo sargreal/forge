@@ -633,7 +633,11 @@ public class AdventureQuestController implements Serializable {
         nextQuestDate.put(pointID, LocalDate.now().toEpochDay());
 
         Array<AdventureQuestData> validSideQuests = new Array<>();
+        Array<AdventureQuestData> eligibleSideQuests = new Array<>(); //Fork (run 2): quests whose condition holds
         for (AdventureQuestData option : allSideQuests){
+            if (!isOffered(option))
+                continue;
+            eligibleSideQuests.add(option);
             if (option.questSourceTags.length == 0)
                 validSideQuests.add(option);
             for (int i = 0; i < option.questSourceTags.length; i++){
@@ -645,11 +649,16 @@ public class AdventureQuestController implements Serializable {
         }
         if (validSideQuests.size > 0)
             ret = new AdventureQuestData(Aggregates.random(validSideQuests));
-        else
-            ret = new AdventureQuestData(Aggregates.random(allSideQuests));
+        else //fork (run 2): unconditioned first; all only when no condition holds (an empty pool crashes the board)
+            ret = new AdventureQuestData(Aggregates.random(eligibleSideQuests.size > 0 ? eligibleSideQuests : allSideQuests));
         ret.sourceID = pointID;
         ret.initialize();
         return ret;
+    }
+
+    /** Fork (run 2): a side quest's {@code condition} (null = always) decides whether quest boards offer it. */
+    public static boolean isOffered(AdventureQuestData quest) {
+        return quest.condition == null || quest.condition.eval();
     }
 
     private boolean tooManyQuests(List<AdventureQuestData> existing){

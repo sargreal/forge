@@ -61,6 +61,17 @@ public class FlagConditionCheck {
         p.setQuestFlag("big", 300);
         ok(p.getQuestFlag("big") == 44, "set casts to byte (300 -> 44), documented");
 
+        // --- run 2: side quest condition (quest boards) ---
+        forge.adventure.data.AdventureQuestData q = new com.badlogic.gdx.utils.Json().fromJson(forge.adventure.data.AdventureQuestData.class,
+                "{\"id\": 9, \"name\": \"x\", \"condition\": {\"scope\": \"character\", \"key\": \"allegiance\", \"op\": \"=\", \"val\": 2}}");
+        ok(q.condition != null && !forge.adventure.util.AdventureQuestController.isOffered(q), "conditioned side quest not offered");
+        p.setCharacterFlag("allegiance", 2);
+        ok(forge.adventure.util.AdventureQuestController.isOffered(q), "conditioned side quest offered once it holds");
+        ok(forge.adventure.util.AdventureQuestController.isOffered(new forge.adventure.data.AdventureQuestData(q)), "copy keeps the condition");
+        p.setCharacterFlag("allegiance", 0);
+        q.condition = null;
+        ok(forge.adventure.util.AdventureQuestController.isOffered(q), "no condition: always offered");
+
         // --- run 2: signed, clamped add (never wraps) ---
         ok(FlagCondition.clampedAdd(5, -10, 0, 100) == 0, "clamp at min");
         ok(FlagCondition.clampedAdd(95, 10, 0, 100) == 100, "clamp at max");

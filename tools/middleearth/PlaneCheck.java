@@ -1279,6 +1279,11 @@ public class PlaneCheck {
             String w = "quest " + q.getID();
             checkDialogConditions(q.offerDialog, w); checkDialogConditions(q.prologue, w); checkDialogConditions(q.epilogue, w);
             checkDialogConditions(q.failureDialog, w); checkDialogConditions(q.declinedDialog, w);
+            if (q.condition != null) { // Fork run 2: side-quest pool condition
+                conds++;
+                flagProblems(w + " condition", q.condition);
+                if (q.storyQuest) warn(w + ": condition only filters the side-quest pool; story quests ignore it");
+            }
             if (q.stages != null) for (AdventureQuestStage st : q.stages) {
                 checkDialogConditions(st.prologue, w); checkDialogConditions(st.epilogue, w); checkDialogConditions(st.failureDialog, w);
                 if (st.condition == null) continue;
