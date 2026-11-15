@@ -176,6 +176,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | STORY.md v0.4: win at lower corruption → a one-time duel against the Ring itself to destroy it (difficulty scales with corruption); "Cast down" confirmed. Story engine run 1 started. |
 | 2026-11-15 | Story engine audit (Sonnet agent, read-only): feature → data/engine table and 5 recommended engine additions (FlagCondition + flag fixes, flag-conditioned world state, `spawnCondition`, origins table, corruption package; ~5 days). |
 | 2026-11-15 | STORY.md v0.3: S8 confirmed; S12 Ring endgame (Sauron boss duel, several dark endings). |
 | 2026-11-15 | User decisions: MEAR swaps applied (Murder → Grasp of Darkness, Cancel → Remand, Think Twice → Mulldrifter, Claustrophobia → Frost Lynx "Snow-beast of Forochel"); 21 ME decks now use the official-set twins instead (Bilbo's Deadly Slice, Saruman's Trickery, Plunder the Trollshaws, Enchanted River's Grasp), so deck strength is unchanged. The One Ring was removed from Umbar's shop. STORY.md v0.2 (S7–S11). Phase 2d-2 terrain postponed. check: 0 errors. |

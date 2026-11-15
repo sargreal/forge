@@ -1,6 +1,6 @@
 # Middle-earth Adventure: Story Concept
 
-> **Draft v0.3, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
+> **Draft v0.4, a working document.** This is the high-level design we refine together before any quest is implemented. Decisions go into the table below. Open points are marked ❓.
 
 ## Decisions so far
 
@@ -79,13 +79,13 @@ The player holds the One Ring (S9) and Sauron hunts them. A pursuit phase (Nazg�
 | Outcome | Corruption | Ending (draft) |
 | --- | --- | --- |
 | Win the duel | high | **The new Dark Lord**: you master the Ring and take Sauron's place. The darkest "triumph". |
-| Win the duel | lower | **The Ring-lord's burden**: you defeat Sauron but the Ring is now yours to carry; an ambiguous ending (rule, hide it, or cast it away). ❓ |
+| Win the duel | lower | **Unmaking the Ring**: you get a **one-time chance to destroy it**, a final duel **against the Ring itself**, harder the higher your corruption. Win: the Ring is unmade by your hand (a heroic, non-canon ending). Lose or refuse: you remain the Ring-lord, carrying a burden that will consume you. ❓ (exact epilogues) |
 | Lose the duel | high | **Sauron's general**: you lose the Ring, but Sauron sees your value and raises you as a captain of Mordor (in the spirit of the Witch-king or the Mouth of Sauron). |
-| Lose the duel | lower | **Cast down**: you lose the Ring and are broken or imprisoned, a Gollum-like ending. ❓ |
+| Lose the duel | lower | **Cast down**: you lose the Ring and are broken or imprisoned, a Gollum-like ending. (Confirmed.) |
 | *(Free side, never took the Ring)* | — | The canon victory, seen from your margin of the War (the main Free ending). |
 | *(Shadow side, never took the Ring)* | — | The personal victory in the vacuum after Sauron's fall (S7). |
 
-Open ❓: the corruption thresholds between the rows; whether the "won" endings are reachable by Free and Shadow players alike; how hard the Sauron duel should be (deck, life, special rules such as "the Ring tempts you" every turn).
+Open ❓: the corruption thresholds between the rows; the Ring duel's rules (e.g. the Ring tempts you every turn, the opponent's strength scales with corruption); whether the "won" endings are reachable by Free and Shadow players alike; how hard the Sauron duel should be (deck, life, special rules such as "the Ring tempts you" every turn).
 
 ## Corruption: the Shadow meter (S5)
 
