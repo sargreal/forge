@@ -492,6 +492,8 @@ public final class WorldMapTmx {
     /** The image tiles of the clutter tileset: per sprite name its first tile id and number of variants. */
     static final class SpriteTiles {
         final Map<String, int[]> firstAndCount = new HashMap<>();
+        /** Size (width, height) of each tile, by tile id. */
+        final List<int[]> sizes = new ArrayList<>();
 
         /** Tile id of the variant the game draws at this position (MapSprite/BiomeSprites: ((int) x + (int) y * 11483) % count). */
         int tileId(Sprite s) {
@@ -653,6 +655,8 @@ public final class WorldMapTmx {
                     s.append(" gid=\"").append(tilesets.clutterFirstGid + tileId).append("\"");
                 s.append(" x=\"").append(exact((double) sprite.x - left, v -> (float) (v + left), sprite.x))
                         .append("\" y=\"").append(exact(heightPx - top - sprite.yUp, v -> (float) (heightPx - (v + top)), sprite.yUp)).append("\"");
+                if (tileId >= 0) // Tiled writes the size of tile objects too
+                    s.append(" width=\"").append(tilesets.sprites.sizes.get(tileId)[0]).append("\" height=\"").append(tilesets.sprites.sizes.get(tileId)[1]).append("\"");
                 if (tileId < 0) // unknown sprite: a plain point with the name, so it is not lost
                     s.append(">\n   <properties>\n    <property name=\"sprite\" value=\"").append(esc(sprite.name)).append("\"/>\n   </properties>\n   <point/>\n  </object>\n");
                 else
@@ -808,6 +812,7 @@ public final class WorldMapTmx {
                         .append("   <property name=\"variant\" type=\"int\" value=\"").append(id - first).append("\"/>\n  </properties>\n")
                         .append("  <image source=\"").append(image).append("\" width=\"").append((int) region.page.width).append("\" height=\"")
                         .append((int) region.page.height).append("\"/>\n </tile>\n");
+                result.sizes.add(new int[]{region.width, region.height});
                 maxW = Math.max(maxW, region.width);
                 maxH = Math.max(maxH, region.height);
                 id++;
