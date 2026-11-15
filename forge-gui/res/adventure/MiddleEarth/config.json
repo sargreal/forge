@@ -172,6 +172,13 @@
     { "name": "Wizard's Hollow", "startPOI": "Spawn", "introQuest": "28" },
     { "name": "Test", "hidden": true, "startPOI": "Forest Capital", "respawnPOI": "Forest Capital", "introQuest": "9001",
       "characterFlags": { "test_origin": 1 }, "questFlags": { "test_origin_q": 3 } }
+  ],
+  "statusFlags": [
+    { "flag": "corruption", "label": "Shadow", "max": 100, "showWhen": { "key": "corruption", "op": ">", "val": 0 } }
+  ],
+  "flagEffects": [
+    { "condition": { "scope": "character", "key": "test_flag_effect", "op": ">=", "val": 1 },
+      "effect": { "lifeModifier": 7, "startBattleScript": ["DB$ RingTemptsYou | SpellDescription$ The Ring tempts you."] } }
   ]
 }
 

@@ -1306,6 +1306,28 @@ public class PlaneCheck {
             if (!catchAll) warn("origins: no visible origin without races/colors; unmatched characters get the upstream start (Spawn, quest 28)");
             info(cd.origins.length + " origins");
         }
+        // Fork run 2: config.json statusFlags (HUD) and flagEffects (duel effects by flag)
+        if (cd.statusFlags != null) for (int i = 0; i < cd.statusFlags.length; i++) {
+            ConfigData.StatusFlag f = cd.statusFlags[i];
+            String w = "config statusFlags[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.flag == null || f.flag.isEmpty()) error(w + ": missing 'flag'");
+            if (FlagCondition.normalizeScope(f.scope) == null) error(w + ": unknown scope '" + f.scope + "' (quest, character, map)");
+            if (f.max < 0 || f.max > Byte.MAX_VALUE) warn(w + ": max " + f.max + " is outside 0..127 (flags are bytes)");
+            if (f.showWhen != null) { conds++; flagProblems(w + ".showWhen", f.showWhen); }
+            if (f.icon != null && !f.icon.isEmpty() && f.icon.contains("]")) error(w + ": icon must be a plain skin icon name");
+        }
+        if (cd.flagEffects != null) for (int i = 0; i < cd.flagEffects.length; i++) {
+            ConfigData.FlagEffect f = cd.flagEffects[i];
+            String w = "config flagEffects[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.effect == null) error(w + ": missing 'effect'");
+            else checkEffectCards(w, f.effect);
+            if (f.condition == null) warn(w + ": no condition (always applies)");
+            else { conds++; flagProblems(w + ".condition", f.condition); }
+        }
+        if (cd.statusFlags != null || cd.flagEffects != null)
+            info((cd.statusFlags == null ? 0 : cd.statusFlags.length) + " statusFlags, " + (cd.flagEffects == null ? 0 : cd.flagEffects.length) + " flagEffects");
         info(conds + " flag conditions on biomes, POIs and quest stages checked");
     }
 }

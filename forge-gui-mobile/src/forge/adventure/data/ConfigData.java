@@ -43,5 +43,24 @@ public class ConfigData {
     public EffectData globalEffect;
     public ModifierData[] modifiers; //Optional rules the player can turn on at new game.
     public OriginData[] origins; //Fork (Middle-earth): game starts by race/colour; none = upstream start (Spawn, quest 28).
+    public StatusFlag[] statusFlags; //Fork (run 2): flags shown in the game HUD (e.g. a corruption meter); none = nothing shown.
+    public FlagEffect[] flagEffects; //Fork (run 2): duel effects for the player while a flag condition holds.
+
+    /** Fork (run 2): one HUD readout of a flag, next to life, shards and gold. */
+    public static class StatusFlag {
+        public String flag;              //flag key
+        public String scope = "quest";   //quest | character | map
+        public String label;             //text before the value (default: the key)
+        public String icon;              //optional skin icon name, written as [+icon] (e.g. "Shards")
+        public int max = 0;              //> 0: shows "value/max"
+        public boolean hidden = false;   //turn the readout off without deleting it
+        public FlagCondition showWhen;   //optional: shown only while it holds
+    }
+
+    /** Fork (run 2): an EffectData applied to the player at duel start while {@code condition} holds. */
+    public static class FlagEffect {
+        public FlagCondition condition;
+        public EffectData effect;
+    }
 
 }

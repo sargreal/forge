@@ -40,6 +40,7 @@ import forge.adventure.scene.Scene;
 import forge.adventure.scene.TileMapScene;
 import forge.adventure.scene.UIScene;
 import forge.adventure.stage.ConsoleCommandInterpreter;
+import forge.adventure.stage.GameHUD;
 import forge.adventure.stage.GameStage;
 import forge.adventure.stage.MapStage;
 import forge.adventure.stage.WorldStage;
@@ -304,12 +305,31 @@ public final class DevApi {
             st.put("quests", quests());
             st.put("questFlags", AdventurePlayer.current().getQuestFlags());
             st.put("characterFlags", AdventurePlayer.current().getCharacterFlags());
+            st.put("statusFlags", statusFlags());
         } catch (Exception e) {
             st.put("questsError", e.toString());
         }
         Map<String, Object> dlg = gameDialog();
         if (dlg != null) st.put("dialog", dlg);
         return st;
+    }
+
+    /** Fork (run 2): config.json statusFlags: value, whether shown, and the HUD label text. */
+    private static List<Object> statusFlags() {
+        List<Object> out = new ArrayList<>();
+        forge.adventure.data.ConfigData.StatusFlag[] cfg = Config.instance().getConfigData().statusFlags;
+        if (cfg == null) return out;
+        List<String> hud = GameHUD.instance == null ? null : GameHUD.instance.getStatusFlagTexts();
+        int i = 0;
+        for (forge.adventure.data.ConfigData.StatusFlag f : cfg) {
+            if (f == null || f.flag == null || f.flag.isEmpty()) continue;
+            String text = GameHUD.statusFlagText(f);
+            out.add(m("flag", f.flag, "scope", forge.adventure.data.FlagCondition.normalizeScope(f.scope), "label", f.label,
+                    "value", forge.adventure.data.FlagCondition.flagValue(f.scope, f.flag, null), "max", f.max,
+                    "visible", text != null, "hud", hud != null && i < hud.size() ? hud.get(i) : null));
+            i++;
+        }
+        return out;
     }
 
     private static Map<String, Object> player() {
@@ -971,13 +991,26 @@ public final class DevApi {
         for (Player p : g.getPlayers())
             players.add(m("name", p.getName(), "life", p.getLife(), "human", p.getController() instanceof PlayerControllerHuman,
                     "ai", p.getController() instanceof PlayerControllerAi, "hand", p.getCardsIn(forge.game.zone.ZoneType.Hand).size(),
-                    "library", p.getCardsIn(forge.game.zone.ZoneType.Library).size()));
+                    "library", p.getCardsIn(forge.game.zone.ZoneType.Library).size(),
+                    "startingLife", p.getStartingLife(), "ringTempted", p.getNumRingTemptedYou(),
+                    "ringBearer", p.getRingBearer() == null ? null : p.getRingBearer().getName(),
+                    "battlefield", cardNames(p.getCardsIn(forge.game.zone.ZoneType.Battlefield)),
+                    "command", cardNames(p.getCardsIn(forge.game.zone.ZoneType.Command))));
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("players", players);
         r.put("turn", g.getPhaseHandler().getTurn());
         r.put("phase", String.valueOf(g.getPhaseHandler().getPhase()));
         r.put("gameOver", g.isGameOver());
         return r;
+    }
+
+    private static List<String> cardNames(Iterable<forge.game.card.Card> cards) {
+        List<String> out = new ArrayList<>();
+        for (forge.game.card.Card c : cards) {
+            if (out.size() >= 40) { out.add("..."); break; }
+            out.add(c.getName());
+        }
+        return out;
     }
 
     private static Object duel(boolean autoplay) {

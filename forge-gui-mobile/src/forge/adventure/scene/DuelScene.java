@@ -519,6 +519,13 @@ public class DuelScene extends ForgeScene {
                 if (advPlayer.getBlessing().opponent != null) oppEffects.add(advPlayer.getBlessing().opponent);
             }
         }
+        //Fork (run 2): config.json flagEffects are written for the player; their opponent block goes to the enemies.
+        if (eventData == null && Config.instance().getConfigData().flagEffects != null) {
+            for (ConfigData.FlagEffect fe : Config.instance().getConfigData().flagEffects) {
+                if (fe != null && fe.effect != null && (fe.condition == null || fe.condition.eval()))
+                    addEffect(playerEffects, oppEffects, fe.effect);
+            }
+        }
         //Every layer is written for the enemies, as dungeon effects always were, so its opponent block goes to the player.
         if (!ignoreGlobalEffect && !enemy.ignoreGlobalEffect)
             addEffect(oppEffects, playerEffects, Config.instance().getConfigData().globalEffect);
