@@ -94,13 +94,16 @@ Original plan: fill the biome `enemies` lists with ME enemies per region (all 43
 
 **Phase 2c ✅ (2026-11-15):** the world is a Tiled World `MiddleEarth/world/middleearth/middleearth.world` with 36 chunks of 150×150 tiles (`onlyShowAdjacentMaps`: Tiled loads at most 3×3 chunks, about ¼ of the old map). There's a generated `overview.tmx` (biomes as one image plus the user's reference image layer) for checking against the reference. Migration from the user's Tiled 1.12 save is lossless (incl. 38 hand-painted tiles); the round trip is byte-identical. See [notes](notes/phase2c-tiled-world-chunks.md) and DEVELOPMENT §4.1.
 
-**Phase 2d (planned, ~4–5 days):** fully editable world. Optional per-chunk layers `Terrain` (real terrain/structure tilesets), `Roads` and `Clutter` (sprite objects). When a layer is present, import skips that generation step; export writes every layer. Design in the 2c notes.
+**Phase 2d-1 ✅ (2026-11-15):** `Roads` and `Clutter` layers in every chunk (2,360 road tiles, 50,586 clutter objects with real sprites). The game builds the identical world from them; deleting a layer regenerates that part from the seed. The reference image moved to `docs/MiddleEarth/reference/`, with 36 per-chunk crops as hidden `Reference` layers (`tools/middleearth/worldmap/make_reference_crops.py`). World folder 4.3 MB. See [notes](notes/phase2d1-roads-clutter.md).
+
+**Phase 2d-2 (next, ~2.5–3 days):** a `Terrain` layer (layer id 6); skipping noise/structure generation per map (also saves ~2 s of world generation).
+
+**Phase 2d design:** fully editable world. Optional per-chunk layers `Terrain` (real terrain/structure tilesets), `Roads` and `Clutter` (sprite objects). When a layer is present, import skips that generation step; export writes every layer. Design in the 2c notes.
 
 **Phase 2 open items:**
 - User: one Tiled open/edit/save round of the chunked world.
-- Optional: reference crops per chunk (a `Reference` layer the game ignores) for painting with the reference visible.
 - Moving a POI across chunks needs cut and paste in Tiled.
-- Decide whether the 400 KB reference jpg should ship in `forge-gui/res`.
+- 2d-1 limits: a moved clutter object may show a different variant in the game (the variant comes from the position); the Roads layer shows only the centre tile in Tiled (a Wang set could fix the look); Tiled rounds clutter positions to ~0.01 px on save.
 - Structures (mountains, Mordor) are anchored on the biome JSON bounding boxes. When painting a biome far outside its box, update `startPointX/Y` and `width/height` (a candidate for automation).
 - Optional `Roads` layer.
 - Distinct tilesets per region: Shire, Eriador, Rohan and Gondor all use the Green tileset, so their borders don't show.
@@ -142,6 +145,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 | No invisible water crossings in fixed layouts: when `worldMap`/`biomeMap` is set, the hidden POI-to-nearest-town paths in `World.generateNew` no longer clear collision on pure water tiles (biome mask = base/ocean only). Visible roads still cross water. | `forge-gui-mobile/.../world/World.java` | Play-test: the player could walk across the Brandywine anywhere a hidden path crossed it. |
 | `god [seconds]` console command (default 3600): sprint + fly + hide for the duration, plus a full heal. For play-testing. | `ConsoleCommandInterpreter.java` | Play-test convenience. |
 | Chunked Tiled worlds: `WorldMapTmx.read` also accepts a Tiled `.world` (chunks parsed with the Phase 2b parser and assembled, with checks for gaps, overlaps, objects outside chunks, and a single seed/start). `WorldMapTmx.writeWorld` writes chunks + `.world` + tileset + a generated `overview.tmx`. `exportWorldTmx [dir\|x.world\|x.tmx] [chunkSize]`. A single `.tmx` still works. `generateNew` is unchanged. | `forge-gui-mobile/.../world/WorldMapTmx.java`, `World.java`, `ConsoleCommandInterpreter.java` | Phase 2c: Tiled performance (user feedback). |
+| Editable Roads/Clutter layers: `WorldMapTmx` reads/writes optional per-chunk `Roads` (tile layer, `roads.tsx`) and `Clutter` (tile objects from `clutter.tsx`, real sprites) layers, plus a `Reference` image layer per chunk (ignored by the game). `World.generateNew` skips road lines and the random clutter placement for maps that have the layer (`placeWorldMapClutter`); `SpritesDataMap.allPositions()` for export. The save format is unchanged. | `WorldMapTmx.java`, `World.java`, `SpritesDataMap.java` | Phase 2d-1: edit roads and clutter in Tiled. |
 | `exportMap [file]` console command | `forge-gui-mobile/src/forge/adventure/stage/ConsoleCommandInterpreter.java` | Writes the whole generated world to a PNG for layout work and tests. |
 
 ## Known issues / backlog
@@ -172,6 +176,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-15 | Phase 2d-1 merged (Opus agent): Roads/Clutter layers, per-chunk reference crops, reference image moved to docs. Identical world, byte-identical round trip; `run_all.sh` ALL PASSED. Main jar rebuilt. |
 | 2026-11-15 | STORY.md v0.1 (story concept with the user's decisions S1–S6). Phase 2d-1 started (roads, clutter, reference crops). |
 | 2026-11-15 | Phase 2c merged (Opus agent): chunked Tiled world plus overview with the user's reference image; check, WorldSim and determinism pass; `run_all.sh` ALL PASSED. Main jar rebuilt. |
 | 2026-11-15 | MEAR similarity check (`tools/middleearth/mear_similarity.py`), LTR Starter Kit reference decks verified against the user's official lists (identical, no re-measure needed), `docs/MiddleEarth/ARTWORK.md` (custom artwork how-to; plane-local pictures need an engine change). |
