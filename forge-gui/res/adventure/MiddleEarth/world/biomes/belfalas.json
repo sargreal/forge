@@ -1,0 +1,39 @@
+{
+"startPointX": 0.364575,
+"startPointY": 0.671675,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "belfalas",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Green",
+"terrain": [
+	{
+		"spriteName": "Green_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Green_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.167475,
+"height": 0.111675,
+"color": "70c070",
+"spriteNames": [
+	"Shell",
+	"PlainsTree",
+	"Flower",
+	"DarkGras",
+	"Bush"
+],
+"enemies": ["Guard of the Citadel", "Captain of Gondor", "Corsair of Umbar", "Corsair Captain", "Wild Wolves"],
+"pointsOfInterest": [
+	"ME Dol Amroth",
+	"ME Belfalas Town",
+	"ME Sea Cave"
+],
+"structures": []
+}

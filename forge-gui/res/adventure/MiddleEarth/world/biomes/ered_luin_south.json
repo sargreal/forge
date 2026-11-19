@@ -1,0 +1,63 @@
+{
+"startPointX": 0.104550,
+"startPointY": 0.450425,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "ered_luin_south",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Red",
+"terrain": [
+	{
+		"spriteName": "Red_1",
+		"max": 0.3,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Red_2",
+		"min": 0.7,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.025800,
+"height": 0.094200,
+"color": "c04535",
+"spriteNames": [
+	"MountainTree",
+	"MountainTree2",
+	"MountainRock",
+	"LargeMountainRock",
+	"Gravel"
+],
+"enemies": ["Dwarf Prospector", "Dwarf of Erebor", "Wild Wolves", "Snaga"],
+"pointsOfInterest": [
+	"ME Ered Luin Town",
+	"ME Dwarf Mine"
+],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/mountain.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "mountain",
+				"color": "a07020",
+				"collision": true
+			},
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
+]
+}

@@ -20,30 +20,20 @@ package forge.ai.ability;
 
 import java.util.Map;
 
-import forge.ai.AiCostDecision;
-import forge.ai.AiProps;
-import forge.ai.ComputerUtil;
-import forge.ai.ComputerUtilAbility;
-import forge.ai.ComputerUtilCost;
-import forge.ai.ComputerUtilMana;
-import forge.ai.PlayerControllerAi;
-import forge.ai.SpecialCardAi;
-import forge.ai.SpellAbilityAi;
+import forge.ai.*;
 import forge.game.Game;
 import forge.game.ability.AbilityUtils;
 import forge.game.ability.ApiType;
 import forge.game.card.Card;
 import forge.game.card.CounterEnumType;
-import forge.game.card.CounterType;
 import forge.game.cost.*;
 import forge.game.phase.PhaseHandler;
 import forge.game.phase.PhaseType;
-import forge.game.player.Player;
-import forge.game.player.PlayerActionConfirmMode;
-import forge.game.player.PlayerCollection;
-import forge.game.player.PlayerPredicates;
+import forge.game.player.*;
 import forge.game.spellability.SpellAbility;
 import forge.game.zone.ZoneType;
+import forge.util.MyRandom;
+import forge.util.collect.FCollectionView;
 
 public class DrawAi extends SpellAbilityAi {
 
@@ -51,36 +41,74 @@ public class DrawAi extends SpellAbilityAi {
      * @see forge.ai.SpellAbilityAi#checkApiLogic(forge.game.player.Player, forge.game.spellability.SpellAbility)
      */
     @Override
-    protected boolean checkApiLogic(Player ai, SpellAbility sa) {
+    protected AiAbilityDecision checkApiLogic(Player ai, SpellAbility sa) {
+        Card hostCard = sa.getHostCard();
+        PhaseHandler ph = ai.getGame().getPhaseHandler();
+        boolean aboutToBeMyTurn = ph.isPlayerNextTurn(ai) && ph.is(PhaseType.END_OF_TURN);
+
         if (!targetAI(ai, sa, false)) {
-            return false;
+            return new AiAbilityDecision(0, AiPlayDecision.TargetingFailed);
         }
 
         if (sa.usesTargeting()) {
             final Player player = sa.getTargets().getFirstTargetedPlayer();
-            if (player != null && player.isOpponentOf(ai)) {
-                return true;
+            if (player != null && player.isOpponentOf(ai) && !killsOpponent(ai, player, sa)) {
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
         }
 
-        // prevent run-away activations - first time will always return true
-        if (ComputerUtil.preventRunAwayActivations(sa)) {
-            return false;
-        }
-
         if (ComputerUtil.playImmediately(ai, sa)) {
-            return true;
+            return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
         }
 
         // Don't tap creatures that may be able to block
         if (ComputerUtil.waitForBlocking(sa)) {
-            return false;
+            return new AiAbilityDecision(0, AiPlayDecision.WaitForCombat);
         }
 
         if (!canLoot(ai, sa)) {
-            return false;
+            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
-        return true;
+
+        if (ComputerUtilCost.isSacrificeSelfCost(sa.getPayCosts())) {
+            // Canopy lands and other cards that sacrifice themselves to draw cards
+
+            if (hostCard.isLand()) {
+                if (aboutToBeMyTurn && ai.getLandsInPlay().size() >= 5) {
+                    return new AiAbilityDecision(80, AiPlayDecision.WillPlay);
+                }
+                return new AiAbilityDecision(0, AiPlayDecision.CostNotAcceptable);
+            }
+
+            if (hostCard.isToken() && (hostCard.getType().hasSubtype("Clue") || hostCard.getType().hasSubtype("Blood"))) {
+                if (ph.isPlayerTurn(ai)) {
+                    if (ph.getPhase().isAfter(PhaseType.DRAW) && ai.getCardsIn(ZoneType.Hand).isEmpty()) {
+                        return new AiAbilityDecision(90, AiPlayDecision.WillPlay);
+                    }
+                } else {
+                    if (aboutToBeMyTurn) {
+                        return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
+                    }
+                    // TODO: Other reasons to draw a card is searching for answers
+                }
+
+                return new AiAbilityDecision(0, AiPlayDecision.AnotherTime);
+            }
+
+            if (ph.isPlayerTurn(ai)) {
+                if (ph.getPhase().isAfter(PhaseType.DRAW) && ai.getCardsIn(ZoneType.Hand).isEmpty()) {
+                    return new AiAbilityDecision(60, AiPlayDecision.WillPlay);
+                }
+            } else {
+                if (aboutToBeMyTurn) {
+                    return new AiAbilityDecision(80, AiPlayDecision.WillPlay);
+                }
+            }
+
+            return new AiAbilityDecision(0, AiPlayDecision.CostNotAcceptable);
+        }
+
+        return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
     }
 
     /*
@@ -91,24 +119,24 @@ public class DrawAi extends SpellAbilityAi {
      * forge.game.card.Card)
      */
     @Override
-    protected boolean willPayCosts(Player ai, SpellAbility sa, Cost cost, Card source) {
-        if (!ComputerUtilCost.checkCreatureSacrificeCost(ai, cost, source, sa)) {
+    protected boolean willPayCosts(Player payer, SpellAbility sa, Cost cost, Card source) {
+        if (!ComputerUtilCost.checkCreatureSacrificeCost(payer, cost, source, sa)) {
             return false;
         }
 
-        if (!ComputerUtilCost.checkLifeCost(ai, cost, source, 4, sa)) {
+        if (!ComputerUtilCost.checkLifeCost(payer, cost, source, 4, sa)) {
             return false;
         }
 
-        if (!ComputerUtilCost.checkDiscardCost(ai, cost, source, sa)) {
-            AiCostDecision aiDecisions = new AiCostDecision(ai, sa, false);
+        if (!ComputerUtilCost.checkDiscardCost(payer, cost, source, sa)) {
+            AiCostDecision aiDecisions = new AiCostDecision(payer, sa, false);
             for (final CostPart part : cost.getCostParts()) {
                 if (part instanceof CostDiscard) {
                     PaymentDecision decision = part.accept(aiDecisions);
                     if (null == decision)
                         return false;
                     for (Card discard : decision.cards) {
-                        if (!ComputerUtil.isWorseThanDraw(ai, discard)) {
+                        if (!ComputerUtil.isWorseThanDraw(payer, discard)) {
                             return false;
                         }
                     }
@@ -132,6 +160,9 @@ public class DrawAi extends SpellAbilityAi {
      */
     @Override
     protected boolean checkPhaseRestrictions(Player ai, SpellAbility sa, PhaseHandler ph) {
+        if (drawsThroughDoomsdayPile(ai, sa)) {
+            return true; // the pile is drawn through in the main phase it was made in, with the cards in hand
+        }
         // Sacrificing a creature in response to something dangerous is generally good in any phase
         boolean isSacCost = false;
         if (sa.getPayCosts() != null && sa.getPayCosts().hasSpecificCostType(CostSacrifice.class)) {
@@ -157,17 +188,18 @@ public class DrawAi extends SpellAbilityAi {
      */
     @Override
     protected boolean checkPhaseRestrictions(Player ai, SpellAbility sa, PhaseHandler ph, String logic) {
+        if (drawsThroughDoomsdayPile(ai, sa)) {
+            return true;
+        }
         if (logic.equals("VeilOfSummer")) {
             return SpecialCardAi.VeilOfSummer.consider(ai, sa); // this is more of a counterspell than a true draw card, so it's timed by the card-specific logic
         } else if (logic.startsWith("LifeLessThan.")) {
             // LifeLessThan logic presupposes activation as soon as possible in an
             // attempt to save the AI from dying
             return true;
-        } else if (logic.equals("AtOppEOT")) {
-            return ph.is(PhaseType.END_OF_TURN) && ph.getNextTurn().equals(ai);
         } else if (logic.equals("RespondToOwnActivation")) {
             return !ai.getGame().getStack().isEmpty() && ai.getGame().getStack().peekAbility().getHostCard().equals(sa.getHostCard());
-        } else if ((!ph.getNextTurn().equals(ai) || ph.getPhase().isBefore(PhaseType.END_OF_TURN))
+        } else if ((!ph.isPlayerNextTurn(ai) || ph.getPhase().isBefore(PhaseType.END_OF_TURN))
                 && !sa.hasParam("PlayerTurn") && !isSorcerySpeed(sa, ai)
                 && ai.getCardsIn(ZoneType.Hand).size() > 1 && !ComputerUtil.activateForCost(sa, ai)
                 && !"YawgmothsBargain".equals(logic)) {
@@ -176,9 +208,55 @@ public class DrawAi extends SpellAbilityAi {
         return super.checkPhaseRestrictions(ai, sa, ph, logic);
     }
 
+    /**
+     * Whether this draw, aimed at an opponent, ends the game for them: it takes their whole library (they lose at their
+     * next draw, targetAI aims it there) or comes with a life loss of the same size that kills them. Every other draw
+     * at an opponent is a gift and is not made.
+     */
+    private static boolean killsOpponent(final Player ai, final Player opp, final SpellAbility sa) {
+        try {
+            final SpellAbility root = sa.getRootAbility();
+            int n;
+            if (sa.costHasManaX() && root.getXManaCostPaid() != null) {
+                n = root.getXManaCostPaid();
+            } else {
+                n = AbilityUtils.calculateAmount(sa.getHostCard(), sa.getParamOrDefault("NumCards", "1"), sa);
+            }
+            if (n <= 0) {
+                return false;
+            }
+            if (n >= opp.getCardsIn(ZoneType.Library).size() && opp.canDraw() && !opp.cantLoseCheck(GameLossReason.Milled)
+                    && !opp.isCardInPlay("Laboratory Maniac")) {
+                return true;
+            }
+            final SpellAbility loseLife = sa.findSubAbilityByType(ApiType.LoseLife);
+            return loseLife != null && "Targeted".equals(loseLife.getParam("Defined")) && opp.canLoseLife()
+                    && n >= opp.getLife();
+        } catch (final RuntimeException e) {
+            return false;
+        }
+    }
+
+    /** The draw of an ability that takes cards out of a library that is already a Doomsday pile (see DoomsdayPile). */
+    private static boolean drawsThroughDoomsdayPile(final Player ai, final SpellAbility sa) {
+        try {
+            if (sa.usesTargeting() && !sa.canTarget(ai)) {
+                return false;
+            }
+            final int numCards = sa.hasParam("NumCards")
+                    ? AbilityUtils.calculateAmount(sa.getHostCard(), sa.getParam("NumCards"), sa) : 1;
+            return forge.ai.simulation.DoomsdayPile.drawsThroughPile(ai, numCards);
+        } catch (final RuntimeException e) {
+            return false;
+        }
+    }
+
     @Override
-    public boolean chkAIDrawback(SpellAbility sa, Player ai) {
-        return targetAI(ai, sa, sa.isTrigger() && sa.getHostCard().isInPlay());
+    public AiAbilityDecision chkDrawback(Player ai, SpellAbility sa) {
+        if (targetAI(ai, sa, sa.isTrigger() && sa.getHostCard().isInPlay())) {
+            return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
+        }
+        return new AiAbilityDecision(0, AiPlayDecision.TargetingFailed);
     }
 
     /**
@@ -249,6 +327,12 @@ public class DrawAi extends SpellAbilityAi {
             numCards = AbilityUtils.calculateAmount(source, sa.getParam("NumCards"), sa);
         }
 
+        if (sa.costHasManaX() && sa.getRootAbility().getXManaCostPaid() == null && source != null
+                && forge.ai.simulation.AiCardLists.has(forge.ai.simulation.AiCardLists.Role.DREDGE_REFILL, source)) {
+            // Breakthrough for the dredge line: X=0 draws four and throws the hand away, which is the point.
+            sa.getRootAbility().setXManaCostPaid(0);
+        }
+
         boolean xPaid = false;
         final String num = sa.getParam("NumCards");
         if (num != null && num.equals("X")) {
@@ -257,7 +341,7 @@ public class DrawAi extends SpellAbilityAi {
                 if (drawback && root.getXManaCostPaid() != null) {
                     numCards = root.getXManaCostPaid();
                 } else {
-                    numCards = ComputerUtilCost.getMaxXValue(sa, ai, sa.isTrigger());
+                    numCards = ComputerUtilCost.setMaxXValue(sa, ai, sa.isTrigger());
                     // try not to overdraw
                     int safeDraw = Math.abs(Math.min(computerMaxHandSize - computerHandSize, computerLibrarySize - 3));
                     if (source.isInstant() || source.isSorcery()) { safeDraw++; } // card will be spent
@@ -267,7 +351,7 @@ public class DrawAi extends SpellAbilityAi {
                     if (sa.getPayCosts().hasSpecificCostType(CostPayLife.class)) {
                         // [Necrologia, Pay X Life : Draw X Cards]
                         // Don't draw more than what's "safe" and don't risk a near death experience
-                        boolean aggroAI = (((PlayerControllerAi) ai.getController()).getAi()).getBooleanProperty(AiProps.PLAY_AGGRO);
+                        boolean aggroAI = AiProfileUtil.getBoolProperty(ai, AiProps.PLAY_AGGRO);
                         while (ComputerUtil.aiLifeInDanger(ai, aggroAI, numCards) && numCards > 0) {
                             numCards--;
                         }
@@ -292,7 +376,6 @@ public class DrawAi extends SpellAbilityAi {
         // TODO: if xPaid and one of the below reasons would fail, instead of
         // bailing reduce toPay amount to acceptable level
         if (sa.usesTargeting()) {
-            // ability is targeted
             sa.resetTargets();
 
             // if it wouldn't draw anything and its not mandatory, skip it
@@ -300,15 +383,12 @@ public class DrawAi extends SpellAbilityAi {
                 return false;
             }
 
-            // filter player that can be targeted
             PlayerCollection players = game.getPlayers().filter(PlayerPredicates.isTargetableBy(sa));
 
-            // no targets skip it
             if (players.isEmpty()) {
                 return false;
             }
 
-            // filter opponents
             PlayerCollection opps = players.filter(PlayerPredicates.isOpponentOf(ai));
 
             for (Player oppA : opps) {
@@ -325,7 +405,7 @@ public class DrawAi extends SpellAbilityAi {
                 }
 
                 // try to kill opponent
-                if (oppA.cantLose() || !oppA.canDraw()) {
+                if (oppA.cantLoseCheck(GameLossReason.Milled) || !oppA.canDraw()) {
                     continue;
                 }
 
@@ -372,7 +452,7 @@ public class DrawAi extends SpellAbilityAi {
 
                 // try to make opponent lose to poison
                 // currently only Caress of Phyrexia
-                if (getPoison != null && oppA.canReceiveCounters(CounterType.get(CounterEnumType.POISON))) {
+                if (getPoison != null && oppA.canReceiveCounters(CounterEnumType.POISON)) {
                     if (oppA.getPoisonCounters() + numCards > 9) {
                         sa.getTargets().add(oppA);
                         return true;
@@ -391,7 +471,7 @@ public class DrawAi extends SpellAbilityAi {
             // checks what the ai prevent from casting it on itself
             // if spell is not mandatory
             if (aiTarget && !ai.cantLose()) {
-                if (numCards >= computerLibrarySize - 3) {
+                if (numCards >= computerLibrarySize - 3 && !forge.ai.simulation.DoomsdayPile.drawsThroughPile(ai, numCards)) {
                     if (xPaid) {
                         numCards = computerLibrarySize - 1;
                         if (numCards <= 0 && !mandatory) {
@@ -416,7 +496,7 @@ public class DrawAi extends SpellAbilityAi {
                     }
                 }
 
-                if (getPoison != null && ai.canReceiveCounters(CounterType.get(CounterEnumType.POISON))) {
+                if (getPoison != null && ai.canReceiveCounters(CounterEnumType.POISON)) {
                     if (numCards + ai.getPoisonCounters() >= 8) {
                         aiTarget = false;
                     }
@@ -474,7 +554,7 @@ public class DrawAi extends SpellAbilityAi {
                 }
 
                 // ally would lose because of poison
-                if (getPoison != null && ally.canReceiveCounters(CounterType.get(CounterEnumType.POISON)) && ally.getPoisonCounters() + numCards > 9) {
+                if (getPoison != null && ally.canReceiveCounters(CounterEnumType.POISON) && ally.getPoisonCounters() + numCards > 9) {
                         continue;
                 }
 
@@ -509,7 +589,7 @@ public class DrawAi extends SpellAbilityAi {
                 return false;
             }
 
-            if (numCards >= computerLibrarySize - 3) {
+            if (numCards >= computerLibrarySize - 3 && !forge.ai.simulation.DoomsdayPile.drawsThroughPile(ai, numCards)) {
                 if (ai.isCardInPlay("Laboratory Maniac") && !ai.cantWin()) {
                     return true;
                 }
@@ -517,26 +597,30 @@ public class DrawAi extends SpellAbilityAi {
                 return false;
             }
 
-            if ((computerHandSize + numCards > computerMaxHandSize)
-                    && game.getPhaseHandler().isPlayerTurn(ai)
-                    && !sa.isTrigger()
-                    && !assumeSafeX) {
+            if ((computerHandSize + numCards > computerMaxHandSize)) {
                 // Don't draw too many cards and then risk discarding cards at EOT
-                if (!drawback) {
+                 if (game.getPhaseHandler().isPlayerTurn(ai)
+                        && !sa.isTrigger()
+                        && !assumeSafeX
+                        && !drawback) {
+                     return false;
+                 }
+
+                if (computerHandSize > computerMaxHandSize) {
+                    // Don't make my hand size get too big if already at max
                     return false;
                 }
             }
         }
         return true;
-    } // drawTargetAI()
+    }
 
     @Override
-    protected boolean doTriggerAINoCost(Player ai, SpellAbility sa, boolean mandatory) {
-        if (!mandatory && !willPayCosts(ai, sa, sa.getPayCosts(), sa.getHostCard())) {
-            return false;
+    protected AiAbilityDecision doTriggerNoCost(Player ai, SpellAbility sa, boolean mandatory) {
+        if (targetAI(ai, sa, mandatory)) {
+            return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
         }
-
-        return targetAI(ai, sa, mandatory);
+        return new AiAbilityDecision(0, AiPlayDecision.TargetingFailed);
     }
 
     /* (non-Javadoc)
@@ -550,5 +634,37 @@ public class DrawAi extends SpellAbilityAi {
             return true;
         // except it has Laboratory Maniac
         return player.isCardInPlay("Laboratory Maniac");
+    }
+
+    @Override
+    public boolean willPayUnlessCost(Player payer, SpellAbility sa, Cost cost, boolean alreadyPaid, FCollectionView<Player> payers) {
+        final Card host = sa.getHostCard();
+        final String aiLogic = sa.getParam("UnlessAI");
+
+        if ("LowPriority".equals(aiLogic) && MyRandom.getRandom().nextInt(100) < 67) {
+            return false;
+        }
+
+        // Risk Factor Effects
+        for (Player p : AbilityUtils.getDefinedPlayers(host, sa.getParam("Defined"), sa)) {
+            if (p.isOpponentOf(payer)) {
+                if (!p.canDraw()) {
+                    return false;
+                }
+                if (cost.hasSpecificCostType(CostDamage.class)) {
+                    if (!payer.canLoseLife()) {
+                        continue;
+                    }
+                    final CostDamage pay = cost.getCostPartByType(CostDamage.class);
+                    int realDamage = ComputerUtilCombat.predictDamageTo(payer, pay.getAbilityAmount(sa), host, false);
+                    if (payer.getLife() < realDamage * 2) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // TODO add logic for Discard + Draw Effects
+
+        return super.willPayUnlessCost(payer, sa, cost, alreadyPaid, payers);
     }
 }

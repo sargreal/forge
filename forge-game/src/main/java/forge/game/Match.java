@@ -11,6 +11,7 @@ import forge.game.ability.AbilityKey;
 import forge.game.card.Card;
 import forge.game.card.CardCollectionView;
 import forge.game.event.Event;
+import forge.game.event.GameEventAddLog;
 import forge.game.event.GameEventAnteCardsSelected;
 import forge.game.event.GameEventGameFinished;
 import forge.game.player.Player;
@@ -23,12 +24,13 @@ import forge.item.PaperCard;
 import forge.util.Localizer;
 import forge.util.MyRandom;
 import forge.util.collect.FCollectionView;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 public class Match {
-    private static List<PaperCard> removedCards = Lists.newArrayList();
+    private List<PaperCard> removedCards = Lists.newArrayList();
     private final List<RegisteredPlayer> players;
     private final GameRules rules;
     private final String title;
@@ -78,20 +80,19 @@ public class Match {
     public void startGame(final Game game, Runnable startGameHook) {
         prepareAllZones(game);
         if (rules.useAnte()) {  // Deciding which cards go to ante
-            Multimap<Player, Card> list = game.chooseCardsForAnte(rules.getMatchAnteRarity());
+            Multimap<Player, Card> list = game.chooseCardsForAnte(rules.getMatchAnteRarity(), rules.getAnteIncludeBasicLands());
             for (Entry<Player, Card> kv : list.entries()) {
                 Player p = kv.getKey();
                 game.getAction().moveTo(ZoneType.Ante, kv.getValue(), null, AbilityKey.newMap());
-                game.getGameLog().add(GameLogEntryType.ANTE, p + " anted " + kv.getValue());
+                game.fireEvent(new GameEventAddLog(GameLogEntryType.ANTE, p + " anted " + kv.getValue()));
             }
-            game.fireEvent(new GameEventAnteCardsSelected(list));
+            game.fireEvent(GameEventAnteCardsSelected.fromCards(list));
         }
 
         game.getAction().startGame(this.lastOutcome, startGameHook);
 
-        if (rules.useAnte()) {
-            executeAnte(game);
-        }
+        // Typically ante, but also tearing up a blacker lotus
+        executeOwnershipChanges(game);
 
         game.clearCaches();
 
@@ -100,6 +101,18 @@ public class Match {
 
         //run GC after game is finished
         System.gc();
+    }
+
+    /**
+     * The main decks as they were played in the game before this one, taken before anyone sideboards for the next
+     * game: what a player knows about the deck of its opponent. Empty before the second game.
+     */
+    private final Map<RegisteredPlayer, List<PaperCard>> playedMains = new IdentityHashMap<>();
+
+    /** The main deck {@code player} played last game (null if unknown), as everyone at the table has seen it. */
+    public List<PaperCard> getPlayedMain(final RegisteredPlayer player) {
+        final List<PaperCard> main = playedMains.get(player);
+        return main == null ? null : Collections.unmodifiableList(main);
     }
 
     public GameOutcome getOutcomeById(int id) {
@@ -190,7 +203,7 @@ public class Match {
         return myRemovedAnteCards;
     }
 
-    public static List<PaperCard> getRemovedCards() { return removedCards; }
+    public List<PaperCard> getRemovedCards() { return removedCards; }
 
     public void removeCard(PaperCard c) {
         removedCards.add(c);
@@ -199,7 +212,14 @@ public class Match {
     private static void preparePlayerZone(Player player, final ZoneType zoneType, CardPool section, boolean canRandomFoil) {
         PlayerZone library = player.getZone(zoneType);
         List<Card> newLibrary = new ArrayList<>();
-        for (final Entry<PaperCard, Integer> stackOfCards : section) {
+        // Iterate the deck section in sorted order: CardPool's backing map
+        // does not guarantee iteration order, so for a fixed seed the
+        // pre-shuffle library order, the random-foil roll sequence, and the
+        // card id assignment order could all vary across JVMs. Sorted
+        // iteration makes zone preparation a pure function of (deck, seed).
+        List<Entry<PaperCard, Integer>> ordered = Lists.newArrayList(section);
+        ordered.sort(Entry.comparingByKey());
+        for (final Entry<PaperCard, Integer> stackOfCards : ordered) {
             final PaperCard cp = stackOfCards.getKey();
             for (int i = 0; i < stackOfCards.getValue(); i++) {
                 final Card card = Card.fromPaperCard(cp, player);
@@ -208,6 +228,7 @@ public class Match {
                 if (cp.isFoil() || (canRandomFoil && MyRandom.percentTrue(5))) {
                     card.setRandomFoil();
                 }
+                card.setCollectible(true);
 
                 newLibrary.add(card);
             }
@@ -223,6 +244,7 @@ public class Match {
         // friendliness
         Map<Player, Map<DeckSection, List<? extends PaperCard>>> rAICards = new HashMap<>();
         Multimap<Player, PaperCard> removedAnteCards = ArrayListMultimap.create();
+        Map<Player, List<PaperCard>> unsupported = new HashMap<>();
 
         final FCollectionView<Player> players = game.getPlayers();
         final List<RegisteredPlayer> playersConditions = game.getMatch().getPlayers();
@@ -232,6 +254,14 @@ public class Match {
         // Only allow this if feature flag is on AND for certain match types
         boolean sideboardForAIs = rules.getSideboardForAI() &&
             rules.getGameType().getDeckFormat().equals(DeckFormat.Constructed);
+        playedMains.clear();
+        if (canSideBoard) {
+            for (final RegisteredPlayer rp : playersConditions) {
+                if (rp.getDeck() != null) {
+                    playedMains.put(rp, new ArrayList<>(rp.getDeck().getMain().toFlatList()));
+                }
+            }
+        }
         PlayerController sideboardProxy = null;
         if (canSideBoard && sideboardForAIs) {
             for (int i = 0; i < players.size(); i++) {
@@ -250,7 +280,9 @@ public class Match {
             PlayerController person = player.getController();
 
             if (canSideBoard) {
-                if (sideboardProxy != null && person.isAI()) {
+                // an AI that reads the deck of its opponent sideboards for itself; the human only does it for the others
+                final boolean byItself = person.isAI() && person.sideboardsByItself();
+                if (sideboardProxy != null && person.isAI() && !byItself) {
                     person = sideboardProxy;
                 }
 
@@ -273,6 +305,12 @@ public class Match {
                     toChange.get(DeckSection.Sideboard).addAll(sideboard);
                 }
                 List<PaperCard> newMain = person.sideboard(toChange, rules.getGameType(), player.getName());
+                if (byItself && toChange.has(DeckSection.Sideboard)) {
+                    // show what the AI did with its sideboard, so that nobody has to guess what changed between games
+                    for (final String line : person.getSideboardingReport()) {
+                        game.fireEvent(new GameEventAddLog(GameLogEntryType.SIDEBOARD, player.getName() + " " + line));
+                    }
+                }
                 if (null != newMain) {
                     CardPool allCards = new CardPool();
                     allCards.addAll(toChange.get(DeckSection.Main));
@@ -287,33 +325,34 @@ public class Match {
                 }
             }
 
-            Deck myDeck = psc.getDeck();
-            player.setDraftNotes(myDeck.getDraftNotes());
+            Deck toCheck = psc.getDeck();
+            if (toCheck == null) {
+                try {
+                    System.err.println(psc.getPlayer().getName() + " Deck is NULL...");
+                    int val = rules.getGameType().getDeckFormat().getMainRange().getMinimum();
+                    toCheck = new Deck("NULL");
+                    if (val > 0)
+                        toCheck.getMain().add("Wastes", val);
+                } catch (Exception ignored) {}
+            }
+            Pair<Deck, List<PaperCard>> myDeck = toCheck.getValid();
+            player.setDraftNotes(myDeck.getLeft().getDraftNotes());
 
             Set<PaperCard> myRemovedAnteCards = null;
             if (!rules.useAnte()) {
-                myRemovedAnteCards = getRemovedAnteCards(myDeck);
+                myRemovedAnteCards = getRemovedAnteCards(myDeck.getLeft());
                 for (PaperCard cp: myRemovedAnteCards) {
-                    for (Entry<DeckSection, CardPool> ds : myDeck) {
+                    for (Entry<DeckSection, CardPool> ds : myDeck.getLeft()) {
                         ds.getValue().removeAll(cp);
                     }
                 }
             }
 
-            preparePlayerZone(player, ZoneType.Library, myDeck.getMain(), psc.useRandomFoil());
-            if (myDeck.has(DeckSection.Sideboard)) {
-                preparePlayerZone(player, ZoneType.Sideboard, myDeck.get(DeckSection.Sideboard), psc.useRandomFoil());
+            preparePlayerZone(player, ZoneType.Library, myDeck.getLeft().getMain(), psc.useRandomFoil());
+            if (myDeck.getLeft().has(DeckSection.Sideboard)) {
+                preparePlayerZone(player, ZoneType.Sideboard, myDeck.getLeft().get(DeckSection.Sideboard), psc.useRandomFoil());
 
-                // Assign Companion
-                Card companion = player.assignCompanion(game, person);
-                // Create an effect that lets you cast your companion from your sideboard
-                if (companion != null) {
-                    PlayerZone commandZone = player.getZone(ZoneType.Command);
-                    companion = game.getAction().moveTo(ZoneType.Command, companion, null, AbilityKey.newMap());
-                    commandZone.add(Player.createCompanionEffect(game, companion));
-
-                    player.updateZoneForView(commandZone);
-                }
+                player.assignCompanion(game, person);
             }
 
             player.initVariantsZones(psc);
@@ -321,7 +360,7 @@ public class Match {
             player.shuffle(null);
 
             if (isFirstGame) {
-                Map<DeckSection, List<? extends PaperCard>> cardsComplained = player.getController().complainCardsCantPlayWell(myDeck);
+                Map<DeckSection, List<? extends PaperCard>> cardsComplained = player.getController().complainCardsCantPlayWell(myDeck.getLeft());
                 if (cardsComplained != null && !cardsComplained.isEmpty()) {
                     rAICards.put(player, cardsComplained);
                 }
@@ -336,6 +375,7 @@ public class Match {
             if (myRemovedAnteCards != null && !myRemovedAnteCards.isEmpty()) {
                 removedAnteCards.putAll(player, myRemovedAnteCards);
             }
+            unsupported.put(player, myDeck.getRight());
         }
 
         final Localizer localizer = Localizer.getInstance();
@@ -346,9 +386,13 @@ public class Match {
         if (!removedAnteCards.isEmpty()) {
             game.getAction().revealAnte(localizer.getMessage("lblAnteCardsRemoved"), removedAnteCards);
         }
+
+        if (!unsupported.isEmpty()) {
+            game.getAction().revealUnsupported(unsupported);
+        }
     }
 
-    private void executeAnte(Game lastGame) {
+    private void executeOwnershipChanges(Game lastGame) {
         GameOutcome outcome = lastGame.getOutcome();
 
         // remove all the lost cards from owners' decks
@@ -356,12 +400,12 @@ public class Match {
         int cntPlayers = players.size();
         int iWinner = -1;
         for (int i = 0; i < cntPlayers; i++) {
-            Player fromGame = lastGame.getRegisteredPlayers().get(i);
-            RegisteredPlayer registered = fromGame.getRegisteredPlayer();
+            Player gamePlayer = lastGame.getRegisteredPlayers().get(i);
+            RegisteredPlayer registered = gamePlayer.getRegisteredPlayer();
 
             // Add/Remove Cards lost via ChangeOwnership cards like Darkpact
-            CardCollectionView lostOwnership = fromGame.getLostOwnership();
-            CardCollectionView gainedOwnership = fromGame.getGainedOwnership();
+            CardCollectionView lostOwnership = gamePlayer.getLostOwnership();
+            CardCollectionView gainedOwnership = gamePlayer.getGainedOwnership();
 
             if (!lostOwnership.isEmpty()) {
                 List<PaperCard> lostPaperOwnership = new ArrayList<>();
@@ -379,18 +423,24 @@ public class Match {
                 outcome.addAnteWon(registered, gainedPaperOwnership);
             }
 
+            if (!getRules().useAnte()) {
+                continue;
+            }
+
             if (outcome.isDraw()) {
                 continue;
             }
 
-            if (!fromGame.hasLost()) {
+            if (!gamePlayer.hasLost()) {
                 iWinner = i;
                 continue; // not a loser
             }
 
             Deck losersDeck = players.get(i).getDeck();
             List<PaperCard> personalLosses = new ArrayList<>();
-            for (Card c : fromGame.getCardsIn(ZoneType.Ante)) {
+            for (Card c : gamePlayer.getCardsIn(ZoneType.Ante)) {
+                if (!c.isCollectible())
+                    continue;
                 PaperCard toRemove = (PaperCard) c.getPaperCard();
                 // this could miss the cards by returning instances that are not equal to cards found in deck
                 // (but only if the card has multiple prints in a set)
@@ -402,7 +452,7 @@ public class Match {
             outcome.addAnteLost(registered, personalLosses);
         }
 
-        if (iWinner >= 0) {
+        if (rules.useAnte() && iWinner >= 0) {
             // Winner gains these cards always
             Player fromGame = lastGame.getRegisteredPlayers().get(iWinner);
             RegisteredPlayer registered = fromGame.getRegisteredPlayer();
@@ -420,6 +470,19 @@ public class Match {
             }
             // Other game types (like Quest) need to do something in their own calls to actually update data
         }
+    }
+
+    public GameOutcome.AnteResult getAnteResult(RegisteredPlayer player) {
+        GameOutcome.AnteResult out = new GameOutcome.AnteResult();
+        for (GameOutcome outcome : gameOutcomes.values()) {
+            GameOutcome.AnteResult gameAnte = outcome.getAnteResult(player);
+            if (gameAnte == null) {
+                continue;
+            }
+            out.addWon(gameAnte.wonCards);
+            out.addLost(gameAnte.lostCards);
+        }
+        return out;
     }
 
     /**

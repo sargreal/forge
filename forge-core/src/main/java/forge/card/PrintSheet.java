@@ -1,13 +1,5 @@
 package forge.card;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
-
-import com.google.common.base.Function;
-
 import forge.deck.CardPool;
 import forge.item.PaperCard;
 import forge.util.ItemPool;
@@ -16,15 +8,16 @@ import forge.util.storage.IStorage;
 import forge.util.storage.StorageExtendable;
 import forge.util.storage.StorageReaderFileSections;
 
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 /**
  * TODO: Write javadoc for this type.
  *
  */
 public class PrintSheet {
-    public static final Function<PrintSheet, String> FN_GET_KEY = new Function<PrintSheet, String>() {
-        @Override public final String apply(PrintSheet sheet) { return sheet.name; }
-    };
 
     public static final IStorage<PrintSheet> initializePrintSheets(File sheetsFile, CardEdition.Collection editions) {
         IStorage<PrintSheet> sheets = new StorageExtendable<>("Special print runs", new PrintSheet.Reader(sheetsFile));
@@ -47,7 +40,12 @@ public class PrintSheet {
 
     public PrintSheet(String name0, ItemPool<PaperCard> pool) {
         name = name0;
-        cardsWithWeights = pool != null ? pool : new ItemPool<>(PaperCard.class);
+        cardsWithWeights = new ItemPool<>(PaperCard.class);
+        if (pool != null) {
+            for (Entry<PaperCard, Integer> entry : pool) {
+                add(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     public void add(PaperCard card) {
@@ -55,6 +53,10 @@ public class PrintSheet {
     }
 
     public void add(PaperCard card, int weight) {
+        // Skip missing/unsupported scripts so boosters never deal placeholder cards.
+        if (card == null || card.getRules() == null || card.getRules().isUnsupported()) {
+            return;
+        }
         cardsWithWeights.add(card, weight);
     }
 
@@ -64,7 +66,25 @@ public class PrintSheet {
 
     public void addAll(Iterable<PaperCard> cards, int weight) {
         for (PaperCard card : cards)
-            cardsWithWeights.add(card, weight);
+            add(card, weight);
+    }
+
+    /**
+     * Returns a new sheet with the same weights for every card whose name is not
+     * in {@code excludedNames}. Does not mutate this sheet. If {@code excludedNames}
+     * is null or empty, returns this sheet.
+     */
+    public PrintSheet copyWithoutNames(Collection<String> excludedNames) {
+        if (excludedNames == null || excludedNames.isEmpty()) {
+            return this;
+        }
+        PrintSheet copy = new PrintSheet(name);
+        for (Entry<PaperCard, Integer> entry : cardsWithWeights) {
+            if (!excludedNames.contains(entry.getKey().getName())) {
+                copy.add(entry.getKey(), entry.getValue());
+            }
+        }
+        return copy;
     }
 
     /** Cuts cards out of a sheet - they won't be printed again.
@@ -72,6 +92,13 @@ public class PrintSheet {
     public void removeAll(Iterable<PaperCard> cards) {
         for(PaperCard card : cards)
             cardsWithWeights.remove(card);
+    }
+
+    public boolean contains(PaperCard pc) {
+        return cardsWithWeights.contains(pc);
+    }
+    public PaperCard find(Predicate<PaperCard> filter) {
+        return cardsWithWeights.find(filter);
     }
 
     private PaperCard fetchRoulette(int start, int roulette, Collection<PaperCard> toSkip) {
@@ -91,28 +118,6 @@ public class PrintSheet {
         return fetchRoulette(sum + 1, roulette, toSkip); // start over from beginning, in case last cards were to skip
     }
 
-    public List<PaperCard> all() {
-        List<PaperCard> result = new ArrayList<>();
-        for (Entry<PaperCard, Integer> kv : cardsWithWeights) {
-            for (int i = 0; i < kv.getValue(); i++) {
-                result.add(kv.getKey());
-            }
-        }
-        return result;
-    }
-    public boolean containsCardNamed(String name,int atLeast) {
-        int count=0;
-        for (Entry<PaperCard, Integer> kv : cardsWithWeights) {
-            for (int i = 0; i < kv.getValue(); i++) {
-                if(kv.getKey().getName().equals(name))
-                {
-                    count++;
-                    if(count>=atLeast)return true;
-                }
-            }
-        }
-        return false;
-    }
     public String getName() {
         return name;
     }
@@ -150,13 +155,17 @@ public class PrintSheet {
         return cardsWithWeights.isEmpty();
     }
 
-    public Iterable<PaperCard> toFlatList() {
+    public List<PaperCard> toFlatList() {
         return cardsWithWeights.toFlatList();
+    }
+
+    public Map<String, Integer> toNameLookup() {
+        return cardsWithWeights.toNameLookup();
     }
 
     public static class Reader extends StorageReaderFileSections<PrintSheet> {
         public Reader(File file) {
-            super(file, PrintSheet.FN_GET_KEY);
+            super(file, PrintSheet::getName);
         }
 
         @Override
@@ -165,5 +174,4 @@ public class PrintSheet {
         }
 
     }
-
 }

@@ -1,34 +1,26 @@
 package forge.ai.simulation;
 
-import forge.util.MyRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import forge.ai.AiPlayDecision;
-import forge.ai.ComputerUtil;
-import forge.ai.ComputerUtilAbility;
-import forge.ai.ComputerUtilCard;
-import forge.ai.ComputerUtilCost;
+import forge.ai.*;
+import forge.ai.ability.AnimateAi;
 import forge.ai.ability.ChangeZoneAi;
 import forge.ai.ability.LearnAi;
 import forge.ai.simulation.GameStateEvaluator.Score;
 import forge.game.Game;
 import forge.game.ability.ApiType;
-import forge.game.card.Card;
-import forge.game.card.CardCollection;
-import forge.game.card.CardCollectionView;
-import forge.game.card.CardLists;
-import forge.game.card.CardPredicates;
+import forge.game.card.*;
 import forge.game.phase.PhaseType;
 import forge.game.player.Player;
 import forge.game.spellability.AbilitySub;
-import forge.game.spellability.LandAbility;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.SpellAbilityCondition;
 import forge.game.zone.ZoneType;
+import forge.util.MyRandom;
 import forge.util.TextUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class SpellAbilityPicker {
     private Game game;
@@ -40,8 +32,8 @@ public class SpellAbilityPicker {
     private Plan plan;
     private int numSimulations;
 
-    public SpellAbilityPicker(Game game, Player player) {
-        this.game = game;
+    public SpellAbilityPicker(Player player) {
+        this.game = player.getGame();
         this.player = player;
     }
 
@@ -57,7 +49,7 @@ public class SpellAbilityPicker {
 
     private void printPhaseInfo() {
         String phaseStr = game.getPhaseHandler().getPhase().toString();
-        if (game.getPhaseHandler().getPlayerTurn() != player) {
+        if (!game.getPhaseHandler().isPlayerTurn(player)) {
             phaseStr = "opponent " + phaseStr;
         }
         print("---- choose ability  (phase = " + phaseStr + ")");
@@ -73,7 +65,7 @@ public class SpellAbilityPicker {
             if (sa.isManaAbility()) {
                 continue;
             }
-            sa.setActivatingPlayer(player, true);
+            sa.setActivatingPlayer(player);
 
             AiPlayDecision opinion = canPlayAndPayForSim(sa);
             // print("  " + opinion + ": " + sa);
@@ -87,6 +79,24 @@ public class SpellAbilityPicker {
         }
         candidateSAs.subList(writeIndex, candidateSAs.size()).clear();
         return candidateSAs;
+    }
+
+    /** For diagnostics: what the picker thinks of every ability it looked at, including those it left out. */
+    public List<String> explainCandidates() {
+        CardCollection cards = ComputerUtilAbility.getAvailableCards(game, player);
+        cards = ComputerUtilCard.dedupeCards(cards);
+        List<SpellAbility> all = ComputerUtilAbility.getSpellAbilities(cards, player);
+        List<SpellAbility> candidateSAs = ComputerUtilAbility.getOriginalAndAltCostAbilities(all, player);
+        List<String> out = new java.util.ArrayList<>();
+        for (SpellAbility sa : candidateSAs) {
+            if (sa.isManaAbility()) {
+                continue;
+            }
+            sa.setActivatingPlayer(player);
+            out.add(sa.getHostCard() + " [" + sa.getHostCard().getZone() + "] " + canPlayAndPayForSim(sa)
+                    + (sa.isOptionalCostPaid(forge.game.spellability.OptionalCost.Bargain) ? " (bargained)" : ""));
+        }
+        return out;
     }
 
     public SpellAbility chooseSpellAbilityToPlay(SimulationController controller) {
@@ -134,20 +144,6 @@ public class SpellAbilityPicker {
         }
     }
 
-    private static boolean isSorcerySpeed(SpellAbility sa, Player player) {
-        // TODO: Can we use the actual rules engine for this instead of trying to do the logic ourselves?
-        if (sa instanceof LandAbility) {
-            return true;
-        }
-        if (sa.isSpell()) {
-            return !sa.withFlash(sa.getHostCard(), player);
-        }
-        if (sa.isPwAbility()) {
-            return !sa.withFlash(sa.getHostCard(), player);
-        }
-        return sa.isActivatedAbility() && sa.getRestrictions().isSorcerySpeed();
-    }
-
     private void createNewPlan(Score origGameScore, List<SpellAbility> candidateSAs) {
         plan = null;
 
@@ -161,7 +157,7 @@ public class SpellAbilityPicker {
         if (currentPhase.isBefore(PhaseType.COMBAT_DECLARE_BLOCKERS)) {
             List<SpellAbility> candidateSAs2 = new ArrayList<>();
             for (SpellAbility sa : candidateSAs) {
-                if (!isSorcerySpeed(sa, player)) {
+                if (!SpellAbilityAi.isSorcerySpeed(sa, player)) {
                     if (printOutput) {
                         System.err.println("Not sorcery: " + sa);
                     }
@@ -199,17 +195,17 @@ public class SpellAbilityPicker {
             }
         }
 
-        // To make the AI hold-off on playing creatures in MAIN1 if they give no other benefits,
-        // check the score for the bestSA while counting summon sick creatures for 0.
+        // To make the AI hold off on plays that only add unavailable resources, check the score
+        // while excluding phased-out permanents and summon sick creatures before MAIN2.
         // Do it here on the best SA, rather than for all evaluations, so that if the best SA
         // is indeed a creature spell, we don't pick something else to play now and then have
         // no mana to play the truly best SA post-combat.
-        if (bestSa != null && bestSaValue.summonSickValue <= origGameScore.summonSickValue) {
+        if (bestSa != null && bestSaValue.availableValue <= origGameScore.availableValue) {
             bestSa = null;
         }
 
         long execTime = System.currentTimeMillis() - startTime;
-        print("BEST: " + abilityToString(bestSa) + " SCORE: " + bestSaValue.summonSickValue + " TIME: " + execTime);
+        print("BEST: " + abilityToString(bestSa) + " SCORE: " + bestSaValue.availableValue + " TIME: " + execTime);
         this.bestScore = bestSaValue;
         return bestSa;
     }
@@ -327,15 +323,15 @@ public class SpellAbilityPicker {
     }
 
     private AiPlayDecision canPlayAndPayForSim(final SpellAbility sa) {
-        if (!sa.isLegalAfterStack()) {
-            return AiPlayDecision.CantPlaySa;
-        }
         if (!sa.checkRestrictions(sa.getHostCard(), player)) {
             return AiPlayDecision.CantPlaySa;
         }
 
-        if (sa instanceof LandAbility) {
+        if (sa.isLandAbility()) {
             return AiPlayDecision.WillPlay;
+        }
+        if (!sa.isLegalAfterStack()) {
+            return AiPlayDecision.CantPlaySa;
         }
         if (!sa.canPlay()) {
             return AiPlayDecision.CantPlaySa;
@@ -353,6 +349,24 @@ public class SpellAbilityPicker {
         }
         if (!ComputerUtilAbility.isFullyTargetable(sa)) {
             return AiPlayDecision.TargetingFailed;
+        }
+        if (forge.ai.AiController.isPunishedForFreeCast(sa)) {
+            return AiPlayDecision.CantAfford;
+        }
+        if (forge.ai.ability.UntapAi.isPointlessSelfUntap(player, sa)) {
+            return AiPlayDecision.TimingRestrictions;
+        }
+        // the board evaluation can't tell that e.g. animating a tapped manland does nothing useful
+        if (AnimateAi.isPointlessSelfAnimate(player, sa)) {
+            return AiPlayDecision.DoesntImpactCombat;
+        }
+        if (sa.isActivatedAbility() && !sa.isSpell() && !sa.isManaAbility() && sa.costHasManaX()
+                && sa.getSVar("X").equals("Count$xPaid")
+                && (ComputerUtilMana.determineLeftoverMana(sa.getRootAbility(), player, false) <= 0
+                    || AnimateAi.isRedundantPermanentPtSet(player, sa))) {
+            // an {X} ability paid with X=0, or one that would change nothing: the simulation would happily "play" it at
+            // every priority pass
+            return AiPlayDecision.CantAffordX;
         }
         if (shouldWaitForLater(sa)) {
             return AiPlayDecision.AnotherTime;
@@ -394,7 +408,7 @@ public class SpellAbilityPicker {
 
     public List<AbilitySub> chooseModeForAbility(SpellAbility sa, List<AbilitySub> choices, int min, int num, boolean allowRepeat) {
         if (interceptor != null) {
-            return interceptor.chooseModesForAbility(choices, min, num, allowRepeat);
+            return interceptor.chooseModesForAbility(sa, choices, min, num, allowRepeat);
         }
         if (plan != null && plan.getSelectedDecision() != null && plan.getSelectedDecision().modes != null) {
             Plan.Decision decision = plan.getSelectedDecision();

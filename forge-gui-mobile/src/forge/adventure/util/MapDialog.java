@@ -20,10 +20,13 @@ import forge.adventure.character.CharacterSprite;
 import forge.adventure.character.EnemySprite;
 import forge.adventure.data.AdventureQuestData;
 import forge.adventure.data.DialogData;
+import forge.adventure.data.FlagCondition;
 import forge.adventure.data.RewardData;
 import forge.adventure.player.AdventurePlayer;
+import forge.adventure.scene.TileMapScene;
 import forge.adventure.stage.GameHUD;
 import forge.adventure.scene.RewardScene;
+import forge.adventure.stage.ConsoleCommandInterpreter;
 import forge.adventure.stage.MapStage;
 import forge.adventure.world.WorldSave;
 import forge.card.ColorSet;
@@ -33,6 +36,7 @@ import forge.util.Localizer;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -41,11 +45,13 @@ import java.util.List;
  */
 
 public class MapDialog {
+
     private final MapStage stage;
     private Array<DialogData> data;
     private final int parentID;
     private final static float WIDTH = 250f;
     public String questAccepted = "";
+    private final String blockedGateText = "YOU ARE NOT WORTHY, BEGONE!";
     static private final String defaultJSON = "[\n" +
             "  {\n" +
             //"    \"effect\":[],\n" +
@@ -58,12 +64,37 @@ public class MapDialog {
             "  }\n" +
             "]";
 
+    private static final HashMap<String, String> upperCaseMap = new HashMap<>(32);
+    private final ClickListener skipClickListener;
+    private final ChangeListener signalChangeListener;
+    private float volumeFade = 1.0f;
+    private int volumeFadeStepCount = 0;
 
     public MapDialog(String S, MapStage stage, int parentID) {
+        this(S, stage, parentID, null);
+    }
+
+    public MapDialog(String S, MapStage stage, int parentID, String sourceMapFile) {
         this.stage = stage;
         this.parentID = parentID;
+        this.signalChangeListener = null;
+        this.skipClickListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (event.getListenerActor() instanceof Dialog d) {
+                    for (Actor child : d.getContentTable().getChildren()) {
+                        if (child instanceof TypingLabel) {
+                            ((TypingLabel) child).skipToTheEnd();
+                            break;
+                        }
+                    }
+                }
+                super.clicked(event, x, y);
+            }
+        };
+
         try {
-            if (S.isEmpty()) {
+            if (S == null || S.isEmpty()) {
                 System.err.print("Dialog error. Dialog property is empty.\n");
                 this.data = JSONStringLoader.parse(Array.class, DialogData.class, defaultJSON, defaultJSON);
                 return;
@@ -71,15 +102,39 @@ public class MapDialog {
             this.data = JSONStringLoader.parse(Array.class, DialogData.class, S, defaultJSON);
         } catch (Exception exception) {
             exception.printStackTrace();
-
         }
     }
 
     public MapDialog(DialogData prebuiltDialog, MapStage stage, int parentID, AdventureQuestData prebuiltQuestData) {
         this.stage = stage;
         this.parentID = parentID;
-        try
-        {
+        this.skipClickListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (event.getListenerActor() instanceof Dialog d) {
+                    for (Actor child : d.getContentTable().getChildren()) {
+                        if (child instanceof TypingLabel) {
+                            ((TypingLabel) child).skipToTheEnd();
+                            break;
+                        }
+                    }
+                }
+                super.clicked(event, x, y);
+            }
+        };
+
+        this.signalChangeListener = new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                if (prebuiltQuestData != null && questAccepted != null && !questAccepted.isEmpty() && Integer.parseInt(questAccepted) == prebuiltQuestData.getID()) {
+                    Current.player().addQuest(prebuiltQuestData, false);
+                } else {
+                    Current.player().addQuest(questAccepted, false);
+                }
+            }
+        };
+
+        try {
             if (prebuiltDialog == null) {
                 System.err.print("Dialog error. Dialog provided is null.\n");
                 this.data = JSONStringLoader.parse(Array.class, DialogData.class, defaultJSON, defaultJSON);
@@ -87,21 +142,8 @@ public class MapDialog {
             }
             this.data = new Array<>();
             this.data.add(prebuiltDialog);
-            ChangeListener listen = new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent changeEvent, Actor actor) {
-                    if (prebuiltQuestData != null && Integer.parseInt(questAccepted) == prebuiltQuestData.getID()) {
-                        Current.player().addQuest(prebuiltQuestData);
-                    }
-                    else {
-                        Current.player().addQuest(questAccepted);
-                    }
-                }
-            };
-            addQuestAcceptedListener(listen);
-        }
-        catch (Exception exception)
-        {
+            addQuestAcceptedListener(signalChangeListener);
+        } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
@@ -122,25 +164,30 @@ public class MapDialog {
     }
 
     void disposeAudio(boolean fadeout) {
-        if (fadeout) {
-            final float[] v = {1f};
-            for (int i = 10; i > 1; i--) {
-                float delay = i * 0.1f;
-                float j = i;
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        v[0] -= 0.1f;
-                        if (v[0] < 0.1f)
-                            v[0] = 0.1f;
-                        if (audio != null && j == 2) {
-                            unload();
-                        } else if (audio != null && j == 10) {
-                            audio.getRight().setVolume(v[0]);
-                        }
+        if (fadeout && audio != null) {
+            this.volumeFade = 1.0f;
+            this.volumeFadeStepCount = 10;
+
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    volumeFadeStepCount--;
+                    volumeFade -= 0.1f;
+                    if (volumeFade < 0.1f) {
+                        volumeFade = 0.1f;
                     }
-                }, delay);
-            }
+
+                    if (audio != null) {
+                        audio.getRight().setVolume(volumeFade);
+                        if (volumeFadeStepCount <= 0) {
+                            unload();
+                            this.cancel(); // Terminate the recurring timer safely
+                        }
+                    } else {
+                        this.cancel();
+                    }
+                }
+            }, 0.1f, 0.1f, 10);
         } else {
             unload();
         }
@@ -166,13 +213,16 @@ public class MapDialog {
         if (actor instanceof CharacterSprite)
             sprite = ((CharacterSprite) actor).getAvatar();
         String text; //Check for localized string (locname), otherwise print text.
-        if (dialog.loctext != null && !dialog.loctext.isEmpty()) text = L.getMessage(dialog.loctext);
+        if (dialog.loctext != null && !dialog.loctext.isEmpty()) text = L.getMessageorUseDefault(dialog.loctext, dialog.text);
         else text = dialog.text;
         disposeAudio();
         if (dialog.voiceFile != null) {
             FileHandle file = Gdx.files.absolute(Config.instance().getFilePath(dialog.voiceFile));
             if (file.exists()) {
-                audio = Pair.of(file, Forge.getAssets().getMusic(file));
+                Music voice = Forge.getAssets().getMusic(file);
+                if (voice != null) {
+                    audio = Pair.of(file, voice);
+                }
             }
             if (audio != null) {
                 int vol = FModel.getPreferences().getPrefInt(ForgePreferences.FPref.UI_VOL_MUSIC);
@@ -186,6 +236,13 @@ public class MapDialog {
             }
         } else {
             fadeIn();
+        }
+        // Only used by castle though this should be controlled by map creator as dialog option but no one has updated it in ages
+        boolean blockedGate;
+        if (blockedGateText.equalsIgnoreCase(text))
+            blockedGate = true;
+        else {
+            blockedGate = false;
         }
         TypingLabel A = Controls.newTypingLabel(text);
         A.setWrap(true);
@@ -224,14 +281,20 @@ public class MapDialog {
             for (DialogData option : dialog.options) {
                 if (isConditionOk(option.condition)) {
                     String name; //Get localized label if present.
-                    if (option.locname != null && !option.locname.isEmpty()) name = L.getMessage(option.locname);
+                    if (option.locname != null && !option.locname.isEmpty()) name = L.getMessageorUseDefault(option.locname, option.name);
                     else name = option.name;
                     TextraButton B;
                     if (option.isDisabled) {
                         B = Controls.newTextButton(name);
                         B.setDisabled(true);
                     } else {
-                        B = Controls.newTextButton(name, () -> loadDialog(option));
+                        B = Controls.newTextButton(name, () -> {
+                            loadDialog(option);
+                            if (blockedGate) {
+                                // TODO: Add support for extra dialog actions and maybe animated bounce back..
+                                stage.getPlayerSprite().moveBy(0f, -stage.getPlayerSprite().getHeight());
+                            }
+                        });
                     }
                     B.getTextraLabel().setWrap(true); //We want this to wrap in case it's a wordy choice.
                     buttons.add(B);
@@ -243,13 +306,7 @@ public class MapDialog {
                     B.setDisabled(option.isDisabled);
                 }
             }
-            D.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    A.skipToTheEnd();
-                    super.clicked(event, x, y);
-                }
-            });
+            D.addListener(skipClickListener);
             if (i == 0) {
                 stage.hideDialog();
                 emitDialogFinished();
@@ -332,15 +389,30 @@ public class MapDialog {
                 else Current.player().takeGold(-E.addGold);
             }
             if (E.addShards != 0) { //Gives (positive or negative) mana shards to the player.
-                if (E.addShards > 0) Current.player().giveGold(E.addShards);
-                else Current.player().takeGold(-E.addShards);
+                if (E.addShards > 0) Current.player().addShards(E.addShards);
+                else Current.player().takeShards(-E.addShards);
             }
             if (E.addMapReputation != 0) {
-                if (!E.POIReference.isEmpty() && !E.POIReference.contains("$")) {
-                    WorldSave.getCurrentSave().getPointOfInterestChanges(E.POIReference).addMapReputation(E.addMapReputation);
-                }
-                else
+                if (E.POIReference != null && !E.POIReference.isEmpty()) {
+                    if(E.POIReference.contains("$")) {
+                        // When this happens, we have a quest with a poi reference that failed to store the target in saved poi tokens
+                        if(TileMapScene.instance().rootPoint == null) {
+                            // This previously caused an exception because the rootPoint reflects the last POI visited.
+                            // If the save file was loaded and the quest is completed, and we don't have the poi token,
+                            // getting the changes assumes the root point as where to apply the reputation. In
+                            // actuality, we should not, so we basically should do nothing because we are going to just
+                            // generate a new poi with the replacement token name if we fix that issue.
+                        } else {
+                            // In this case, we can follow the previous path to grant reputation to the last place
+                            // visited, so the player gets *something* for reputation, however erroneously.
+                            stage.getChanges().addMapReputation(E.addMapReputation);
+                        }
+                    } else {
+                        WorldSave.getCurrentSave().getPointOfInterestChanges(E.POIReference).addMapReputation(E.addMapReputation);
+                    }
+                } else {
                     stage.getChanges().addMapReputation(E.addMapReputation);
+                }
             }
             if (E.deleteMapObject != 0) { //Removes a dummy object from the map.
                 if (E.deleteMapObject < 0) stage.deleteObject(parentID);
@@ -377,6 +449,20 @@ public class MapDialog {
             if (E.advanceMapFlag != null && !E.advanceMapFlag.isEmpty()) { //Increase a given local quest flag by 1.
                 stage.advanceQuestFlag(E.advanceMapFlag);
             }
+            //Fork (run 2): signed, clamped adds; they wake flag stages like set*.
+            if (E.addQuestFlag != null && E.addQuestFlag.key != null && !E.addQuestFlag.key.isEmpty())
+                FlagCondition.addFlag("quest", E.addQuestFlag.key, E.addQuestFlag.val, E.addQuestFlag.min, E.addQuestFlag.max);
+            if (E.addCharacterFlag != null && E.addCharacterFlag.key != null && !E.addCharacterFlag.key.isEmpty())
+                FlagCondition.addFlag("character", E.addCharacterFlag.key, E.addCharacterFlag.val, E.addCharacterFlag.min, E.addCharacterFlag.max);
+            if (E.addMapFlag != null && E.addMapFlag.key != null && !E.addMapFlag.key.isEmpty())
+                FlagCondition.addFlag("map", E.addMapFlag.key, E.addMapFlag.val, E.addMapFlag.min, E.addMapFlag.max);
+            if (E.runCommand != null && !E.runCommand.trim().isEmpty()) //Fork (run 2): allow-listed console command
+                ConsoleCommandInterpreter.getInstance().runFromData(E.runCommand);
+            if (E.endGame != null) { //Fork (run 2): ending screen once this dialog is closed
+                if (E.endGame.flag != null && !E.endGame.flag.isEmpty())
+                    Current.player().setCharacterFlag(E.endGame.flag, 1);
+                stage.showEndingDialogWhenFree(E.endGame.title, E.endGame.text, E.endGame.image);
+            }
             if (E.setEffect != null) { //Replace current effects.
                 EnemySprite EN = stage.getEnemyByID(parentID);
                 EN.effect = E.setEffect;
@@ -389,15 +475,14 @@ public class MapDialog {
                 RewardScene.instance().loadRewards(ret, RewardScene.Type.QuestReward, null);
                 Forge.switchScene(RewardScene.instance());
             }
-            //Test code for selectable rewards:
-//            if (E.grantRewards != null && E.grantRewards.length > 0) {
-//                Array<Reward> ret = new Array<Reward>();
-//                for(RewardData rdata:E.grantRewards) {
-//                    ret.addAll(rdata.generate(false, true));
-//                }
-//                RewardScene.instance().loadSelectableRewards(ret, RewardScene.Type.RewardChoice, ret.size > 1? 2: 1);
-//                Forge.switchScene(RewardScene.instance());
-//            }
+            if (E.grantRewardsChoice != null && E.grantRewardsChoice.length > 0) {
+               Array<Reward> ret = new Array<Reward>();
+               for(RewardData rdata:E.grantRewardsChoice) {
+                   ret.addAll(rdata.generate(false, true));
+               }
+               RewardScene.instance().loadSelectableRewards(ret, RewardScene.Type.RewardChoice, 1);
+               Forge.switchScene(RewardScene.instance());
+            }
             if (E.issueQuest != null && (!E.issueQuest.isEmpty())) {
                 questAccepted = E.issueQuest;
                 emitQuestAccepted();
@@ -506,6 +591,9 @@ public class MapDialog {
                     if (condition.not) return false;
                 }
             }
+            if (condition.flag != null) { //Fork (Middle-earth): unset flags read as 0, see FlagCondition.
+                if (condition.flag.eval(stage) == condition.not) return false;
+            }
             if (condition.checkMapFlag != null && !condition.checkMapFlag.isEmpty()) {
                 if (!stage.checkQuestFlag(condition.checkMapFlag)) {
                     if (!condition.not) return false;
@@ -516,30 +604,33 @@ public class MapDialog {
     }
 
     private boolean checkFlagCondition(int flag, String condition, int value) {
-        switch (condition.toUpperCase()) {
-            default:
+        if (condition == null) return false;
+
+        String upperCondition = upperCaseMap.get(condition);
+        if (upperCondition == null) {
+            upperCondition = condition.toUpperCase();
+            upperCaseMap.put(condition, upperCondition);
+        }
+
+        switch (upperCondition) {
             case "EQUALS":
             case "EQUAL":
             case "=":
-                if (flag == value) return true;
-                break;
+                return flag == value;
             case "LESSTHAN":
             case "<":
-                if (flag < value) return true;
-                break;
+                return flag < value;
             case "MORETHAN":
             case ">":
-                if (flag > value) return true;
-                break;
+                return flag > value;
             case "LE_THAN":
             case "<=":
-                if (flag <= value) return true;
-                break;
+                return flag <= value;
             case "ME_THAN":
             case ">=":
-                if (flag >= value) return true;
-                break;
+                return flag >= value;
+            default:
+                return false;
         }
-        return false;
     }
 }

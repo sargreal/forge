@@ -1,90 +1,58 @@
 {
-"startPointX": 0.48,
-"startPointY": 0.473,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.396675,
+"startPointY": 0.495800,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "fangorn",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
 "tilesetName": "Green",
 "terrain": [
 	{
 		"spriteName": "Green_1",
-		"max": 0.2,
-		"resolution": 224
+		"max": 0.25,
+		"resolution": 10
 	},
 	{
 		"spriteName": "Green_2",
-		"min": 0.8,
+		"min": 0.5,
 		"max": 1,
-		"resolution": 10
+		"resolution": 8
 	}
 ],
-"width": 0.06,
-"height": 0.066,
-"color": "59a650",
+"width": 0.048300,
+"height": 0.058350,
+"color": "2f7a2a",
 "spriteNames": [
+	"WoodTree",
+	"WoodTree2",
+	"Bush",
 	"Stump",
 	"Moss",
-	"Stone",
-	"Flower",
-	"Wood"
+	"Flower"
 ],
-"enemies": [
-	"Adept Green Wizard",
-	"Ape",
-	"Apprentice Green Wizard",
-	"Badger",
-	"Bear",
-	"Beastmaster",
-	"Centaur",
-	"Centaur Warrior",
-	"Challenger 20",
-	"Challenger 21",
-	"Challenger 22",
-	"Copper Host Infector",
-	"Eldraine Faerie",
-	"Elephant",
-	"Elf",
-	"Elf warrior",
-	"Elk",
-	"Faerie",
-	"Falcon",
-	"Fox",
-	"Frog",
-	"Giant Panda",
-	"Giant Spider",
-	"Goblin Fanatic",
-	"Gorgon",
-	"Gorgon 2",
-	"Green Beast",
-	"Green Sliver",
-	"High Elf",
-	"Hydra",
-	"Ibis",
-	"Kavu",
-	"Ladybug",
-	"Master Green Wizard",
-	"Owl",
-	"Plant",
-	"Porcupine",
-	"Raccoon",
-	"Rhino",
-	"Satyr",
-	"Snake",
-	"Spider",
-	"Squirrel",
-	"Tiger",
-	"Triceratops",
-	"Treefolk",
-	"Treefolk Guardian",
-	"Viper",
-	"Werewolf",
-	"Wild-Magic Sorcerer",
-	"Wurm"
-],
+"enemies": ["Huorn", "Ent of Fangorn", "Uruk-hai", "Crebain", "Wild Bear"],
 "pointsOfInterest": [
-	"Forest Town Fangorn"
+	"ME Derndingle"
 ],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/forest.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.7,
+		"width": 0.7,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
 ]
 }

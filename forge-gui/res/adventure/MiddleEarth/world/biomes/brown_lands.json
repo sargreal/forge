@@ -1,0 +1,37 @@
+{
+"startPointX": 0.515025,
+"startPointY": 0.504200,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "brown_lands",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Colorless",
+"terrain": [
+	{
+		"spriteName": "Colorless_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Colorless_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.155025,
+"height": 0.108300,
+"color": "aeaeae",
+"spriteNames": [
+	"WasteRock",
+	"Stone",
+	"LargePlainsRock",
+	"Bush",
+	"Gravel"
+],
+"enemies": ["Easterling Warrior", "Mordor Orc", "Warg Rider", "Crebain", "Gollum", "Orc Captain"],
+"pointsOfInterest": [
+	"ME Emyn Muil Cave"
+],
+"structures": []
+}

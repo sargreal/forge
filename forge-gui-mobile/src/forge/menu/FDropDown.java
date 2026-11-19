@@ -1,5 +1,6 @@
 package forge.menu;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 
 import forge.Forge;
@@ -8,6 +9,7 @@ import forge.assets.FSkinColor;
 import forge.assets.FSkinColor.Colors;
 import forge.assets.FSkinTexture;
 import forge.screens.FScreen;
+import forge.screens.match.views.VChat;
 import forge.screens.match.views.VDevMenu;
 import forge.screens.match.views.VGameMenu;
 import forge.screens.match.views.VLog;
@@ -145,22 +147,23 @@ public abstract class FDropDown extends FScrollPane {
     protected abstract ScrollBounds updateAndGetPaneSize(float maxWidth, float maxVisibleHeight);
 
     protected void updateSizeAndPosition() {
-        if (menuTab == null) {
+        FDisplayObject dropdownOwner = getDropDownOwner();
+        if (dropdownOwner == null) {
             return;
         }
 
         Rectangle boundary = Forge.getCurrentScreen().getDropDownBoundary();
 
-        float x = menuTab.screenPos.x;
-        float y = menuTab.screenPos.y + menuTab.getHeight();
+        float x = dropdownOwner.screenPos.x;
+        float y = dropdownOwner.screenPos.y + dropdownOwner.getHeight();
         boolean showAbove;
         float maxVisibleHeight;
         if (y < boundary.y + boundary.height / 2) {
             showAbove = false;
             maxVisibleHeight = boundary.y + boundary.height - y; //prevent covering prompt
-        } else { //handle drop downs at near bottom of screen
+        } else { //handle dropdown menus that open near the bottom of screen
             showAbove = true;
-            y = menuTab.screenPos.y;
+            y = dropdownOwner.screenPos.y;
             maxVisibleHeight = y - boundary.y;
         }
 
@@ -189,8 +192,22 @@ public abstract class FDropDown extends FScrollPane {
     protected void drawBackground(Graphics g) {
         float w = getWidth();
         float h = getHeight();
+        if (isGlass()) { //frosted slate, the same as the compact player panels
+            g.fillRect(GLASS, 0, 0, w, h);
+            return;
+        }
         g.drawImage(Forge.isMobileAdventureMode ? FSkinTexture.ADV_BG_TEXTURE : FSkinTexture.BG_TEXTURE, 0, 0, w, h);
         g.fillRect(FScreen.getTextureOverlayColor(), 0, 0, w, h);
+    }
+
+    private static final Color GLASS = new Color(35 / 255f, 40 / 255f, 44 / 255f, 0.92f);
+    private static final Color GLASS_EDGE = new Color(1f, 1f, 1f, 0.14f);
+
+    private boolean isGlass() {
+        if (getDropDownOwner() instanceof FMenuTab) {
+            return ((FMenuTab) getDropDownOwner()).isGlass();
+        }
+        return forge.toolbox.Frost.isOn(); //menus and combo box lists in the frosted style
     }
 
     protected boolean drawAboveOverlay() {
@@ -202,7 +219,11 @@ public abstract class FDropDown extends FScrollPane {
         super.drawOverlay(g);
         float w = getWidth();
         float h = getHeight();
-        g.drawRect(2, getBorderColor(), 0, 0, w, h); //ensure border shows up on all sides
+        if (isGlass()) {
+            g.drawRect(1, GLASS_EDGE, 0, 0, w, h);
+        } else {
+            g.drawRect(2, getBorderColor(), 0, 0, w, h); //ensure border shows up on all sides
+        }
         if (getDropDownOwner() instanceof FMenuTab) {
             try {
                 if (getScrollLeft() > 0) {
@@ -335,6 +356,8 @@ public abstract class FDropDown extends FScrollPane {
         if (this instanceof VReveal)
             return true;
         if (this instanceof VLog)
+            return true;
+        if (this instanceof VChat)
             return true;
         if (this instanceof VDevMenu)
             return true;

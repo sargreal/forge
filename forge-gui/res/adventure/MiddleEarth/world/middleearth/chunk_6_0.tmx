@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <tileset firstgid="45" source="roads.tsx"/>
+ <tileset firstgid="46" source="clutter.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrtwwEJAAAMBKH7/qXXYyi4aqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg8fHwlX5Q==
+  </data>
+ </layer>
+ <layer id="3" name="Roads" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eNrtwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+  </data>
+ </layer>
+ <objectgroup id="4" name="Clutter">
+ </objectgroup>
+ <imagelayer id="5" name="Reference" opacity="0.5" visible="0">
+  <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_6_0.png" width="2400" height="2400"/>
+ </imagelayer>
+ <objectgroup id="2" name="POI">
+ </objectgroup>
+</map>

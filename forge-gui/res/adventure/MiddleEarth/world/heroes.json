@@ -1,0 +1,40 @@
+{
+  "avatar": "sprites/heroes/avatar.atlas",
+  "heroes": [
+    {
+      "name": "Hobbit",
+      "female": "sprites/enemy/humanoid/human/peasant/peasant2.atlas",
+      "male": "sprites/enemy/humanoid/human/peasant/farmer.atlas",
+      "femaleAvatar": "Human_f",
+      "maleAvatar": "Human_m"
+    },
+    {
+      "name": "Man",
+      "female": "sprites/heroes/human_f.atlas",
+      "male": "sprites/heroes/human_m.atlas",
+      "femaleAvatar": "Human_f",
+      "maleAvatar": "Human_m"
+    },
+    {
+      "name": "Elf",
+      "female": "sprites/heroes/elf_f.atlas",
+      "male": "sprites/heroes/elf_m.atlas",
+      "femaleAvatar": "Elf_f",
+      "maleAvatar": "Elf_m"
+    },
+    {
+      "name": "Dwarf",
+      "female": "sprites/heroes/dwarf_f.atlas",
+      "male": "sprites/heroes/dwarf_m.atlas",
+      "femaleAvatar": "Dwarf_f",
+      "maleAvatar": "Dwarf_m"
+    },
+    {
+      "name": "Wizard",
+      "female": "sprites/enemy/humanoid/human/wizard/white_wiz2.atlas",
+      "male": "sprites/enemy/humanoid/human/wizard/wizard.atlas",
+      "femaleAvatar": "Human_f",
+      "maleAvatar": "Human_m"
+    }
+  ]
+}

@@ -20,14 +20,13 @@ package forge.game.trigger;
 import java.util.Collections;
 import java.util.Map;
 
-import com.google.common.collect.Iterables;
-
 import forge.game.ability.AbilityKey;
 import forge.game.ability.AbilityUtils;
 import forge.game.card.Card;
 import forge.game.card.CardPredicates;
 import forge.game.player.PlayerCollection;
 import forge.game.spellability.SpellAbility;
+import forge.util.IterableUtil;
 
 public class TriggerTokenCreatedOnce extends Trigger {
 
@@ -42,13 +41,14 @@ public class TriggerTokenCreatedOnce extends Trigger {
 
     /** {@inheritDoc} */
     @Override
-    public final void setTriggeringObjects(final SpellAbility sa, Map<AbilityKey, Object> runParams) {
+    public final void setTriggeringObjects(final Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
+        @SuppressWarnings("unchecked")
         Iterable<Card> tokens = (Iterable<Card>) runParams.get(AbilityKey.Cards);
         if (hasParam("ValidToken")) {
-            tokens = Iterables.filter(tokens, CardPredicates.restriction(getParam("ValidToken").split(","), getHostCard().getController(), getHostCard(), this));
+            tokens = IterableUtil.filter(tokens, CardPredicates.restriction(getParam("ValidToken").split(","), getHostCard().getController(), getHostCard(), this));
         }
 
-        sa.setTriggeringObject(AbilityKey.Cards, tokens);
+        objects.put(AbilityKey.Cards, tokens);
     }
 
     /** {@inheritDoc}

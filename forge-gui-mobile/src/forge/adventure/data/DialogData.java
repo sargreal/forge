@@ -1,17 +1,16 @@
 package forge.adventure.data;
 
-import forge.util.Callback;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Dialog Data JSON loader class.
  * Carries all text, branches and effects of dialogs.
  */
 public class DialogData implements Serializable {
-    //private static final long SerialVersionUID = 1; // TODO: set to current value
+    private static final long serialVersionUID = 1L;
 
     public ActionData[] action = new ActionData[0];       //List of effects to cause when the dialog shows.
     public ConditionData[] condition = new ConditionData[0]; //List of conditions for the action to show.
@@ -21,8 +20,10 @@ public class DialogData implements Serializable {
     public String loctext= "";            //References a localized string for the text body.
     public DialogData[] options = new DialogData[0];      //List of sub-dialogs. Show up as options in the current one.
     public boolean isDisabled = false;
+    // Persist quest dialog state here because this class already has a stable cross-platform serialization UID.
+    private boolean displayed = false;
 
-    public transient Callback callback;
+    public transient Consumer callback;
 
     public DialogData(){}
     public DialogData(DialogData other){
@@ -42,6 +43,15 @@ public class DialogData implements Serializable {
         this.options = clonedOptions.toArray(new DialogData[0]);
         this.voiceFile = other.voiceFile;
         this.isDisabled = other.isDisabled;
+        this.displayed = other.displayed;
+    }
+
+    public boolean isDisplayed() {
+        return displayed;
+    }
+
+    public void markDisplayed() {
+        displayed = true;
     }
 
     @Override
@@ -56,6 +66,14 @@ public class DialogData implements Serializable {
         static public class QuestFlag implements Serializable{
             public String key;
             public int val;
+        }
+        /** Fork (run 2): signed, clamped add: {key, val (delta), min, max}; min/max default to the byte range. */
+        static public class FlagAdd implements Serializable {
+            private static final long serialVersionUID = 4710393127464412871L;
+            public String key;
+            public int val;
+            public int min = Byte.MIN_VALUE;
+            public int max = Byte.MAX_VALUE;
         }
         public String removeItem;         //Remove item name from inventory.
         public String addItem;            //Add item name to inventory.
@@ -75,8 +93,14 @@ public class DialogData implements Serializable {
         public QuestFlag setCharacterFlag;    //Set quest flag.
         public QuestFlag setQuestFlag;    //Set quest flag.
         public QuestFlag setMapFlag;      //Set map flag.
+        public FlagAdd addQuestFlag;      //Fork (run 2): add a signed value to a quest flag, clamped.
+        public FlagAdd addCharacterFlag;  //Fork (run 2): same for a character flag.
+        public FlagAdd addMapFlag;        //Fork (run 2): same for a map flag (in a map only).
+        public String runCommand;         //Fork (run 2): a console command from the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS).
+        public EndGameData endGame;       //Fork (run 2): sets a character flag and shows a closing screen (continue / main menu).
 
         public RewardData[] grantRewards = new RewardData[0];   //launch a RewardScene with the provided data.
+        public RewardData[] grantRewardsChoice = new RewardData[0];   //launch a RewardScene choice with the provided data.
         public String issueQuest; //Add quest with this ID to the player's questlog.
 
         public int addMapReputation = 0;  //Gives the player X reputation points in this POI. Negative to take.
@@ -86,7 +110,7 @@ public class DialogData implements Serializable {
 
         public ActionData(ActionData other){
             removeItem = other.removeItem;
-            addItem = other.removeItem;
+            addItem = other.addItem;
             addLife = other.addLife;
             addGold = other.addGold;
             addShards = other.addShards;
@@ -109,15 +133,31 @@ public class DialogData implements Serializable {
                 setMapFlag.val = other.setMapFlag.val;
             }
             grantRewards = other.grantRewards.clone();
+            grantRewardsChoice = other.grantRewardsChoice.clone();
             issueQuest = other.issueQuest;
             addMapReputation = other.addMapReputation;
             POIReference = other.POIReference;
+            addQuestFlag = other.addQuestFlag;
+            addCharacterFlag = other.addCharacterFlag;
+            addMapFlag = other.addMapFlag;
+            runCommand = other.runCommand;
+            endGame = other.endGame;
         }
     }
 
+    /** Fork (run 2): the {@code endGame} action. */
+    static public class EndGameData implements Serializable {
+        private static final long serialVersionUID = 6203914770130911846L;
+        public String title;
+        public String text;
+        public String image;               //optional picture, a plane file path (Config.getFile)
+        public String flag = "gameEnded";  //character flag set to 1 when the action runs (empty: none)
+    }
+
     static public class ConditionData implements Serializable {
-        private static final long SerialVersionUID = 1L;
-        static public class QueryQuestFlag{
+        private static final long serialVersionUID = 1L;
+        static public class QueryQuestFlag implements Serializable {
+            private static final long serialVersionUID = 1L;
             public String key;
             public String op;
             public int val;
@@ -137,5 +177,6 @@ public class DialogData implements Serializable {
         public QueryQuestFlag getQuestFlag = null; //Check for value of a flag { <flagID>, <comparison>, <value> }
         public QueryQuestFlag getMapFlag = null;   //Check for a local dungeon flag ("map flag").
         public boolean not = false;                //Reverse the result of a condition ("actorID":"XX" + "not":true => true if XX is not in the map.)
+        public FlagCondition flag = null;          //Fork (Middle-earth): shared flag condition (unset flags read as 0), see FlagCondition.
     }
 }

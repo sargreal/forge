@@ -12,12 +12,11 @@ import forge.game.ability.AbilityUtils;
 import forge.game.card.Card;
 import forge.game.card.CardCollection;
 import forge.game.card.CardCollectionView;
-import forge.game.card.CardDamageMap;
+import forge.game.card.CardDamageTable;
 import forge.game.player.Player;
 import forge.game.replacement.ReplacementType;
 import forge.game.spellability.SpellAbility;
 import forge.game.trigger.TriggerType;
-import forge.util.CardTranslation;
 import forge.util.Lang;
 import forge.util.Localizer;
 
@@ -65,7 +64,10 @@ public class FightEffect extends DamageBaseEffect {
         Player controller = host.getController();
         boolean isOptional = sa.hasParam("Optional");
 
-        if (isOptional && !controller.getController().confirmAction(sa, null, Localizer.getInstance().getMessage("lblWouldYouLikeFight", CardTranslation.getTranslatedName(fighters.get(0).getName()), CardTranslation.getTranslatedName(fighters.get(1).getName())), null)) {
+        final Card cardToShow = fighters.get(0);
+        if (isOptional && !controller.getController().confirmAction(sa, null,
+                Localizer.getInstance().getMessage("lblWouldYouLikeFight", cardToShow.getTranslatedName(),
+                        fighters.get(1).getTranslatedName()), cardToShow, null)) {
             return;
         }
 
@@ -141,14 +143,14 @@ public class FightEffect extends DamageBaseEffect {
 
     private void dealDamage(final SpellAbility sa, Card fighterA, Card fighterB) {
         boolean usedDamageMap = true;
-        CardDamageMap damageMap = sa.getDamageMap();
-        CardDamageMap preventMap = sa.getPreventMap();
+        CardDamageTable damageMap = sa.getDamageMap();
+        CardDamageTable preventMap = sa.getPreventMap();
         GameEntityCounterTable counterTable = sa.getCounterTable();
 
         if (damageMap == null) {
             // make a new damage map
-            damageMap = new CardDamageMap();
-            preventMap = new CardDamageMap();
+            damageMap = new CardDamageTable();
+            preventMap = new CardDamageTable();
             counterTable = new GameEntityCounterTable();
             usedDamageMap = false;
         }

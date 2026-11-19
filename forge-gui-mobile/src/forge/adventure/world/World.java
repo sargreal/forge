@@ -26,6 +26,8 @@ import forge.gui.GuiBase;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class that will create the world from the configuration
@@ -44,9 +46,14 @@ public class World implements Disposable, SaveFileContent {
     private PointOfInterestMap mapPoiIds;
     private BiomeTexture[] biomeTexture;
     private long seed;
+    /** Seed the world was generated with: the world map's "seed" if set, else {@link #seed}. 0 = unknown (loaded save). */
+    private long generationSeed;
     private final Random random = new Random();
     private boolean worldDataLoaded = false;
     private Texture globalTexture = null;
+    private final ArrayList<DrawingInformation> drawingInfoCache = new ArrayList<>(32);
+    private Pixmap globalTileDrawing = null;
+    private Pixmap emptyTile = null;
 
     public Random getRandom() {
         return random;
@@ -97,8 +104,10 @@ public class World implements Disposable, SaveFileContent {
     @Override
     public void load(SaveFileData saveFileData) {
 
-        if (biomeImage != null)
+        if (biomeImage != null) {
             biomeImage.dispose();
+            biomeImage = null;
+        }
 
         loadWorldData();
 
@@ -156,36 +165,42 @@ public class World implements Disposable, SaveFileContent {
     }
 
     public Pixmap getBiomeSprite(int x, int y) {
-        if (x < 0 || y <= 0 || x >= width || y > height)
-            return new Pixmap(data.tileSize, data.tileSize, Pixmap.Format.RGBA8888);
+        if (x < 0 || y <= 0 || x >= width || y > height) {
+            if (emptyTile == null) {
+                emptyTile = new Pixmap(data.tileSize, data.tileSize, Pixmap.Format.RGBA8888);
+                emptyTile.setColor(0, 0, 0, 0);
+                emptyTile.fill();
+            }
+            return emptyTile;
+        }
+
+        // init exactly once on demand
+        if (globalTileDrawing == null) {
+            globalTileDrawing = new Pixmap(data.tileSize, data.tileSize, Pixmap.Format.RGBA8888);
+        } else {
+            // Clean the existing alpha pixels instead of instantiating a new object
+            globalTileDrawing.setColor(0, 0, 0, 0);
+            globalTileDrawing.fill();
+        }
 
         long biomeIndex = getBiome(x, y);
         int biomeTerrain = getTerrainIndex(x, y);
-        Pixmap drawingPixmap = new Pixmap(data.tileSize, data.tileSize, Pixmap.Format.RGBA8888);
-        ArrayList<DrawingInformation> information = new ArrayList<>();
+
+        drawingInfoCache.clear();
+
         for (int i = 0; i < biomeTexture.length; i++) {
-            if ((biomeIndex & 1L << i) == 0) {
-                continue;
-            }
+            if ((biomeIndex & 1L << i) == 0) continue;
             BiomeTexture regions = biomeTexture[i];
-            if (x <= 0 || y <= 1 || x >= width - 1 || y >= height)//edge
-            {
+            if (x <= 0 || y <= 1 || x >= width - 1 || y >= height) {
                 return regions.getPixmap(biomeTerrain);
             }
 
-
             int neighbors = 0b000_000_000;
-
             int bitIndex = 8;
             for (int ny = 1; ny > -2; ny--) {
                 for (int nx = -1; nx < 2; nx++) {
-                    long otherBiome = getBiome(x + nx, y + ny);
-                    int otherTerrain = getTerrainIndex(x + nx, y + ny);
-
-
-                    if ((otherBiome & 1L << i) != 0 && (biomeTerrain == otherTerrain) | biomeTerrain == 0)
+                    if ((getBiome(x + nx, y + ny) & 1L << i) != 0 && (biomeTerrain == getTerrainIndex(x + nx, y + ny) || biomeTerrain == 0))
                         neighbors |= (1 << bitIndex);
-
                     bitIndex--;
                 }
             }
@@ -199,32 +214,32 @@ public class World implements Disposable, SaveFileContent {
                         bitIndex--;
                     }
                 }
-                information.add(new DrawingInformation(baseNeighbors, regions, 0));
+                drawingInfoCache.add(new DrawingInformation(baseNeighbors, regions, 0));
             }
-            information.add(new DrawingInformation(neighbors, regions, biomeTerrain));
-
+            drawingInfoCache.add(new DrawingInformation(neighbors, regions, biomeTerrain));
         }
+
         int lastFullNeighbour = -1;
         int counter = 0;
-        for (DrawingInformation info : information) {
-            if (info.neighbors == 0b111_111_111)
-                lastFullNeighbour = counter;
+        for (DrawingInformation info : drawingInfoCache) {
+            if (info.neighbors == 0b111_111_111) lastFullNeighbour = counter;
             counter++;
-
         }
         counter = 0;
-        if (lastFullNeighbour < 0 && information.size() != 0)
-            information.get(0).neighbors = 0b111_111_111;
-        for (DrawingInformation info : information) {
+        if (lastFullNeighbour < 0 && !drawingInfoCache.isEmpty()) {
+            drawingInfoCache.get(0).neighbors = 0b111_111_111;
+        }
+        for (DrawingInformation info : drawingInfoCache) {
             if (counter < lastFullNeighbour) {
                 counter++;
                 continue;
             }
-            info.draw(drawingPixmap);
+            info.draw(globalTileDrawing);
         }
-        return drawingPixmap;
 
+        return globalTileDrawing;
     }
+
 
     public int getTerrainIndex(int x, int y) {
         try {
@@ -275,12 +290,188 @@ public class World implements Disposable, SaveFileContent {
         for (int xclear = -size; xclear < size; xclear++)
             for (int yclear = -size; yclear < size; yclear++) {
                 try {
-
                     terrainMap[x + xclear][height - 1 - (y + yclear)] = 0;
-                } catch (ArrayIndexOutOfBoundsException e) {
-
-                }
+                } catch (ArrayIndexOutOfBoundsException ignored) {}
             }
+    }
+
+    /**
+     * Fork (Middle-earth): optional fixed biome layout. WorldData.biomeMap names an image in which each pixel's RGB
+     * selects the biome whose "color" matches exactly (unmatched colours fall back to the first biome; row 0 = north,
+     * the image is sampled nearest-neighbour if its size differs from the world). Each tile gets its own biome bit,
+     * the first biome's bit (it underlies everything, as in random generation) and the bits of lower-index biomes within
+     * 2 tiles, so that biome borders are drawn as transitions over the neighbouring biome instead of over the base.
+     * With a Tiled world map (WorldData.worldMap) the tile's own biome comes from its "Biomes" layer instead.
+     * Returns null when neither is configured (random generation).
+     */
+    private long[][] loadFixedBiomeMap(WorldMapTmx worldMap) {
+        if (worldMap != null)
+            return buildBiomeMasks(worldMap.biomes);
+        if (data.biomeMap == null || data.biomeMap.isEmpty())
+            return null;
+        Pixmap image = new Pixmap(Config.instance().getFile(data.biomeMap));
+        int[][] own = new int[width][height];
+        try {
+            Map<Integer, Integer> colorToBiome = new HashMap<>();
+            List<BiomeData> biomes = data.GetBiomes();
+            for (int i = 0; i < biomes.size(); i++)
+                colorToBiome.putIfAbsent(Color.rgb888(biomes.get(i).GetColor()), i);
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    own[x][y] = colorToBiome.getOrDefault(image.getPixel(x * image.getWidth() / width, y * image.getHeight() / height) >>> 8, 0);
+        } finally {
+            image.dispose();
+        }
+        return buildBiomeMasks(own);
+    }
+
+    /** Bit masks from each tile's own biome index ([x][row], row 0 = north): own, biome 0 and lower biomes within 2 tiles. */
+    private long[][] buildBiomeMasks(int[][] own) {
+        long[][] masks = new long[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++) {
+                long mask = 1L | (1L << own[x][y]);
+                for (int nx = Math.max(0, x - 2); nx <= Math.min(width - 1, x + 2); nx++)
+                    for (int ny = Math.max(0, y - 2); ny <= Math.min(height - 1, y + 2); ny++)
+                        if (own[nx][ny] < own[x][y])
+                            mask |= 1L << own[nx][ny];
+                masks[x][y] = mask;
+            }
+        return masks;
+    }
+
+    private void drawPoiMarker(TextureAtlas mapMarker, Pixmap mapMarkerPixmap, String type, float x, float y) {
+        TextureAtlas.AtlasRegion marker = mapMarker.findRegion(type);
+
+        if (marker != null) {
+            int xInPixels = (int) ((x / data.tileSize) * data.miniMapTileSize);
+            int yInPixels = (int) ((height - (y / data.tileSize)) * data.miniMapTileSize);
+            xInPixels -= (marker.getRegionWidth() / 2);
+            yInPixels -= (marker.getRegionHeight() / 2);
+            drawPixmapLater(mapMarkerPixmap, marker.getRegionX(), marker.getRegionY(),
+                    marker.getRegionWidth(), marker.getRegionHeight(), xInPixels, yInPixels, marker.getRegionWidth(), marker.getRegionHeight());
+        }
+    }
+
+    /**
+     * Fork (Middle-earth): reads WorldData.worldMap (Tiled .tmx or .world, see WorldMapTmx), or returns null if none is set.
+     * Applies the map's start object to playerStartPosX/Y.
+     */
+    private WorldMapTmx loadWorldMap() {
+        if (data.worldMap == null || data.worldMap.isEmpty())
+            return null;
+        WorldMapTmx worldMap = WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), data.width, data.height);
+        if (worldMap.start != null) {
+            // +0.5 px so that (int)(fraction * size) gives back the exact pixel
+            data.playerStartPosX = (worldMap.start[0] + 0.5f) / (data.width * data.tileSize);
+            data.playerStartPosY = (data.height * data.tileSize - worldMap.start[1] + 0.5f) / (data.height * data.tileSize);
+        }
+        return worldMap;
+    }
+
+    /** Fork (Middle-earth): places the world map's POI objects at their exact positions instead of the random placement. */
+    private void placeWorldMapPois(WorldMapTmx worldMap, List<PointOfInterest> towns, List<PointOfInterest> notTowns, TextureAtlas mapMarker, Pixmap mapMarkerPixmap) {
+        for (WorldMapTmx.Poi object : worldMap.pois) {
+            PointOfInterestData poi = PointOfInterestData.getPointOfInterest(object.name);
+            if (poi == null) {
+                System.err.println("worldMap: POI object '" + object.name + "' has no entry in points_of_interest.json, skipped");
+                continue;
+            }
+            float x = object.x, y = height * data.tileSize - object.y;
+            PointOfInterest newPoint = new PointOfInterest(poi, new Vector2(x, y), random);
+            if (object.spriteIndex >= 0)
+                newPoint.setSpriteIndex(object.spriteIndex);
+            if (object.displayName != null && !object.displayName.isEmpty() && !object.displayName.equals(poi.getDisplayName()))
+                newPoint.setDisplayName(object.displayName);
+            clearTerrain((int) (x / data.tileSize), (int) (y / data.tileSize), 3);
+            mapPoiIds.add(newPoint);
+            drawPoiMarker(mapMarker, mapMarkerPixmap, poi.type, x, y);
+            if (poi.type != null && (poi.type.equals("town") || poi.type.equals("capital"))) {
+                if (!newPoint.hasDisplayName())
+                    newPoint.setDisplayName(poi.getDisplayName());
+                towns.add(newPoint);
+            } else {
+                notTowns.add(newPoint);
+            }
+        }
+    }
+
+    /** Fork (Middle-earth) Phase 2d-1: puts the Clutter layer objects into mapObjectIds, in the generator's order. */
+    private void placeWorldMapClutter(WorldMapTmx worldMap, double heightPx) {
+        List<WorldMapTmx.Sprite> sprites = new ArrayList<>();
+        for (WorldMapTmx.Clutter c : worldMap.clutter)
+            sprites.add(new WorldMapTmx.Sprite(c.sprite, (float) c.x, (float) (heightPx - c.y)));
+        sprites.sort(WorldMapTmx.SPRITE_ORDER);
+        for (WorldMapTmx.Sprite s : sprites) {
+            BiomeSpriteData sprite = s.name == null ? null : data.GetBiomeSprites().getSpriteData(s.name);
+            if (sprite == null) {
+                System.err.println("worldMap: Clutter object with unknown sprite '" + s.name + "' at " + s.x + "," + s.yUp + ", skipped");
+                continue;
+            }
+            int key = mapObjectIds.containsKey(sprite.key()) ? mapObjectIds.intKey(sprite.key()) : mapObjectIds.put(sprite.key(), sprite, data.GetBiomeSprites());
+            mapObjectIds.putPosition(key, new Vector2(s.x, s.yUp));
+        }
+    }
+
+    private static boolean allTrue(boolean[][] flags) {
+        for (boolean[] column : flags)
+            for (boolean b : column)
+                if (!b)
+                    return false;
+        return true;
+    }
+
+    /**
+     * Fork (Middle-earth): writes the current world (each tile's own biome, all placed POIs with position, display name
+     * and sprite variant, the player start and the generation seed) as a Tiled map plus tileset. See WorldMapTmx.
+     * A {@code .tmx} file gives one map; anything else is a directory (or a {@code .world} file) for a Tiled world of
+     * chunks of {@code chunkSize} tiles (0 = as the current worldMap, else 150) plus the overview.
+     * Phase 2d-1: also the road tiles (Roads layer) and every clutter sprite (Clutter layer).
+     */
+    public void exportWorldTmx(FileHandle file, int chunkSize) {
+        int roadBit = data.GetBiomes().size();
+        int[][] own = new int[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                own[x][y] = highestBiome(biomeMap[x][y] & ~(1L << roadBit));
+        int mapHeightPx = height * data.tileSize;
+        List<WorldMapTmx.Poi> pois = new ArrayList<>();
+        for (PointOfInterest point : getAllPointOfInterest()) {
+            WorldMapTmx.Poi poi = new WorldMapTmx.Poi();
+            poi.name = point.getData().name;
+            poi.x = Math.round(point.getPosition().x);
+            poi.y = mapHeightPx - Math.round(point.getPosition().y);
+            poi.displayName = point.save().readString("displayName");
+            poi.spriteIndex = point.getSpriteIndex();
+            pois.add(poi);
+        }
+        float[] start = {(int) (data.playerStartPosX * width * data.tileSize), mapHeightPx - (int) (data.playerStartPosY * height * data.tileSize)};
+        // Phase 2d-1: the Roads and Clutter layers hold the current roads and clutter, whether generated or read from the layers
+        WorldMapTmx.Layers layers = new WorldMapTmx.Layers();
+        layers.roads = new boolean[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                layers.roads[x][y] = (biomeMap[x][y] & (1L << roadBit)) != 0;
+        layers.clutter = new ArrayList<>();
+        for (Pair<Vector2, Integer> object : mapObjectIds.allPositions())
+            layers.clutter.add(new WorldMapTmx.Sprite(mapObjectIds.get(object.getValue()).name, object.getKey().x, object.getKey().y));
+        long exportSeed = generationSeed;
+        boolean tmx = "tmx".equalsIgnoreCase(file.extension());
+        WorldMapTmx worldMap = null;
+        if ((exportSeed == 0 || (!tmx && chunkSize <= 0)) && data.worldMap != null && !data.worldMap.isEmpty())
+            worldMap = WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), width, height);
+        if (exportSeed == 0)
+            exportSeed = worldMap != null && worldMap.seed != null ? worldMap.seed : seed;
+        if (tmx) {
+            WorldMapTmx.write(file, data, own, pois, start, exportSeed, layers);
+            return;
+        }
+        // Phase 2c: a Tiled world (chunks + overview) into the directory, or next to the given .world file
+        boolean worldFile = WorldMapTmx.WORLD_EXTENSION.equalsIgnoreCase(file.extension());
+        if (chunkSize <= 0)
+            chunkSize = worldMap != null && !worldMap.chunks.isEmpty() ? worldMap.chunks.get(0).width : WorldMapTmx.DEFAULT_CHUNK_SIZE;
+        WorldMapTmx.writeWorld(worldFile ? file.parent() : file, worldFile ? file.nameWithoutExtension() : file.name(),
+                data, own, pois, start, exportSeed, chunkSize, layers);
     }
 
     private long measureGenerationTime(String msg, long lastTime) {
@@ -289,515 +480,569 @@ public class World implements Disposable, SaveFileContent {
         return currentTime;
     }
 
-    public World generateNew(long seed) {
-        if (GuiBase.isAndroid())
-            GuiBase.getInterface().preventSystemSleep(true);
-        final long[] currentTime = {System.currentTimeMillis()};
-        long startTime = System.currentTimeMillis();
+    public boolean generateNew(long seed) {
+        try {
+            if (GuiBase.isMobile())
+                GuiBase.getInterface().preventSystemSleep(true);
+            final long[] currentTime = {System.currentTimeMillis()};
+            long startTime = System.currentTimeMillis();
 
-        loadWorldData();
+            loadWorldData();
+            WorldMapTmx worldMap = loadWorldMap();
 //////////////////
 ///////// initialize
 //////////////////
 
-        if (seed == 0) {
-            seed = random.nextLong();
-        }
-        this.seed = seed;
-        random.setSeed(seed);
-        OpenSimplexNoise noise = new OpenSimplexNoise(seed);
-
-        float noiseZoom = data.noiseZoomBiome;
-        width = data.width;
-        height = data.height;
-        //save at all data
-        biomeMap = new long[width][height];
-        terrainMap = new int[width][height];
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                biomeMap[x][y] = 0;
-                terrainMap[x][y] = 0;
+            if (seed == 0) {
+                seed = random.nextLong();
             }
-        }
+            this.seed = seed;
+            if (worldMap != null && worldMap.seed != null)
+                seed = worldMap.seed; // fixed world: same generation for every save, the save keeps its own seed
+            generationSeed = seed;
+            random.setSeed(seed);
+            OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 
-        final int[] biomeIndex = {-1};
-        currentTime[0] = measureGenerationTime("loading data", currentTime[0]);
-        HashMap<BiomeStructureData, BiomeStructure> structureDataMap = new HashMap<>();
+            float noiseZoom = data.noiseZoomBiome;
+            width = data.width;
+            height = data.height;
+            //save at all data
+            biomeMap = new long[width][height];
+            terrainMap = new int[width][height];
 
-        List<BiomeData> biomes = data.GetBiomes();
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    biomeMap[x][y] = 0;
+                    terrainMap[x][y] = 0;
+                }
+            }
+
+            final int[] biomeIndex = {-1};
+            currentTime[0] = measureGenerationTime("loading data", currentTime[0]);
+            Map<BiomeStructureData, BiomeStructure> structureDataMap = new ConcurrentHashMap<>();
+
 //////////////////
 ///////// calculation structure position with wavefunctioncollapse
 //////////////////
-        System.out.println("initializing biomes ");
-        for (BiomeData biome : biomes) {
-            System.out.println("initializing biome "+biome.name);
-            if (biome.structures != null) {
+            List<CompletableFuture<Long>> futures = new ArrayList<>();
+            for (BiomeData biome : data.GetBiomes()) {
+                if (biome.structures != null) {
+                    int biomeWidth = (int) Math.round(biome.width * (double) width);
+                    int biomeHeight = (int) Math.round(biome.height * (double) height);
+                    for (BiomeStructureData data : biome.structures) {
+                        long localSeed = seed;
+                        futures.add(CompletableFuture.supplyAsync(()-> {
+                            long threadStartTime = System.currentTimeMillis();
+                            BiomeStructure structure = new BiomeStructure(data, localSeed, biomeWidth, biomeHeight);
+                            structure.initialize();
+                            structureDataMap.put(data, structure);
+                            return measureGenerationTime("wavefunctioncollapse " + data.sourcePath, threadStartTime);
+                        }).exceptionally(ex -> {
+                            ex.printStackTrace();
+                            return 0L;
+                        }));
+                    }
+                }
+            }
+            CompletableFuture<?>[] futuresArray = futures.toArray(new CompletableFuture<?>[0]);
+            CompletableFuture.allOf(futuresArray).join();
+            futures.clear();
+
+//////////////////
+///////// calculation each biome position based on noise and radius (or from the fixed biome map image)
+//////////////////
+            long[][] fixedBiomes = loadFixedBiomeMap(worldMap);
+            for (BiomeData biome : data.GetBiomes()) {
+
+                biomeIndex[0]++;
+                int biomeXStart = (int) Math.round(biome.startPointX * (double) width);
+                int biomeYStart = (int) Math.round(biome.startPointY * (double) height);
                 int biomeWidth = (int) Math.round(biome.width * (double) width);
                 int biomeHeight = (int) Math.round(biome.height * (double) height);
-                for (BiomeStructureData data : biome.structures) {
-                    long localSeed = seed;
-                    long threadStartTime = System.currentTimeMillis();
-                    BiomeStructure structure = new BiomeStructure(data, localSeed, biomeWidth, biomeHeight);
-                    structure.initialize();
-                    structureDataMap.put(data, structure);
-                    measureGenerationTime("wavefunctioncollapse " + data.sourcePath, threadStartTime);
+
+                int beginX = Math.max(biomeXStart - biomeWidth / 2, 0);
+                int beginY = Math.max(biomeYStart - biomeHeight / 2, 0);
+                int endX = Math.min(biomeXStart + biomeWidth / 2, width);
+                int endY = Math.min(biomeYStart + biomeHeight / 2, height);
+                if (biome.width == 1.0 && biome.height == 1.0 || fixedBiomes != null) {
+                    beginX = 0;
+                    beginY = 0;
+                    endX = width;
+                    endY = height;
                 }
-            }
-        }
-
-//////////////////
-///////// calculation each biome position based on noise and radius
-//////////////////
-        System.out.println("positioning biomes ");
-        for (BiomeData biome : data.GetBiomes()) {
-            System.out.println("positioning biomes "+biome.name);
-            biomeIndex[0]++;
-            int biomeXStart = (int) Math.round(biome.startPointX * (double) width);
-            int biomeYStart = (int) Math.round(biome.startPointY * (double) height);
-            int biomeWidth = (int) Math.round(biome.width * (double) width);
-            int biomeHeight = (int) Math.round(biome.height * (double) height);
-
-            int beginX = Math.max(biomeXStart - biomeWidth / 2, 0);
-            int beginY = Math.max(biomeYStart - biomeHeight / 2, 0);
-            int endX = Math.min(biomeXStart + biomeWidth / 2, width);
-            int endY = Math.min(biomeYStart + biomeHeight / 2, height);
-            if (biome.width == 1.0 && biome.height == 1.0) {
-                beginX = 0;
-                beginY = 0;
-                endX = width;
-                endY = height;
-            }
-            for (int x = beginX; x < endX; x++) {
-                for (int y = beginY; y < endY; y++) {
-                    //value 0-1 based on noise
-                    float noiseValue = ((float) noise.eval(x / (float) width * noiseZoom, y / (float) height * noiseZoom) + 1) / 2f;
-                    noiseValue *= biome.noiseWeight;
-                    //value 0-1 based on dist to origin
-                    float distanceValue = ((float) Math.sqrt((x - biomeXStart) * (x - biomeXStart) + (y - biomeYStart) * (y - biomeYStart))) / (Math.max(biomeWidth, biomeHeight) / 2f);
-                    distanceValue *= biome.distWeight;
-                    if (noiseValue + distanceValue < 1.0 || biome.invertHeight && (1 - noiseValue) + distanceValue < 1.0) {
-                        Color color = biome.GetColor();
-                        float[] hsv = new float[3];
-                        color.toHsv(hsv);
-                        int count = (int) ((noiseValue - 0.5) * 10 / 4);
-                        //hsv[2]+=(count*0.2);
-                        biomeMap[x][y] |= (1L << biomeIndex[0]);
-                        int terrainCounter = 1;
-                        terrainMap[x][y] = 0;
-                        if (biome.terrain != null) {
-                            for (BiomeTerrainData terrain : biome.terrain) {
-                                float terrainNoise = ((float) noise.eval(x / (float) width * (noiseZoom * terrain.resolution), y / (float) height * (noiseZoom * terrain.resolution)) + 1) / 2;
-                                if (terrainNoise >= terrain.min && terrainNoise <= terrain.max) {
-                                    terrainMap[x][y] = terrainCounter;
-                                    //pix.fillRectangle(x*data.miniMapTileSize, y*data.miniMapTileSize,data.miniMapTileSize,data.miniMapTileSize);
-                                }
-                                terrainCounter++;
-                            }
+                for (int x = beginX; x < endX; x++) {
+                    for (int y = beginY; y < endY; y++) {
+                        float noiseValue = 0;
+                        boolean inBiome;
+                        if (fixedBiomes != null) {
+                            inBiome = (fixedBiomes[x][y] & (1L << biomeIndex[0])) != 0;
+                        } else {
+                            //value 0-1 based on noise
+                            noiseValue = ((float) noise.eval(x / (float) width * noiseZoom, y / (float) height * noiseZoom) + 1) / 2f;
+                            noiseValue *= biome.noiseWeight;
+                            //value 0-1 based on dist to origin
+                            float distanceValue = ((float) Math.sqrt((x - biomeXStart) * (x - biomeXStart) + (y - biomeYStart) * (y - biomeYStart))) / (Math.max(biomeWidth, biomeHeight) / 2f);
+                            distanceValue *= biome.distWeight;
+                            inBiome = noiseValue + distanceValue < 1.0 || biome.invertHeight && (1 - noiseValue) + distanceValue < 1.0;
                         }
-                        if (biome.collision)
-                            terrainMap[x][y] |= collisionBit;
-                        if (biome.structures != null) {
-                            for (BiomeStructureData data : biome.structures) {
-                                while (!structureDataMap.containsKey(data)) {
-                                    try {
-                                        Thread.sleep(10);
-                                    } catch (InterruptedException e) {
-                                        throw new RuntimeException(e);
+                        if (inBiome) {
+                            Color color = biome.GetColor();
+                            float[] hsv = new float[3];
+                            color.toHsv(hsv);
+                            int count = (int) ((noiseValue - 0.5) * 10 / 4);
+                            //hsv[2]+=(count*0.2);
+                            biomeMap[x][y] |= (1L << biomeIndex[0]);
+                            int terrainCounter = 1;
+                            terrainMap[x][y] = 0;
+                            if (biome.terrain != null) {
+                                for (BiomeTerrainData terrain : biome.terrain) {
+                                    float terrainNoise = ((float) noise.eval(x / (float) width * (noiseZoom * terrain.resolution), y / (float) height * (noiseZoom * terrain.resolution)) + 1) / 2;
+                                    if (terrainNoise >= terrain.min && terrainNoise <= terrain.max) {
+                                        terrainMap[x][y] = terrainCounter;
+                                        //pix.fillRectangle(x*data.miniMapTileSize, y*data.miniMapTileSize,data.miniMapTileSize,data.miniMapTileSize);
                                     }
+                                    terrainCounter++;
                                 }
+                            }
+                            if (biome.collision)
+                                terrainMap[x][y] |= collisionBit;
+                            if (biome.structures != null) {
+                                for (BiomeStructureData data : biome.structures) {
+                                    while (!structureDataMap.containsKey(data)) {
+                                        try {
+                                            Thread.sleep(10);
+                                        } catch (InterruptedException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
 
-                                BiomeStructure structure = structureDataMap.get(data);
-                                int structureXStart = x - (biomeXStart - biomeWidth / 2) - (int) ((data.x * biomeWidth) - (data.width * biomeWidth / 2));
-                                int structureYStart = y - (biomeYStart - biomeHeight / 2) - (int) ((data.y * biomeHeight) - (data.height * biomeHeight / 2));
+                                    BiomeStructure structure = structureDataMap.get(data);
+                                    int structureXStart = x - (biomeXStart - biomeWidth / 2) - (int) ((data.x * biomeWidth) - (data.width * biomeWidth / 2));
+                                    int structureYStart = y - (biomeYStart - biomeHeight / 2) - (int) ((data.y * biomeHeight) - (data.height * biomeHeight / 2));
 
-                                int structureIndex = structure.objectID(structureXStart, structureYStart);
-                                if (structureIndex >= 0) {
+                                    int structureIndex = structure.objectID(structureXStart, structureYStart);
+                                    if (structureIndex >= 0) {
 
-                                    terrainMap[x][y] = terrainCounter + structureIndex;
-                                    if (structure.collision(structureXStart, structureYStart))
-                                        terrainMap[x][y] |= collisionBit;
-                                    terrainMap[x][y] |= isStructureBit;
+                                        terrainMap[x][y] = terrainCounter + structureIndex;
+                                        if (structure.collision(structureXStart, structureYStart))
+                                            terrainMap[x][y] |= collisionBit;
+                                        terrainMap[x][y] |= isStructureBit;
 
+                                    }
+
+                                    terrainCounter += structure.structureObjectCount();
                                 }
-
-                                terrainCounter += structure.structureObjectCount();
                             }
                         }
-                    }
 
+                    }
                 }
             }
-        }
-        currentTime[0] = measureGenerationTime("biomes in total", currentTime[0]);
+            currentTime[0] = measureGenerationTime("biomes in total", currentTime[0]);
 
 //////////////////
 ///////// set poi placement
 //////////////////
+            List<PointOfInterest> towns = new ArrayList<>();
+            List<PointOfInterest> notTowns = new ArrayList<>();
+            List<Rectangle> otherPoints = new ArrayList<>();
 
-        List<PointOfInterest> towns = new ArrayList<>();
-        List<PointOfInterest> notTowns = new ArrayList<>();
-        List<Rectangle> otherPoints = new ArrayList<>();
+            TextureAtlas mapMarker = Config.instance().getAtlas(Paths.MAP_MARKER);
+            TextureData texture = mapMarker.getTextures().first().getTextureData();
+            if (!texture.isPrepared())
+                texture.prepare();
+            Pixmap mapMarkerPixmap = texture.consumePixmap();
+            clearTerrain((int) (data.width * data.playerStartPosX), (int) (data.height * data.playerStartPosY), 10);
+            //otherPoints.add(new Rectangle(((float) data.width * data.playerStartPosX * (float) data.tileSize) - data.tileSize * 3, ((float) data.height * data.playerStartPosY * data.tileSize) - data.tileSize * 3, data.tileSize * 6, data.tileSize * 6));
+            boolean running = worldMap == null;
+            if (worldMap != null) {
+                mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
+                placeWorldMapPois(worldMap, towns, notTowns, mapMarker, mapMarkerPixmap);
+            }
+            here:
+            while (running) {
+                mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
+                int biomeIndex2 = -1;
+                running = false;
+                for (BiomeData biome : data.GetBiomes()) {
+                    biomeIndex2++;
+                    for (PointOfInterestData poi : biome.getPointsOfInterest()) {
+                        for (int i = 0; i < poi.count; i++) {
+                            for (int counter = 0; counter < 500; counter++)//tries 500 times to find a free point
+                            {
+                                float radius = (float) Math.sqrt(((random.nextDouble()) / 2 * poi.radiusFactor));
+                                float theta = (float) (random.nextDouble() * 2 * Math.PI);
+                                float x = (float) (radius * Math.cos(theta));
+                                x *= (biome.width * width / 2);
+                                x += (biome.startPointX * width);
+                                float y = (float) (radius * Math.sin(theta));
+                                y *= (biome.height * height / 2);
+                                y += (height - (biome.startPointY * height));
 
-        TextureAtlas mapMarker = Config.instance().getAtlas(Paths.MAP_MARKER);
-        TextureData texture = mapMarker.getTextures().first().getTextureData();
-        if (!texture.isPrepared())
-            texture.prepare();
-        Pixmap mapMarkerPixmap = texture.consumePixmap();
-        clearTerrain((int) (data.width * data.playerStartPosX), (int) (data.height * data.playerStartPosY), 10);
-        //otherPoints.add(new Rectangle(((float) data.width * data.playerStartPosX * (float) data.tileSize) - data.tileSize * 3, ((float) data.height * data.playerStartPosY * data.tileSize) - data.tileSize * 3, data.tileSize * 6, data.tileSize * 6));
-        boolean running = true;
-        here:
-        while (running) {
-            System.out.println("generating pois");
-            mapPoiIds = new PointOfInterestMap(getChunkSize(), data.tileSize, data.width / getChunkSize(), data.height / getChunkSize());
-            int biomeIndex2 = -1;
-            running = false;
-            for (BiomeData biome : biomes) {
-                biomeIndex2++;
-                System.out.println("generating pois " + (towns.size()+ notTowns.size()+otherPoints.size()));
-                for (PointOfInterestData poi : biome.getPointsOfInterest()) {
-                    for (int i = 0; i < poi.count; i++) {
-                        for (int counter = 0; counter < 500; counter++)//tries 500 times to find a free point
-                        {
-                            float radius = (float) Math.sqrt(((random.nextDouble()) / 2 * poi.radiusFactor));
-                            float theta = (float) (random.nextDouble() * 2 * Math.PI);
-                            float x = (float) (radius * Math.cos(theta));
-                            x *= (biome.width * width / 2);
-                            x += (biome.startPointX * width);
-                            float y = (float) (radius * Math.sin(theta));
-                            y *= (biome.height * height / 2);
-                            y += (height - (biome.startPointY * height));
+                                y += (poi.offsetY * (biome.height * height));
+                                x += (poi.offsetX * (biome.width * width));
 
-                            y += (poi.offsetY * (biome.height * height));
-                            x += (poi.offsetX * (biome.width * width));
-
-                            if ((int) x < 0 || (int) y <= 0 || (int) y >= height || (int) x >= width || biomeIndex2 != highestBiome(getBiome((int) x, (int) y))) {
-                                continue;
-                            }
-
-                            x *= data.tileSize;
-                            y *= data.tileSize;
-
-                            boolean breakNextLoop = false;
-                            for (Rectangle rect : otherPoints) {
-                                if (rect.contains(x, y)) {
-                                    breakNextLoop = true;
-                                    break;
-                                }
-                            }
-                            if (breakNextLoop) {
-                                boolean foundSolution = false;
-                                boolean noSolution = false;
-                                breakNextLoop = false;
-                                for (int xi = -1; xi < 2 && !foundSolution; xi++) {
-                                    for (int yi = -1; yi < 2 && !foundSolution; yi++) {
-                                        for (Rectangle rect : otherPoints) {
-                                            if (rect.contains(x + xi * data.tileSize, y + yi * data.tileSize)) {
-                                                noSolution = true;
-                                                break;
-                                            }
-                                        }
-                                        if (!noSolution) {
-                                            foundSolution = true;
-                                            x = x + xi * data.tileSize;
-                                            y = y + yi * data.tileSize;
-
-
-                                        }
-                                    }
-                                }
-                                if (!foundSolution) {
-                                    if (counter == 499) {
-                                        System.err.print("Can not place POI " + poi.name + " in biome " + biome.name + "...Rerunning..\n");
-                                        running = true;
-                                        towns.clear();
-                                        notTowns.clear();
-                                        otherPoints.clear();
-                                        clearTerrain((int) (data.width * data.playerStartPosX), (int) (data.height * data.playerStartPosY), 10);
-                                        storedInfo.clear();
-                                        continue here;
-                                    }
+                                if ((int) x < 0 || (int) y <= 0 || (int) y >= height || (int) x >= width || biomeIndex2 != highestBiome(getBiome((int) x, (int) y))) {
                                     continue;
                                 }
-                            }
-                            otherPoints.add(new Rectangle(x - data.tileSize * 4, y - data.tileSize * 4, data.tileSize * 8, data.tileSize * 8));
-                            PointOfInterest newPoint = new PointOfInterest(poi, new Vector2(x, y), random);
-                            clearTerrain((int) (x / data.tileSize), (int) (y / data.tileSize), 3);
-                            mapPoiIds.add(newPoint);
 
-                            TextureAtlas.AtlasRegion marker = mapMarker.findRegion(poi.type);
+                                x *= data.tileSize;
+                                y *= data.tileSize;
 
-                            if (marker != null) {
-                                int xInPixels = (int) ((x / data.tileSize) * data.miniMapTileSize);
-                                int yInPixels = (int) ((height - (y / data.tileSize)) * data.miniMapTileSize);
-                                xInPixels -= (marker.getRegionWidth() / 2);
-                                yInPixels -= (marker.getRegionHeight() / 2);
-                                drawPixmapLater(mapMarkerPixmap, marker.getRegionX(), marker.getRegionY(),
-                                        marker.getRegionWidth(), marker.getRegionHeight(), xInPixels, yInPixels, marker.getRegionWidth(), marker.getRegionHeight());
-                            }
-
-
-                            if (poi.type != null && (poi.type.equals("town") || poi.type.equals("capital"))) {
-                                if (!newPoint.hasDisplayName()) {
-                                    if (poi.displayName == null || poi.displayName.isEmpty()) {
-                                        newPoint.setDisplayName(biome.getNewTownName());
-                                    } else {
-                                        newPoint.setDisplayName(poi.getDisplayName());
+                                boolean breakNextLoop = false;
+                                for (Rectangle rect : otherPoints) {
+                                    if (rect.contains(x, y)) {
+                                        breakNextLoop = true;
+                                        break;
                                     }
                                 }
-                                towns.add(newPoint);
-                            } else {
-                                notTowns.add(newPoint);
+                                if (breakNextLoop) {
+                                    boolean foundSolution = false;
+                                    boolean noSolution = false;
+                                    breakNextLoop = false;
+                                    for (int xi = -1; xi < 2 && !foundSolution; xi++) {
+                                        for (int yi = -1; yi < 2 && !foundSolution; yi++) {
+                                            for (Rectangle rect : otherPoints) {
+                                                if (rect.contains(x + xi * data.tileSize, y + yi * data.tileSize)) {
+                                                    noSolution = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!noSolution) {
+                                                foundSolution = true;
+                                                x = x + xi * data.tileSize;
+                                                y = y + yi * data.tileSize;
+
+
+                                            }
+                                        }
+                                    }
+                                    if (!foundSolution) {
+                                        if (counter == 499) {
+                                            System.err.print("Can not place POI " + poi.name + "...Rerunning..\n");
+                                            running = true;
+                                            towns.clear();
+                                            notTowns.clear();
+                                            otherPoints.clear();
+                                            clearTerrain((int) (data.width * data.playerStartPosX), (int) (data.height * data.playerStartPosY), 10);
+                                            storedInfo.clear();
+                                            continue here;
+                                        }
+                                        continue;
+                                    }
+                                }
+                                otherPoints.add(new Rectangle(x - data.tileSize * 4, y - data.tileSize * 4, data.tileSize * 8, data.tileSize * 8));
+                                PointOfInterest newPoint = new PointOfInterest(poi, new Vector2(x, y), random);
+                                clearTerrain((int) (x / data.tileSize), (int) (y / data.tileSize), 3);
+                                mapPoiIds.add(newPoint);
+
+                                drawPoiMarker(mapMarker, mapMarkerPixmap, poi.type, x, y);
+
+
+                                if (poi.type != null && (poi.type.equals("town") || poi.type.equals("capital"))) {
+                                    if (!newPoint.hasDisplayName()) {
+                                        if (poi.displayName == null || poi.displayName.isEmpty()) {
+                                            newPoint.setDisplayName(biome.getNewTownName());
+                                        } else {
+                                            newPoint.setDisplayName(poi.getDisplayName());
+                                        }
+                                    }
+                                    towns.add(newPoint);
+                                } else {
+                                    notTowns.add(newPoint);
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
             }
-        }
-        currentTime[0] = measureGenerationTime("poi placement", currentTime[0]);
+            currentTime[0] = measureGenerationTime("poi placement", currentTime[0]);
 
 //////////////////
 ///////// sort towns and build roads in between
 //////////////////
-        List<Pair<PointOfInterest, PointOfInterest>> allSortedTowns = new ArrayList<>();
+            List<Pair<PointOfInterest, PointOfInterest>> allSortedTowns = new ArrayList<>();
+            // Fork (Middle-earth) Phase 2d-1: tiles of maps with a "Roads" layer take their roads from it, not from the town lines
+            final boolean[][] roadsDefined = worldMap != null ? worldMap.roadsDefined : null;
 
-        System.out.println("building roads - generating");
-        HashSet<Long> usedEdges = new HashSet<>();//edge is first 32 bits id of first id and last 32 bits id of second
-        for (int i = 0; i < towns.size() - 1; i++) {
+            HashSet<Long> usedEdges = new HashSet<>();//edge is first 32 bits id of first id and last 32 bits id of second
+            for (int i = 0; i < towns.size() - 1; i++) {
 
-            PointOfInterest current = towns.get(i);
-            int smallestIndex = -1;
-            int secondSmallestIndex = -1;
-            float smallestDistance = Float.MAX_VALUE;
-            for (int j = 0; j < towns.size(); j++) {
+                PointOfInterest current = towns.get(i);
+                int smallestIndex = -1;
+                int secondSmallestIndex = -1;
+                float smallestDistance = Float.MAX_VALUE;
+                for (int j = 0; j < towns.size(); j++) {
 
-                if (i == j || usedEdges.contains((long) i | ((long) j << 32)))
+                    if (i == j || usedEdges.contains((long) i | ((long) j << 32)))
+                        continue;
+                    float dist = current.getPosition().dst(towns.get(j).getPosition());
+                    if (dist > data.maxRoadDistance)
+                        continue;
+                    if (dist < smallestDistance) {
+                        smallestDistance = dist;
+                        secondSmallestIndex = smallestIndex;
+                        smallestIndex = j;
+
+                    }
+                }
+                if (smallestIndex < 0)
                     continue;
-                float dist = current.getPosition().dst(towns.get(j).getPosition());
-                if (dist > data.maxRoadDistance)
+                usedEdges.add((long) i | ((long) smallestIndex << 32));
+                usedEdges.add((long) i << 32 | ((long) smallestIndex));
+                allSortedTowns.add(Pair.of(current, towns.get(smallestIndex)));
+
+                if (secondSmallestIndex < 0)
                     continue;
-                if (dist < smallestDistance) {
-                    smallestDistance = dist;
-                    secondSmallestIndex = smallestIndex;
-                    smallestIndex = j;
-
-                }
+                usedEdges.add((long) i | ((long) secondSmallestIndex << 32));
+                usedEdges.add((long) i << 32 | ((long) secondSmallestIndex));
+                //allSortedTowns.add(Pair.of(current, towns.get(secondSmallestIndex)));
             }
-            if (smallestIndex < 0)
-                continue;
-            usedEdges.add((long) i | ((long) smallestIndex << 32));
-            usedEdges.add((long) i << 32 | ((long) smallestIndex));
-            allSortedTowns.add(Pair.of(current, towns.get(smallestIndex)));
+            List<Pair<PointOfInterest, PointOfInterest>> allPOIPathsToNextTown = new ArrayList<>();
+            final boolean fixedLayout = (data.worldMap != null && !data.worldMap.isEmpty())
+                    || (data.biomeMap != null && !data.biomeMap.isEmpty());
+            for (int i = 0; i < notTowns.size() - 1; i++) {
 
-            if (secondSmallestIndex < 0)
-                continue;
-            usedEdges.add((long) i | ((long) secondSmallestIndex << 32));
-            usedEdges.add((long) i << 32 | ((long) secondSmallestIndex));
-            //allSortedTowns.add(Pair.of(current, towns.get(secondSmallestIndex)));
-        }
-        System.out.println("building roads - selecting");
-        List<Pair<PointOfInterest, PointOfInterest>> allPOIPathsToNextTown = new ArrayList<>();
-        for (int i = 0; i < notTowns.size() - 1; i++) {
+                PointOfInterest poi = notTowns.get(i);
+                int smallestIndex = -1;
+                float smallestDistance = Float.MAX_VALUE;
+                for (int j = 0; j < towns.size(); j++) {
 
-            PointOfInterest poi = notTowns.get(i);
-            int smallestIndex = -1;
-            float smallestDistance = Float.MAX_VALUE;
-            for (int j = 0; j < towns.size(); j++) {
+                    float dist = poi.getPosition().dst(towns.get(j).getPosition());
+                    if (dist < smallestDistance) {
+                        smallestDistance = dist;
+                        smallestIndex = j;
 
-                float dist = poi.getPosition().dst(towns.get(j).getPosition());
-                if (dist < smallestDistance) {
-                    smallestDistance = dist;
-                    smallestIndex = j;
-
+                    }
                 }
+                if (smallestIndex < 0)
+                    continue;
+                allPOIPathsToNextTown.add(Pair.of(poi, towns.get(smallestIndex)));
             }
-            if (smallestIndex < 0)
-                continue;
-            allPOIPathsToNextTown.add(Pair.of(poi, towns.get(smallestIndex)));
-        }
-        biomeIndex[0]++;
+            biomeIndex[0]++;
 
-        System.out.println("building roads - resetting terrain path");
-        //reset terrain path to the next town
-        for (Pair<PointOfInterest, PointOfInterest> poiToTown : allPOIPathsToNextTown) {
+            //reset terrain path to the next town
+            for (Pair<PointOfInterest, PointOfInterest> poiToTown : allPOIPathsToNextTown) {
+                futures.add(CompletableFuture.supplyAsync(()-> {
+                    int startX = (int) poiToTown.getKey().getTilePosition(data.tileSize).x;
+                    int startY = (int) poiToTown.getKey().getTilePosition(data.tileSize).y;
+                    int x1 = (int) poiToTown.getValue().getTilePosition(data.tileSize).x;
+                    int y1 = (int) poiToTown.getValue().getTilePosition(data.tileSize).y;
+                    int dx = Math.abs(x1 - startX);
+                    int dy = Math.abs(y1 - startY);
+                    int sx = startX < x1 ? 1 : -1;
+                    int sy = startY < y1 ? 1 : -1;
+                    int err = dx - dy;
+                    int e2;
+                    for (int i = 0; i < 1000; i++) {
+                        if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
+                        // Fork (Middle-earth): with a fixed layout, don't punch invisible fords through water
+                        // (tiles that only carry the base/ocean biome); rivers stay crossable at the drawn fords and roads.
+                        boolean keepWater = fixedLayout && biomeMap[startX][height - startY] == 1L;
+                        if (!keepWater && (terrainMap[startX][height - startY] & collisionBit) != 0)//clear terrain if it has collision
+                            terrainMap[startX][height - startY] = 0;
 
-            int startX = (int) poiToTown.getKey().getTilePosition(data.tileSize).x;
-            int startY = (int) poiToTown.getKey().getTilePosition(data.tileSize).y;
-            int x1 = (int) poiToTown.getValue().getTilePosition(data.tileSize).x;
-            int y1 = (int) poiToTown.getValue().getTilePosition(data.tileSize).y;
-            int dx = Math.abs(x1 - startX);
-            int dy = Math.abs(y1 - startY);
-            int sx = startX < x1 ? 1 : -1;
-            int sy = startY < y1 ? 1 : -1;
-            int err = dx - dy;
-            int e2;
-            for (int i = 0; i < 1000; i++) {
-                if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
-                if ((terrainMap[startX][height - startY] & collisionBit) != 0)//clear terrain if it has collision
-                    terrainMap[startX][height - startY] = 0;
-
-                if (startX == x1 && startY == y1)
-                    break;
-                e2 = 2 * err;
-                if (e2 > -dy) {
-                    err = err - dy;
-                    startX = startX + sx;
-                } else if (e2 < dx) {
-                    err = err + dx;
-                    startY = startY + sy;
-                }
+                        if (startX == x1 && startY == y1)
+                            break;
+                        e2 = 2 * err;
+                        if (e2 > -dy) {
+                            err = err - dy;
+                            startX = startX + sx;
+                        } else if (e2 < dx) {
+                            err = err + dx;
+                            startY = startY + sy;
+                        }
+                    }
+                    return 0L;
+                }).exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return 0L;
+                }));
             }
-        }
+            futuresArray = futures.toArray(new CompletableFuture<?>[0]);
+            CompletableFuture.allOf(futuresArray).join();
+            futures.clear();
+            for (Pair<PointOfInterest, PointOfInterest> townPair : roadsDefined != null && allTrue(roadsDefined) ? List.<Pair<PointOfInterest, PointOfInterest>>of() : allSortedTowns) {
+                futures.add(CompletableFuture.supplyAsync(()-> {
+                    int startX = (int) townPair.getKey().getTilePosition(data.tileSize).x;
+                    int startY = (int) townPair.getKey().getTilePosition(data.tileSize).y;
+                    int x1 = (int) townPair.getValue().getTilePosition(data.tileSize).x;
+                    int y1 = (int) townPair.getValue().getTilePosition(data.tileSize).y;
+                    for (int x = startX - 1; x < startX + 2; x++) {
+                        for (int y = startY - 1; y < startY + 2; y++) {
+                            if (x < 0 || y < 0 || x >= width || y >= height) continue;
+                            if (roadsDefined != null && roadsDefined[x][height - y - 1]) continue;
+                            biomeMap[x][height - y - 1] |= (1L << biomeIndex[0]);
+                            terrainMap[x][height - y - 1] = 0;
+                        }
+                    }
+                    int dx = Math.abs(x1 - startX);
+                    int dy = Math.abs(y1 - startY);
+                    int sx = startX < x1 ? 1 : -1;
+                    int sy = startY < y1 ? 1 : -1;
+                    int err = dx - dy;
+                    int e2;
+                    for (int i = 0; i < 1000; i++) {
+                        if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
+                        if (roadsDefined == null || !roadsDefined[startX][height - startY]) {
+                            biomeMap[startX][height - startY] |= (1L << biomeIndex[0]);
+                            terrainMap[startX][height - startY] = 0;
+                        }
 
-        System.out.println("building roads - placing tiles");
-        for (Pair<PointOfInterest, PointOfInterest> townPair : allSortedTowns) {
-
-            int startX = (int) townPair.getKey().getTilePosition(data.tileSize).x;
-            int startY = (int) townPair.getKey().getTilePosition(data.tileSize).y;
-            int x1 = (int) townPair.getValue().getTilePosition(data.tileSize).x;
-            int y1 = (int) townPair.getValue().getTilePosition(data.tileSize).y;
-            for (int x = startX - 1; x < startX + 2; x++) {
-                for (int y = startY - 1; y < startY + 2; y++) {
-                    if (x < 0 || y < 0 || x >= width || y >= height) continue;
-                    biomeMap[x][height - y - 1] |= (1L << biomeIndex[0]);
-                    terrainMap[x][height - y - 1] = 0;
-                }
+                        if (startX == x1 && startY == y1)
+                            break;
+                        e2 = 2 * err;
+                        if (e2 > -dy) {
+                            err = err - dy;
+                            startX = startX + sx;
+                        } else if (e2 < dx) {
+                            err = err + dx;
+                            startY = startY + sy;
+                        }
+                    }
+                    return 0L;
+                }).exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return 0L;
+                }));
             }
-            int dx = Math.abs(x1 - startX);
-            int dy = Math.abs(y1 - startY);
-            int sx = startX < x1 ? 1 : -1;
-            int sy = startY < y1 ? 1 : -1;
-            int err = dx - dy;
-            int e2;
-            for (int i = 0; i < 1000; i++) {
-                if (startX < 0 || startY <= 0 || startX >= width || startY > height) continue;
-                biomeMap[startX][height - startY] |= (1L << biomeIndex[0]);
-                terrainMap[startX][height - startY] = 0;
-
-                if (startX == x1 && startY == y1)
-                    break;
-                e2 = 2 * err;
-                if (e2 > -dy) {
-                    err = err - dy;
-                    startX = startX + sx;
-                } else if (e2 < dx) {
-                    err = err + dx;
-                    startY = startY + sy;
-                }
-            }
-        }
-        currentTime[0] = measureGenerationTime("roads", currentTime[0]);
+            futuresArray = futures.toArray(new CompletableFuture<?>[0]);
+            CompletableFuture.allOf(futuresArray).join();
+            futures.clear();
+            if (roadsDefined != null) // as a generated road: road bit, no terrain, decoration or collision
+                for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
+                        if (roadsDefined[x][y] && worldMap.roads[x][y]) {
+                            biomeMap[x][y] |= (1L << biomeIndex[0]);
+                            terrainMap[x][y] = 0;
+                        }
+            currentTime[0] = measureGenerationTime("roads", currentTime[0]);
 
 //////////////////
 ///////// draw mini map
 //////////////////
 
-        System.out.println("creating mini map");
-        Pixmap pix = new Pixmap(width * data.miniMapTileSize, height * data.miniMapTileSize, Pixmap.Format.RGBA8888);
-        pix.setColor(1, 0, 0, 1);
-        pix.fill();
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                if (highestBiome(biomeMap[x][y]) >= data.GetBiomes().size()) {
-                    Pixmap smallPixmap = createSmallPixmap(data.roadTileset.tilesetAtlas, data.roadTileset.tilesetName, 0);
-                    pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
-                } else {
-
-                    BiomeData biome = data.GetBiomes().get(highestBiome(biomeMap[x][y]));
-                    int terrainIndex = terrainMap[x][y] & ~terrainMask;
-                    if (terrainIndex > biome.terrain.length) {
-                        Pixmap smallPixmap = createSmallPixmap(biome.tilesetAtlas, biome.tilesetName, 0);
+            Pixmap pix = new Pixmap(width * data.miniMapTileSize, height * data.miniMapTileSize, Pixmap.Format.RGBA8888);
+            pix.setColor(1, 0, 0, 1);
+            pix.fill();
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    if (highestBiome(biomeMap[x][y]) >= data.GetBiomes().size()) {
+                        Pixmap smallPixmap = createSmallPixmap(data.roadTileset.tilesetAtlas, data.roadTileset.tilesetName, 0);
                         pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
-
-                        terrainIndex -= biome.terrain.length;
-                        terrainIndex--;
-                        for (BiomeStructureData structData : biome.structures) {
-                            if (terrainIndex >= structData.mappingInfo.length) {
-                                terrainIndex -= structData.mappingInfo.length;
-                                continue;
-                            }
-                            smallPixmap = createSmallPixmap(structData.structureAtlasPath, structData.mappingInfo[terrainIndex].name, 0);
-                            pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
-                            break;
-                        }
                     } else {
-                        Pixmap smallPixmap = createSmallPixmap(biome.tilesetAtlas, biome.tilesetName, terrainIndex);
-                        pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
+
+                        BiomeData biome = data.GetBiomes().get(highestBiome(biomeMap[x][y]));
+                        int terrainIndex = terrainMap[x][y] & ~terrainMask;
+                        if (terrainIndex > biome.terrain.length) {
+                            Pixmap smallPixmap = createSmallPixmap(biome.tilesetAtlas, biome.tilesetName, 0);
+                            pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
+
+                            terrainIndex -= biome.terrain.length;
+                            terrainIndex--;
+                            for (BiomeStructureData structData : biome.structures) {
+                                if (terrainIndex >= structData.mappingInfo.length) {
+                                    terrainIndex -= structData.mappingInfo.length;
+                                    continue;
+                                }
+                                smallPixmap = createSmallPixmap(structData.structureAtlasPath, structData.mappingInfo[terrainIndex].name, 0);
+                                pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
+                                break;
+                            }
+                        } else {
+                            Pixmap smallPixmap = createSmallPixmap(biome.tilesetAtlas, biome.tilesetName, terrainIndex);
+                            pix.drawPixmap(smallPixmap, x * data.miniMapTileSize, y * data.miniMapTileSize);
+                        }
+
                     }
 
                 }
 
             }
-
-        }
-        for (Map.Entry<String, Pair<Pixmap, HashMap<String, Pixmap>>> entry : pixmapHash.entrySet()) {
-            try {
-                entry.getValue().getLeft().dispose();
-            } catch (Exception e) {
-                //e.printStackTrace();
-            }
-            for (Map.Entry<String, Pixmap> pairEntry : entry.getValue().getRight().entrySet()) {
+            for (Map.Entry<String, Pair<Pixmap, HashMap<String, Pixmap>>> entry : pixmapHash.entrySet()) {
                 try {
-                    pairEntry.getValue().dispose();
+                    entry.getValue().getLeft().dispose();
                 } catch (Exception e) {
                     //e.printStackTrace();
                 }
+                for (Map.Entry<String, Pixmap> pairEntry : entry.getValue().getRight().entrySet()) {
+                    try {
+                        pairEntry.getValue().dispose();
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                    }
+                }
             }
-        }
-        pixmapHash.clear();
-        try {
-            drawPixmapNow(pix);
-        } catch (Exception e) {
-            //e.printStackTrace();
-        }
-        currentTime[0] = measureGenerationTime("mini map", currentTime[0]);
+            pixmapHash.clear();
+            try {
+                drawPixmapNow(pix);
+            } catch (Exception e) {
+                //e.printStackTrace();
+            }
+            currentTime[0] = measureGenerationTime("mini map", currentTime[0]);
 
 
 //////////////////
 ///////// distribute small rocks and trees across the map
 //////////////////
-        System.out.println("placing clutter");
-        mapObjectIds = new SpritesDataMap(getChunkSize(), data.tileSize, data.width / getChunkSize());
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int invertedHeight = height - y - 1;
-                int currentBiome = highestBiome(biomeMap[x][invertedHeight]);
-                if (currentBiome >= data.GetBiomes().size())
-                    continue;//roads
-                if (isStructure(x, y))
-                    continue;
-                BiomeData biome = data.GetBiomes().get(currentBiome);
-                for (String name : biome.spriteNames) {
-                    BiomeSpriteData sprite = data.GetBiomeSprites().getSpriteData(name);
-                    double spriteNoise = (noise.eval(x / (double) width * noiseZoom * sprite.resolution, y / (double) invertedHeight * noiseZoom * sprite.resolution) + 1) / 2;
-                    if (spriteNoise >= sprite.startArea && spriteNoise <= sprite.endArea) {
-                        if (random.nextFloat() <= sprite.density) {
-                            String spriteKey = sprite.key();
-                            int key;
-                            if (!mapObjectIds.containsKey(spriteKey)) {
+            mapObjectIds = new SpritesDataMap(getChunkSize(), data.tileSize, data.width / getChunkSize());
+            // Fork (Middle-earth) Phase 2d-1: maps with a "Clutter" layer take their sprites from it. The random placement
+            // still runs (and draws the same random numbers) while any map lacks the layer, so those keep their usual clutter.
+            final boolean[][] clutterDefined = worldMap != null ? worldMap.clutterDefined : null;
+            final double heightPx = (double) height * data.tileSize;
+            final boolean generateClutter = clutterDefined == null || !allTrue(clutterDefined);
+            for (int x = 0; generateClutter && x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    int invertedHeight = height - y - 1;
+                    int currentBiome = highestBiome(biomeMap[x][invertedHeight]);
+                    if (currentBiome >= data.GetBiomes().size())
+                        continue;//roads
+                    if (isStructure(x, y))
+                        continue;
+                    BiomeData biome = data.GetBiomes().get(currentBiome);
+                    for (String name : biome.spriteNames) {
+                        BiomeSpriteData sprite = data.GetBiomeSprites().getSpriteData(name);
+                        double spriteNoise = (noise.eval(x / (double) width * noiseZoom * sprite.resolution, y / (double) invertedHeight * noiseZoom * sprite.resolution) + 1) / 2;
+                        if (spriteNoise >= sprite.startArea && spriteNoise <= sprite.endArea) {
+                            if (random.nextFloat() <= sprite.density) {
+                                float spriteX = (((float) x) + .25f + random.nextFloat() / 2) * data.tileSize;
+                                float spriteY = (((float) y + .25f) - random.nextFloat() / 2) * data.tileSize;
+                                if (clutterDefined != null) {
+                                    int[] tile = WorldMapTmx.tileOf(spriteX, heightPx - spriteY, data.tileSize, width, height);
+                                    if (clutterDefined[tile[0]][tile[1]])
+                                        break; // that map's Clutter layer decides
+                                }
+                                String spriteKey = sprite.key();
+                                int key;
+                                if (!mapObjectIds.containsKey(spriteKey)) {
 
-                                key = mapObjectIds.put(sprite.key(), sprite, data.GetBiomeSprites());
-                            } else {
-                                key = mapObjectIds.intKey(spriteKey);
+                                    key = mapObjectIds.put(sprite.key(), sprite, data.GetBiomeSprites());
+                                } else {
+                                    key = mapObjectIds.intKey(spriteKey);
+                                }
+                                mapObjectIds.putPosition(key, new Vector2(spriteX, spriteY));
+                                break;//only on sprite per point
                             }
-                            mapObjectIds.putPosition(key, new Vector2((((float) x) + .25f + random.nextFloat() / 2) * data.tileSize, (((float) y + .25f) - random.nextFloat() / 2) * data.tileSize));
-                            break;//only on sprite per point
                         }
                     }
                 }
             }
-        }
-        mapMarkerPixmap.dispose();
-        biomeImage = pix;
-        measureGenerationTime("sprites", currentTime[0]);
-        System.out.println("Generating world took :\t\t" + ((System.currentTimeMillis() - startTime) / 1000f) + " s");
-        WorldStage.getInstance().clearCache();
+            if (clutterDefined != null)
+                placeWorldMapClutter(worldMap, heightPx);
+            mapMarkerPixmap.dispose();
+            biomeImage = pix;
+            measureGenerationTime("sprites", currentTime[0]);
+            System.out.println("Generating world took :\t\t" + ((System.currentTimeMillis() - startTime) / 1000f) + " s");
+            WorldStage.getInstance().clearCache();
 
-        if (GuiBase.isAndroid())
-            GuiBase.getInterface().preventSystemSleep(false);
-        return this;
+            if (GuiBase.isMobile())
+                GuiBase.getInterface().preventSystemSleep(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     HashMap<String, Pair<Pixmap, HashMap<String, Pixmap>>> pixmapHash = new HashMap<>();
@@ -922,12 +1167,12 @@ public class World implements Disposable, SaveFileContent {
     }
 
     public int getChunkSize() {
-        return (Scene.getIntendedWidth() > Scene.getIntendedHeight() ? Scene.getIntendedWidth() : Scene.getIntendedHeight()) / data.tileSize;
+        return (Math.max(Scene.getIntendedWidth(), Scene.getIntendedHeight())) / data.tileSize;
     }
 
     public void dispose() {
-
-        if (biomeImage != null) biomeImage.dispose();
+        drawingInfoCache.clear();
+        Forge.safeDispose(biomeImage, globalTileDrawing, globalTexture, emptyTile);
     }
 
     public void setSeed(long seedOffset) {
@@ -940,5 +1185,68 @@ public class World implements Disposable, SaveFileContent {
             System.out.print("Loading auxiliary sprites.\n");
         }
         return globalTexture;
+    }
+
+    public static final class AsyncSaveSnapshot implements Disposable {
+        private final SaveFileData data;
+        private Pixmap biomeImage;
+
+        private AsyncSaveSnapshot(SaveFileData data, Pixmap biomeImage) {
+            this.data = data;
+            this.biomeImage = biomeImage;
+        }
+
+        public SaveFileData encode() {
+            Pixmap image = biomeImage;
+            if (image == null) {
+                throw new IllegalStateException("Snapshot already consumed");
+            }
+
+            try {
+                data.store("biomeImage", image);
+                return data;
+            } finally {
+                image.dispose();
+                biomeImage = null;
+            }
+        }
+
+        @Override
+        public void dispose() {
+            if (biomeImage != null) {
+                biomeImage.dispose();
+                biomeImage = null;
+            }
+        }
+    }
+
+    public AsyncSaveSnapshot snapshotForAsyncSave() {
+        if (biomeImage == null) {
+            throw new IllegalStateException("World biome image is unavailable");
+        }
+
+        // Capture the image while still on the calling thread.
+        Pixmap imageCopy = new Pixmap(
+                biomeImage.getWidth(),
+                biomeImage.getHeight(),
+                biomeImage.getFormat());
+
+        try {
+            imageCopy.drawPixmap(biomeImage, 0, 0);
+
+            SaveFileData saveData = new SaveFileData();
+            saveData.storeObject("biomeMap", biomeMap);
+            saveData.storeObject("terrainMap", terrainMap);
+            saveData.store("width", width);
+            saveData.store("height", height);
+            saveData.store("mapObjectIds", mapObjectIds.save());
+            saveData.store("mapPoiIds", mapPoiIds.save());
+            saveData.store("seed", seed);
+
+            return new AsyncSaveSnapshot(saveData, imageCopy);
+        } catch (RuntimeException | Error e) {
+            imageCopy.dispose();
+            throw e;
+        }
     }
 }

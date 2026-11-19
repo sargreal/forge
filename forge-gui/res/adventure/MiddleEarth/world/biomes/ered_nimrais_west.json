@@ -1,0 +1,62 @@
+{
+"startPointX": 0.328725,
+"startPointY": 0.651650,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "ered_nimrais_west",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Red",
+"terrain": [
+	{
+		"spriteName": "Red_1",
+		"max": 0.3,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Red_2",
+		"min": 0.7,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.089175,
+"height": 0.088350,
+"color": "b84a3a",
+"spriteNames": [
+	"MountainTree",
+	"MountainTree2",
+	"MountainRock",
+	"LargeMountainRock",
+	"Gravel"
+],
+"enemies": ["Dunlending Raider", "Rohirrim Rider", "Hill Troll", "Wild Wolves"],
+"pointsOfInterest": [
+	"ME Mountain Cave"
+],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/mountain.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "mountain",
+				"color": "a07020",
+				"collision": true
+			},
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
+]
+}
