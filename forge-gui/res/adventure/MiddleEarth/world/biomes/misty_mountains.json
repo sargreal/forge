@@ -1,6 +1,6 @@
 {
-"startPointX": 0.383325,
-"startPointY": 0.299600,
+"startPointX": 0.383333,
+"startPointY": 0.299167,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "misty_mountains",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.035025,
-"height": 0.099150,
+"width": 0.035000,
+"height": 0.099167,
 "color": "b8412f",
 "spriteNames": [
 	"MountainTree",

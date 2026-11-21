@@ -129,7 +129,7 @@ EOF
     $GAMECTL wait onOverworld --timeout 20000 >/dev/null
     if $GAMECTL wait dialogOpen --timeout 3000 >/dev/null; then $GAMECTL close >/dev/null; fi
     sleep 2
-    $GAMECTL state | head -4
+    $GAMECTL state | head -4 || true   # head may close the pipe early (BrokenPipe under pipefail)
     $GAMECTL screenshot "$OUT_DIR/smoke-overworld.png" >/dev/null
     $GAMECTL console "exportMap $OUT_DIR/smoke-worldmap.png"
     rm -rf "$OUT_DIR/smoke-world"   # Tiled world (chunks + overview); two runs must give identical files

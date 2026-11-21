@@ -1,6 +1,6 @@
 {
-"startPointX": 0.328725,
-"startPointY": 0.651650,
+"startPointX": 0.285000,
+"startPointY": 0.620000,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ered_nimrais_west",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.089175,
-"height": 0.088350,
+"width": 0.176667,
+"height": 0.050000,
 "color": "b84a3a",
 "spriteNames": [
 	"MountainTree",

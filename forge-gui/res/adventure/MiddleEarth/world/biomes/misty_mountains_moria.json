@@ -1,6 +1,6 @@
 {
-"startPointX": 0.376650,
-"startPointY": 0.391250,
+"startPointX": 0.376667,
+"startPointY": 0.390833,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "misty_mountains_moria",
@@ -20,7 +20,7 @@
 	}
 ],
 "width": 0.030000,
-"height": 0.089175,
+"height": 0.089167,
 "color": "ad3a2a",
 "spriteNames": [
 	"MountainTree",
