@@ -1,6 +1,6 @@
 {
-"startPointX": 0.104550,
-"startPointY": 0.450425,
+"startPointX": 0.155833,
+"startPointY": 0.416667,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ered_luin_south",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.025800,
-"height": 0.094200,
+"width": 0.110000,
+"height": 0.083333,
 "color": "c04535",
 "spriteNames": [
 	"MountainTree",

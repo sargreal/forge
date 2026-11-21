@@ -1,6 +1,6 @@
 {
-"startPointX": 0.384600,
-"startPointY": 0.207050,
+"startPointX": 0.384167,
+"startPointY": 0.206667,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "misty_mountains_north",
@@ -19,7 +19,7 @@
 		"resolution": 10
 	}
 ],
-"width": 0.035850,
+"width": 0.035833,
 "height": 0.097500,
 "color": "c2503a",
 "spriteNames": [

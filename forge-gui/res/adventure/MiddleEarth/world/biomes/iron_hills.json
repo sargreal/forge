@@ -1,6 +1,6 @@
 {
-"startPointX": 0.682950,
-"startPointY": 0.225425,
+"startPointX": 0.682500,
+"startPointY": 0.225000,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "iron_hills",
@@ -19,7 +19,7 @@
 		"resolution": 10
 	}
 ],
-"width": 0.079200,
+"width": 0.079167,
 "height": 0.052500,
 "color": "a0402a",
 "spriteNames": [

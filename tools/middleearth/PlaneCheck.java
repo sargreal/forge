@@ -295,6 +295,7 @@ public class PlaneCheck {
             if (read.mapWidth != world.width || read.mapHeight != world.height)
                 error("worldMap: the chunks cover " + read.mapWidth + "x" + read.mapHeight + " tiles, world is " + world.width + "x" + world.height);
             checkWorldMapLayers(world, read);
+            reportBiomeBoxes(world, biomes, read);
             int sizeOf0 = read.chunks.isEmpty() ? 0 : read.chunks.get(0).width;
             layout = read.chunks.size() + " chunks of " + sizeOf0 + " tiles, " + read.mapWidth + "x" + read.mapHeight;
             FileHandle overview = f.parent().child(forge.adventure.world.WorldMapTmx.OVERVIEW_NAME + ".tmx");
@@ -334,6 +335,31 @@ public class PlaneCheck {
     static int roadTiles, clutterObjects, missingCrops;
 
     /** Phase 2d-1: checks on the assembled layers (engine reader): clutter on road tiles and outside the world. */
+    /**
+     * The game anchors each biome's structures on the bounding box of its painted tiles (World.applyPaintedBiomeBoxes),
+     * not on the biome JSON box. Lists the biomes whose JSON box differs (all with -v; fix with
+     * tools/middleearth/worldmap/sync_biome_boxes.py), and warns about biomes with structures whose box is huge.
+     */
+    static void reportBiomeBoxes(WorldData world, List<BiomeData> biomes, forge.adventure.world.WorldMapTmx read) {
+        int[][] boxes = forge.adventure.world.WorldMapTmx.biomeBoxes(read.biomes, biomes.size());
+        List<String> differ = new ArrayList<>();
+        for (int i = 0; i < biomes.size(); i++) {
+            BiomeData b = biomes.get(i);
+            if (b.width == 1.0 && b.height == 1.0 || boxes[i] == null) continue;
+            int[] json = forge.adventure.world.WorldMapTmx.boxOf(b.startPointX, b.startPointY, b.width, b.height, world.width, world.height);
+            int[] box = boxes[i];
+            int w = box[2] - box[0] + 1, h = box[3] - box[1] + 1;
+            if (b.structures != null && b.structures.length > 0 && (long) w * h > 400L * 400L)
+                warn("worldMap: biome " + b.name + " spans a " + w + "x" + h + " tile box (its structures are generated over all of it; stray tiles?)");
+            if (!Arrays.equals(json, box))
+                differ.add(b.name + ": JSON " + json[0] + "," + json[1] + " " + (json[2] - json[0] + 1) + "x" + (json[3] - json[1] + 1)
+                        + ", painted " + box[0] + "," + box[1] + " " + w + "x" + h);
+        }
+        info("worldMap biome boxes: structures use the painted bounding boxes; " + differ.size() + " biome JSON boxes differ"
+                + (differ.isEmpty() ? "" : " (fallback only; sync with tools/middleearth/worldmap/sync_biome_boxes.py" + (verbose ? ")" : ", -v lists them)")));
+        if (verbose) for (String d : differ) info("  " + d);
+    }
+
     static void checkWorldMapLayers(WorldData world, forge.adventure.world.WorldMapTmx read) {
         if (read.clutterDefined == null) return;
         int onRoad = 0, outside = 0;

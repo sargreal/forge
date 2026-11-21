@@ -361,12 +361,50 @@ public class World implements Disposable, SaveFileContent {
         if (data.worldMap == null || data.worldMap.isEmpty())
             return null;
         WorldMapTmx worldMap = WorldMapTmx.read(Config.instance().getFile(data.worldMap), data.GetBiomes(), data.width, data.height);
+        applyPaintedBiomeBoxes(worldMap);
         if (worldMap.start != null) {
             // +0.5 px so that (int)(fraction * size) gives back the exact pixel
             data.playerStartPosX = (worldMap.start[0] + 0.5f) / (data.width * data.tileSize);
             data.playerStartPosY = (data.height * data.tileSize - worldMap.start[1] + 0.5f) / (data.height * data.tileSize);
         }
         return worldMap;
+    }
+
+    /** A biome with structures whose painted box is larger than this (in tiles) gets a warning: WFC runs over the whole box. */
+    private static final int LARGE_STRUCTURE_BOX = 400 * 400;
+
+    /**
+     * Fork (Middle-earth): with a world map, each biome's box (startPointX/Y, width, height: what its WFC structures are
+     * anchored on) becomes the bounding box of its painted tiles, replacing the biome JSON values, so painting a biome is
+     * all it takes. Called once, right after the map is read and before the structures are generated. Unpainted biomes
+     * keep the JSON box (logged), and so does a full-world base biome (width = height = 1, e.g. the ocean).
+     */
+    private void applyPaintedBiomeBoxes(WorldMapTmx worldMap) {
+        List<BiomeData> biomes = data.GetBiomes();
+        int[][] boxes = WorldMapTmx.biomeBoxes(worldMap.biomes, biomes.size());
+        int changed = 0;
+        for (int i = 0; i < biomes.size(); i++) {
+            BiomeData biome = biomes.get(i);
+            if (biome.width == 1.0 && biome.height == 1.0)
+                continue;
+            if (boxes[i] == null) {
+                System.err.println("worldMap: biome " + biome.name + " is not painted, keeping its biome JSON box");
+                continue;
+            }
+            int[] box = boxes[i];
+            int w = box[2] - box[0] + 1, h = box[3] - box[1] + 1;
+            if (biome.structures != null && biome.structures.length > 0 && (long) w * h > LARGE_STRUCTURE_BOX)
+                System.err.println("worldMap: biome " + biome.name + " spans a " + w + "x" + h + " tile box; its structures are generated over all of it"
+                        + " (slow). Stray tiles far from the rest?");
+            float[] f = WorldMapTmx.boxFractions(box, data.width, data.height);
+            if (!Arrays.equals(box, WorldMapTmx.boxOf(biome.startPointX, biome.startPointY, biome.width, biome.height, data.width, data.height)))
+                changed++;
+            biome.startPointX = f[0];
+            biome.startPointY = f[1];
+            biome.width = f[2];
+            biome.height = f[3];
+        }
+        System.out.println("worldMap: biome boxes from the painted tiles, " + changed + " differ from the biome JSON");
     }
 
     /** Fork (Middle-earth): places the world map's POI objects at their exact positions instead of the random placement. */

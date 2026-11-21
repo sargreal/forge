@@ -1,6 +1,6 @@
 {
-"startPointX": 0.514200,
-"startPointY": 0.547925,
+"startPointX": 0.514167,
+"startPointY": 0.547500,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "dead_marshes",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.053325,
-"height": 0.030825,
+"width": 0.053333,
+"height": 0.030833,
 "color": "3a4a2a",
 "spriteNames": [
 	"Reed",

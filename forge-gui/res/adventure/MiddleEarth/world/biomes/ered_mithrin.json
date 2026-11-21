@@ -1,6 +1,6 @@
 {
-"startPointX": 0.444600,
-"startPointY": 0.183725,
+"startPointX": 0.444167,
+"startPointY": 0.183333,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "ered_mithrin",
@@ -19,7 +19,7 @@
 		"resolution": 10
 	}
 ],
-"width": 0.090825,
+"width": 0.090833,
 "height": 0.037500,
 "color": "a83020",
 "spriteNames": [

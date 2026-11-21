@@ -894,6 +894,48 @@ public final class WorldMapTmx {
         return s.append("/>\n </imagelayer>\n").toString();
     }
 
+    // ------------------------------------------------------------------ biome boxes (fork, Middle-earth)
+
+    /**
+     * Bounding box of each biome's painted tiles: [biome] = {minX, minRow, maxX, maxRow} (inclusive; row 0 = north, as
+     * biome startPointY), or null for a biome without tiles. {@code own} is [x][row], e.g. {@link #biomes}.
+     */
+    public static int[][] biomeBoxes(int[][] own, int biomeCount) {
+        int[][] boxes = new int[biomeCount][];
+        for (int x = 0; x < own.length; x++)
+            for (int y = 0; y < own[x].length; y++) {
+                int b = own[x][y];
+                if (b < 0 || b >= biomeCount)
+                    continue;
+                int[] box = boxes[b];
+                if (box == null)
+                    boxes[b] = new int[]{x, y, x, y};
+                else {
+                    box[0] = Math.min(box[0], x);
+                    box[1] = Math.min(box[1], y);
+                    box[2] = Math.max(box[2], x);
+                    box[3] = Math.max(box[3], y);
+                }
+            }
+        return boxes;
+    }
+
+    /**
+     * A tile box as biome JSON fractions {startPointX, startPointY, width, height}: the centre and the size, chosen so that
+     * World.generateNew's integer maths (left = round(startPointX * W) - round(width * W) / 2) gives back exactly the box.
+     */
+    public static float[] boxFractions(int[] box, int worldWidth, int worldHeight) {
+        int w = box[2] - box[0] + 1, h = box[3] - box[1] + 1;
+        return new float[]{(box[0] + w / 2) / (float) worldWidth, (box[1] + h / 2) / (float) worldHeight, w / (float) worldWidth, h / (float) worldHeight};
+    }
+
+    /** The tile box {minX, minRow, maxX, maxRow} that World.generateNew anchors structures on for these biome fractions. */
+    public static int[] boxOf(float startPointX, float startPointY, float width, float height, int worldWidth, int worldHeight) {
+        int w = (int) Math.round(width * (double) worldWidth), h = (int) Math.round(height * (double) worldHeight);
+        int x = (int) Math.round(startPointX * (double) worldWidth) - w / 2, y = (int) Math.round(startPointY * (double) worldHeight) - h / 2;
+        return new int[]{x, y, x + w - 1, y + h - 1};
+    }
+
     /** overview.png: 1 px per world tile in the biome's editor colour. */
     private static void writeOverviewImage(FileHandle dir, List<BiomeData> biomes, int[][] ownBiome, Map<String, PaletteEntry> palette) {
         int width = ownBiome.length, height = ownBiome[0].length;
