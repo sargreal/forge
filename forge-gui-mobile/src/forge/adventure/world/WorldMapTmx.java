@@ -518,7 +518,7 @@ public final class WorldMapTmx {
      * @param layers   Phase 2d-1 Roads/Clutter content, or null
      */
     public static void write(FileHandle tmx, WorldData data, int[][] ownBiome, List<Poi> pois, float[] start, long seed, Layers layers) {
-        Tilesets tilesets = writeTilesets(tmx.parent(), data);
+        Tilesets tilesets = writeTilesets(tmx.parent(), data, paletteFor(data));
         List<Poi> sorted = new ArrayList<>(pois);
         sorted.sort(ORDER);
         List<Sprite> clutter = layers == null || layers.clutter == null ? null : new ArrayList<>(layers.clutter);
@@ -540,7 +540,8 @@ public final class WorldMapTmx {
         int width = ownBiome.length, height = ownBiome[0].length, tile = data.tileSize;
         int columns = (width + chunkSize - 1) / chunkSize, rows = (height + chunkSize - 1) / chunkSize;
         dir.mkdirs();
-        Tilesets tilesets = writeTilesets(dir, data);
+        Map<String, PaletteEntry> palette = paletteFor(data);
+        Tilesets tilesets = writeTilesets(dir, data, palette);
         List<Poi> sorted = new ArrayList<>(pois);
         sorted.sort(ORDER);
         int span = chunkSize * tile;
@@ -587,7 +588,7 @@ public final class WorldMapTmx {
         // onlyShowAdjacentMaps: Tiled loads and shows only the current chunk and the 8 around it, not all chunks
         world.append("    ],\n    \"onlyShowAdjacentMaps\": true,\n    \"type\": \"world\"\n}\n");
         dir.child(worldName + "." + WORLD_EXTENSION).writeString(world.toString(), false, "UTF-8");
-        writeOverview(dir, data, ownBiome, sorted, start, chunkSize, columns, rows);
+        writeOverview(dir, data, ownBiome, sorted, start, chunkSize, columns, rows, palette);
     }
 
     /** The chunk's Reference image layer: kept from the existing chunk file (attributes and image verbatim), else the default crop. */
@@ -735,8 +736,8 @@ public final class WorldMapTmx {
     }
 
     /** Writes biomes, roads and clutter tilesets into dir. */
-    static Tilesets writeTilesets(FileHandle dir, WorldData data) {
-        writeTileset(dir, data.GetBiomes(), data.tileSize);
+    static Tilesets writeTilesets(FileHandle dir, WorldData data, Map<String, PaletteEntry> palette) {
+        writeTileset(dir, data.GetBiomes(), data.tileSize, palette);
         Tilesets t = new Tilesets();
         t.roadFirstGid = 1 + data.GetBiomes().size();
         t.clutterFirstGid = t.roadFirstGid + 1;
@@ -832,21 +833,10 @@ public final class WorldMapTmx {
      * layer "Biomes" (overview.png, the biome colours), image layer "Reference" (kept from an existing overview.tmx, else an
      * empty slot), object layers "Chunks" (one rectangle per chunk map) and "POI" (labels only). Generated, never read back.
      */
-    private static void writeOverview(FileHandle dir, WorldData data, int[][] ownBiome, List<Poi> pois, float[] start, int chunkSize, int columns, int rows) {
+    private static void writeOverview(FileHandle dir, WorldData data, int[][] ownBiome, List<Poi> pois, float[] start, int chunkSize, int columns, int rows,
+                                      Map<String, PaletteEntry> palette) {
         int width = ownBiome.length, height = ownBiome[0].length, tile = data.tileSize;
-        List<BiomeData> biomes = data.GetBiomes();
-        Pixmap image = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        try {
-            int[] rgba = new int[biomes.size()];
-            for (int i = 0; i < rgba.length; i++)
-                rgba[i] = Color.rgba8888(biomes.get(i).GetColor());
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    image.drawPixel(x, y, rgba[ownBiome[x][y]]);
-            PixmapIO.writePNG(dir.child(OVERVIEW_NAME + ".png"), image);
-        } finally {
-            image.dispose();
-        }
+        writeOverviewImage(dir, data.GetBiomes(), ownBiome, palette);
 
         FileHandle tmx = dir.child(OVERVIEW_NAME + ".tmx");
         String reference = " <imagelayer id=\"2\" name=\"" + REFERENCE_LAYER + "\" opacity=\"0.6\"/>\n";
@@ -904,20 +894,150 @@ public final class WorldMapTmx {
         return s.append("/>\n </imagelayer>\n").toString();
     }
 
-    /** One solid tile per biome (its colour, 1-px darker border), tile id = biome index, property biome = name. */
-    static void writeTileset(FileHandle dir, List<BiomeData> biomes, int tile) {
+    /** overview.png: 1 px per world tile in the biome's editor colour. */
+    private static void writeOverviewImage(FileHandle dir, List<BiomeData> biomes, int[][] ownBiome, Map<String, PaletteEntry> palette) {
+        int width = ownBiome.length, height = ownBiome[0].length;
+        Pixmap image = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        try {
+            int[] rgba = new int[biomes.size()];
+            for (int i = 0; i < rgba.length; i++)
+                rgba[i] = Color.rgba8888(editorColor(biomes.get(i), palette));
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    image.drawPixel(x, y, rgba[ownBiome[x][y]]);
+            PixmapIO.writePNG(dir.child(OVERVIEW_NAME + ".png"), image);
+        } finally {
+            image.dispose();
+        }
+    }
+
+    /**
+     * Rewrites only the editor images of a world folder: the biome tileset ({@code biomes.tsx/.png}) and {@code overview.png},
+     * in the colours of {@code palette} (see {@link #readPalette}). Chunks, the .world and overview.tmx are not touched.
+     * Used by tools/middleearth/worldmap/BiomeTiles.java (called by make_biome_palette.py).
+     */
+    public static void writeBiomeImages(FileHandle dir, WorldData data, int[][] ownBiome, Map<String, PaletteEntry> palette) {
+        writeTileset(dir, data.GetBiomes(), data.tileSize, palette);
+        writeOverviewImage(dir, data.GetBiomes(), ownBiome, palette);
+    }
+
+    // ------------------------------------------------------------------ editor palette
+
+    /**
+     * Optional editor palette next to the world map ({@code biome_palette.json}): {@code {"<biome name>": "#rrggbb"}} or
+     * {@code {"<biome name>": {"color": "#rrggbb", "label": "ABC"}}}; keys starting with "_" are comments. Only the Tiled
+     * tileset and the overview use it (distinct colours for editing); the game keeps each biome's JSON {@code color}.
+     * Reading a map never uses colours (tiles are matched by their {@code biome} property).
+     */
+    public static final String PALETTE_FILE = "biome_palette.json";
+
+    public static final class PaletteEntry {
+        public Color color;
+        /** Short tile label (A-Z, 0-9, up to 3 characters), or null. */
+        public String label;
+    }
+
+    /** Reads an editor palette; a missing file gives an empty palette. Bad colours are logged (the biome colour is used). */
+    public static Map<String, PaletteEntry> readPalette(FileHandle file) {
+        Map<String, PaletteEntry> palette = new HashMap<>();
+        if (file == null || !file.exists())
+            return palette;
+        JsonValue root = new JsonReader().parse(file);
+        for (JsonValue v = root.child; v != null; v = v.next) {
+            if (v.name == null || v.name.startsWith("_"))
+                continue;
+            PaletteEntry e = new PaletteEntry();
+            String hex = v.isString() ? v.asString() : v.getString("color", null);
+            if (!v.isString())
+                e.label = v.getString("label", null);
+            try {
+                hex = hex.startsWith("#") ? hex.substring(1) : hex;
+                if (hex.length() != 6)
+                    throw new IllegalArgumentException(hex);
+                e.color = new Color((Integer.parseInt(hex, 16) << 8) | 0xff);
+            } catch (Exception ex) {
+                System.err.println("biome palette " + file.path() + ": bad colour for '" + v.name + "', using the biome colour");
+            }
+            palette.put(v.name, e);
+        }
+        return palette;
+    }
+
+    /** The palette next to the configured world map (empty if there is none or no world map). */
+    static Map<String, PaletteEntry> paletteFor(WorldData data) {
+        if (data.worldMap == null || data.worldMap.isEmpty())
+            return Collections.emptyMap();
+        try {
+            return readPalette(forge.adventure.util.Config.instance().getFile(data.worldMap).parent().child(PALETTE_FILE));
+        } catch (Exception e) {
+            System.err.println("biome palette: cannot read (" + e + "), using the biome colours");
+            return Collections.emptyMap();
+        }
+    }
+
+    private static Color editorColor(BiomeData biome, Map<String, PaletteEntry> palette) {
+        PaletteEntry e = palette == null ? null : palette.get(biome.name);
+        return e != null && e.color != null ? e.color : biome.GetColor();
+    }
+
+    /** 3x5 pixel font for tile labels: 15 bits per glyph, rows top to bottom, 3 columns each (left first). */
+    private static final Map<Character, String> FONT = new HashMap<>();
+    static {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        String[] glyphs = {
+                "010101111101101", "110101110101110", "011100100100011", "110101101101110", "111100110100111", "111100110100100",
+                "011100101101011", "101101111101101", "111010010010111", "001001001101010", "101101110101101", "100100100100111",
+                "101111101101101", "110101101101101", "010101101101010", "110101110100100", "010101101110011", "110101110101101",
+                "011100010001110", "111010010010010", "101101101101111", "101101101101010", "101101111111101", "101101010101101",
+                "101101010010010", "111001010100111", "111101101101111", "010110010010111", "110001010100111", "110001010001110",
+                "101101111001001", "111100110001110", "011100111101111", "111001010010010", "111101111101111", "111101111001110"};
+        for (int i = 0; i < chars.length(); i++)
+            FONT.put(chars.charAt(i), glyphs[i]);
+    }
+
+    /** Draws a label (centred, 3x5 glyphs 1 px apart) on the tile at x/y, in a dark or light shade of the fill colour. */
+    private static void drawLabel(Pixmap image, String label, Color fill, int x, int y, int tile) {
+        String text = label.toUpperCase(Locale.ROOT);
+        int width = text.length() * 4 - 1;
+        if (width > tile - 4)
+            return;
+        float luma = 0.299f * fill.r + 0.587f * fill.g + 0.114f * fill.b;
+        if (luma > 0.5f)
+            image.setColor(fill.r * 0.3f, fill.g * 0.3f, fill.b * 0.3f, 1);
+        else
+            image.setColor(fill.r + (1 - fill.r) * 0.75f, fill.g + (1 - fill.g) * 0.75f, fill.b + (1 - fill.b) * 0.75f, 1);
+        int x0 = x + (tile - width) / 2, y0 = y + (tile - 5) / 2;
+        for (int c = 0; c < text.length(); c++) {
+            String glyph = FONT.get(text.charAt(c));
+            if (glyph == null)
+                continue;
+            for (int i = 0; i < 15; i++)
+                if (glyph.charAt(i) == '1')
+                    image.drawPixel(x0 + c * 4 + i % 3, y0 + i / 3);
+        }
+    }
+
+    /**
+     * One tile per biome, tile id = biome index, property biome = name (the only thing the reader uses) and type (Tiled's
+     * "Class", shown in the Properties panel) = name. Drawn in the editor colour (palette, else the biome colour) with a
+     * 1-px darker border and the palette label, if any.
+     */
+    static void writeTileset(FileHandle dir, List<BiomeData> biomes, int tile, Map<String, PaletteEntry> palette) {
         int columns = 8, rows = (biomes.size() + columns - 1) / columns;
         Pixmap image = new Pixmap(columns * tile, rows * tile, Pixmap.Format.RGBA8888);
         try {
             image.setColor(0, 0, 0, 0);
             image.fill();
             for (int i = 0; i < biomes.size(); i++) {
-                Color color = biomes.get(i).GetColor();
+                Color color = editorColor(biomes.get(i), palette);
                 int x = (i % columns) * tile, y = (i / columns) * tile;
                 image.setColor(color.r * 0.6f, color.g * 0.6f, color.b * 0.6f, 1);
                 image.fillRectangle(x, y, tile, tile);
                 image.setColor(color.r, color.g, color.b, 1);
                 image.fillRectangle(x + 1, y + 1, tile - 2, tile - 2);
+                PaletteEntry e = palette == null ? null : palette.get(biomes.get(i).name);
+                if (e != null && e.label != null && !e.label.isEmpty())
+                    drawLabel(image, e.label, color, x, y, tile);
             }
             PixmapIO.writePNG(dir.child(TILESET_NAME + ".png"), image);
         } finally {
@@ -929,7 +1049,7 @@ public final class WorldMapTmx {
                 .append("\" tileheight=\"").append(tile).append("\" tilecount=\"").append(biomes.size()).append("\" columns=\"").append(columns).append("\">\n");
         s.append(" <image source=\"").append(TILESET_NAME).append(".png\" width=\"").append(columns * tile).append("\" height=\"").append(rows * tile).append("\"/>\n");
         for (int i = 0; i < biomes.size(); i++)
-            s.append(" <tile id=\"").append(i).append("\">\n  <properties>\n   <property name=\"biome\" value=\"").append(esc(biomes.get(i).name))
+            s.append(" <tile id=\"").append(i).append("\" type=\"").append(esc(biomes.get(i).name)).append("\">\n  <properties>\n   <property name=\"biome\" value=\"").append(esc(biomes.get(i).name))
                     .append("\"/>\n  </properties>\n </tile>\n");
         s.append("</tileset>\n");
         dir.child(TILESET_NAME + ".tsx").writeString(s.toString(), false, "UTF-8");
