@@ -14,7 +14,7 @@
   </data>
  </layer>
  <objectgroup id="4" name="Clutter"/>
- <imagelayer id="5" name="Reference" visible="0" opacity="0.5">
+ <imagelayer id="5" name="Reference" opacity="0.5">
   <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_0_4.png" width="2400" height="2400"/>
  </imagelayer>
  <objectgroup id="2" name="POI"/>
