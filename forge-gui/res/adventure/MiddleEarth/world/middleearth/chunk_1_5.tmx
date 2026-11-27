@@ -5,7 +5,7 @@
  <tileset firstgid="50" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eJzt2UEOgjAQQFFYuvAW3v+Mxq0xgULbmalv8bam1J8ywL5t205aj5teJz07i943xjR1tqdRbUXvHf26utLSqL6i9448TTmv1nZ3pmrtrPdspau8ZrU1oild5dSjqTNdjWpKVzlVPqd0lVP1uUpX+cxsyny1vqNORr9j0NV6Wlu5eq/T1f+YfQaZr9ZXZU7SVQ0jzqjohnSlJ12todpznJZy69FTr/9YU/VFf7M7Wt/VJjSVs6cMTVHLrG/B0ddJjp60xOym3NdobepXV+YkrjTleZ3eXXkPRGRT37+nJz5ae4peLzWcbSp6ndSlKQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKDVG/8fpmc=
+   eJzt2UEOgjAQQFFYuvAY3v+Kxq0xgULbmalv8bam1J8ywL5t205aj5teJz07i943xjR1tqdRbUXvHf26utLSqL6i9448TTmv1nZ3pmrtrPdspau8ZrU1oild5dSjqTNdjWpKVzlVPqd0lVP1uUpX+cxsyny1vqNORr9j0NV6Wlu5eq/T1f+YfQaZr9ZXZU7SVQ0jzqjohnSlJ12todpznJZy69FTr/9YU/VFf7M7Wt/VJjSVs6cMTVHLrG/B0ddJjp60xOym3NdobepXV+YkrjTleZ3eXXkPRGRT37+nJz5ae4peLzWcbSp6ndSlKQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKDVGzqlp40=
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">
