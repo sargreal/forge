@@ -92,7 +92,7 @@ EOF
     [ -n "$jar" ] || { echo "no jar found, run: $0 build" >&2; exit 1; }
     cd "$ROOT/forge-gui-mobile-dev"   # assets resolve to ../forge-gui/res from here
     apiflag=""; [ -n "${NO_DEVAPI:-}" ] || apiflag="-Dforge.devapi.port=$API_PORT"
-    LIBGL_ALWAYS_SOFTWARE=1 FORGE_DEVAPI_PORT= nohup java -Xmx3g -Duser.home="$GAME_HOME" $apiflag \
+    LIBGL_ALWAYS_SOFTWARE=1 FORGE_DEVAPI_PORT= nohup java -Xmx3g -Duser.home="$GAME_HOME" -Dforge.skipUpdateCheck=true $apiflag \
       --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED \
       -jar "$jar" "width=${SCREEN%x*}" "height=${SCREEN#*x}" > "$LOG" 2>&1 &
     echo $! > "$PIDFILE"

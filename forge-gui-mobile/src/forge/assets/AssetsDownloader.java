@@ -38,6 +38,11 @@ public class AssetsDownloader {
     public static void checkForUpdates(boolean exited, Runnable runnable) {
         if (exited)
             return;
+        // Fork (Middle-earth dev tooling): headless test runs must never block on the "new version" dialog.
+        if (Boolean.getBoolean("forge.skipUpdateCheck")) {
+            run(runnable);
+            return;
+        }
         final String versionString = Forge.getDeviceAdapter().getVersionString();
         Forge.getSplashScreen().getProgressBar().setDescription("Checking for updates...");
         if (versionString.contains("GIT")) {
