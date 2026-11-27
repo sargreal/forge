@@ -1,6 +1,6 @@
 {
-"startPointX": 0.520800,
-"startPointY": 0.800825,
+"startPointX": 0.723333,
+"startPointY": 0.847500,
 "noiseWeight": 0.15,
 "distWeight": 1.0,
 "name": "harad_waith",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.458325,
-"height": 0.148350,
+"width": 0.552500,
+"height": 0.305000,
 "color": "e6d98a",
 "spriteNames": [
 	"Cactus",

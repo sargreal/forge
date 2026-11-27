@@ -1,6 +1,6 @@
 {
-"startPointX": 0.409575,
-"startPointY": 0.454175,
+"startPointX": 0.452500,
+"startPointY": 0.430833,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "lothlorien",
@@ -19,8 +19,8 @@
 		"resolution": 8
 	}
 ],
-"width": 0.054150,
-"height": 0.048300,
+"width": 0.035833,
+"height": 0.028333,
 "color": "c8d84a",
 "spriteNames": [
 	"WoodTree",

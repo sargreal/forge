@@ -1,6 +1,6 @@
 {
-"startPointX": 0.653333,
-"startPointY": 0.652500,
+"startPointX": 0.745000,
+"startPointY": 0.636667,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "mordor",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.192500,
-"height": 0.160833,
+"width": 0.304167,
+"height": 0.178333,
 "color": "110903",
 "spriteNames": [
 	"LargeSwampRock",

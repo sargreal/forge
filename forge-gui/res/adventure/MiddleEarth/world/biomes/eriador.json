@@ -1,6 +1,6 @@
 {
-"startPointX": 0.224167,
-"startPointY": 0.315000,
+"startPointX": 0.262500,
+"startPointY": 0.334167,
 "noiseWeight": 0.5,
 "distWeight": 0.9,
 "name": "eriador",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.305000,
-"height": 0.313333,
+"width": 0.345000,
+"height": 0.261667,
 "color": "59a650",
 "spriteNames": [
 	"DarkGras",

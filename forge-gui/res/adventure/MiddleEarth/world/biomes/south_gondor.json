@@ -1,6 +1,6 @@
 {
-"startPointX": 0.526650,
-"startPointY": 0.764975,
+"startPointX": 0.571667,
+"startPointY": 0.733333,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "south_gondor",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.141675,
-"height": 0.073350,
+"width": 0.260833,
+"height": 0.114167,
 "color": "f5eeb0",
 "spriteNames": [
 	"Cactus",

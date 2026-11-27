@@ -1,6 +1,6 @@
 {
-"startPointX": 0.689175,
-"startPointY": 0.443300,
+"startPointX": 0.815000,
+"startPointY": 0.515000,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "rhun",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.121650,
-"height": 0.223350,
+"width": 0.370000,
+"height": 0.465000,
 "color": "efe697",
 "spriteNames": [
 	"Cactus",

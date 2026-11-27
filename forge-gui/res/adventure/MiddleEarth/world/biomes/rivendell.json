@@ -1,6 +1,6 @@
 {
-"startPointX": 0.350400,
-"startPointY": 0.332900,
+"startPointX": 0.406667,
+"startPointY": 0.344167,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "rivendell",
@@ -19,8 +19,8 @@
 		"resolution": 8
 	}
 ],
-"width": 0.032475,
-"height": 0.034200,
+"width": 0.011667,
+"height": 0.012500,
 "color": "8fd18a",
 "spriteNames": [
 	"WoodTree",

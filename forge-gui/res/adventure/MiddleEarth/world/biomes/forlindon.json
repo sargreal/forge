@@ -1,6 +1,6 @@
 {
-"startPointX": 0.060000,
-"startPointY": 0.319167,
+"startPointX": 0.092500,
+"startPointY": 0.291667,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "forlindon",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.078333,
-"height": 0.139167,
+"width": 0.144167,
+"height": 0.194167,
 "color": "4fae70",
 "spriteNames": [
 	"Shell",

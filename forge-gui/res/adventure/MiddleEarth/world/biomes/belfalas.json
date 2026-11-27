@@ -1,6 +1,6 @@
 {
-"startPointX": 0.366667,
-"startPointY": 0.671667,
+"startPointX": 0.371667,
+"startPointY": 0.655833,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "belfalas",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.163333,
-"height": 0.111667,
+"width": 0.135000,
+"height": 0.075833,
 "color": "70c070",
 "spriteNames": [
 	"Shell",

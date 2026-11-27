@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
  <tileset firstgid="1" source="biomes.tsx"/>
- <tileset firstgid="49" source="roads.tsx"/>
- <tileset firstgid="50" source="clutter.tsx"/>
+ <tileset firstgid="43" source="roads.tsx"/>
+ <tileset firstgid="44" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eJzt2UEOgjAQQFFYuvAY3v+Kxq0xgULbmalv8bam1J8ywL5t205aj5teJz07i943xjR1tqdRbUXvHf26utLSqL6i9448TTmv1nZ3pmrtrPdspau8ZrU1oild5dSjqTNdjWpKVzlVPqd0lVP1uUpX+cxsyny1vqNORr9j0NV6Wlu5eq/T1f+YfQaZr9ZXZU7SVQ0jzqjohnSlJ12todpznJZy69FTr/9YU/VFf7M7Wt/VJjSVs6cMTVHLrG/B0ddJjp60xOym3NdobepXV+YkrjTleZ3eXXkPRGRT37+nJz5ae4peLzWcbSp6ndSlKQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKDVGzqlp40=
+   eNrt2DsOgzAQQEEoKXwM3/+KqSJFKULi7Mq/KaZH+Gkxex7HcTKs60/1SyWYs1uzqdpAV7qKaimrL+enKfNKUxmdFfcrbQW3VXSlqeCuiq50Ncmc0tXe+yrzSlOz7Kx0NUdPz7PP3jHoar+m3rV+63SlqawZ5H6lqTrQHVxXe86oois9Ld6Trta8Q2lJT5ndvD6LptbfbWbPoLvna21CU+Puyns3xX5NVd0Q9M3TEj3uUd6zpu66ck+ipSn/60R3ZQ9Ez6Y+7YS8X11dZg8JXemJLJoCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfvUAOqWnjQ==
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+   eNrtwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
   </data>
  </layer>
- <objectgroup id="4" name="Clutter"/>
+ <objectgroup id="4" name="Clutter">
+ </objectgroup>
  <imagelayer id="5" name="Reference" opacity="0.5">
   <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_1_5.png" width="2400" height="2400"/>
  </imagelayer>
- <objectgroup id="2" name="POI"/>
+ <objectgroup id="2" name="POI">
+ </objectgroup>
 </map>

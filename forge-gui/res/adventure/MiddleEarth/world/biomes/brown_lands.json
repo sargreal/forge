@@ -1,6 +1,6 @@
 {
-"startPointX": 0.515025,
-"startPointY": 0.504200,
+"startPointX": 0.583333,
+"startPointY": 0.515833,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "brown_lands",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.155025,
-"height": 0.108300,
+"width": 0.168333,
+"height": 0.100833,
 "color": "aeaeae",
 "spriteNames": [
 	"WasteRock",

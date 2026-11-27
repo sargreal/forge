@@ -1,6 +1,6 @@
 {
-"startPointX": 0.091667,
-"startPointY": 0.426667,
+"startPointX": 0.137500,
+"startPointY": 0.427500,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "harlindon",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.028333,
-"height": 0.052500,
+"width": 0.120000,
+"height": 0.105000,
 "color": "5fb87a",
 "spriteNames": [
 	"Shell",

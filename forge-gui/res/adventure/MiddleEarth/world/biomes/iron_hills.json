@@ -1,6 +1,6 @@
 {
-"startPointX": 0.682500,
-"startPointY": 0.225000,
+"startPointX": 0.807500,
+"startPointY": 0.290833,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "iron_hills",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.079167,
-"height": 0.052500,
+"width": 0.191667,
+"height": 0.058333,
 "color": "a0402a",
 "spriteNames": [
 	"MountainTree",

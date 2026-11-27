@@ -1,6 +1,6 @@
 {
-"startPointX": 0.424200,
-"startPointY": 0.542525,
+"startPointX": 0.415000,
+"startPointY": 0.530000,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "rohan",
@@ -19,8 +19,8 @@
 		"resolution": 10
 	}
 ],
-"width": 0.138300,
-"height": 0.126675,
+"width": 0.194167,
+"height": 0.135833,
 "color": "a3c25a",
 "spriteNames": [
 	"Flower",

@@ -1,6 +1,6 @@
 {
-"startPointX": 0.396675,
-"startPointY": 0.495800,
+"startPointX": 0.415000,
+"startPointY": 0.484167,
 "noiseWeight": 0.5,
 "distWeight": 1.0,
 "name": "fangorn",
@@ -19,8 +19,8 @@
 		"resolution": 8
 	}
 ],
-"width": 0.048300,
-"height": 0.058350,
+"width": 0.072500,
+"height": 0.052500,
 "color": "2f7a2a",
 "spriteNames": [
 	"WoodTree",

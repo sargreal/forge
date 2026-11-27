@@ -154,7 +154,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 ## Known issues / backlog
 
-- After the user's coastline repaint, 8 POIs stand outside their biome (WorldSim): Elf-haven, Thorin's Halls, Grey Havens, Nogrod, Lond Galen, Abandoned Mine, Eryn Vorn Lodge, Mountain Cave. Move them or repaint in Tiled. Also check `ered_nimrais_west` (3 pieces, 14% of its box) and `ered_luin_south` (2 pieces) for stray paint: stray pieces stretch the structure area.
+- POIs outside their biome after the user's repaint (WorldSim lists them; the user will move them). Earlier list: Elf-haven, Thorin's Halls, Grey Havens, Nogrod, Lond Galen, Abandoned Mine, Eryn Vorn Lodge, Mountain Cave. Move them or repaint in Tiled. Also check `ered_nimrais_west` (3 pieces, 14% of its box) and `ered_luin_south` (2 pieces) for stray paint: stray pieces stretch the structure area.
 - Run 2 limits: `endGame` shares the dialog window (put it last in a chain); "Main menu" from the ending doesn't save; `onDefeat` inside POI maps isn't covered by the GUI tests; extra status-flag labels sit below the HUD panel over the map. More test fixtures (keyed on `test_*`): the `test_flag_effect` flagEffect, the item `Test Cursed Band`, the enemy `Test Boss Loss`.
 - Story-engine test fixtures live in the ME data, keyed on `test_*` flags that normal play never sets: shire biome overrides, Lembas in the `GreenItems` shop, Forest Capital POI conditions, the hidden origin `Test`, story quest 9001. Keep or move them when real content lands.
 - Flags are bytes (−128..127): `set` truncates, `advance` wraps at 127. Run 2's add action must clamp.
@@ -186,6 +186,7 @@ Keep this list complete, because it is what makes upstream merges predictable.
 
 | Date | Change |
 | --- | --- |
+| 2026-11-28 | Merged `ephel_duath_1`/`_2` into `ephel_duath_mid` (POIs Minas Morgul and Shadow Cave and the enemy lists moved over; 9 stray tiles repainted; re-exported from the game, verified that only those 9 tiles changed). 42 biomes. Biome boxes synced (39). Verified in the game: 1-tile-wide rivers and diagonal river steps block walking. |
 | 2026-11-27 | User pushed rough biome shapes for the whole map (all 44 biomes painted). Coordinator review: check 0 errors; smoke OK (generation 5.4 s). Fixed the test tooling hanging on the upstream "new version" dialog (`forge.skipUpdateCheck`). |
 | 2026-11-21 | Biome tools merged (Opus agent): distinct editor palette (closest pair ΔE2000 13.4, previously 1.5; `tools/middleearth/worldmap/make_biome_palette.py`), biome boxes derived from the painted tiles (decorations follow the paint), `sync_biome_boxes.py` (23 biome JSONs synced), check reports JSON-vs-painted box differences. The user's chunk data is untouched (decoded identically). check 0 errors; `run_all.sh` passes; the world is deterministic. WorldSim: 8 POIs outside their biome after the user's coastline repaint (user to fix in Tiled). |
 | 2026-11-15 | Story engine run 2 merged (Opus agent). Coordinator fixed two test-harness flakes found on main: `game.sh stop`/`start` now wait until the old game has exited (tests reused a dying instance), and `duel_with_spawn` retries instead of failing on the first blocked attempt and leaves POIs it walked into (Hobbiton next to the test start). New tests `corruption.py`, `boss_loss.py`, `locked_item.py`. |

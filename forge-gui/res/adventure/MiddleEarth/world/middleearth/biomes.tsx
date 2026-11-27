@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="biomes" tilewidth="16" tileheight="16" tilecount="44" columns="8">
+<tileset version="1.10" tiledversion="1.10.2" name="biomes" tilewidth="16" tileheight="16" tilecount="42" columns="8">
  <image source="biomes.png" width="128" height="96"/>
  <tile id="0" type="ocean">
   <properties>
@@ -201,22 +201,12 @@
    <property name="biome" value="ered_lithui_east"/>
   </properties>
  </tile>
- <tile id="40" type="ephel_duath_1">
-  <properties>
-   <property name="biome" value="ephel_duath_1"/>
-  </properties>
- </tile>
- <tile id="41" type="ephel_duath_mid">
+ <tile id="40" type="ephel_duath_mid">
   <properties>
    <property name="biome" value="ephel_duath_mid"/>
   </properties>
  </tile>
- <tile id="42" type="ephel_duath_2">
-  <properties>
-   <property name="biome" value="ephel_duath_2"/>
-  </properties>
- </tile>
- <tile id="43" type="dead_marshes">
+ <tile id="41" type="dead_marshes">
   <properties>
    <property name="biome" value="dead_marshes"/>
   </properties>
