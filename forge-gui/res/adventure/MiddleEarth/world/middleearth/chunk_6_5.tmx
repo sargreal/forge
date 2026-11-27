@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
  <tileset firstgid="1" source="biomes.tsx"/>
- <tileset firstgid="43" source="roads.tsx"/>
- <tileset firstgid="44" source="clutter.tsx"/>
+ <tileset firstgid="49" source="roads.tsx"/>
+ <tileset firstgid="50" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   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
+   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
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eNrtwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
   </data>
  </layer>
- <objectgroup id="4" name="Clutter">
- </objectgroup>
+ <objectgroup id="4" name="Clutter"/>
  <imagelayer id="5" name="Reference" opacity="0.5">
   <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_6_5.png" width="2400" height="2400"/>
  </imagelayer>
- <objectgroup id="2" name="POI">
- </objectgroup>
+ <objectgroup id="2" name="POI"/>
 </map>
