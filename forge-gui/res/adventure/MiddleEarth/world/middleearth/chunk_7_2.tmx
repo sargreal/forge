@@ -5,7 +5,7 @@
  <tileset firstgid="50" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eJztwwEJAAAMBKH7/qXXYyi4aqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg8fHwlX5Q==
+   eJzt2D2OgzAURlEmTRaS/e9xqpGiCJIB/3yOfYrTWWD8rlxw27btBgAAAAAAAAAAAAAAAAAAAMChx5P0XpjHY9MW9emKFl67etfWmbWsba+VvV6O1mmLPe96Oev1eelvY46u3GX06kpfa+rVlb7W0rsrba0h0ZW25pfqarTO7h+k9/dt0j396TXHT/1ckZ7hiNI9HXVVe2Yterq65xXa7NXJ1a5Kz71nT+6++l2Ndu7pPlZvK9UH63SVPk/maUtX40q3UaOr9BkyV1uaGl+6EffVnNKNlHSlrbGlOynpSlvjS/dytavkP0/a9JVoVFdrS3alr7mlu9LW3JJdaWtuumLktnRFi750RYu29ESLvvTCf53pKr1XvouuaElXtKIrWtMVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMLOfA8n9pM+E8hnuzbF3W6M0Tb05flrT4p0j3Y+Uz/V5vmdbKHmvduZT42642sQqPf0CvD0YHg==
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">

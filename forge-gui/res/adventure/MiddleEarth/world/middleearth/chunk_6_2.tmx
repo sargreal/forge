@@ -5,7 +5,7 @@
  <tileset firstgid="50" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eJztwwEJAAAMBKH7/qXXYyi4aqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg8fHwlX5Q==
+   eJzt29FKI0EQhtGsCD6I7/+Oi7BCELMzmXT3X1NzLs7tpOz60omIb7fb7Q0AAAAAAAAAgNP7vJOehfP53Ck9J+ewtydtseVISyP60mpPo3p6tg/3YF8rmlrRZvocr2D0fVHNMz9jd6vu+fTO02a8D6v2u+KM0vusZMWZrWhlxZ71NH7vKxu2tz5W7VVP17Nqtzq6npX71RMA3G7vBWbo4P1OepYK3jckXj99JiPOLz1X2lZXI85oz2ucbTdnn7/C+Rw5w1nPreDMs1c7o6RH81Y/r/RudVX/Tqs6V1XpJio1VnWuM0p3kO6t0iydpPd9Zend66qn9O511VN697rqKb17XfWU3r2u+krvX1fXk25DV73t2WG6I12d197dpZvSVU/ppnTVS7olXfWSbkhX/aT70VVP6X5WNKdfTY1u65XnavF6XW3tt0rXV5NuoqNXzzvdhJbqmnHm6W40dR2pHjR1Le4XZtITQF0fd9Kz0MPHk9LzUt+zTemKPXTFaEea0hWPHO1JV/zm1Z50xU+jmtIV30Y29cXfuGrtbsZzVze11ZW+5ndUqQVd1Zfea1rXrp59/2tJV0f3qxldbfma688/6TPkWFfV2rqfS1c16YpkVxUa+zmvz8G6jv6fyarWHr2enmob1dWIxvY+3z1VX7qrI8/XVH0zutrT1yvP1VV9M7v6ra0Rz9RVfbO7mkFX9aUbOdqVtmpLN6KrntKN6KmndCvP9KSp80g3447qKd3Nnq7SZ4SuqCHdja56Snejq57S3Ww1patzSrfjrupp9l3ziKZ6S3x+bTXn8+/8fCeielea4pvv2czgrmKGkb/rpX8W6nAvMYOmmOF/n22a4qhHzfj+xCs0wwyaAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOJe/8YtjOw==
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">
