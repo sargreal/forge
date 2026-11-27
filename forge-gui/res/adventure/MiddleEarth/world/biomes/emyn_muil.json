@@ -1,0 +1,67 @@
+{
+	"startPointX": 0.53,
+	"startPointY": 0.51,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "emyn_muil",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Colorless",
+	"terrain": [
+		{
+			"spriteName": "Colorless_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Colorless_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.04,
+	"height": 0.05,
+	"color": "a09a82",
+	"spriteNames": [
+		"WasteRock",
+		"LargePlainsRock",
+		"Stone",
+		"Gravel",
+		"Bush"
+	],
+	"enemies": [
+		"Gollum",
+		"Snaga Scout",
+		"Mordor Orc",
+		"Crebain",
+		"Wild Wolves",
+		"Orc Hunter"
+	],
+	"pointsOfInterest": [],
+	"structures": [
+		{
+			"N": 2,
+			"x": 0.5,
+			"y": 0.5,
+			"structureAtlasPath": "world/structures/structures.atlas",
+			"sourcePath": "world/structures/models/mountain.png",
+			"maskPath": "world/structures/masks/circle.png",
+			"height": 0.6,
+			"width": 0.6,
+			"symmetry": 8,
+			"periodicOutput": false,
+			"mappingInfo": [
+				{
+					"name": "mountain",
+					"color": "a07020",
+					"collision": true
+				},
+				{
+					"name": "forest",
+					"color": "007000",
+					"collision": true
+				}
+			]
+		}
+	]
+}

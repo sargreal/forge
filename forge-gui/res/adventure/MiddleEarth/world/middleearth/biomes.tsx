@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="biomes" tilewidth="16" tileheight="16" tilecount="42" columns="8">
- <image source="biomes.png" width="128" height="96"/>
+<tileset version="1.10" tiledversion="1.10.2" name="biomes" tilewidth="16" tileheight="16" tilecount="53" columns="8">
+ <image source="biomes.png" width="128" height="112"/>
  <tile id="0" type="ocean">
   <properties>
    <property name="biome" value="ocean"/>
@@ -209,6 +209,61 @@
  <tile id="41" type="dead_marshes">
   <properties>
    <property name="biome" value="dead_marshes"/>
+  </properties>
+ </tile>
+ <tile id="42" type="dagorlad">
+  <properties>
+   <property name="biome" value="dagorlad"/>
+  </properties>
+ </tile>
+ <tile id="43" type="orocarni">
+  <properties>
+   <property name="biome" value="orocarni"/>
+  </properties>
+ </tile>
+ <tile id="44" type="emyn_muil">
+  <properties>
+   <property name="biome" value="emyn_muil"/>
+  </properties>
+ </tile>
+ <tile id="45" type="old_forest">
+  <properties>
+   <property name="biome" value="old_forest"/>
+  </properties>
+ </tile>
+ <tile id="46" type="trollshaws">
+  <properties>
+   <property name="biome" value="trollshaws"/>
+  </properties>
+ </tile>
+ <tile id="47" type="weather_hills">
+  <properties>
+   <property name="biome" value="weather_hills"/>
+  </properties>
+ </tile>
+ <tile id="48" type="arnor">
+  <properties>
+   <property name="biome" value="arnor"/>
+  </properties>
+ </tile>
+ <tile id="49" type="ithilien">
+  <properties>
+   <property name="biome" value="ithilien"/>
+  </properties>
+ </tile>
+ <tile id="50" type="withered_heath">
+  <properties>
+   <property name="biome" value="withered_heath"/>
+  </properties>
+ </tile>
+ <tile id="51" type="dunland">
+  <properties>
+   <property name="biome" value="dunland"/>
+  </properties>
+ </tile>
+ <tile id="52" type="isengard">
+  <properties>
+   <property name="biome" value="isengard"/>
   </properties>
  </tile>
 </tileset>

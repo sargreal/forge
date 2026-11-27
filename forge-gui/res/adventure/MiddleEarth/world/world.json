@@ -56,6 +56,17 @@
 		"world/biomes/ered_lithui.json",
 		"world/biomes/ered_lithui_east.json",
 		"world/biomes/ephel_duath_mid.json",
-		"world/biomes/dead_marshes.json"
+		"world/biomes/dead_marshes.json",
+		"world/biomes/dagorlad.json",
+		"world/biomes/orocarni.json",
+		"world/biomes/emyn_muil.json",
+		"world/biomes/old_forest.json",
+		"world/biomes/trollshaws.json",
+		"world/biomes/weather_hills.json",
+		"world/biomes/arnor.json",
+		"world/biomes/ithilien.json",
+		"world/biomes/withered_heath.json",
+		"world/biomes/dunland.json",
+		"world/biomes/isengard.json"
 	]
 }
