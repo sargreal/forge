@@ -46,13 +46,13 @@ PLANE = os.path.join(ROOT, "forge-gui", "res", "adventure", "MiddleEarth")
 FAMILY = {
     "ocean": "water",
     "northern_waste": "snow",
-    "fangorn": "forest", "lothlorien": "forest", "mirkwood": "forest", "mirkwood_south": "forest", "rivendell": "forest",
+    "fangorn": "forest", "old_forest": "forest", "lothlorien": "forest", "mirkwood": "forest", "mirkwood_south": "forest", "rivendell": "forest",
     "harad_waith": "desert", "south_gondor": "desert", "umbar": "desert", "brown_lands": "desert",
     "mordor": "shadow", "ered_lithui": "shadow", "ered_lithui_east": "shadow", "ephel_duath_1": "shadow",
-    "ephel_duath_mid": "shadow", "ephel_duath_2": "shadow", "dead_marshes": "shadow",
+    "ephel_duath_mid": "shadow", "isengard": "shadow", "ephel_duath_2": "shadow", "dead_marshes": "shadow",
     **{n: "mountain" for n in ["ered_luin", "ered_luin_south", "ered_mithrin", "ered_mithrin_east", "misty_mountains_north",
                                "misty_mountains", "misty_mountains_moria", "misty_mountains_south", "erebor", "iron_hills",
-                               "ered_nimrais_west", "ered_nimrais", "ered_nimrais_east"]},
+                               "ered_nimrais_west", "ered_nimrais", "ered_nimrais_east", "orocarni", "withered_heath"]},
     # everything else: plains (eriador, wilderland, anduin_vale, rhun, minhiriath, enedwaith, gondor, belfalas, tolfalas,
     # rohan, shire, harlindon, forlindon)
 }
@@ -67,6 +67,8 @@ LABEL = {
     "erebor": "ERE", "iron_hills": "IH", "ered_nimrais_west": "ENW", "ered_nimrais": "EN", "ered_nimrais_east": "ENE",
     "ered_lithui": "LI", "ered_lithui_east": "LIE", "ephel_duath_1": "ED1", "ephel_duath_mid": "EDM", "ephel_duath_2": "ED2",
     "dead_marshes": "DM",
+    "dagorlad": "DAG", "orocarni": "ORO", "emyn_muil": "EMU", "old_forest": "OLF", "trollshaws": "TRS", "weather_hills": "WEA",
+    "arnor": "ARN", "ithilien": "ITH", "withered_heath": "WHE", "dunland": "DUN", "isengard": "ISE",
 }
 
 
