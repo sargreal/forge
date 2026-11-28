@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1752">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1753">
  <tileset firstgid="1" source="biomes.tsx"/>
  <tileset firstgid="57" source="roads.tsx"/>
  <tileset firstgid="58" source="clutter.tsx"/>
@@ -1784,6 +1784,13 @@
   <object id="3" name="ME Isengard" type="poi" x="2228" y="629">
    <properties>
     <property name="displayName" value="Isengard"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1752" name="ME Wolf-Gate Camp" type="poi" x="2392" y="56">
+   <properties>
+    <property name="displayName" value="Wolf-Gate Camp"/>
     <property name="spriteIndex" type="int" value="0"/>
    </properties>
    <point/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1980">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1981">
  <tileset firstgid="1" source="biomes.tsx"/>
  <tileset firstgid="57" source="roads.tsx"/>
  <tileset firstgid="58" source="clutter.tsx"/>
@@ -2006,6 +2006,13 @@
   <object id="2" name="ME Mount Doom" type="poi" x="1923" y="91">
    <properties>
     <property name="displayName" value="Mount Doom"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1980" name="ME Ithilien Haradrim" type="poi" x="792" y="488">
+   <properties>
+    <property name="displayName" value="Haradrim Raiders"/>
     <property name="spriteIndex" type="int" value="0"/>
    </properties>
    <point/>

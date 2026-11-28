@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1919">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1922">
  <tileset firstgid="1" source="biomes.tsx"/>
  <tileset firstgid="57" source="roads.tsx"/>
  <tileset firstgid="58" source="clutter.tsx"/>
@@ -1957,6 +1957,27 @@
   <object id="4" name="ME Osgiliath" type="poi" x="383" y="2310">
    <properties>
     <property name="displayName" value="Osgiliath"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1919" name="ME Towers of the Teeth" type="poi" x="1816" y="776">
+   <properties>
+    <property name="displayName" value="Towers of the Teeth"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1920" name="ME Gollums Cave" type="poi" x="888" y="216">
+   <properties>
+    <property name="displayName" value="Gollum's Cave"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1921" name="ME Henneth Annun" type="poi" x="1176" y="1656">
+   <properties>
+    <property name="displayName" value="Henneth Annûn"/>
     <property name="spriteIndex" type="int" value="0"/>
    </properties>
    <point/>

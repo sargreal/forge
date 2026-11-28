@@ -37,7 +37,9 @@
 		"Wild Wolves",
 		"Orc Hunter"
 	],
-	"pointsOfInterest": [],
+	"pointsOfInterest": [
+		"ME Gollums Cave"
+	],
 	"structures": [
 		{
 			"N": 2,

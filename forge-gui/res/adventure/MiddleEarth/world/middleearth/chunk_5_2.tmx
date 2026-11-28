@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1975">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1976">
  <tileset firstgid="1" source="biomes.tsx"/>
  <tileset firstgid="57" source="roads.tsx"/>
  <tileset firstgid="58" source="clutter.tsx"/>
@@ -2007,6 +2007,13 @@
   <object id="3" name="ME Wilderland Town" type="poi" x="742" y="1123">
    <properties>
     <property name="displayName" value="Upper Vale"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1975" name="ME Dwarf Ruin" type="poi" x="488" y="8">
+   <properties>
+    <property name="displayName" value="Ruined Dwarf-hold"/>
     <property name="spriteIndex" type="int" value="0"/>
    </properties>
    <point/>

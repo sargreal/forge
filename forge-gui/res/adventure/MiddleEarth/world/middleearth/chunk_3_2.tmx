@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1951">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1953">
  <tileset firstgid="1" source="biomes.tsx"/>
  <tileset firstgid="57" source="roads.tsx"/>
  <tileset firstgid="58" source="clutter.tsx"/>
@@ -1989,6 +1989,20 @@
   <object id="4" name="ME Spider Nest" type="poi" x="1957" y="456">
    <properties>
     <property name="displayName" value="Spider Nest"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1951" name="ME Troll-hoard" type="poi" x="488" y="1512">
+   <properties>
+    <property name="displayName" value="Troll-hoard"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1952" name="ME Last Bridge" type="poi" x="88" y="1880">
+   <properties>
+    <property name="displayName" value="Last Bridge"/>
     <property name="spriteIndex" type="int" value="0"/>
    </properties>
    <point/>
