@@ -2000,12 +2000,5 @@
    </properties>
    <point/>
   </object>
-  <object id="1952" name="ME Last Bridge" type="poi" x="88" y="1880">
-   <properties>
-    <property name="displayName" value="Last Bridge"/>
-    <property name="spriteIndex" type="int" value="0"/>
-   </properties>
-   <point/>
-  </object>
  </objectgroup>
 </map>

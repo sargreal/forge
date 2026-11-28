@@ -38,8 +38,5 @@
 		"Fell Beast",
 		"Black Rider"
 	],
-	"pointsOfInterest": [
-		"ME Dagorlad War-camp",
-		"ME Towers of the Teeth"
-	]
+	"pointsOfInterest": ["ME Dagorlad War-camp", "ME Towers of the Teeth", "ME Morannon"]
 }

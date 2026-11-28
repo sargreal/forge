@@ -30,10 +30,6 @@
 	"LargePlainsRock"
 ],
 "enemies": ["Wild Wolves", "Wild Bear", "Beorning", "Warg Pack", "Great Eagle", "Snaga", "Warg Rider", "Easterling Warrior"],
-"pointsOfInterest": [
-	"ME Lake-town",
-	"ME Wilderland Town",
-	"ME Warg Den"
-],
+"pointsOfInterest": ["ME Lake-town", "ME Wilderland Town", "ME Warg Den", "ME Dale"],
 "structures": []
 }

@@ -37,9 +37,7 @@
 		"Wild Wolves",
 		"Orc Hunter"
 	],
-	"pointsOfInterest": [
-		"ME Gollums Cave"
-	],
+	"pointsOfInterest": ["ME Gollums Cave", "ME Emyn Muil Cave"],
 	"structures": [
 		{
 			"N": 2,

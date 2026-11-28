@@ -30,16 +30,6 @@
 	"LargePlainsRock"
 ],
 "enemies": ["Southern Ruffian", "Wild Wolves", "Dunlending Raider", "Ranger of the North", "Barrow-wight", "Hill Troll", "Stone Troll", "Black Rider", "Barrow-wight Lord", "Old Man Willow"],
-"pointsOfInterest": [
-	"ME Bree",
-	"ME Eriador Town",
-	"ME Barrow-downs",
-	"ME Old Forest",
-	"ME Weathertop",
-	"ME Fornost",
-	"ME Carn Dum",
-	"ME Ruffian Camp",
-	"ME Wolf Den Eriador"
-],
+"pointsOfInterest": ["ME Bree", "ME Eriador Town", "ME Barrow-downs", "ME Carn Dum", "ME Ruffian Camp", "ME Wolf Den Eriador"],
 "structures": []
 }

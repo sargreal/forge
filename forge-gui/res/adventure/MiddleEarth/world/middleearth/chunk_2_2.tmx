@@ -2313,20 +2313,6 @@
    </properties>
    <point/>
   </object>
-  <object id="2265" name="ME Old Man Willow" type="poi" x="328" y="1928">
-   <properties>
-    <property name="displayName" value="Old Man Willow"/>
-    <property name="spriteIndex" type="int" value="0"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="2266" name="ME Amon Sul" type="poi" x="1528" y="1928">
-   <properties>
-    <property name="displayName" value="Amon Sûl Ruins"/>
-    <property name="spriteIndex" type="int" value="0"/>
-   </properties>
-   <point/>
-  </object>
   <object id="2267" name="ME North Downs Camp" type="poi" x="104" y="88">
    <properties>
     <property name="displayName" value="Ranger Camp"/>

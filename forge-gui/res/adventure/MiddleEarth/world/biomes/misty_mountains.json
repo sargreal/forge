@@ -30,7 +30,7 @@
 	"Gravel"
 ],
 "enemies": ["Misty Mountains Goblin", "Snaga", "Warg Rider", "Stone Troll", "Cave Troll", "Great Eagle"],
-"pointsOfInterest": [],
+"pointsOfInterest": ["ME Goblin-town"],
 "structures": [
 	{
 		"N": 2,

@@ -38,8 +38,5 @@
 		"Barrow-wight",
 		"Spirit of Dol Guldur"
 	],
-	"pointsOfInterest": [
-		"ME Annuminas",
-		"ME North Downs Camp"
-	]
+	"pointsOfInterest": ["ME Annuminas", "ME North Downs Camp", "ME Fornost"]
 }

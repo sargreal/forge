@@ -38,9 +38,5 @@
 		"Hill Troll",
 		"Stone Troll"
 	],
-	"pointsOfInterest": [
-		"ME Troll-hoard",
-		"ME Last Bridge",
-		"ME Goblin-town"
-	]
+	"pointsOfInterest": ["ME Troll-hoard", "ME Trollshaws"]
 }

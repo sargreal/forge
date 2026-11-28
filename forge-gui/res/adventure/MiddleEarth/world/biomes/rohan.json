@@ -30,12 +30,6 @@
 	"Stone"
 ],
 "enemies": ["Rohirrim Rider", "Marshal of the Mark", "Uruk-hai", "Warg Rider", "Dunlending Raider", "Crebain", "Uruk-hai Berserker"],
-"pointsOfInterest": [
-	"ME Edoras",
-	"ME Helms Deep",
-	"ME Rohan Town",
-	"ME Isengard",
-	"ME Uruk Camp"
-],
+"pointsOfInterest": ["ME Edoras", "ME Helms Deep", "ME Rohan Town", "ME Uruk Camp"],
 "structures": []
 }

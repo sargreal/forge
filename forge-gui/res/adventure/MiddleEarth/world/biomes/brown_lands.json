@@ -30,8 +30,6 @@
 	"Gravel"
 ],
 "enemies": ["Easterling Warrior", "Mordor Orc", "Warg Rider", "Crebain", "Gollum", "Orc Captain"],
-"pointsOfInterest": [
-	"ME Emyn Muil Cave"
-],
+"pointsOfInterest": [],
 "structures": []
 }

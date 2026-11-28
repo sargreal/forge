@@ -38,7 +38,5 @@
 		"Uruk-hai Berserker",
 		"Uruk-hai Captain"
 	],
-	"pointsOfInterest": [
-		"ME Wolf-Gate Camp"
-	]
+	"pointsOfInterest": ["ME Wolf-Gate Camp", "ME Isengard"]
 }
