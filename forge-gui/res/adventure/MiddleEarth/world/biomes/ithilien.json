@@ -37,5 +37,10 @@
 		"Haradrim Assassin",
 		"Mûmak of Harad"
 	],
-	"pointsOfInterest": []
+	"pointsOfInterest": [
+		"ME Henneth Annun",
+		"ME Ithilien Haradrim",
+		"ME Morannon",
+		"ME Cirith Ungol"
+	]
 }

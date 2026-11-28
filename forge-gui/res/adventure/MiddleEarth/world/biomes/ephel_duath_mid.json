@@ -30,7 +30,10 @@
 	"Gravel"
 ],
 "enemies": ["Mordor Orc", "Brood of Shelob", "Olog-hai", "Fell Beast", "Ringwraith", "Stone Troll", "Haradrim Warrior", "Orc Captain"],
-"pointsOfInterest": ["ME Cirith Ungol", "ME Minas Morgul", "ME Shadow Cave"],
+"pointsOfInterest": [
+	"ME Minas Morgul",
+	"ME Shadow Cave"
+],
 "structures": [
 	{
 		"N": 2,

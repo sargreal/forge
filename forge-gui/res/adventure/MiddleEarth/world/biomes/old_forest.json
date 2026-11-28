@@ -38,7 +38,10 @@
 		"Barrow-wight",
 		"Old Man Willow"
 	],
-	"pointsOfInterest": [],
+	"pointsOfInterest": [
+		"ME Bombadils House",
+		"ME Old Man Willow"
+	],
 	"structures": [
 		{
 			"N": 2,

@@ -36,7 +36,14 @@
 		"Cold-drake",
 		"Grey Mountain Wyrm"
 	],
-	"pointsOfInterest": [],
+	"pointsOfInterest": [
+		"ME Dragon Lair",
+		"ME Dwarf Ruin",
+		"ME Dale",
+		"ME Thranduils Halls",
+		"ME Iron Hills",
+		"ME Iron Mine"
+	],
 	"structures": [
 		{
 			"N": 2,

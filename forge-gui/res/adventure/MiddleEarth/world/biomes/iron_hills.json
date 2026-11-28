@@ -30,10 +30,7 @@
 	"Gravel"
 ],
 "enemies": ["Dwarf of Erebor", "Iron Hills Warlord", "Dwarf Prospector", "Easterling Warrior", "Cold-drake"],
-"pointsOfInterest": [
-	"ME Iron Hills",
-	"ME Iron Mine"
-],
+"pointsOfInterest": [],
 "structures": [
 	{
 		"N": 2,

@@ -38,7 +38,10 @@
 		"Dwarf of Erebor",
 		"Iron Hills Warlord"
 	],
-	"pointsOfInterest": [],
+	"pointsOfInterest": [
+		"ME Orocarni Warband",
+		"ME Orocarni Hold"
+	],
 	"structures": [
 		{
 			"N": 2,

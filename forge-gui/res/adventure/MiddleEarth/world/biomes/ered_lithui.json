@@ -30,9 +30,7 @@
 	"Gravel"
 ],
 "enemies": ["Mordor Orc", "Olog-hai", "Orc Captain", "Fell Beast", "Black Rider"],
-"pointsOfInterest": [
-	"ME Morannon"
-],
+"pointsOfInterest": [],
 "structures": [
 	{
 		"N": 2,
