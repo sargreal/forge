@@ -1,0 +1,68 @@
+{
+"startPointX": 0.406667,
+"startPointY": 0.344167,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "rivendell",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Green",
+"terrain": [
+	{
+		"spriteName": "Green_1",
+		"max": 0.25,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Green_2",
+		"min": 0.5,
+		"max": 1,
+		"resolution": 8
+	}
+],
+"width": 0.011667,
+"height": 0.012500,
+"color": "8fd18a",
+"spriteNames": [
+	"WoodTree",
+	"WoodTree2",
+	"Bush",
+	"Stump",
+	"Moss",
+	"Flower"
+],
+"enemies": ["Ranger of the North", "Elf-lord of Rivendell", "Wild Wolves", "Stone Troll", "Hill Troll", "Warg Pack"],
+"pointsOfInterest": [
+	"Island Capital"
+],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/white_structures.atlas",
+		"sourcePath": "world/structures/models/white.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.4,
+		"width": 0.4,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "tree",
+				"color": "ff8000",
+				"collision": true
+			},
+			{
+				"name": "tree2",
+				"color": "008000",
+				"collision": true
+			},
+			{
+				"name": "tree3",
+				"color": "00ff00",
+				"collision": true
+			}
+		]
+	}
+]
+}

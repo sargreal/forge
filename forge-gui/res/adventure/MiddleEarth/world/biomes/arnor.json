@@ -1,0 +1,42 @@
+{
+	"startPointX": 0.25,
+	"startPointY": 0.27,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "arnor",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Green",
+	"terrain": [
+		{
+			"spriteName": "Green_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Green_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.09,
+	"height": 0.05,
+	"color": "6e8a78",
+	"spriteNames": [
+		"Stone",
+		"LargePlainsRock",
+		"Stump",
+		"DarkGras",
+		"Skull",
+		"Bush"
+	],
+	"enemies": [
+		"Restless Barrow-wight",
+		"Barrow-wight Thrall",
+		"Wild Wolves",
+		"Ranger of the North",
+		"Barrow-wight",
+		"Spirit of Dol Guldur"
+	],
+	"pointsOfInterest": ["ME Annuminas", "ME North Downs Camp", "ME Fornost"]
+}

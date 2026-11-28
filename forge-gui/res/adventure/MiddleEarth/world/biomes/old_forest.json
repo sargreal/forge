@@ -1,0 +1,63 @@
+{
+	"startPointX": 0.245,
+	"startPointY": 0.365,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "old_forest",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Green",
+	"terrain": [
+		{
+			"spriteName": "Green_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Green_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.025,
+	"height": 0.035,
+	"color": "2a5e2a",
+	"spriteNames": [
+		"DarkWood",
+		"WoodTree2",
+		"Moss",
+		"Stump",
+		"Shroom"
+	],
+	"enemies": [
+		"Wild Wolves",
+		"Wolf",
+		"Wild Bear",
+		"Badger",
+		"Huorn",
+		"Barrow-wight",
+		"Old Man Willow"
+	],
+	"pointsOfInterest": ["ME Bombadils House", "ME Old Forest"],
+	"structures": [
+		{
+			"N": 2,
+			"x": 0.5,
+			"y": 0.5,
+			"structureAtlasPath": "world/structures/structures.atlas",
+			"sourcePath": "world/structures/models/forest.png",
+			"maskPath": "world/structures/masks/circle.png",
+			"height": 0.7,
+			"width": 0.7,
+			"symmetry": 8,
+			"periodicOutput": false,
+			"mappingInfo": [
+				{
+					"name": "forest",
+					"color": "007000",
+					"collision": true
+				}
+			]
+		}
+	]
+}

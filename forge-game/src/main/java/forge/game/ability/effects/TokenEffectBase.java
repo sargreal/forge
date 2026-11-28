@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
+import forge.card.GamePieceType;
 import forge.game.card.*;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -16,6 +17,7 @@ import com.google.common.collect.Table;
 import forge.GameCommand;
 import forge.game.Game;
 import forge.game.GameEntity;
+import forge.game.GameEntityCounterTable;
 import forge.game.ability.AbilityKey;
 import forge.game.ability.AbilityUtils;
 import forge.game.ability.SpellAbilityEffect;
@@ -73,10 +75,11 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
         final Card host = sa.getHostCard();
         final Game game = host.getGame();
         long timestamp = game.getNextTimestamp();
+        Set<Card> originalTokens = Sets.newHashSet(tokenTable.columnKeySet());
 
         // support PlayerCollection for affected
         Set<Player> toRemove = Sets.newHashSet();
-        for (Player p : Sets.newHashSet(tokenTable.rowKeySet())) {
+        for (Player p : Lists.newArrayList(tokenTable.rowKeySet())) {
             final Map<AbilityKey, Object> repParams = AbilityKey.mapFromAffected(p);
             repParams.put(AbilityKey.Token, tokenTable);
             repParams.put(AbilityKey.Cause, sa);
@@ -113,6 +116,8 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
 
             for (int i = 0; i < cellAmount; i++) {
                 Card tok = new CardCopyService(prototype).copyCard(true);
+                // disconnect from prototype
+                tok.getStates().forEach(cs -> tok.getState(cs).resetOriginalHost(prototype));
                 // Crafty Cutpurse would change under which control it does enter,
                 // but it shouldn't change who creates the token
                 tok.setOwner(creator);
@@ -120,7 +125,7 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                     tok.setController(controller, timestamp);
                 }
                 tok.setGameTimestamp(timestamp);
-                tok.setToken(true);
+                tok.setGamePieceType(GamePieceType.TOKEN);
 
                 // do effect stuff with the token
                 if (sa.hasParam("TokenTapped")) {
@@ -135,7 +140,9 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                 if (sa.hasParam("WithCountersType")) {
                     CounterType cType = CounterType.getType(sa.getParam("WithCountersType"));
                     int cAmount = AbilityUtils.calculateAmount(host, sa.getParamOrDefault("WithCountersAmount", "1"), sa);
-                    tok.addEtbCounter(cType, cAmount, creator);
+                    GameEntityCounterTable table = new GameEntityCounterTable();
+                    table.put(creator, tok, cType, cAmount);
+                    moveParams.put(AbilityKey.CounterTable, table);
                 }
 
                 if (sa.hasParam("AddTriggersFrom")) {
@@ -147,7 +154,7 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                     }
                 }
 
-                if (clone) {
+                if (clone || prototype.getCopiedPermanent() != null) {
                     tok.setCopiedPermanent(prototype);
                 }
 
@@ -170,7 +177,7 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                 }
 
                 if (!pumpKeywords.isEmpty()) {
-                    moved.addChangedCardKeywords(pumpKeywords, Lists.newArrayList(), false, timestamp, 0);
+                    moved.addChangedCardKeywords(pumpKeywords, Lists.newArrayList(), false, timestamp, null);
                     addPumpUntil(sa, moved, timestamp);
                 }
 
@@ -189,6 +196,10 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
                 moved.updateStateForView();
 
                 if (sa.hasParam("RememberTokens")) {
+                    host.addRemembered(moved);
+                }
+                // used for some reflexive trigger
+                if (sa.hasParam("RememberOriginalTokens") && originalTokens.contains(prototype)) {
                     host.addRemembered(moved);
                 }
                 if (sa.hasParam("ImprintTokens")) {
@@ -253,7 +264,7 @@ public abstract class TokenEffectBase extends SpellAbilityEffect {
             tok.attachToEntity(aTo, sa);
             return true;
         }
-        // not a GameEntity, cant be attach
+        // not a GameEntity, can't be attach
         return false;
     }
 

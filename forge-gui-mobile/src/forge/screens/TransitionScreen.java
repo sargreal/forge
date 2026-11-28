@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Timer;
 import forge.Forge;
 import forge.Graphics;
+import forge.adventure.data.EnemyData;
 import forge.adventure.scene.ArenaScene;
 import forge.adventure.util.Config;
 import forge.adventure.util.Controls;
@@ -21,6 +22,7 @@ import forge.gui.GuiBase;
 import forge.sound.SoundSystem;
 import forge.toolbox.FContainer;
 import forge.toolbox.FProgressBar;
+import forge.util.ScreenUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class TransitionScreen extends FContainer {
@@ -29,13 +31,19 @@ public class TransitionScreen extends FContainer {
     Runnable runnable;
     TextureRegion textureRegion, screenUIBackground, playerAvatar;
     Texture vsTexture;
-    String enemyAtlasPath, playerAvatarName, enemyAvatarName;
+    String enemyAtlasPath, playerAvatarName, enemyAvatarName, enemyDisplayName;
     private String message = "", playerRecord = "", enemyRecord = "";
-    boolean matchTransition, isloading, isIntro, isFadeMusic, isArenaScene;
+    boolean matchTransition, isloading, isIntro, isFadeMusic, isArenaScene, isAlternate;
+    public boolean afterMatch, eventDuel, afterEvent;
+    private boolean snap = true;
     GlyphLayout layout;
 
     public TransitionScreen(Runnable proc, TextureRegion screen, boolean enterMatch, boolean loading) {
         this(proc, screen, enterMatch, loading, false, false);
+    }
+
+    public TransitionScreen(Runnable proc, TextureRegion screen, String message) {//simple for custom transition
+        this(proc, screen, true, false, false, false, false, message, null, "", "", "", "", "");
     }
 
     public TransitionScreen(Runnable proc, TextureRegion screen, boolean enterMatch, boolean loading, String loadingMessage) {
@@ -51,6 +59,9 @@ public class TransitionScreen extends FContainer {
     }
 
     public TransitionScreen(Runnable proc, TextureRegion screen, boolean enterMatch, boolean loading, boolean intro, boolean fadeMusic, String loadingMessage, TextureRegion player, String enemyAtlas, String playerName, String enemyName, String playerRecord, String enemyRecord) {
+        this(proc, screen, false, enterMatch, loading, intro, fadeMusic, loadingMessage, player, enemyAtlas, playerName, enemyName, playerRecord, enemyRecord);
+    }
+    public TransitionScreen(Runnable proc, TextureRegion screen, boolean alternate, boolean enterMatch, boolean loading, boolean intro, boolean fadeMusic, String loadingMessage, TextureRegion player, String enemyAtlas, String playerName, String enemyName, String playerRecord, String enemyRecord) {
         progressBar = new FProgressBar();
         progressBar.setMaximum(100);
         progressBar.setPercentMode(true);
@@ -62,6 +73,7 @@ public class TransitionScreen extends FContainer {
         isloading = loading;
         isIntro = intro;
         isFadeMusic = fadeMusic;
+        isAlternate = alternate;
         message = loadingMessage;
         this.playerRecord = playerRecord;
         this.enemyRecord = enemyRecord;
@@ -76,9 +88,13 @@ public class TransitionScreen extends FContainer {
         playerAvatar = player;
         playerAvatarName = playerName;
         enemyAvatarName = enemyName;
+        enemyDisplayName = EnemyData.getDisplayName(enemyName);
         enemyAtlasPath = enemyAtlas;
         vsTexture = Forge.getAssets().fallback_skins().get("vs");
         layout = new GlyphLayout();
+    }
+
+    public TransitionScreen() {
     }
 
     public FProgressBar getProgressBar() {
@@ -99,7 +115,7 @@ public class TransitionScreen extends FContainer {
     }
 
     private class BGAnimation extends ForgeAnimation {
-        float DURATION = isArenaScene ? 1.2f : 0.6f;
+        float DURATION = isArenaScene || isAlternate ? 1.2f : 0.6f;
         private float progress = 0;
         TextureRegion enemyAvatar;
 
@@ -111,6 +127,7 @@ public class TransitionScreen extends FContainer {
             } else if (percentage > 1) {
                 percentage = 1;
             }
+            FSkinTexture bgTexture = Forge.isMobileAdventureMode ? FSkinTexture.ADV_BG_TEXTURE : FSkinTexture.BG_TEXTURE;
             if (isFadeMusic) {
                 try {
                     //fade out volume
@@ -119,9 +136,13 @@ public class TransitionScreen extends FContainer {
                     e.printStackTrace();
                 }
             }
-            if (isloading) {
+            if (isAlternate) {
                 g.fillRect(Color.BLACK, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
-                FSkinTexture bgTexture = Forge.isMobileAdventureMode ? FSkinTexture.ADV_BG_TEXTURE : FSkinTexture.BG_TEXTURE;
+                if (textureRegion != null) {
+                    g.drawPortalFade(textureRegion, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight(), Math.min(percentage, 1f), true);
+                }
+            } else if (isloading) {
+                g.fillRect(Color.BLACK, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
                 if (bgTexture != null) {
                     g.setAlphaComposite(percentage);
                     g.drawImage(bgTexture, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
@@ -131,8 +152,8 @@ public class TransitionScreen extends FContainer {
                 xmod *= 1f;//static logo only
                 float ymod;
                 if (FSkin.getLogo() != null) {
-                    ymod = Forge.getScreenHeight() / 2f + (FSkin.getLogo().getHeight() * xmod) / 2;
-                    g.drawImage(FSkin.getLogo(), Forge.getScreenWidth() / 2f - (FSkin.getLogo().getWidth() * xmod) / 2, Forge.getScreenHeight() / 2f - (FSkin.getLogo().getHeight() * xmod) / 2, FSkin.getLogo().getWidth() * xmod, FSkin.getLogo().getHeight() * xmod);
+                    ymod = Forge.isMobileAdventureMode && Forge.isLandscapeMode() ? 0.85f : 1f;
+                    g.drawImage(FSkin.getLogo(), Forge.getScreenWidth() / 2f - (FSkin.getLogo().getWidth() * xmod) / 2, (Forge.getScreenHeight() / 2f - (FSkin.getLogo().getHeight() * xmod) / 2) * ymod, FSkin.getLogo().getWidth() * xmod, FSkin.getLogo().getHeight() * xmod);
                 } else {
                     ymod = Forge.getScreenHeight() / 2f + (FSkinImage.LOGO.getHeight() * xmod) / 1.5f;
                     g.drawImage(FSkinImage.LOGO, Forge.getScreenWidth() / 2f - (FSkinImage.LOGO.getWidth() * xmod) / 2, Forge.getScreenHeight() / 2f - (FSkinImage.LOGO.getHeight() * xmod) / 1.5f, FSkinImage.LOGO.getWidth() * xmod, FSkinImage.LOGO.getHeight() * xmod);
@@ -160,15 +181,21 @@ public class TransitionScreen extends FContainer {
                 enemyAvatar = Config.instance().getAtlas(enemyAtlasPath).createSprite("Avatar");
                 if (enemyAvatar != null)
                     enemyAvatar.flip(true, false);
-                float fontScale = GuiBase.isAndroid() ? 14f : 10f;
+                float fontScale = GuiBase.isAndroid() ? 12f : 10f;
                 BitmapFont font = Controls.getBitmapFont("default", fontScale / (screenW / screenH));
                 if (textureRegion != null) {
-                    if (isArenaScene)
-                        g.drawImage(screenUIBackground, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
+                    float value = 1 - percentage;
+                    if (eventDuel)
+                        g.setAlphaComposite(percentage);
                     else
+                        g.setAlphaComposite(value > 0.35f ? value : 0.35f);
+                    if (isArenaScene) {
+                        g.drawImage(screenUIBackground, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
+                    } else if (eventDuel) {
                         g.drawImage(FSkinTexture.ADV_BG_TEXTURE, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
-                    g.setAlphaComposite(1 - percentage);
-                    g.drawImage(textureRegion, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
+                    } else {
+                        g.drawGrayTransitionImage(textureRegion, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight(), false, percentage);
+                    }
                     g.setAlphaComposite(oldAlpha);
                 }
                 String p1Record = "0 - 0";
@@ -196,8 +223,8 @@ public class TransitionScreen extends FContainer {
                     float enemyAvatarX = screenW - screenW / 4 - (scale / 2 * percentage);
                     float enemyAvatarY = centerY - scale / 2;
                     g.drawImage(enemyAvatar, enemyAvatarX, enemyAvatarY, scale, scale);
-                    layout.setText(font, enemyAvatarName);
-                    g.drawText(enemyAvatarName, font, screenW - screenW / 4 - layout.width / 2, enemyAvatarY - layout.height, Color.WHITE, percentage);
+                    layout.setText(font, enemyDisplayName);
+                    g.drawText(enemyDisplayName, font, screenW - screenW / 4 - layout.width / 2, enemyAvatarY - layout.height, Color.WHITE, percentage);
                     layout.setText(font, p2Record);
                     g.drawText(p2Record, font, screenW - screenW / 4 - layout.width / 2, enemyAvatarY - layout.height * 2.5f, Color.WHITE, percentage);
                     //vs
@@ -216,8 +243,8 @@ public class TransitionScreen extends FContainer {
                     float vsScale = (screenW / 3.2f);
                     g.drawHueShift(vsTexture, centerY - vsScale / 2, centerX - vsScale / 2, vsScale, vsScale, percentage * 4);
                     //names
-                    layout.setText(font, enemyAvatarName);
-                    g.drawText(enemyAvatarName, font, centerY - layout.width / 2, screenW - scale / 4, Color.WHITE, percentage);
+                    layout.setText(font, enemyDisplayName);
+                    g.drawText(enemyDisplayName, font, centerY - layout.width / 2, screenW - scale / 4, Color.WHITE, percentage);
                     layout.setText(font, playerAvatarName);
                     g.drawText(playerAvatarName, font, centerY - layout.width / 2, 0 + scale / 4, Color.WHITE, percentage);
                 }
@@ -238,8 +265,19 @@ public class TransitionScreen extends FContainer {
                     }
                 }
             } else {
-                if (textureRegion != null)
-                    g.drawGrayTransitionImage(textureRegion, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight(), false, percentage);
+                if (afterEvent) {
+                    if (bgTexture != null)
+                        g.drawImage(bgTexture, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight());
+                    if (FSkin.getLogo() != null) {
+                        float xmod = Forge.getScreenHeight() > 2000 ? 1.5f : 1f;
+                        xmod *= 1f;//static logo only
+                        float ymod = 1f;//Forge.isMobileAdventureMode && Forge.isLandscapeMode() ? 0.85f : 1f;
+                        g.drawImage(FSkin.getLogo(), Forge.getScreenWidth() / 2f - (FSkin.getLogo().getWidth() * xmod) / 2, (Forge.getScreenHeight() / 2f - (FSkin.getLogo().getHeight() * xmod) / 2) * ymod, FSkin.getLogo().getWidth() * xmod, FSkin.getLogo().getHeight() * xmod);
+                    }
+                } else if (textureRegion != null) {
+                    float value = afterMatch ? 0.6f - percentage : percentage;
+                    g.drawGrayTransitionImage(textureRegion, 0, 0, Forge.getScreenWidth(), Forge.getScreenHeight(), isArenaScene, value);
+                }
             }
         }
 
@@ -253,6 +291,11 @@ public class TransitionScreen extends FContainer {
 
         @Override
         protected void onEnd(boolean endingAll) {
+            if (snap && (isArenaScene || eventDuel)) {
+                snap = false;
+                // overwrite initial capture
+                ScreenUtil.getInstance().takeScreenshot();
+            }
             if (runnable != null) {
                 if (isMatchTransition()) {
                     Timer.schedule(new Timer.Task() {

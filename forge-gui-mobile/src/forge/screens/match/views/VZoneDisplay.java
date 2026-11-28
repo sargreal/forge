@@ -4,16 +4,18 @@ import java.util.List;
 
 import forge.Forge;
 import forge.Graphics;
+import forge.game.card.CardView;
 import forge.game.player.PlayerView;
 import forge.game.zone.ZoneType;
+import forge.screens.match.MatchController;
 import forge.toolbox.FCardPanel;
 import forge.toolbox.FDisplayObject;
+import forge.util.collect.FCollectionView;
 
 public class VZoneDisplay extends VCardDisplayArea {
     private final PlayerView player;
     private final ZoneType zoneType;
     private FCardPanel revealedPanel;
-
     public VZoneDisplay(PlayerView player0, ZoneType zoneType0) {
         player = player0;
         zoneType = zoneType0;
@@ -25,7 +27,8 @@ public class VZoneDisplay extends VCardDisplayArea {
 
     @Override
     public void update() {
-        refreshCardPanels(player.getCards(zoneType));
+        FCollectionView<CardView> cards = player.getCards(zoneType);
+        refreshCardPanels(MatchController.instance.isNetGame() ? cards.threadSafeIterable() : cards);
     }
 
     @Override
@@ -37,11 +40,11 @@ public class VZoneDisplay extends VCardDisplayArea {
             float y = screenToLocalY(screenY);
             if (revealedPanel.contains(x, y)) { return; }
 
-            int idx = cardPanels.size() - 1;
+            int idx = cardPanels.get().size() - 1;
             for (int i = getChildCount() - 2; i >= 0; i--) {
                 final FDisplayObject cardPanel = getChildAt(i);
                 if (cardPanel.contains(x, y)) {
-                    idx = cardPanels.indexOf(cardPanel);
+                    idx = cardPanels.get().indexOf(cardPanel);
                     break;
                 }
             }
@@ -52,11 +55,14 @@ public class VZoneDisplay extends VCardDisplayArea {
     @Override
     public boolean pan(float x, float y, float deltaX, float deltaY, boolean moreVertical) {
         if (revealedPanel == null) { //if no overlapping panels, just pan scroll as normal
-            return super.pan(x, y, deltaX, deltaY, moreVertical);
+            return super.pan(x, y, deltaX, deltaY, moreVertical); //base class tracks the card under the finger
         }
-        int idx = cardPanels.size() - 1;
+        /*if (Forge.isLandscapeMode()) {
+            updateDragPanel(x, y);
+        }*/
+        int idx = cardPanels.get().size() - 1;
         for (int i = idx - 1; i >= 0; i--) {
-            if (cardPanels.get(i).contains(x, y)) {
+            if (cardPanels.get().get(i).contains(x, y)) {
                 idx = i;
                 break;
             }
@@ -66,16 +72,15 @@ public class VZoneDisplay extends VCardDisplayArea {
     }
 
     private void setRevealedPanel(int idx) {
-        try {
-            revealedPanel = cardPanels.get(idx); //on network match, when zoomed and cast a card would randomly trigger the bug
-        } catch (Exception e) {                  //before it was arrayindexoutofbounds, then indexoutofbounds, so just use a general exception
-            e.printStackTrace();
+        if (idx >= 0 && idx < cardPanels.get().size())
+            revealedPanel = cardPanels.get().get(idx);
+        else
             return;
-        }
+
         clearChildren();
-        if (Forge.isLandscapeMode()) {
+        if (Forge.isLandscapeMode() && layoutVerticallyForLandscapeMode()) {
             //for landscape mode, just show revealed card on top
-            for (CardAreaPanel cardPanel : cardPanels) {
+            for (CardAreaPanel cardPanel : cardPanels.get()) {
                 if (cardPanel != revealedPanel) {
                     add(cardPanel);
                 }
@@ -83,16 +88,16 @@ public class VZoneDisplay extends VCardDisplayArea {
         }
         else {
             //for portrait mode, cascade cards back from revealed panel
-            int maxIdx = cardPanels.size() - 1;
+            int maxIdx = cardPanels.get().size() - 1;
             int offset = Math.max(idx, maxIdx - idx);
             for (int i = offset; i > 0; i--) {
                 int idx1 = idx - i;
                 int idx2 = idx + i;
                 if (idx1 >= 0) {
-                    add(cardPanels.get(idx1));
+                    add(cardPanels.get().get(idx1));
                 }
                 if (idx2 <= maxIdx) {
-                    add(cardPanels.get(idx2));
+                    add(cardPanels.get().get(idx2));
                 }
             }
         }
@@ -114,7 +119,12 @@ public class VZoneDisplay extends VCardDisplayArea {
     }
 
     protected boolean layoutVerticallyForLandscapeMode() {
-        return true;
+        return !VPlayerPanel.isAltZoneLayout();
+    }
+
+    @Override
+    protected boolean isHorizontalStrip() {
+        return Forge.isLandscapeMode() && !layoutVerticallyForLandscapeMode();
     }
 
     @Override
@@ -123,7 +133,7 @@ public class VZoneDisplay extends VCardDisplayArea {
             return new ScrollBounds(visibleWidth, visibleHeight);
         }
 
-        orderedCards.clear();
+        orderedCards.get().clear();
 
         if (Forge.isLandscapeMode() && layoutVerticallyForLandscapeMode()) {
             return layoutAndGetScrollBoundsLandscape(visibleWidth, visibleHeight);
@@ -135,27 +145,31 @@ public class VZoneDisplay extends VCardDisplayArea {
         float cardWidth = getCardWidth(cardHeight);
         float dx = cardWidth;
 
-        float totalWidth = cardWidth * cardPanels.size();
+        float totalWidth = cardWidth * cardPanels.get().size();
+        final boolean centered = VPlayerPanel.isCompactLayout() && totalWidth < visibleWidth; //compact popup zones center their cards
+        if (centered) {
+            x = (visibleWidth - totalWidth) / 2;
+        }
         if (totalWidth > visibleWidth && totalWidth <= visibleWidth * 2) {
             //allow overlapping cards up to one half of the card,
             //otherwise don't overlap and allow scrolling horizontally
             dx *= (visibleWidth - cardWidth) / (totalWidth - cardWidth);
-            dx += FCardPanel.PADDING / cardPanels.size(); //make final card go right up to right edge of screen
+            dx += FCardPanel.PADDING / cardPanels.get().size(); //make final card go right up to right edge of screen
             if (revealedPanel == null) {
-                revealedPanel = cardPanels.get(cardPanels.size() - 1);
+                revealedPanel = cardPanels.get().get(cardPanels.get().size() - 1);
             }
         }
         else {
             revealedPanel = null;
         }
 
-        for (CardAreaPanel cardPanel : cardPanels) {
-            orderedCards.add(cardPanel.getCard());
+        for (CardAreaPanel cardPanel : cardPanels.get()) {
+            orderedCards.get().add(cardPanel.getCard());
             cardPanel.setBounds(x, y, cardWidth, cardHeight);
             x += dx;
         }
 
-        return new ScrollBounds(x, visibleHeight);
+        return new ScrollBounds(centered ? visibleWidth : x, visibleHeight);
     }
 
     private ScrollBounds layoutAndGetScrollBoundsLandscape(float visibleWidth, float visibleHeight) {
@@ -166,7 +180,7 @@ public class VZoneDisplay extends VCardDisplayArea {
         float dy = cardHeight;
         float scrollHeight;
 
-        int rowCount = (int)Math.ceil((float)cardPanels.size() / 2f);
+        int rowCount = (int)Math.ceil((float)cardPanels.get().size() / 2f);
         float totalHeight = cardHeight * rowCount;
         if (totalHeight > visibleHeight && totalHeight <= visibleHeight * 3) {
             //allow overlapping cards up to one third of the card,
@@ -174,7 +188,7 @@ public class VZoneDisplay extends VCardDisplayArea {
             dy *= (visibleHeight - cardHeight) / (totalHeight - cardHeight);
             dy += FCardPanel.PADDING / rowCount; //make final card go right up to right edge of screen
             if (revealedPanel == null) {
-                revealedPanel = cardPanels.get(cardPanels.size() - 1);
+                revealedPanel = cardPanels.get().get(cardPanels.get().size() - 1);
             }
             scrollHeight = visibleHeight;
         }
@@ -183,10 +197,10 @@ public class VZoneDisplay extends VCardDisplayArea {
             scrollHeight = rowCount * dy;
         }
 
-        for (CardAreaPanel cardPanel : cardPanels) {
-            orderedCards.add(cardPanel.getCard());
+        for (CardAreaPanel cardPanel : cardPanels.get()) {
+            orderedCards.get().add(cardPanel.getCard());
             cardPanel.setBounds(x, y, cardWidth, cardHeight);
-            if (orderedCards.size() % 2 == 0) {
+            if (orderedCards.get().size() % 2 == 0) {
                 x = 0;
                 y += dy;
             }

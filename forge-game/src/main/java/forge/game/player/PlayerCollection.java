@@ -1,15 +1,16 @@
 package forge.game.player;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
+import forge.game.card.Card;
 import forge.game.card.CardCollection;
 import forge.game.zone.ZoneType;
 import forge.util.Aggregates;
+import forge.util.IterableUtil;
 import forge.util.collect.FCollection;
 
 public class PlayerCollection extends FCollection<Player> {
@@ -29,32 +30,38 @@ public class PlayerCollection extends FCollection<Player> {
 
     // card collection functions
     public final CardCollection getCardsIn(ZoneType zone) {
-        CardCollection result = new CardCollection();
+        final CardCollection result = new CardCollection(0);
         for (Player p : this) {
-            result.addAll(p.getCardsIn(zone));
+            // one zone type: the cards of different players are distinct, no duplicate check needed
+            result.addAllUnique(p.getCardsIn(zone));
         }
         return result;
     }
 
     public final CardCollection getCardsIn(Iterable<ZoneType> zones) {
-        CardCollection result = new CardCollection();
+        final CardCollection result = new CardCollection(0);
         for (Player p : this) {
-            result.addAll(p.getCardsIn(zones));
+            final Collection<Card> cards = p.getCardsIn(zones);
+            final int s = cards.size();
+            if (s > 0) {
+                result.ensureCapacity(result.size() + s);
+                result.addAll(cards);
+            }
         }
         return result;
     }
     
     public final CardCollection getCreaturesInPlay() {
-        CardCollection result = new CardCollection();
+        final CardCollection result = new CardCollection(0);
         for (Player p : this) {
-            result.addAll(p.getCreaturesInPlay());
+            result.addAllUnique(p.getCreaturesInPlay());
         }
         return result;
     }
     
     // filter functions with predicate
     public PlayerCollection filter(Predicate<Player> pred) {
-        return new PlayerCollection(Iterables.filter(this, pred));
+        return new PlayerCollection(IterableUtil.filter(this, pred));
     }
     
     // sort functions with Comparator
@@ -68,6 +75,7 @@ public class PlayerCollection extends FCollection<Player> {
     }
     
     // value functions with Function
+    //TODO: Could probably move these up to FCollectionView, apply them, and trim off a bunch of "Aggregates" clauses.
     public Integer min(Function<Player, Integer> func) {
         return Aggregates.min(this, func);
     }

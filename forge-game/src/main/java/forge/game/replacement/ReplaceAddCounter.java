@@ -1,11 +1,11 @@
 package forge.game.replacement;
 
 import java.util.Map;
+import java.util.Optional;
 
-import org.apache.commons.lang3.ObjectUtils;
+import com.google.common.collect.Multiset;
 
-import com.google.common.base.Optional;
-
+import forge.game.GameEntity;
 import forge.game.ability.AbilityKey;
 import forge.game.card.Card;
 import forge.game.card.CounterType;
@@ -18,12 +18,6 @@ import forge.game.spellability.SpellAbility;
  */
 public class ReplaceAddCounter extends ReplacementEffect {
 
-    /**
-     *
-     * ReplaceProduceMana.
-     * @param mapParams &emsp; HashMap<String, String>
-     * @param host &emsp; Card
-     */
     public ReplaceAddCounter(final Map<String, String> mapParams, final Card host, final boolean intrinsic) {
         super(mapParams, host, intrinsic);
     }
@@ -58,7 +52,7 @@ public class ReplaceAddCounter extends ReplacementEffect {
             return false;
         }
 
-        if (runParams.containsKey(AbilityKey.ETB) && (Boolean)runParams.get(AbilityKey.ETB) && !canReplaceETB(runParams)) {
+        if (runParams.containsKey(AbilityKey.Destination) && !canReplaceETB(runParams)) {
             return false;
         }
 
@@ -82,24 +76,31 @@ public class ReplaceAddCounter extends ReplacementEffect {
 
     public boolean hasAnyInCounterMap(Map<AbilityKey, Object> runParams) {
         @SuppressWarnings("unchecked")
-        Map<Optional<Player>, Map<CounterType, Integer>> counterMap = (Map<Optional<Player>, Map<CounterType, Integer>>) runParams.get(AbilityKey.CounterMap);
+        Map<Optional<Player>, Multiset<CounterType>> counterMap = (Map<Optional<Player>, Multiset<CounterType>>) runParams.get(AbilityKey.CounterMap);
+        GameEntity affected = (GameEntity) runParams.get(AbilityKey.Affected);
 
-        for (Map.Entry<Optional<Player>, Map<CounterType, Integer>> e : counterMap.entrySet()) {
-            if (!matchesValidParam("ValidSource", e.getKey().orNull())) {
+        for (Map.Entry<Optional<Player>, Multiset<CounterType>> e : counterMap.entrySet()) {
+            if (!matchesValidParam("ValidSource", e.getKey().orElse(null))) {
                 continue;
             }
-            if (hasParam("ValidCounterType")) {
-                CounterType ct = CounterType.getType(getParam("ValidCounterType"));
-                if (!e.getValue().containsKey(ct)) {
+            for (CounterType ct : e.getValue().elementSet()) {
+                if (hasParam("ValidCounterType") && !ct.equals(CounterType.getType(getParam("ValidCounterType")))) {
                     continue;
                 }
-                if (0 >= ObjectUtils.defaultIfNull(e.getValue().get(ct), 0)) {
-                    continue;
+                if (!runParams.containsKey(AbilityKey.Destination) || affected.canReceiveCounters(ct, runParams)) {
+                    return true;
                 }
             }
-            return true;
         }
 
         return false;
+    }
+
+    @Override
+    public boolean modeCheck(ReplacementType event, Map<AbilityKey, Object> runParams) {
+        if (event.equals(ReplacementType.Moved) && runParams.containsKey(AbilityKey.CounterMap)) {
+            return true;
+        }
+        return super.modeCheck(event, runParams);
     }
 }

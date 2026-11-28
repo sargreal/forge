@@ -10,6 +10,7 @@ import forge.adventure.util.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -19,7 +20,6 @@ public class PointOfInterest implements Serializable, SaveFileContent {
 
     @Override
     public void load(SaveFileData saveFileData) {
-
         position.set(saveFileData.readVector2("position"));
         data=PointOfInterestData.getPointOfInterest(saveFileData.readString("name"));
         rectangle.set(saveFileData.readRectangle("rectangle"));
@@ -46,14 +46,13 @@ public class PointOfInterest implements Serializable, SaveFileContent {
 
     @Override
     public SaveFileData save() {
-
         SaveFileData data=new SaveFileData();
         data.store("name",this.data.name);
         data.store("position",position);
         data.store("rectangle",rectangle);
         data.store("spriteIndex",spriteIndex);
         data.store("active",active);
-        data.store("displayName",getDisplayName());
+        data.store("displayName",getEnglishDisplayName());
         data.storeObject("questFlagsToActivate", questFlagsToActivate);
 
         return data;
@@ -80,9 +79,7 @@ public class PointOfInterest implements Serializable, SaveFileContent {
         data = d;
         active = d.active;
         position.set(pos);
-        for (DialogData.ActionData.QuestFlag flag : data.questFlagsToActivate) {
-            questFlagsToActivate.add(flag);
-        }
+        questFlagsToActivate.addAll(Arrays.asList(data.questFlagsToActivate));
 
         rectangle.set(position.x, position.y, sprite.getWidth(), sprite.getHeight());
     }
@@ -94,6 +91,16 @@ public class PointOfInterest implements Serializable, SaveFileContent {
         position.set(parent.position);
         oldMapId=parent.getID();
         rectangle.set(position.x, position.y, sprite.getWidth(), sprite.getHeight());
+    }
+    /** Fork (Middle-earth): sprite variant, exported to and restored from the fixed world map (WorldMapTmx). */
+    public int getSpriteIndex() {
+        return spriteIndex;
+    }
+    public void setSpriteIndex(int index) {
+        Array<Sprite> textureAtlas = Config.instance().getPOISprites(data);
+        spriteIndex = index;
+        sprite = textureAtlas.get(index % textureAtlas.size);
+        rectangle.setSize(sprite.getWidth(), sprite.getHeight());
     }
     public Sprite getSprite() {
         return sprite;
@@ -109,6 +116,10 @@ public class PointOfInterest implements Serializable, SaveFileContent {
 
     public Rectangle getBoundingRectangle() {
         return rectangle;
+    }
+
+    public Vector2 getCenter() {
+        return rectangle.getCenter(new Vector2());
     }
 
     public PointOfInterestData getData() {
@@ -129,6 +140,17 @@ public class PointOfInterest implements Serializable, SaveFileContent {
                 return false;
             }
         }
+        //Fork (Middle-earth): read from the POI data (not the save), so they also work in saves made before they were added.
+        if (data != null) {
+            if (!data.active)
+                return false;
+            if (data.questFlagsToDeactivate != null)
+                for (DialogData.ActionData.QuestFlag flag : data.questFlagsToDeactivate)
+                    if (Current.player().getQuestFlag(flag.key) >= flag.val)
+                        return false;
+            if (data.condition != null && !data.condition.eval())
+                return false;
+        }
         return true;
     }
 
@@ -140,6 +162,11 @@ public class PointOfInterest implements Serializable, SaveFileContent {
     }
 
     public String getDisplayName() {
+        String englishName = getEnglishDisplayName();
+        return forge.Forge.getLocalizer().getMessageorUseDefault(
+            "adv.poi." + englishName.replaceAll("[^A-Za-z0-9]", "") + ".displayName", englishName);
+    }
+    private String getEnglishDisplayName() {
         if (displayName == null || displayName.isEmpty())
             displayName = data.getDisplayName();
         return displayName;

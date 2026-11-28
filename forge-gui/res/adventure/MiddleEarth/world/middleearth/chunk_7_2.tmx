@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="2">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <tileset firstgid="57" source="roads.tsx"/>
+ <tileset firstgid="58" source="clutter.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJzt2Dtu21AYhFElTRbi1p33vzdXAQJBivm45FwOT3E6ySb++UAD/no8Hl8n+c1tnNWUtu7l7K60dQ+JrrTVT1foiqtIdaWtbsmutNUr3ZW2OqWb0lWndFO66pRuSled0k3pqlO6KW11Svekq07pnrTVKd2StjqlO9JWp3RD2uqU7kdXndL96KpTuh9tdUq3o6tO6XZ01SndjrY6pbvRVad0N7rqlO5GV50+/pFuSFc9Ph5zt5W+D7piHs9d/a+tNZ/V1b29auVVL+8+d3Rb6fswtqstnvvT1H2N7Gr0uyx9G+btak9f6dswf1db+krfhut0taat9G24VldL20rfhut19VNnZ9/hzw/SO11Nuqe/ztrxp362SG84o3RP77oavdkRPW195ju0eVYnW7vae/cze/LuG9/VbHdP93H3tlJ9cJ+u0vekpy1dzSvdxoiu0jekqy1NzS/diPdVp3Qje7rS1tzSnezpSlvzS/eytavk/zw5pq9Eo7q6t2RX+uqW7kpb3ZJdaaubrpi5LV1xRF+64oi29MQRfemFpdZ0lX5WrkVXHElXHEVXHE1XAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACM9Pkk/Txc33NTumKPVz3pi72WdKU51tjblLZ4ZVRX79rS3j2N7Mp7jVRXnwt+90z3SO9zZYm2ZnynzfxsV5VuKb3nLM/RKt3PEe0t+Y6u9LV09zXf0ZXWZukWbelqbuld09L3b5beVled0tvqqld6X111Su+rqz7pbXXVJb3pDNIbNEpvOoP0Bm3Se84ivUOb9J6zSO/QKL3pDNIbNEpvOoP0Bq3Su6al798uva+u7iO9ua56pXfXVa/09rrqld5fV93SHeiqX7oJXfVKd6GrXuk2dNUp3YauOqXb0FW3dCO6GuPXG8nnuVpj6Q1n866hs9t613S6F11t33Ftc6PaWfJ+TPeiq2W7ru1lxN/FPT8j3Yuulu26dd+tXe1tMt3LUt9a3Thb
+  </data>
+ </layer>
+ <layer id="3" name="Roads" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+  </data>
+ </layer>
+ <objectgroup id="4" name="Clutter"/>
+ <imagelayer id="5" name="Reference" opacity="0.5">
+  <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_7_2.png" width="2400" height="2400"/>
+ </imagelayer>
+ <objectgroup id="2" name="POI">
+  <object id="1" name="ME Orocarni Warband" type="poi" x="1656" y="2136">
+   <properties>
+    <property name="displayName" value="Easterling Warband"/>
+    <property name="spriteIndex" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>

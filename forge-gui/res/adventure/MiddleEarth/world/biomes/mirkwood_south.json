@@ -1,0 +1,65 @@
+{
+"startPointX": 0.562500,
+"startPointY": 0.410833,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "mirkwood_south",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Black",
+"terrain": [
+	{
+		"spriteName": "Black_1",
+		"max": 0.25,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Black_2",
+		"min": 0.5,
+		"max": 1,
+		"resolution": 8
+	}
+],
+"width": 0.158333,
+"height": 0.085833,
+"color": "2a3320",
+"spriteNames": [
+	"WoodTree",
+	"SwampTree2",
+	"DarkWood",
+	"Shroom",
+	"Shroom2",
+	"Moss",
+	"Skull"
+],
+"enemies": ["Mirkwood Spiders", "Great Spider of Mirkwood", "Spirit of Dol Guldur", "Necromancer of Dol Guldur", "Warg Pack", "Brood of Shelob"],
+"pointsOfInterest": [
+	"ME Dol Guldur",
+	"ME Woodmen Town"
+],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/swamp_forest.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.75,
+		"width": 0.75,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "swamp_forest",
+				"color": "007000",
+				"collision": true
+			},
+			{
+				"name": "swamp_water",
+				"color": "005050",
+				"collision": true
+			}
+		]
+	}
+]
+}

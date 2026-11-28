@@ -1,0 +1,63 @@
+{
+"startPointX": 0.405000,
+"startPointY": 0.415000,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "misty_mountains_moria",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Red",
+"terrain": [
+	{
+		"spriteName": "Red_1",
+		"max": 0.3,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Red_2",
+		"min": 0.7,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.046667,
+"height": 0.038333,
+"color": "ad3a2a",
+"spriteNames": [
+	"MountainTree",
+	"MountainTree2",
+	"MountainRock",
+	"LargeMountainRock",
+	"Gravel"
+],
+"enemies": ["Moria Orc", "Misty Mountains Goblin", "Cave Troll", "Watcher in the Water", "Snaga"],
+"pointsOfInterest": [
+	"ME Moria",
+	"ME Caradhras"
+],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/mountain.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "mountain",
+				"color": "a07020",
+				"collision": true
+			},
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
+]
+}

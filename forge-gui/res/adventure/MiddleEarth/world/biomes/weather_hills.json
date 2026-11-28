@@ -1,0 +1,42 @@
+{
+	"startPointX": 0.335,
+	"startPointY": 0.33,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "weather_hills",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Green",
+	"terrain": [
+		{
+			"spriteName": "Green_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Green_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.025,
+	"height": 0.02,
+	"color": "7a8a4a",
+	"spriteNames": [
+		"Stone",
+		"LargePlainsRock",
+		"Bush",
+		"DarkGras",
+		"PlainsRock"
+	],
+	"enemies": [
+		"Wild Wolves",
+		"Wolf",
+		"Southern Ruffian",
+		"Dunlending Raider",
+		"Ranger of the North",
+		"Bill Ferny",
+		"Black Rider"
+	],
+	"pointsOfInterest": ["ME Weathertop"]
+}

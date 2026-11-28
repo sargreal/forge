@@ -1,0 +1,42 @@
+{
+	"startPointX": 0.62,
+	"startPointY": 0.575,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "dagorlad",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Colorless",
+	"terrain": [
+		{
+			"spriteName": "Colorless_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Colorless_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.06,
+	"height": 0.06,
+	"color": "8a8478",
+	"spriteNames": [
+		"WasteRock",
+		"Skull",
+		"Stone",
+		"Gravel",
+		"LargePlainsRock"
+	],
+	"enemies": [
+		"Orc Warrior",
+		"Mordor Orc",
+		"Easterling Warrior",
+		"Orc Captain",
+		"Olog-hai",
+		"Fell Beast",
+		"Black Rider"
+	],
+	"pointsOfInterest": ["ME Dagorlad War-camp", "ME Towers of the Teeth", "ME Morannon"]
+}

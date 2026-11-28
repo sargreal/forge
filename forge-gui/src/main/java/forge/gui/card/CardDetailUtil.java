@@ -1,12 +1,10 @@
 package forge.gui.card;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Multiset;
 import forge.card.CardRarity;
 import forge.card.CardStateName;
 import forge.card.ColorSet;
 import forge.card.MagicColor;
-import forge.card.mana.ManaCostShard;
-import forge.deck.DeckRecognizer;
 import forge.game.GameView;
 import forge.game.card.Card;
 import forge.game.card.CardView;
@@ -30,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CardDetailUtil {
@@ -66,20 +64,20 @@ public class CardDetailUtil {
 
     public static DetailColors getBorderColor(final CardStateView card, final boolean canShow) {
         if (card == null) {
-            return getBorderColors(null, false, false, false).iterator().next();
+            return getBorderColors(null, false, false, false, false).iterator().next();
         }
-        return getBorderColors(card.getColors(), card.isLand(), canShow, false).iterator().next();
+        return getBorderColors(card.getColors(), card.isLand(), canShow, false, card.isEnchantment()).iterator().next();
     }
     public static List<DetailColors> getBorderColors(final CardStateView card, final boolean canShow) {
         if (card == null) {
-            return getBorderColors(null, false, false, true);
+            return getBorderColors(null, false, false, true, false);
         }
-        return getBorderColors(card.getColors(), card.isLand(), canShow, true);
+        return getBorderColors(card.getColors(), card.isLand(), canShow, true, card.isEnchantment());
     }
     public static List<DetailColors> getBorderColors(final ColorSet colorSet) {
-        return getBorderColors(colorSet, false, true, true);
+        return getBorderColors(colorSet, false, true, true, false);
     }
-    private static List<DetailColors> getBorderColors(final ColorSet cardColors, final boolean isLand, final boolean canShow, final boolean supportMultiple) {
+    private static List<DetailColors> getBorderColors(final ColorSet cardColors, final boolean isLand, final boolean canShow, final boolean supportMultiple, final boolean isEnchantment) {
         final List<DetailColors> borderColors = new ArrayList<>();
 
         if (cardColors == null || !canShow) {
@@ -99,23 +97,10 @@ public class CardDetailUtil {
                 borderColors.add(DetailColors.MULTICOLOR);
             }
             else { //for 3 colors or fewer, return all colors in shard order
-                for (ManaCostShard shard : cardColors.getOrderedShards()) {
-                    switch (shard.getColorMask()) {
-                    case MagicColor.WHITE:
-                        borderColors.add(DetailColors.WHITE);
-                        break;
-                    case MagicColor.BLUE:
-                        borderColors.add(DetailColors.BLUE);
-                        break;
-                    case MagicColor.BLACK:
-                        borderColors.add(DetailColors.BLACK);
-                        break;
-                    case MagicColor.RED:
-                        borderColors.add(DetailColors.RED);
-                        break;
-                    case MagicColor.GREEN:
-                        borderColors.add(DetailColors.GREEN);
-                        break;
+                for (MagicColor.Color shard : cardColors.getOrderedColors()) {
+                    DetailColors colors = getColor(shard);
+                    if (colors != null) {
+                        borderColors.add(colors);
                     }
                 }
             }
@@ -126,22 +111,19 @@ public class CardDetailUtil {
         }
         return borderColors;
     }
+    public static DetailColors getColor(MagicColor.Color shard) {
+        return switch (shard) {
+            case WHITE -> DetailColors.WHITE;
+            case BLUE -> DetailColors.BLUE;
+            case BLACK -> DetailColors.BLACK;
+            case RED -> DetailColors.RED;
+            case GREEN -> DetailColors.GREEN;
+            default -> null;
+        };
+    }
 
     public static String getCurrentColors(final CardStateView c) {
-        ColorSet curColors = c.getColors();
-        String strCurColors = "";
-
-        if (curColors.hasWhite()) { strCurColors += "{W}"; }
-        if (curColors.hasBlue())  { strCurColors += "{U}"; }
-        if (curColors.hasBlack()) { strCurColors += "{B}"; }
-        if (curColors.hasRed())   { strCurColors += "{R}"; }
-        if (curColors.hasGreen()) { strCurColors += "{G}"; }
-
-        if (strCurColors.isEmpty()) {
-            strCurColors = "{C}";
-        }
-
-        return strCurColors;
+        return c.getColors().getSymbolsString();
     }
 
     public static DetailColors getRarityColor(final CardRarity rarity) {
@@ -166,7 +148,7 @@ public class CardDetailUtil {
         if (item instanceof PreconDeck) {
             return ((PreconDeck) item).getDescription();
         }
-        return item.getName();
+        return item.getDisplayName();
     }
 
     public static String formatCardName(final CardView card, final boolean canShow, final boolean forAltState) {
@@ -177,7 +159,7 @@ public class CardDetailUtil {
 
     public static String formatCardType(final CardStateView card, final boolean canShow) {
         boolean isInPlay = card.getCard() != null && ZoneType.Battlefield.equals(card.getCard().getZone());
-        String translatedtype = CardTranslation.getTranslatedType(card.getName(), card.getType().toString());
+        String translatedtype = CardTranslation.getTranslatedType(card);
         return canShow ? translatedtype : (card.getState() == CardStateName.FaceDown && isInPlay ? "Creature" : "");
     }
 
@@ -186,17 +168,16 @@ public class CardDetailUtil {
             return "";
         }
         final StringBuilder ptText = new StringBuilder();
-        boolean vehicle = card.getType().hasSubtype("Vehicle");
-        if (vehicle && !card.isCreature()) {
-            ptText.append("{");
+        if (card.hasPrintedPT() && !card.isCreature()) {
+            ptText.append("[");
         }
 
-        if (card.isCreature() || vehicle) {
+        if (card.isCreature() || card.hasPrintedPT()) {
             ptText.append(card.getPower()).append(" / ").append(card.getToughness());
         }
 
-        if (vehicle && !card.isCreature()) {
-            ptText.append("}");
+        if (card.hasPrintedPT() && !card.isCreature()) {
+            ptText.append("]");
         }
 
         if (card.isPlaneswalker()) {
@@ -215,7 +196,21 @@ public class CardDetailUtil {
             ptText.append(card.getDefense());
         }
 
+        if (card.isAttraction()) {
+            ptText.append(Localizer.getInstance().getMessage("lblLights")).append(": ");
+            ptText.append(formatAttractionLights(card.getAttractionLights()));
+        }
+
         return ptText.toString();
+    }
+
+    public static String formatAttractionLights(Set<Integer> lights) {
+        return (lights.contains(1) ? "{AL1ON} " : "{AL1OFF} ") +
+                (lights.contains(2) ? "{AL2ON} " : "{AL2OFF} ") +
+                (lights.contains(3) ? "{AL3ON} " : "{AL3OFF} ") +
+                (lights.contains(4) ? "{AL4ON} " : "{AL4OFF} ") +
+                (lights.contains(5) ? "{AL5ON} " : "{AL5OFF} ") +
+                (lights.contains(6) ? "{AL6ON}" : "{AL6OFF}");
     }
 
     public static String formatCardId(final CardStateView card) {
@@ -245,13 +240,13 @@ public class CardDetailUtil {
                 PaperCard origPaperCard = null;
                 Card origCard = null;
                 try {
-                    if (!card.getName().isEmpty()) {
-                        origPaperCard = FModel.getMagicDb().getCommonCards().getCard(card.getName());
+                    if (!card.getOracleName().isEmpty()) {
+                        origPaperCard = FModel.getMagicDb().getCommonCards().getCard(card.getOracleName());
                     } else {
                         // probably a morph or manifest, try to get its identity from the alternate state
-                        String altName = card.getAlternateState().getName();
+                        String altName = card.getAlternateState().getOracleName();
                         if (!altName.isEmpty()) {
-                            origPaperCard = FModel.getMagicDb().getCommonCards().getCard(card.getAlternateState().getName());
+                            origPaperCard = FModel.getMagicDb().getCommonCards().getCard(altName);
                         }
                     }
                     if (origPaperCard != null) {
@@ -259,7 +254,7 @@ public class CardDetailUtil {
                     }
                     origIdent = origCard != null ? getCurrentColors(origCard.isFaceDown() ? CardView.get(origCard).getState(false) : CardView.get(origCard).getCurrentState()) : "";
                 } catch(Exception ex) {
-                    System.err.println("Unexpected behavior: card " + card.getName() + "[" + card.getId() + "] tripped an exception when trying to process current card colors.");
+                    System.err.println("Unexpected behavior: card " + card.getOracleName() + "[" + card.getId() + "] tripped an exception when trying to process current card colors.");
                 }
                 isChanged = !curColors.equals(origIdent);
             }
@@ -276,12 +271,19 @@ public class CardDetailUtil {
     }
 
     public static String composeCardText(final CardStateView state, final GameView gameView, final boolean canShow) {
-        if (!canShow) { return ""; }
+        if (!canShow || state == null) {
+            return "";
+        }
 
         final CardView card = state.getCard();
-        final StringBuilder area = new StringBuilder();
+        if (card == null) {
+            return "";
+        }
 
-        // Token
+        // a local builder: a shared static one is corrupted when two threads (UI, netplay, AI) compose text at once
+        final StringBuilder area = new StringBuilder(512);
+
+        // Token / Emblem / Effect Types
         if (card.isToken()) {
             area.append("Token");
         } else if (card.isTokenCard()) {
@@ -294,96 +296,87 @@ public class CardDetailUtil {
             area.append("Effect");
         }
         // card text
-        if (area.length() != 0) {
-            area.append("\n");
-        }
+        area.append("\n");
 
         boolean needTranslation = true;
-        if (card.isToken()) {
-            if (card.getCloneOrigin() == null)
-                needTranslation = false;
+        if (card.isToken() && card.getCloneOrigin() == null) {
+            needTranslation = false;
         }
+
         String text = !card.isSplitCard() ?
-            card.getText(state, needTranslation ? CardTranslation.getTranslationTexts(state.getName(), "") : null) :
-            card.getText(state, needTranslation ? CardTranslation.getTranslationTexts(card.getLeftSplitState().getName(), card.getRightSplitState().getName()) : null );
+                card.getText(state, needTranslation ? CardTranslation.getTranslationTexts(state) : null) :
+                card.getText(state, needTranslation ? CardTranslation.getTranslationTexts(card.getLeftSplitState(), card.getRightSplitState()) : null);
 
-        // Bracket P/T for Level up
-        if (text.contains("LEVEL")) {
-            String regex = "[0-99]+/[0-99]";
-            text = text.replaceAll(regex, "[$0]");
+        if (text != null) {
+            // Bracket P/T for Level up
+            if (text.contains("LEVEL")) {
+                text = text.replaceAll("[0-99]+/[0-99]", "[$0]");
+            }
+            // LEVEL [0-9]+-[0-9]+
+            text = text.replaceAll("LEVEL [0-9]+-[0-9]+ \\[[0-99]+/[0-99]]+ ", "$0\n");
+            // LEVEL [0-9]+\+
+            text = text.replaceAll("LEVEL [0-9]+\\+ \\[[0-99]+/[0-99]]+ ", "$0\n");
+            // ",,," becomes a line break
+            text = text.replace(",,,", "\n");
+            // displays keywords that have dots in them a little better:
+            text = text.replaceAll("\\., ", ".\n");
+
+            area.append(text);
         }
-
-        // LEVEL [0-9]+-[0-9]+
-        String regex = "LEVEL [0-9]+-[0-9]+ \\[[0-99]+/[0-99]]+ ";
-        text = text.replaceAll(regex, "$0\r\n");
-
-        // LEVEL [0-9]+\+
-        regex = "LEVEL [0-9]+\\+ \\[[0-99]+/[0-99]]+ ";
-        text = text.replaceAll(regex, "$0\r\n");
-
-        // ",,," becomes a line break
-        regex = ",,,";
-        text = text.replaceAll(regex, "\r\n");
-
-        // displays keywords that have dots in them a little better:
-        regex = "\\., ";
-        text = text.replaceAll(regex, ".\r\n");
-
-        area.append(text);
 
         if (card.isPhasedOut()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Phased Out");
+            area.append("\nPhased Out");
         }
 
-        // text changes
+        // Text Changes
         final Map<String, String> changedColorWords = card.getChangedColorWords();
         final Map<String, String> changedTypes = card.getChangedTypes();
-        if (changedColorWords != null && changedTypes != null) {
-            if (!(changedColorWords.isEmpty() && changedTypes.isEmpty())) {
-                if (area.length() != 0) {
-                    area.append("\n");
+        if (changedColorWords != null && changedTypes != null && !(changedColorWords.isEmpty() && changedTypes.isEmpty())) {
+            area.append("\n");
+
+            // Refactored to map keys iteratively without implicit Entry collection creations
+            if (!changedColorWords.isEmpty()) {
+                for (String key: changedColorWords.keySet()) {
+                    String value = changedColorWords.get(key);
+                    area.append("Text changed: all instances of ");
+                    if ("Any".equals(key)) {
+                        area.append("color words");
+                    } else {
+                        area.append(key);
+                    }
+                    area.append(" are replaced by ").append(value).append(".\n");
                 }
             }
-
-            for (final Entry<String, String> e : Sets.union(changedColorWords.entrySet(), changedTypes.entrySet())) {
-                area.append("Text changed: all instances of ");
-                if (e.getKey().equals("Any")) {
-                    if (changedColorWords.containsKey(e.getValue())) {
-                        area.append("color words");
-                    } else if (forge.card.CardType.getBasicTypes().contains(e.getValue())) {
-                        area.append("basic land types");
+            if (!changedTypes.isEmpty()) {
+                for (String key: changedTypes.keySet()) {
+                    String value = changedTypes.get(key);
+                    area.append("Text changed: all instances of ");
+                    if ("Any".equals(key)) {
+                        if (forge.card.CardType.getBasicTypes().contains(value)) {
+                            area.append("basic land types");
+                        } else {
+                            area.append("creature types");
+                        }
                     } else {
-                        area.append("creature types");
+                        area.append(key);
                     }
-                } else {
-                    area.append(e.getKey());
+                    area.append(" are replaced by ").append(value).append(".\n");
                 }
-                area.append(" are replaced by ");
-                area.append(e.getValue());
-                area.append(".\n");
             }
         }
 
         final int intensity = card.getIntensity();
         if (intensity > 0) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Intensity: ").append(intensity);
+            area.append("\nIntensity: ").append(intensity);
         }
 
-        // counter text
-        if (card.getCounters() != null) {
-            for (final Entry<CounterType, Integer> c : card.getCounters().entrySet()) {
-                if (c.getValue().intValue() != 0) {
-                    if (area.length() != 0) {
-                        area.append("\n");
-                    }
-                    area.append(c.getKey().getName()).append(" counters: ");
-                    area.append(c.getValue());
+        // Counter Text
+        final Multiset < CounterType > counters = card.getCounters();
+        if (counters != null && !counters.isEmpty()) {
+            for (CounterType type: counters.elementSet()) {
+                int count = counters.count(type);
+                if (count != 0) {
+                    area.append("\n").append(type.getName()).append(" counters: ").append(count);
                 }
             }
         }
@@ -391,145 +384,107 @@ public class CardDetailUtil {
         if (state.isCreature()) {
             final int damage = card.getDamage();
             if (damage > 0) {
-                if (area.length() != 0) {
-                    area.append("\n");
-                }
-                area.append("Damage: ").append(damage);
+                area.append("\nDamage: ").append(damage);
             }
         }
         if (state.isCreature() || state.isPlaneswalker()) {
             final int assigned = card.getAssignedDamage();
             if (assigned > 0) {
-                if (area.length() != 0) {
-                    area.append("\n");
-                }
-                area.append("Assigned Damage: ").append(assigned);
+                area.append("\nAssigned Damage: ").append(assigned);
             }
         }
 
         // Regeneration Shields
         final int regenShields = card.getShieldCount();
         if (regenShields > 0) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Regeneration Shields: ").append(regenShields);
+            area.append("\nRegeneration Shields: ").append(regenShields);
         }
 
         // Damage Prevention
         final int preventNextDamage = card.getPreventNextDamage();
         if (preventNextDamage > 0) {
-            area.append("\n");
-            area.append("Prevent the next ").append(preventNextDamage).append(" damage that would be dealt to ");
-            area.append(state.getName()).append(" this turn.");
+            area.append("\nPrevent the next ").append(preventNextDamage).append(" damage that would be dealt to ")
+                    .append(state.getName()).append(" this turn.");
         }
 
-        // Draft keywords
+        // Draft Keywords
         if (card.getDraftAction() != null) {
-            for(final String draftAction : card.getDraftAction()) {
-                if (area.length() != 0) {
-                    area.append("\n");
-                }
-                area.append(TextUtil.fastReplace(draftAction, "CARDNAME", card.getName()));
+            final List < String > draftActions = card.getDraftAction();
+            final int size = draftActions.size();
+            for (int i = 0; i < size; i++) {
+                area.append("\n").append(TextUtil.fastReplace(draftActions.get(i), "CARDNAME", card.getName()));
             }
         }
 
-        // Draft notes
-        PlayerView pl = card.getController();
+        // Draft Notes
+        final PlayerView pl = card.getController();
         if (pl != null) {
-            Map<String, String> notes = pl.getDraftNotes();
+            final Map<String, String> notes = pl.getDraftNotes();
             if (notes != null) {
-                String note = notes.get(card.getName());
+                final String note = notes.get(card.getOracleName());
                 if (note != null) {
-                    if (area.length() != 0) {
-                        area.append("\n");
-                    }
-                    area.append("Draft Notes: ").append(note);
+                    area.append("\nDraft Notes: ").append(note);
                 }
             }
         }
 
-        // chosen type
+        // Chosen Type
         if (!card.getChosenType().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(chosen type: ");
-            area.append(card.getChosenType());
+            area.append("\n(chosen type: ").append(card.getChosenType());
             if (!card.getChosenType2().isEmpty()) {
                 area.append(", ").append(card.getChosenType2());
             }
             area.append(")");
         }
 
-        // noted types
+        // Noted Types
         if (card.getNotedTypes() != null && !card.getNotedTypes().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(noted type").append(card.getNotedTypes().size() == 1 ? ": " : "s: ");
-            area.append(Lang.joinHomogenous(card.getNotedTypes()));
-            area.append(")");
+            area.append("\n(noted type").append(card.getNotedTypes().size() == 1 ? ": " : "s: ")
+                    .append(Lang.joinHomogenous(card.getNotedTypes())).append(")");
         }
 
-        // chosen color
+        // Chosen Spire / Colors
+        if (card.getMarkedColors() != null && !card.getMarkedColors().isColorless()) {
+            area.append("\n(").append(Localizer.getInstance().getMessage("lblSelected")).append(": ")
+                    .append(Lang.joinHomogenous(card.getMarkedColors().stream().map(MagicColor.Color::getTranslatedName).collect(Collectors.toList())))
+                    .append(")");
+        }
+
         if (card.getChosenColors() != null && !card.getChosenColors().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(").append(Localizer.getInstance().getMessage("lblChosenColors")).append(" ");
-            area.append(Lang.joinHomogenous(card.getChosenColors().stream().map(DeckRecognizer::getLocalisedMagicColorName).collect(Collectors.toList())));
-            area.append(")");
+            area.append("\n(").append(Localizer.getInstance().getMessage("lblChosenColors")).append(" ")
+                    .append(Lang.joinHomogenous(ColorSet.fromNames(card.getChosenColors()).stream().map(MagicColor.Color::getTranslatedName).collect(Collectors.toList())))
+                    .append(")");
         }
 
-        // chosen cards
-        if (card.getChosenCards() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(chosen card").append(card.getChosenCards().size() == 1 ? ": " : "s: ");
-            area.append(Lang.joinHomogenous(card.getChosenCards())).append(")");
+        // Chosen Cards
+        if (!card.getChosenCards().isEmpty()) {
+            area.append("\n(chosen card").append(card.getChosenCards().size() == 1 ? ": " : "s: ")
+                    .append(Lang.joinHomogenous(card.getChosenCards())).append(")");
         }
 
         // chosen number
         if (!card.getChosenNumber().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(chosen number: ").append(card.getChosenNumber()).append(")");
+            area.append("\n(chosen number: ").append(card.getChosenNumber()).append(")");
         }
 
         // stored dice results
         if (card.getStoredRolls() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(stored dice results: ").append(StringUtils.join(card.getStoredRolls(), ", "));
-            area.append(")");
+            area.append("\n(stored dice results: ").append(StringUtils.join(card.getStoredRolls(), ", ")).append(")");
         }
 
         // chosen player
         if (card.getChosenPlayer() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(chosen player: ").append(card.getChosenPlayer()).append(")");
+            area.append("\n(chosen player: ").append(card.getChosenPlayer()).append(")");
         }
 
         // chosen mode
         if (!card.getChosenMode().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(chosen mode: ").append(card.getChosenMode()).append(")");
+            area.append("\n(chosen mode: ").append(card.getChosenMode()).append(")");
         }
 
-        // named card
+        // Named Card
         if (card.getNamedCard() != null && !card.getNamedCard().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("(named card").append(card.getNamedCard().size() > 1 ? "s" : "").append(": ");
+            area.append("\n(named card").append(card.getNamedCard().size() > 1 ? "s" : "").append(": ");
             if (card.isFaceDown() && state.getState() == CardStateName.FaceDown) {
                 area.append("Hidden");
             } else {
@@ -540,180 +495,145 @@ public class CardDetailUtil {
 
         // dungeon room
         if (card.getCurrentRoom() != null && !card.getCurrentRoom().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("(In room: ");
-            area.append(card.getCurrentRoom()).append(")");
+            area.append("\n\n(In room: ").append(card.getCurrentRoom()).append(")");
         }
 
         // class level
         if (card.getId() >= 0 && card.getCurrentState().getType().hasStringType("Class") && card.getZone() == ZoneType.Battlefield) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("(Class Level:").append(card.getClassLevel()).append(")");
+            area.append("\n\n(Class Level: ").append(card.getClassLevel()).append(")");
         }
 
         //ring level
         if (card.getRingLevel() > 0 && card.getZone() == ZoneType.Command) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("(Ring Level:").append(card.getRingLevel()).append(")");
+            area.append("\n\n(Ring Level: ").append(card.getRingLevel()).append(")");
+        }
+
+        // Text on gameplay trackers (e.g. Speed)
+        if (StringUtils.isNotEmpty(card.getOverlayText())) {
+            area.append("\n\n(").append(card.getOverlayText()).append(")");
         }
 
         // sector
         if (card.getSector() != null && !card.getSector().isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Sector: ").append(card.getSector());
+            area.append("\n\nSector: ").append(card.getSector());
         }
 
         // a card has something attached to it
         if (card.hasCardAttachments()) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("=Attached: ");
-            area.append(StringUtils.join(card.getAttachedCards(), ", "));
-            area.append("=");
+            area.append("\n=Attached: ").append(StringUtils.join(card.getAttachedCards(), ", ")).append("=");
         }
 
         // a card is attached to something
         if (card.getAttachedTo() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("*Attached to ").append(card.getAttachedTo()).append("*");
+            area.append("\n*Attached to ").append(card.getAttachedTo()).append("*");
         }
         if (card.getEnchantedPlayer() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("*Enchanting ").append(card.getEnchantedPlayer()).append("*");
+            area.append("\n*Enchanting ").append(card.getEnchantedPlayer()).append("*");
         }
 
         // controlling
-        if (card.getGainControlTargets() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("+Controlling: ");
-            area.append(StringUtils.join(card.getGainControlTargets(), ", "));
-            area.append("+");
+        if (!card.getGainControlTargets().isEmpty()) {
+            area.append("\n+Controlling: ").append(StringUtils.join(card.getGainControlTargets(), ", ")).append("+");
+        }
+
+        // Sprocket a contraption is on.
+        if (card.getSprocket() > 0 && card.getCurrentState().isContraption()) {
+            area.append("\nSprocket: ").append(card.getSprocket());
         }
 
         if (card.getProtectingPlayer() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Protected by: ").append(card.getProtectingPlayer());
+            area.append("\nProtected by: ").append(card.getProtectingPlayer());
         }
 
         // cloned via
         if (card.getCloneOrigin() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("^Cloned via: ");
-            area.append(card.getCloneOrigin().getCurrentState().getName());
-            area.append("^");
+            area.append("\n^Cloned via: ").append(card.getCloneOrigin().getCurrentState().getName()).append("^");
         }
 
         // Imprint
-        if (card.getImprintedCards() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Imprinting: ");
-            area.append(StringUtils.join(card.getImprintedCards(), ", "));
+        if (!card.getImprintedCards().isEmpty()) {
+            area.append("\nImprinting: ").append(StringUtils.join(card.getImprintedCards(), ", "));
         }
 
         // CardsExiledBy
-        if (card.getExiledCards() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Exiled: ");
-            area.append(StringUtils.join(card.getExiledCards(), ", "));
+        if (!card.getExiledCards().isEmpty()) {
+            area.append("\nExiled: ").append(StringUtils.join(card.getExiledCards(), ", "));
+        }
+
+        // TODO don't print both if identical
+        if (!card.getUntilLeavesBattlefield().isEmpty()) {
+            area.append("\nExiled until this leaves the battlefield: ").append(card.getUntilLeavesBattlefield());
         }
 
         // Haunt
-        if (card.getHauntedBy() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Haunted by: ");
-            area.append(StringUtils.join(card.getHauntedBy(), ", "));
+        if (!card.getHauntedBy().isEmpty()) {
+            area.append("\nHaunted by: ").append(StringUtils.join(card.getHauntedBy(), ", "));
         }
         if (card.getHaunting() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Haunting ").append(card.getHaunting());
+            area.append("\nHaunting ").append(card.getHaunting());
         }
 
         // Cipher
-        if (card.getEncodedCards() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Encoded: ").append(card.getEncodedCards());
-        }
-
-        if (card.getUntilLeavesBattlefield() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            area.append("Exiled until this leaves the battlefield: ").append(card.getUntilLeavesBattlefield());
+        if (!card.getEncodedCards().isEmpty()) {
+            area.append("\nEncoded: ").append(card.getEncodedCards());
         }
 
         // must block
-        if (card.getMustBlockCards() != null) {
-            if (area.length() != 0) {
-                area.append("\n");
-            }
-            final String mustBlockThese = Lang.joinHomogenous(card.getMustBlockCards());
-            area.append("Must block ").append(mustBlockThese);
+        if (!card.getMustBlockCards().isEmpty()) {
+            area.append("\nMust block ").append(Lang.joinHomogenous(card.getMustBlockCards()));
         }
 
         // exerted
         if (card.isExertedThisTurn()) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("^Exerted^");
+            area.append("\n^Exerted^");
+        }
+        // detained
+        if (card.isDetained()) {
+            area.append("\n^Detained^");
         }
 
         //show current card colors if enabled
-        String curCardColors = formatCurrentCardColors(state);
+        final String curCardColors = formatCurrentCardColors(state);
         if (!curCardColors.isEmpty()) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("Current Card Colors: ");
-            area.append(curCardColors);
+            area.append("\n\nCurrent Card Colors: ").append(curCardColors);
         }
 
         //show current storm count for storm cards
-        if (state.hasStorm()) {
-            if (gameView != null) {
-                if (area.length() != 0) {
-                    area.append("\n\n");
-                }
-                area.append("Current Storm Count: ").append(gameView.getStormCount());
-            }
+        if (state.hasStorm() && gameView != null) {
+            area.append("\n\nCurrent Storm Count: ").append(gameView.getStormCount());
         }
 
         //show owner if being controlled by a different player
         if (card.getOwner() != card.getController()) {
-            if (area.length() != 0) {
-                area.append("\n\n");
-            }
-            area.append("Owner: ").append(card.getOwner().toString());
+            area.append("\n\nOwner: ").append(card.getOwner().toString());
         }
-        return area.toString();
+
+        if (card.hasAlternateState() && state.getState() == CardStateName.Original) {
+            if (card.getAlternateState().getType().hasSubtype("Adventure")) {
+                area.append("\n\n").append(Localizer.getInstance().getMessage("lblAdventure")).append(" — ").append(getAlternateStateDesc(card));
+            }
+
+            if (card.getAlternateState().getType().hasSubtype("Omen")) {
+                area.append("\n\n").append(Localizer.getInstance().getMessage("lblOmen")).append(" — ").append(getAlternateStateDesc(card));
+            }
+
+            if (card.getAlternateState().getType().hasSubtype("Vengeance")) {
+                area.append("\n\n");
+                area.append(Localizer.getInstance().getMessage("lblVengeance") + " — " + getAlternateStateDesc(card));
+            }
+
+            if (card.hasPreparedSpell()) {
+                area.append("\n\n").append(Localizer.getInstance().getMessage("lblPrepared")).append(" — ").append(getAlternateStateDesc(card));
+            }
+        }
+
+        return area.toString().trim();
+    }
+
+    protected static String getAlternateStateDesc(CardView card) {
+        CardStateView state = card.getAlternateState();
+        return state.getName() + " "
+                + state.getManaCost().toString() + ": "
+                + (card.getId() > 0 ? state.getAbilityText() : state.getOracleText());
     }
 }

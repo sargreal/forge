@@ -59,6 +59,8 @@ public class AdventureQuestStage implements Serializable {
     private transient List<Integer> _parsedPrerequisiteNames;
     private transient List<PointOfInterest> validPOIs;
     public boolean allowInactivePOI = false;
+    /** Fork (Middle-earth): for QuestFlag/CharacterFlag/MapFlag objectives, complete when this holds (instead of mapFlag >= mapFlagValue). */
+    public FlagCondition condition;
 
     public UUID stageID;
 
@@ -238,6 +240,7 @@ public class AdventureQuestStage implements Serializable {
         this.deliveryItem = other.deliveryItem;
         this.worldMapOK = other.worldMapOK;
         this.allowInactivePOI = other.allowInactivePOI;
+        this.condition = other.condition;
     }
 
 
@@ -265,7 +268,23 @@ public class AdventureQuestStage implements Serializable {
         return validPOIs;
     }
 
+    /** Fork (Middle-earth): true when this is a flag stage with a {@link #condition} that holds now. */
+    public boolean flagConditionHolds() {
+        return condition != null && (objective == QuestFlag || objective == CharacterFlag || objective == MapFlag) && condition.eval();
+    }
+
     public AdventureQuestController.QuestStatus handleEvent(AdventureQuestEvent event) {
+        if (objective == Fetch && hasRequiredFetchItems()) {
+            status = COMPLETE;
+            return status;
+        }
+        if (condition != null && (objective == QuestFlag || objective == CharacterFlag || objective == MapFlag)) {
+            //Fork (Middle-earth): any event (and stage activation) re-checks the condition, so a flag that already holds completes the stage too.
+            if (flagConditionHolds())
+                status = COMPLETE;
+            return status;
+        }
+
         if (!checkIfTargetLocation(event.poi))
             return status;
 
@@ -325,9 +344,14 @@ public class AdventureQuestStage implements Serializable {
                 }
                 break;
             case Fetch:
-                status = event.type == AdventureQuestEventType.RECEIVEITEM
-                        && (itemNames.isEmpty()) || (event.item != null && itemNames.contains(event.item.name))
-                        && ++progress1 >= count1 ? COMPLETE : status;
+                if (event.type == AdventureQuestEventType.RECEIVEITEM) {
+                    if ((itemNames.isEmpty()) || (event.item != null && itemNames.contains(event.item.name)))
+                        status = ++progress1 >= count1 ? COMPLETE : status;
+                }
+                else if (event.type == AdventureQuestEventType.USEITEM) {
+                    if ((itemNames.isEmpty()) || (event.item != null && itemNames.contains(event.item.name)))
+                        status = ++progress3 >= count3 ? COMPLETE : status;
+                }
                 break;
             case Hunt:
                 if (event.type == AdventureQuestEventType.DESPAWN) {
@@ -373,5 +397,23 @@ public class AdventureQuestStage implements Serializable {
                 break;
         }
         return status;
+    }
+
+    public boolean hasRequiredFetchItems() {
+        if (objective != Fetch || itemNames == null || itemNames.isEmpty()) {
+            return false;
+        }
+
+        int owned = 0;
+        for (String itemName : itemNames) {
+            if (itemName == null || itemName.isEmpty()) {
+                continue;
+            }
+            owned += Current.player().countItem(itemName);
+            if (owned >= count1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

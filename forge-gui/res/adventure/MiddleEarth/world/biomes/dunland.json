@@ -1,0 +1,44 @@
+{
+	"startPointX": 0.355,
+	"startPointY": 0.485,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "dunland",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Colorless",
+	"terrain": [
+		{
+			"spriteName": "Colorless_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Colorless_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.05,
+	"height": 0.06,
+	"color": "8c7a6a",
+	"spriteNames": [
+		"Bush",
+		"Stone",
+		"Gravel",
+		"LargePlainsRock",
+		"DarkGras"
+	],
+	"enemies": [
+		"Dunlending Raider",
+		"Dunlending Hedge-wizard",
+		"Crebain",
+		"Wild Wolves",
+		"Uruk-hai",
+		"Sharkey's Ruffian"
+	],
+	"pointsOfInterest": [
+		"ME Dunlending Village",
+		"ME Dunlending Hillfort"
+	]
+}

@@ -1,19 +1,19 @@
 package forge.ai.simulation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import com.google.common.collect.ArrayListMultimap;
-
 import forge.ai.ComputerUtilCard;
 import forge.game.GameObject;
 import forge.game.ability.AbilityUtils;
+import forge.game.ability.ApiType;
 import forge.game.card.Card;
 import forge.game.combat.Combat;
 import forge.game.player.Player;
 import forge.game.spellability.SpellAbility;
 import forge.game.spellability.TargetRestrictions;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class PossibleTargetSelector {
     private final SpellAbility sa;
@@ -63,18 +63,38 @@ public class PossibleTargetSelector {
         if (targetingSa == null) {
             return;
         }
-        sa.setActivatingPlayer(player, true);
+        sa.setActivatingPlayer(player);
         targetingSa.resetTargets();
         TargetRestrictions tgt = targetingSa.getTargetRestrictions();
         maxTargets = tgt.getMaxTargets(sa.getHostCard(), targetingSa);
 
         SimilarTargetSkipper skipper = new SimilarTargetSkipper();
-        for (GameObject o : tgt.getAllCandidates(targetingSa, true)) {
+        for (GameObject o : tgt.getAllCandidates(targetingSa)) {
+            if (pointlessCounterTarget(player, o)) {
+                continue;
+            }
             if (maxTargets == 1 && skipper.shouldSkipTarget(o)) {
                 continue;
             }
             validTargets.add(o);
         }
+    }
+
+    /**
+     * A +1/+1 counter is only a gain on a creature of the player's own (a curse, -1/-1 or a counter that is meant to hurt,
+     * is another matter): Ozolith, the Shattered Spire may name any artifact, and a counter on a Treasure or an
+     * Equipment is wasted, as is one on the opponent's creature.
+     */
+    private boolean pointlessCounterTarget(final Player player, final GameObject o) {
+        if (targetingSa.getApi() != ApiType.PutCounter || targetingSa.isCurse()
+                || !"P1P1".equals(targetingSa.getParam("CounterType")) || ActivationGuard.animatesTargetToCreature(targetingSa)) {
+            return false;
+        }
+        if (!(o instanceof Card)) {
+            return false;
+        }
+        final Card c = (Card) o;
+        return !c.isCreature() || c.getController().isOpponentOf(player);
     }
 
     private static class SimilarTargetSkipper {
@@ -88,7 +108,7 @@ public class PossibleTargetSelector {
                 if (score != null) {
                     return score;
                 }
-            } else  {
+            } else {
                 creatureScores = new HashMap<>();
             }
 
@@ -109,16 +129,15 @@ public class PossibleTargetSelector {
 
         public boolean shouldSkipTarget(GameObject o) {
             // TODO: Support non-card targets, such as spells on the stack.
-            if (!(o instanceof Card)) {
+            if (!(o instanceof Card c)) {
                 return false;
             }
 
-            Card c = (Card) o;
             Combat combat = c.getGame().getCombat();
             for (Card existingTarget : validTargetsMap.get(c.getName())) {
                 // Note: Checks are ordered from cheapest to more expensive ones. For example, type equals()
                 // ends up calling toString() on the type object and is more expensive than the checks above it.
-                if (c.getController() != c.getController() || c.getOwner() != existingTarget.getOwner()) {
+                if (c.getController() != existingTarget.getController() || c.getOwner() != existingTarget.getOwner()) {
                     continue;
                 }
                 if (c.getSpellAbilities().size() != existingTarget.getSpellAbilities().size()) {
@@ -149,7 +168,6 @@ public class PossibleTargetSelector {
                             continue;
                         }
                     }
-                    continue;
                 }
                 return true;
             }

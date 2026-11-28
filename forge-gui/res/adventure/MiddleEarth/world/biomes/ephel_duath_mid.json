@@ -1,0 +1,60 @@
+{
+"startPointX": 0.731667,
+"startPointY": 0.646667,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "ephel_duath_mid",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Red",
+"terrain": [
+	{
+		"spriteName": "Red_1",
+		"max": 0.3,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Red_2",
+		"min": 0.7,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.315000,
+"height": 0.200000,
+"color": "902e20",
+"spriteNames": [
+	"MountainTree",
+	"MountainTree2",
+	"MountainRock",
+	"LargeMountainRock",
+	"Gravel"
+],
+"enemies": ["Mordor Orc", "Brood of Shelob", "Olog-hai", "Fell Beast", "Ringwraith", "Stone Troll", "Haradrim Warrior", "Orc Captain"],
+"pointsOfInterest": ["ME Minas Morgul", "ME Shadow Cave", "ME Cirith Ungol"],
+"structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/mountain.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.6,
+		"width": 0.6,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "mountain",
+				"color": "a07020",
+				"collision": true
+			},
+			{
+				"name": "forest",
+				"color": "007000",
+				"collision": true
+			}
+		]
+	}
+]
+}

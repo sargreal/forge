@@ -76,7 +76,7 @@ public class TriggerCounterRemoved extends Trigger {
         if (hasParam("NewCounterAmount")) {
             final String amtString = getParam("NewCounterAmount");
             int amt = Integer.parseInt(amtString);
-            if(amt != addedNewCounterAmount.intValue()) {
+            if(amt != addedNewCounterAmount) {
                 return false;
             }
         }
@@ -86,8 +86,8 @@ public class TriggerCounterRemoved extends Trigger {
 
     /** {@inheritDoc} */
     @Override
-    public final void setTriggeringObjects(final SpellAbility sa, Map<AbilityKey, Object> runParams) {
-        sa.setTriggeringObjectsFrom(runParams, AbilityKey.Card);
+    public final void setTriggeringObjects(final Map<AbilityKey, Object> objects, Map<AbilityKey, Object> runParams) {
+        AbilityKey.copyKeys(runParams, objects, AbilityKey.Card);
     }
 
     @Override

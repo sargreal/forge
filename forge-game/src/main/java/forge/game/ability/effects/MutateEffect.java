@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.google.common.collect.Lists;
 
+import forge.card.GamePieceType;
 import forge.game.Game;
 import forge.game.ability.AbilityKey;
 import forge.game.ability.SpellAbilityEffect;
@@ -28,8 +29,7 @@ public class MutateEffect extends SpellAbilityEffect {
         // The token has the characteristics of the spell that became that token.
         // The token is not “created” for the purposes of any replacement effects or triggered abilities that refer to creating a token.
         if (host.isCopiedSpell()) {
-            host.setCopiedSpell(false);
-            host.setToken(true);
+            host.setGamePieceType(GamePieceType.TOKEN);
         }
 
         final Card target = getDefinedCardsOrTargeted(sa, "Defined").get(0);
@@ -65,10 +65,15 @@ public class MutateEffect extends SpellAbilityEffect {
         // First remove current mutated states
         target.removeMutatedStates();
         // Now add all abilities from bottom cards
-        final Long ts = game.getNextTimestamp();
+        final long ts = game.getNextTimestamp();
         target.setMutatedTimestamp(ts);
 
         target.addCloneState(CardFactory.getMutatedCloneStates(target, sa), ts);
+
+        // CR 123.5b
+        if (host.isStickered()) {
+            target.takeStickersFrom(host);
+        }
 
         // currently used by Tezzeret, Cruel Machinist and Yedora, Grave Gardener
         // when mutating onto the FaceDown, their effect should end, then 721.2e would stop trigger
@@ -80,7 +85,7 @@ public class MutateEffect extends SpellAbilityEffect {
         game.getTriggerHandler().clearActiveTriggers(target, null);
         game.getTriggerHandler().registerActiveTrigger(target, false);
 
-        game.getAction().moveTo(p.getZone(ZoneType.Merged), host, sa, AbilityKey.newMap());
+        game.getAction().moveTo(p.getZone(ZoneType.Merged), host, sa);
 
         host.setTapped(target.isTapped());
         host.setFlipped(target.isFlipped());

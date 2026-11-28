@@ -1,0 +1,39 @@
+{
+"startPointX": 0.465000,
+"startPointY": 0.359167,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "anduin_vale",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "Green",
+"terrain": [
+	{
+		"spriteName": "Green_1",
+		"max": 0.2,
+		"resolution": 10
+	},
+	{
+		"spriteName": "Green_2",
+		"min": 0.8,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.134167,
+"height": 0.333333,
+"color": "66b35c",
+"spriteNames": [
+	"Flower",
+	"PlainsTree",
+	"Bush",
+	"DarkGras",
+	"Stone"
+],
+"enemies": ["Wild Bear", "Beorning", "Wild Wolves", "Galadhrim Warden", "Great Eagle", "Warg Rider", "Gollum"],
+"pointsOfInterest": [
+	"ME Beorns Hall",
+	"ME Anduin Town",
+	"ME Gladden Fields"
+],
+"structures": []
+}

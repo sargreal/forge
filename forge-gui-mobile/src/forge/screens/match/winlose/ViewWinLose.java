@@ -13,7 +13,9 @@ import forge.assets.FSkinColor.Colors;
 import forge.assets.FSkinFont;
 import forge.game.GameLogEntry;
 import forge.game.GameLogEntryType;
+import forge.game.GameType;
 import forge.game.GameView;
+import forge.gamemodes.tutorial.HowToPlay;
 import forge.gui.FThreads;
 import forge.gui.interfaces.IWinLoseView;
 import forge.gui.util.SGuiChoose;
@@ -21,12 +23,11 @@ import forge.gui.util.SOptionPane;
 import forge.item.PaperCard;
 import forge.localinstance.skin.FSkinProp;
 import forge.menu.FMagnifyView;
+import forge.screens.match.MatchController;
 import forge.model.FModel;
 import forge.toolbox.FButton;
 import forge.toolbox.FContainer;
 import forge.toolbox.FDisplayObject;
-import forge.toolbox.FEvent;
-import forge.toolbox.FEvent.FEventHandler;
 import forge.toolbox.FLabel;
 import forge.toolbox.FOverlay;
 import forge.toolbox.FTextArea;
@@ -64,7 +65,7 @@ public class ViewWinLose extends FOverlay implements IWinLoseView<FButton> {
         btnContinue.setEnabled(!game0.isMatchOver());
 
         lblLog = add(new FLabel.Builder().text(Forge.getLocalizer().getMessage("lblGameLog")).align(Align.center).font(FSkinFont.get(18)).build());
-        txtLog = add(new FTextArea(true, StringUtils.join(game.getGameLog().getLogEntries(null), "\r\n").replace("[COMPUTER]", "[AI]")) {
+        txtLog = add(new FTextArea(true, StringUtils.join(game.getGameLog().getLogEntries(null), "\r\n")) {
             @Override
             public boolean tap(float x, float y, int count) {
                 if (txtLog.getMaxScrollTop() > 0) {
@@ -75,25 +76,31 @@ public class ViewWinLose extends FOverlay implements IWinLoseView<FButton> {
         });
         txtLog.setFont(FSkinFont.get(12));
 
-        btnCopyLog = add(new FLabel.ButtonBuilder().text(Forge.getLocalizer().getMessage("btnCopyToClipboard")).selectable().command(new FEventHandler() {
-            @Override
-            public void handleEvent(FEvent e) {
-                Forge.getClipboard().setContents(txtLog.getText());
-            }
-        }).build());
+        btnCopyLog = add(new FLabel.ButtonBuilder().text(Forge.getLocalizer().getMessage("btnCopyToClipboard")).selectable()
+                .command(e -> Forge.getClipboard().setContents(txtLog.getText())).build()
+        );
 
-        btnShowBattlefield = add(new FLabel.ButtonBuilder().text(Forge.getLocalizer().getMessage("lblShowBattlefield")).font(FSkinFont.get(12)).selectable().command(new FEventHandler() {
-            @Override
-            public void handleEvent(FEvent e) {
-                hide();
-            }
-        }).build());
-        lblTitle.setText(composeTitle(game0));
+        btnShowBattlefield = add(new FLabel.ButtonBuilder().text(Forge.getLocalizer().getMessage("lblShowBattlefield")).font(FSkinFont.get(12)).selectable()
+                .command(e -> hide()).build()
+        );
+        lblTitle.setText((MatchController.instance.isReplay() ? "Replay: " : "") + composeTitle(game0));
+        if (MatchController.instance.isReplay()) {
+            btnQuit.setText("Close replay");
+            btnContinue.setEnabled(false); // disabled buttons are left out of the layout
+            btnRestart.setEnabled(false);
+        } else if (game0.getGameType() == GameType.Puzzle) {
+            // a puzzle is one fixed game: no next game and no new match, only trying it again
+            btnContinue.setEnabled(false);
+            final boolean tutorial = HowToPlay.isTutorialGame(game0);
+            btnRestart.setText(tutorial ? HowToPlay.restartLabel() : Forge.getLocalizer().getMessage("lblRestartPuzzle"));
+            btnQuit.setText(tutorial ? HowToPlay.quitLabel() : Forge.getLocalizer().getMessage("lblQuitPuzzle"));
+        }
 
-        // Control of the win/lose is handled differently for various game
-        // modes.
+        // Control of the win/lose is handled differently for various game modes
         ControlWinLose control = null;
-        switch (game0.getGameType()) {
+        // a recording only shows what happened: no rewards, no saving results, no next game
+        final boolean replay = MatchController.instance.isReplay();
+        switch (replay ? GameType.Constructed : game0.getGameType()) {
         case Quest:
             control = new QuestWinLose(this, game0);
             break;
@@ -162,13 +169,13 @@ public class ViewWinLose extends FOverlay implements IWinLoseView<FButton> {
 
     private void showGameOutcomeSummary() {
         for (GameLogEntry o : game.getGameLog().getLogEntriesExact(GameLogEntryType.GAME_OUTCOME)) {
-            pnlOutcomes.add(new FLabel.Builder().text(o.message).font(FSkinFont.get(14)).build());
+            pnlOutcomes.add(new FLabel.Builder().text(o.message()).font(FSkinFont.get(14)).build());
         }
     }
 
     private void showPlayerScores() {
         for (GameLogEntry o : game.getGameLog().getLogEntriesExact(GameLogEntryType.MATCH_RESULTS)) {
-            lblStats.setText(removePlayerTypeFromLogMessage(o.message));
+            lblStats.setText(removePlayerTypeFromLogMessage(o.message()));
         }
     }
 
@@ -260,6 +267,14 @@ public class ViewWinLose extends FOverlay implements IWinLoseView<FButton> {
     @Override
     public boolean keyDown(int keyCode) {
         if (keyCode == Keys.ESCAPE || keyCode == Keys.BACK) {
+            if (Forge.isMobileAdventureMode) {
+                if (btnContinue.isEnabled()) {
+                    btnContinue.trigger();
+                } else {
+                    btnQuit.trigger();
+                }
+                return true;
+            }
             btnQuit.trigger(); //quit on escape or back
             return true;
         } else if (keyCode == Keys.SPACE || keyCode == Keys.ENTER) {

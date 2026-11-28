@@ -1,73 +1,35 @@
 {
-"startPointX": 0.26,
-"startPointY": 0.26,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.262500,
+"startPointY": 0.334167,
+"noiseWeight": 0.5,
+"distWeight": 0.9,
 "name": "eriador",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Colorless",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Colorless_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
-		"resolution": 5
+		"resolution": 10
 	},
 	{
-		"spriteName": "Colorless_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
-		"resolution": 5
+		"resolution": 10
 	}
 ],
-"width": 0.48,
-"height": 0.32,
-"color": "aeaeae",
+"width": 0.345000,
+"height": 0.261667,
+"color": "59a650",
 "spriteNames": [
-	"Stone"
+	"DarkGras",
+	"Bush",
+	"PlainsTree",
+	"Stone",
+	"LargePlainsRock"
 ],
-"enemies": [
-	"Adept Black Wizard",
-	"Adept Blue Wizard",
-	"Adept Green Wizard",
-	"Adept Red Wizard",
-	"Adept White Wizard",
-	"Apprentice Black Wizard",
-	"Apprentice Blue Wizard",
-	"Apprentice Green Wizard",
-    "Apprentice Red Wizard",
-	"Apprentice White Wizard",
-	"Bandit",
-	"Boar",
-	"Caracal",
-	"Challenger 20",
-	"Challenger 21",
-	"Challenger 22",
-	"Clay Golem",
-	"Construct",
-	"Corrupted Cleric",
-	"Corrupted Green Wizard",
-	"Corrupted Red Wizard",
-	"Corrupted Blue Wizard",
-	"Dog",
-	"Doppelganger",
-	"Eldrazi",
-	"Falcon",
-	"Fox",
-	"Gargoyle",
-	"Gargoyle 2",
-	"Geonid Death-Cap",
-	"Golem",
-	"Maelstrom Angel",
-	"Mummy",
-	"Ooze",
-	"Pirate",
-	"Raven",
-	"Sliver",
-	"Wandering Giant",
-	"Wild Rat"
-],
-"pointsOfInterest": [
-	"Waste Town Generic"
-],
+"enemies": ["Southern Ruffian", "Wild Wolves", "Dunlending Raider", "Ranger of the North", "Barrow-wight", "Hill Troll", "Stone Troll", "Black Rider", "Barrow-wight Lord", "Old Man Willow"],
+"pointsOfInterest": ["ME Bree", "ME Eriador Town", "ME Barrow-downs", "ME Carn Dum", "ME Ruffian Camp", "ME Wolf Den Eriador"],
 "structures": []
 }

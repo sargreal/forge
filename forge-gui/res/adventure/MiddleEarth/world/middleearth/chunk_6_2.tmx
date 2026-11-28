@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <tileset firstgid="57" source="roads.tsx"/>
+ <tileset firstgid="58" source="clutter.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJzt2VFq40AQRVEPBLKQLCH739sQmIAJ8UiWu/uVSufj/Mrlruu2Qz5vt9snAAAAAAAAAACn93EnPQvn87FTek7OYW9P2mLLkZZG9KXVnkb19Gwf7sG+VjS1os30OV7B6PuimmfeY3er7vn0ztNmfA6r9rvijNL7rGTFma1oZcWe9TR+7ysbtrc+Vu1VT9ezarc6up6V+9UTANxubwVm6ODtTnqWCt42JF4/fSYjzi89V9pWVyPOaM9rnG03Z5+/wvkcOcNZz63gzLNXO6OkR/NWP6/0bnVV/06rOldV6SYqNVZ1rjNKd5DurdIsnaT3fWXp3euqp/TuddVTeve66im9e131lN69rvpK719X15NuQ1e97dlhuiNdndfe3aWb0lVP6aZ01Uu6JV31km5IV/2k+9FVT+l+VjSnX02NbuuV52rxel1t7bdK11eTbqKjV8873YSW6ppx5uluNHUdqR40dS3uF2bSE0Bd73fSs9DD+5PS81Lfs03pij10xWhHmtIVjxztSVf85tWedMVPo5rSFd9GNvXF/7hq7W7Gc1c3tdWVvuZ3VKkFXdWX3mta166e/fxrSVdH96sZXW35muvPP+kz5FhX1dq6n0tXNemKZFcVGvs5h+/Buo50tbK1R6+nqdpGdTWisb3P11R96a6OPF9T9c3oak9frzxXV/XN7Oq3tkY8U1f1ze5qBl3Vl27kaFfaqi3diK56SjdypCdN1ZduRU89pZvxnddTups9XaXPCF1RQ7obXfWU7kZXPaW72WpKV+eUbsdd1dPsu+YRd1Vvie+vreY0dX5+E1G9K03xze9sZnBXMcPIv/XS74U63EvMoClm+N93m6Y46lEzfj/xCs0wg6YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADO5S8k6MFz
+  </data>
+ </layer>
+ <layer id="3" name="Roads" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+  </data>
+ </layer>
+ <objectgroup id="4" name="Clutter"/>
+ <imagelayer id="5" name="Reference" opacity="0.5">
+  <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_6_2.png" width="2400" height="2400"/>
+ </imagelayer>
+ <objectgroup id="2" name="POI"/>
+</map>

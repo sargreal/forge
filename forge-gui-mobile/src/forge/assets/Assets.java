@@ -8,32 +8,81 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.ParticleEffectLoader;
 import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.assets.loaders.resolvers.AbsoluteFileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.ParticleEffect;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.github.tommyettinger.textra.Font;
 import forge.Forge;
+import forge.animation.GifAnimation;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
 import forge.localinstance.properties.ForgeConstants;
 import forge.localinstance.skin.FSkinProp;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static forge.assets.FSkin.getDefaultSkinFile;
+
 public class Assets implements Disposable {
+    public static Assets instance;
+    public static Assets getInstance() {
+        return instance == null ? instance = new Assets() : instance;
+    }
+    /**
+     * Custom FileHandleResolver for iOS/Android that handles both:
+     * - Absolute paths (for writable cache/Documents files)
+     * - Relative paths (for read-only bundle resources)
+     */
+    private class HybridFileHandleResolver implements FileHandleResolver {
+        private final AbsoluteFileHandleResolver absoluteResolver = new AbsoluteFileHandleResolver();
+        private final InternalFileHandleResolver internalResolver = new InternalFileHandleResolver();
+
+        @Override
+        public FileHandle resolve(String fileName) {
+            // iOS only: bundle-internal resources must resolve via internal() (the app bundle
+            // lives behind a /var symlink that absolute() fails to realpath inside the sandbox).
+            // All other platforms keep master's absolute-resolver behavior unchanged — Android's
+            // assets are extracted to storage and were always resolved absolutely.
+            if (GuiBase.isIOS() && !fileName.startsWith("/")) {
+                return internalResolver.resolve(fileName);
+            }
+            return absoluteResolver.resolve(fileName);
+        }
+    }
+
+    /**
+     * FileHandle for a resource, mirroring {@link HybridFileHandleResolver} for direct (non-manager)
+     * use — shared by FSkin/FSkinFont. iOS must use internal() with a relative path for bundled
+     * resources (the app bundle lives behind a /var symlink that absolute() fails to realpath inside
+     * the sandbox); only paths under ASSETS_DIR (the read-only bundle) are rerouted, so writable
+     * locations (cache/Documents — downloaded skins, generated .fnt files, planechase pics) keep
+     * absolute(), which works fine in the sandbox. Every other platform keeps absolute() throughout
+     * — Android's assets are extracted to storage and are NOT reachable via internal() APK paths.
+     */
+    FileHandle getFileHandle(String path) {
+        if (GuiBase.isIOS() && path.startsWith(ForgeConstants.ASSETS_DIR)) {
+            return Gdx.files.internal(path.substring(ForgeConstants.ASSETS_DIR.length()));
+        }
+        return Gdx.files.absolute(path);
+    }
+
     private MemoryTrackingAssetManager manager;
     private HashMap<Integer, FSkinFont> fonts;
-    private HashMap<String, FImageComplex> cardArtCache;
+    private LinkedHashMap<String, FImageComplex> cardArtCache;
     private HashMap<String, FImage> avatarImages;
     private HashMap<String, FSkinImageInterface> manaImages;
     private HashMap<String, FSkinImageInterface> symbolLookup;
@@ -44,88 +93,173 @@ public class Assets implements Disposable {
     private HashMap<Integer, TextureRegion> borders;
     private HashMap<Integer, TextureRegion> deckbox;
     private HashMap<Integer, TextureRegion> cursor;
-    private ObjectMap<Integer, BitmapFont> counterFonts;
-    private ObjectMap<String, Texture> generatedCards;
     private ObjectMap<String, Texture> fallback_skins;
     private ObjectMap<String, Texture> tmxMap;
-    private Texture defaultImage, dummy;
+    private Texture defaultImage, blackTexture;
     private TextureParameter textureParameter;
     private ObjectMap<String, Font> textrafonts;
-    private int cGen = 0, cGenVal = 0, cFB = 0, cFBVal = 0, cTM = 0, cTMVal = 0, cSF = 0, cSFVal = 0, cCF = 0, cCFVal = 0, aDF = 0, cDFVal = 0;
+    private int cFB = 0, cFBVal = 0, cTM = 0, cTMVal = 0, cSF = 0, cSFVal = 0, cCF = 0, cCFVal = 0;
+    private Texture whiteTexture, backdropTexture, grayTexture, holofoil, miniMapTexture, coinHead, coinTail;
+    private FrameBuffer cardFrameBuffer, itemFrameBuffer;
+    private GifAnimation gifAnimation;
+    private boolean isDisposed = false;
+    private int miniMapID;
+    private String transformAtlasPath;
+    private TextureAtlas transformAtlas;
+    private boolean transformAtlasFailed;
+    private String topMenuAtlasPath;
+    private TextureAtlas topMenuAtlas;
+    private boolean topMenuAtlasFailed;
+    private static final String COUNTER_FONT_FILE = "Roboto-Bold.ttf";
+    private static final String COUNTER_FONT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890./-+:'!—";
 
-    public Assets() {
+    private FileHandle counterFontHandle; // cached
+
+    private Assets() {
         String titleFilename = Forge.isLandscapeMode() ? "title_bg_lq.png" : "title_bg_lq_portrait.png";
         try {
             //init titleLQ
-            if (GuiBase.isAndroid())
+            if (GuiBase.isMobile())
                 getTexture(Gdx.files.internal("fallback_skin").child(titleFilename));
             else
                 getTexture(Gdx.files.classpath("fallback_skin").child(titleFilename));
             //init transition
-            if (GuiBase.isAndroid())
+            if (GuiBase.isMobile())
                 getTexture(Gdx.files.internal("fallback_skin").child("transition.png"));
             else
                 getTexture(Gdx.files.classpath("fallback_skin").child("transition.png"));
         } catch (Exception e) {
             fallback_skins().clear();
-            fallback_skins().put("title", getDummy());
-            fallback_skins().put("transition", getDummy());
+            fallback_skins().put("title", getBlackTexture());
+            fallback_skins().put("transition", getBlackTexture());
         }
     }
 
     @Override
     public void dispose() {
-        try {
-            if (counterFonts != null) {
-                for (BitmapFont bitmapFont : counterFonts.values())
-                    bitmapFont.dispose();
-                counterFonts.clear();
-            }
-            if (generatedCards != null) {
-                for (Texture texture : generatedCards.values())
-                    texture.dispose();
-                generatedCards.clear();
-            }
-            if (fallback_skins != null) {
-                for (Texture texture : fallback_skins.values())
-                    texture.dispose();
-                fallback_skins.clear();
-            }
-            if (tmxMap != null) {
-                for (Texture texture : tmxMap.values())
-                    texture.dispose();
-                tmxMap.clear();
-            }
-            if (defaultImage != null)
-                defaultImage.dispose();
-            if (dummy != null)
-                dummy.dispose();
-            if (textrafonts != null) {
-                for (Font f : textrafonts.values())
-                    f.dispose();
-            }
-            cardArtCache.clear();
-            avatarImages.clear();
-            manaImages.clear();
-            symbolLookup.clear();
-            images.clear();
-            avatars.clear();
-            sleeves.clear();
-            cracks.clear();
-            borders.clear();
-            deckbox.clear();
-            cursor.clear();
-            fonts.clear();
-            if (manager != null)
-                manager.dispose();
-        } catch (Exception e) {
-            //e.printStackTrace();
+        if (isDisposed) {
+            return;
         }
+        isDisposed = true;
+        if (fallback_skins != null) {
+            for (Texture texture : fallback_skins.values())
+                Forge.safeDispose(texture);
+            fallback_skins.clear();
+        }
+        if (tmxMap != null) {
+            for (Texture texture : tmxMap.values())
+                Forge.safeDispose(texture);
+            tmxMap.clear();
+        }
+        if (textrafonts != null) {
+            for (Font f : textrafonts.values())
+                Forge.safeDispose(f);
+            textrafonts.clear();
+        }
+        Forge.safeDispose(
+            defaultImage, blackTexture, whiteTexture, backdropTexture, grayTexture, coinHead, coinTail,
+            cardFrameBuffer, itemFrameBuffer, gifAnimation, miniMapTexture, transformAtlas, topMenuAtlas);
+        if (cardArtCache != null)
+            cardArtCache.clear();
+        if (avatarImages != null)
+            avatarImages.clear();
+        if (manaImages != null)
+            manaImages.clear();
+        if (symbolLookup != null)
+            symbolLookup.clear();
+        if (images != null)
+            images.clear();
+        if (avatars != null)
+            avatars.clear();
+        if (sleeves != null)
+            sleeves.clear();
+        if (cracks != null)
+            cracks.clear();
+        if (borders != null)
+            borders.clear();
+        if (deckbox != null)
+            deckbox.clear();
+        if (cursor != null)
+            cursor.clear();
+        if (fonts != null)
+            fonts.clear();
+        Forge.safeDispose(manager);
+    }
+
+    public BitmapFont getCounterFont(int fontSize) {
+        if (fontSize <= 0) {
+            return null;
+        }
+
+        // faux key only for storing different font size params with the same ttf font
+        final String key = "Roboto-Bold-" + fontSize + ".ttf";
+
+        // Fast path: already loaded, no file system lookups
+        if (manager().isLoaded(key, BitmapFont.class)) {
+            return manager().get(key, BitmapFont.class);
+        }
+
+        // Resolve the TTF only once
+        if (counterFontHandle == null || !counterFontHandle.exists()) {
+            counterFontHandle = getFileHandle(ForgeConstants.COMMON_FONTS_DIR + "/" + COUNTER_FONT_FILE);
+            if (counterFontHandle == null || !counterFontHandle.exists()) {
+                counterFontHandle = null;
+                return null; // caller should fall back to a default font ideally
+            }
+        }
+
+        FreetypeFontLoader.FreeTypeFontLoaderParameter param = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+        param.fontFileName = counterFontHandle.path();
+        param.fontParameters.size = fontSize;
+        param.fontParameters.characters = COUNTER_FONT_CHARS;
+        param.fontParameters.minFilter = Texture.TextureFilter.Linear;
+        param.fontParameters.magFilter = Texture.TextureFilter.Linear;
+        param.fontParameters.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
+
+        manager().load(key, BitmapFont.class, param);
+        manager().finishLoadingAsset(key);
+        return manager().get(key, BitmapFont.class);
+    }
+
+    public GifAnimation getGifAnimation() {
+        return gifAnimation;
+    }
+
+    public void setGifAnimation(FileHandle file, Animation.PlayMode playMode) {
+        if (file.exists())
+            gifAnimation = new GifAnimation(file.path(), playMode);
+    }
+
+    public void playGifAnimation() {
+        if (gifAnimation != null)
+            gifAnimation.start();
+    }
+
+    public void stopGifAnimation() {
+        if (gifAnimation != null)
+            gifAnimation.stop();
+    }
+
+    public FrameBuffer getItemFrameBuffer(final int w, final int h, boolean isCard) {
+        FrameBuffer buffer = isCard ? cardFrameBuffer : itemFrameBuffer;
+        if (buffer == null) {
+            try {
+                buffer = new FrameBuffer(Pixmap.Format.RGB565, w, h, false);
+            } catch (Exception e) {
+                // framebuffer creation failed
+                e.printStackTrace();
+            }
+        }
+        return buffer;
     }
 
     public MemoryTrackingAssetManager manager() {
-        if (manager == null)
-            manager = new MemoryTrackingAssetManager(new AbsoluteFileHandleResolver());
+        if (manager == null) {
+            HybridFileHandleResolver resolver = new HybridFileHandleResolver();
+            manager = new MemoryTrackingAssetManager(resolver);
+            manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+            manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+        }
         return manager;
     }
 
@@ -135,9 +269,16 @@ public class Assets implements Disposable {
         return fonts;
     }
 
-    public HashMap<String, FImageComplex> cardArtCache() {
+    public LinkedHashMap<String, FImageComplex> cardArtCache() {
+        // LRU-capped: card art entries otherwise accumulate unboundedly over a
+        // long session (memory hygiene on RAM-constrained devices)
         if (cardArtCache == null)
-            cardArtCache = new HashMap<>();
+            cardArtCache = new LinkedHashMap<String, FImageComplex>(100, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, FImageComplex> eldest) {
+                    return size() > 100;
+                }
+            };
         return cardArtCache;
     }
 
@@ -201,18 +342,6 @@ public class Assets implements Disposable {
         return cursor;
     }
 
-    public ObjectMap<Integer, BitmapFont> counterFonts() {
-        if (counterFonts == null)
-            counterFonts = new ObjectMap<>();
-        return counterFonts;
-    }
-
-    public ObjectMap<String, Texture> generatedCards() {
-        if (generatedCards == null)
-            generatedCards = new ObjectMap<>();
-        return generatedCards;
-    }
-
     public ObjectMap<String, Texture> fallback_skins() {
         if (fallback_skins == null)
             fallback_skins = new ObjectMap<String, Texture>() {
@@ -257,12 +386,15 @@ public class Assets implements Disposable {
     }
 
     public Texture getTexture(FileHandle file, boolean is2D, boolean required) {
+        if (isDisposed)
+            return null;
         if (file == null || !file.exists()) {
             if (!required)
                 return null;
             System.err.println("Failed to load: " + file + "!. Creating dummy texture.");
-            return getDummy();
+            return getBlackTexture();
         }
+
         //internal path can be inside apk or jar..
         if (!FileType.Absolute.equals(file.type()) || file.path().contains("fallback_skin")) {
             Texture f = fallback_skins().get(file.path());
@@ -300,7 +432,7 @@ public class Assets implements Disposable {
 
     public Texture getDefaultImage() {
         if (defaultImage == null) {
-            FileHandle blankImage = Gdx.files.absolute(ForgeConstants.NO_CARD_FILE);
+            FileHandle blankImage = getFileHandle(ForgeConstants.NO_CARD_FILE);
             if (blankImage.exists()) {
                 defaultImage = manager().get(blankImage.path(), Texture.class, false);
                 if (defaultImage != null)
@@ -310,7 +442,7 @@ public class Assets implements Disposable {
                 manager().finishLoadingAsset(blankImage.path());
                 defaultImage = manager().get(blankImage.path());
             } else {
-                defaultImage = getDummy();
+                defaultImage = getBlackTexture();
             }
         }
         return defaultImage;
@@ -324,6 +456,7 @@ public class Assets implements Disposable {
         try {
             if (file == null || !file.exists())
                 return;
+
             if (!FileType.Absolute.equals(file.type()))
                 return;
             manager().load(file.path(), Texture.class, parameter);
@@ -333,15 +466,160 @@ public class Assets implements Disposable {
         }
     }
 
-    private Texture getDummy() {
-        if (dummy == null) {
-            Pixmap P = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-            P.setColor(0f, 0f, 0f, 1f);
-            P.drawPixel(0, 0);
-            dummy = new Texture(P);
-            P.dispose();
+    private Texture setTexture(Texture texture, Color color, float alphaComposite) {
+        if (texture != null)
+            return texture;
+        Pixmap P = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        P.setColor(color.r, color.g, color.b, alphaComposite);
+        P.drawPixel(0, 0);
+        texture = new Texture(P);
+        P.dispose();
+        return texture;
+    }
+
+    public Texture getWhiteTexture() {
+        if (whiteTexture == null)
+            whiteTexture = setTexture(whiteTexture, Color.WHITE, 1f);
+        return whiteTexture;
+    }
+
+    public Texture getBackropTexture() {
+        if (backdropTexture == null)
+            backdropTexture = setTexture(backdropTexture, Color.BLACK, 0.5f);
+        return backdropTexture;
+    }
+
+    public Texture getGrayTexture() {
+        if (grayTexture == null)
+            grayTexture = setTexture(grayTexture, Color.DARK_GRAY, 0.5f);
+        return grayTexture;
+    }
+
+    private Texture getBlackTexture() {
+        if (blackTexture == null)
+            blackTexture = setTexture(blackTexture, Color.BLACK, 1f);
+        return blackTexture;
+    }
+
+    public Texture getCoinHead() {
+        if (coinHead == null) {
+            coinHead = getTexture(getDefaultSkinFile("coin_heads.png"));
         }
-        return dummy;
+        return coinHead;
+    }
+
+    public Texture getCoinTail() {
+        if (coinTail == null) {
+            coinTail = getTexture(getDefaultSkinFile("coin_tails.png"));
+        }
+        return coinTail;
+    }
+
+    public TextureAtlas getTransformAtlas() {
+        if (isDisposed || transformAtlasFailed)
+            return null;
+        try {
+            if (transformAtlasPath == null && transformAtlas == null) {
+                FileHandle file = getDefaultSkinFile("sprite_transform.atlas");
+                if (file == null || !file.exists()) {
+                    transformAtlasFailed = true;
+                    return null;
+                }
+                if (FileType.Absolute.equals(file.type())) {
+                    transformAtlasPath = file.path();
+                } else { //inside an apk or jar, the asset manager can't see it
+                    transformAtlas = new TextureAtlas(file);
+                    smoothAtlas(transformAtlas);
+                }
+            }
+            if (transformAtlas != null)
+                return transformAtlas;
+            TextureAtlas atlas = manager().get(transformAtlasPath, TextureAtlas.class, false);
+            if (atlas == null) {
+                manager().load(transformAtlasPath, TextureAtlas.class);
+                manager().finishLoadingAsset(transformAtlasPath);
+                atlas = manager().get(transformAtlasPath, TextureAtlas.class);
+                smoothAtlas(atlas);
+            }
+            return atlas;
+        } catch (Exception e) {
+            transformAtlasFailed = true;
+            System.err.println("Failed to load sprite_transform.atlas: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /** Icons of the match screen's top menu in the compact layout: topmenu.atlas next to sprite_transform.atlas in the default skin folder. */
+    public TextureAtlas getTopMenuAtlas() {
+        if (isDisposed || topMenuAtlasFailed)
+            return null;
+        try {
+            if (topMenuAtlasPath == null && topMenuAtlas == null) {
+                FileHandle file = getDefaultSkinFile("topmenu.atlas");
+                if (file == null || !file.exists()) {
+                    topMenuAtlasFailed = true;
+                    return null;
+                }
+                if (FileType.Absolute.equals(file.type())) {
+                    topMenuAtlasPath = file.path();
+                } else { //inside an apk or jar, the asset manager can't see it
+                    topMenuAtlas = new TextureAtlas(file);
+                    smoothAtlas(topMenuAtlas);
+                }
+            }
+            if (topMenuAtlas != null)
+                return topMenuAtlas;
+            TextureAtlas atlas = manager().get(topMenuAtlasPath, TextureAtlas.class, false);
+            if (atlas == null) {
+                manager().load(topMenuAtlasPath, TextureAtlas.class);
+                manager().finishLoadingAsset(topMenuAtlasPath);
+                atlas = manager().get(topMenuAtlasPath, TextureAtlas.class);
+                smoothAtlas(atlas);
+            }
+            return atlas;
+        } catch (Exception e) {
+            topMenuAtlasFailed = true;
+            System.err.println("Failed to load topmenu.atlas: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void smoothAtlas(TextureAtlas atlas) {
+        for (Texture t : atlas.getTextures())
+            t.setFilter(getTextureFilter().minFilter, getTextureFilter().magFilter);
+    }
+
+    public Texture getHolofoil() {
+        if (holofoil == null) {
+            holofoil = getTexture(getDefaultSkinFile("holofoil.png"));
+        }
+        return holofoil;
+    }
+
+    public Texture getNewMiniMapTexture(Pixmap pixmap) {
+        if (pixmap == null)
+            return null;
+        if (miniMapID == pixmap.hashCode())
+            return miniMapTexture;
+        try {
+            // try to reuse existing texture to save VRAM init and overwrite the pixeldata
+            if (miniMapTexture != null
+                && miniMapTexture.getWidth() == pixmap.getWidth()
+                && miniMapTexture.getHeight() == pixmap.getHeight()) {
+                miniMapTexture.draw(pixmap, 0, 0);
+            } else {
+                if (miniMapTexture != null)
+                    miniMapTexture.dispose();
+                miniMapTexture = new Texture(pixmap);
+            }
+        } catch (Exception e) {
+            // if somehow we can't reuse the existing texture then dispose and initialize a new one
+            if (miniMapTexture != null)
+                miniMapTexture.dispose();
+            miniMapTexture = new Texture(pixmap);
+        }
+        miniMapID = pixmap.hashCode();
+        return miniMapTexture;
     }
 
     public Font getTextraFont(BitmapFont bitmapFont, TextureAtlas item_atlas, TextureAtlas pixelmana_atlas) {
@@ -401,9 +679,18 @@ public class Assets implements Disposable {
         }
         Music music = manager().get(file.path(), Music.class, false);
         if (music == null) {
-            manager().load(file.path(), Music.class);
-            manager().finishLoadingAsset(file.path());
-            music = manager().get(file.path(), Music.class);
+            // A load failure (unsupported/corrupt file, or audio unavailable) must
+            // not propagate: getMusic is called synchronously from the render loop
+            // (adventure dialog voice), where an uncaught exception kills the app.
+            // Callers already treat null as "no audio".
+            try {
+                manager().load(file.path(), Music.class);
+                manager().finishLoadingAsset(file.path());
+                music = manager().get(file.path(), Music.class);
+            } catch (Exception e) {
+                System.err.println("Failed to load music " + file.path() + ": " + e.getMessage());
+                return null;
+            }
         }
         return music;
     }
@@ -434,7 +721,7 @@ public class Assets implements Disposable {
         }
 
         @SuppressWarnings("unchecked")
-        private int calculateTextureSize(AssetManager assetManager, String fileName, Class type) {
+        private int calculateTextureSize(AssetManager assetManager, String fileName, Class<?> type) {
             if (!Forge.showFPS)
                 return 0;
             Texture texture = (Texture) assetManager.get(fileName, type);
@@ -442,24 +729,10 @@ public class Assets implements Disposable {
             int textureSize = textureData.getWidth() * textureData.getHeight();
             if (Forge.isTextureFilteringEnabled())
                 textureSize = textureSize + (textureSize / 3);
-            switch (textureData.getFormat()) {
-                case RGB565:
-                    textureSize *= 2;
-                    break;
-                case RGB888:
-                    textureSize *= 3;
-                    break;
-                case RGBA4444:
-                    textureSize *= 2;
-                    break;
-                case RGBA8888:
-                    textureSize *= 4;
-                    break;
-            }
-            memoryPerFile.put(fileName, textureSize);
+            memoryPerFile.put(fileName, calcTextureDataSize(textureSize, textureData.getFormat()));
 
-            return memoryPerFile.values().stream().mapToInt(Integer::intValue).sum() + calcFonts() + calcCounterFonts()
-                    + calculateObjectMaps(generatedCards()) + calculateObjectMaps(fallback_skins()) + calculateObjectMaps(tmxMap());
+            return memoryPerFile.values().stream().mapToInt(Integer::intValue).sum() + calcFonts() +
+                calculateObjectMaps(fallback_skins()) + calculateObjectMaps(tmxMap());
         }
 
         @SuppressWarnings("unchecked")
@@ -468,12 +741,6 @@ public class Assets implements Disposable {
                 return 0;
             if (objectMap == null || objectMap.isEmpty())
                 return 0;
-            if (objectMap == generatedCards) {
-                if (cGen == objectMap.size)
-                    return cGenVal;
-                else
-                    cGen = objectMap.size;
-            }
             if (objectMap == tmxMap) {
                 if (cTM == objectMap.size)
                     return cTMVal;
@@ -492,24 +759,8 @@ public class Assets implements Disposable {
                 int textureSize = textureData.getWidth() * textureData.getHeight();
                 if (Forge.isTextureFilteringEnabled())
                     textureSize = textureSize + (textureSize / 3);
-                switch (textureData.getFormat()) {
-                    case RGB565:
-                        textureSize *= 2;
-                        break;
-                    case RGB888:
-                        textureSize *= 3;
-                        break;
-                    case RGBA4444:
-                        textureSize *= 2;
-                        break;
-                    case RGBA8888:
-                        textureSize *= 4;
-                        break;
-                }
-                sum += textureSize;
+                sum += calcTextureDataSize(textureSize, textureData.getFormat());
             }
-            if (objectMap == generatedCards)
-                cGenVal = sum;
             if (objectMap == tmxMap)
                 cTMVal = sum;
             if (objectMap == fallback_skins)
@@ -533,21 +784,6 @@ public class Assets implements Disposable {
             return cSFVal;
         }
 
-        private int calcCounterFonts() {
-            if (!Forge.showFPS)
-                return 0;
-            if (counterFonts == null || counterFonts.isEmpty())
-                return 0;
-            if (cCF == counterFonts.size)
-                return cCFVal;
-            int val = 0;
-            for (BitmapFont cf : counterFonts.values()) {
-                val += calcBitmapFont(cf);
-            }
-            cCFVal = val;
-            return cCFVal;
-        }
-
         private int calcBitmapFont(BitmapFont bitmapFont) {
             if (bitmapFont == null)
                 return 0;
@@ -559,6 +795,20 @@ public class Assets implements Disposable {
             return val;
         }
 
+        private int calcTextureDataSize(int textureSize, Pixmap.Format format) {
+            switch (format) {
+                case RGB565:
+                case RGBA4444:
+                    return textureSize * 2;
+                case RGB888:
+                    return textureSize * 3;
+                case RGBA8888:
+                    return textureSize * 4;
+                default: //assume plain RGB888
+                    return textureSize * 3;
+            }
+        }
+
         @SuppressWarnings("unchecked")
         @Override
         public synchronized <T> void load(String fileName, Class<T> type, AssetLoaderParameters<T> parameter) {
@@ -566,13 +816,13 @@ public class Assets implements Disposable {
                 if (parameter == null) {
                     parameter = (AssetLoaderParameters<T>) getTextureFilter();
                 }
-
-                final AssetLoaderParameters.LoadedCallback prevCallback = parameter.loadedCallback;
+                // shared filter holds our own prior wrapper; chaining overflows the stack — replace it, but keep a fresh caller's callback (libgdx refcount restore on context loss)
+                boolean sharedFilter = parameter == (Object) textureParameter;
+                final AssetLoaderParameters.LoadedCallback prevCallback = sharedFilter ? null : parameter.loadedCallback;
                 parameter.loadedCallback = (assetManager, fileName1, type1) -> {
                     if (prevCallback != null) {
                         prevCallback.finishedLoading(assetManager, fileName1, type1);
                     }
-
                     currentMemory = calculateTextureSize(assetManager, fileName1, type1);
                 };
             }
@@ -583,10 +833,8 @@ public class Assets implements Disposable {
         public synchronized void unload(String fileName) {
             if (isLoaded(fileName))
                 super.unload(fileName);
-            if (memoryPerFile.containsKey(fileName)) {
-                memoryPerFile.remove(fileName);
-                cardArtCache().clear();
-            }
+            memoryPerFile.remove(fileName);
+            cardArtCache().clear();
         }
 
         @Override

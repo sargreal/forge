@@ -1,79 +1,37 @@
 {
-"startPointX": 0.513,
-"startPointY": 0.737,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.417500,
+"startPointY": 0.722500,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "tolfalas",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Blue",
+"tilesetName": "Green",
 "terrain": [
 	{
-		"spriteName": "Blue_1",
+		"spriteName": "Green_1",
 		"max": 0.2,
 		"resolution": 10
 	},
 	{
-		"spriteName": "Blue_2",
+		"spriteName": "Green_2",
 		"min": 0.8,
 		"max": 1,
 		"resolution": 10
 	}
 ],
-"width": 0.026,
-"height": 0.026,
-"color": "10a2e0",
+"width": 0.075833,
+"height": 0.040000,
+"color": "85cc7a",
 "spriteNames": [
-	"Shell"
+	"Shell",
+	"PlainsTree",
+	"Flower",
+	"DarkGras",
+	"Bush"
 ],
-"enemies": [
-	"Adept Blue Wizard",
-	"Aether Channeler",
-	"Apprentice Blue Wizard",
-	"Bird",
-	"Blue Sliver",
-	"Challenger 20",
-	"Challenger 21",
-	"Challenger 22",
-	"Crab",
-	"Djinn",
-	"Doppelganger",
-	"Dragonfly",
-	"Drake",
-	"Elemental",
-	"Frog",
-	"Frost Titan",
-	"Geist",
-	"Geistmage",
-	"Gitaxian Underling",
-	"Hermit Crab",
-	"Horror",
-	"Ibis",
-	"Ibis-headed Aven Initiate",
-	"Illusionist",
-	"Jellyfish",
-	"Master Blue Wizard",
-	"Merfolk",
-	"Merfolk Avatar",
-	"Merfolk Fighter",
-	"Merfolk Lord",
-	"Merfolk Soldier",
-	"Merfolk warrior",
-	"Octopus",
-	"Owl",
-	"Pirate",
-	"Polar Bear",
-	"Rogue",
-	"Scorpion",
-	"Sea Monster",
-	"Tarkir Djinn",
-	"Turtle",
-	"Walking Brain",
-	"Water Elemental"
-
-],
+"enemies": ["Corsair of Umbar", "Corsair Captain", "Guard of the Citadel"],
 "pointsOfInterest": [
-	"Island Town Tolfalas"
+	"ME Tolfalas"
 ],
-"structures": [
-]
+"structures": []
 }

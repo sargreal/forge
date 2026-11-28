@@ -1,0 +1,37 @@
+{
+"startPointX": 0.815000,
+"startPointY": 0.515000,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
+"name": "rhun",
+"tilesetAtlas": "world/tilesets/terrain.atlas",
+"tilesetName": "White",
+"terrain": [
+	{
+		"spriteName": "White_1",
+		"max": 0.3,
+		"resolution": 10
+	},
+	{
+		"spriteName": "White_2",
+		"min": 0.7,
+		"max": 1,
+		"resolution": 10
+	}
+],
+"width": 0.370000,
+"height": 0.465000,
+"color": "efe697",
+"spriteNames": [
+	"Cactus",
+	"PlainsRock",
+	"LargePlainsRock",
+	"Stone"
+],
+"enemies": ["Easterling Warrior", "Warg Pack", "Mordor Orc", "Orc Captain", "Black Rider"],
+"pointsOfInterest": [
+	"ME Rhun Town",
+	"ME Easterling Camp"
+],
+"structures": []
+}

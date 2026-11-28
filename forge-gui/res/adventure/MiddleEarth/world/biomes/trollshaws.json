@@ -1,0 +1,42 @@
+{
+	"startPointX": 0.375,
+	"startPointY": 0.345,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "trollshaws",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Green",
+	"terrain": [
+		{
+			"spriteName": "Green_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Green_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.04,
+	"height": 0.03,
+	"color": "5a7a3a",
+	"spriteNames": [
+		"WoodTree",
+		"Bush",
+		"MountainRock",
+		"LargePlainsRock",
+		"Stone"
+	],
+	"enemies": [
+		"Troll",
+		"Stone-turned Troll",
+		"Wild Wolves",
+		"Wild Bear",
+		"Ranger of the North",
+		"Hill Troll",
+		"Stone Troll"
+	],
+	"pointsOfInterest": ["ME Troll-hoard", "ME Trollshaws"]
+}

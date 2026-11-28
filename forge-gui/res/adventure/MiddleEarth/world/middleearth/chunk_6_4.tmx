@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" source="biomes.tsx"/>
+ <tileset firstgid="49" source="roads.tsx"/>
+ <tileset firstgid="50" source="clutter.tsx"/>
+ <layer id="1" name="Biomes" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJzt3UFu2zAQhlFn1XVO0d7/hEWBBjEM2Zbs+Tmk8hZvEyQG5flC0WqB/LpcLr+Yysd/3evgPDRFNU2RoCkSdEWCrkhwviJFVyToigT3QlJ0RYKuqOY+SDVNkaApqtmrqPRx0RR19EQlPVFNT1TTFNU0RYKmSNAVCboiwfmKFF2RYM8iRVck6IoEXZGgKxJ0RTWfB6mmKappigofG7rXxLp0RDU9kaApqtmreNfWGUpTvOq2J5/3qKAdEnRFgq5I0BXVnM2ppimqaYoqnkuRoCUSdEWCrqjmTEUl53QSRvb050Xd7xHHjerq1ab0taYRXVU0pa21pLuqbEpf8xtxXk81pa953eupaoYjmtLXfLa6qprj6Kb0NYet+19nCx1t6TLT1VmbetaHPa+2o3v/B6Z7/rOrmsHvK909VK35X0efV7pntZqq2dx693XSLR3pqntGK6ru6Wgf7/589Xq/dM/lTFJzSr9OdVPa6uns1TlVzHpkV/oa21bFrN41qiltjWuru6ku3XM4u+75auucumfbrfv9f9XnZfuZ3O3Xu56vdM+1W3cflW09oittpdoa2Vf3TGfR3Yeuzqm7j9FdpVvrnucsuvsY0dTIPax7nrOYoY2OphJtfU4wz1mk9pARTYxsa+817XnPj37/qqqbWlXFNT3r6MjPrU5TdY72dKa2bq9BV/VdVXS5d34zOHKNmnqti8o+n82tu6d3f4+Yl6bQFBWzfreRmZvSVU9T1X3M1JOu5uhqawbdTWhqHd2zTjakJ13Zj87lnXlVfb+mzqdrVpoiRVOkaIoUvfCINqjkXkU1ZyIqOW9TzfMBKnmWSbXKprRFqild/Rypfu75+tsP12v4uPN11jWyqa2Ornu619ej7jQ5r5FN3fawtZ5n3W29hrbmtcJZaqu3rc6Yy6w97aWr+a3S0jVdrWOFnr7oaj0z9/Tl3tn+0bmMOaywZ+15NtG9Tr6tcC/cQ1f9Vjq376WrPqs9YzjCvbDHqs+vjtDWeCs/Gz3CZ8VMM4mmVmvrUWfd61nJowaqmlq1q9vGutewksp2dMXIrrqvsaIpXc3VVff1VXXVvYbVvNvM2ZvS1diuutc9kvvgcZraR1vH/PRejvDcdD89vU5bpGiLFG2Roi0SdEU1TZGgKRJ0RYKuSHC+IsW/7ZCkL5J0RYKuqOY+SIKmqGavopqmSNAUCfarb38BP5+NZw==
+  </data>
+ </layer>
+ <layer id="3" name="Roads" width="150" height="150">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+  </data>
+ </layer>
+ <objectgroup id="4" name="Clutter"/>
+ <imagelayer id="5" name="Reference" opacity="0.5">
+  <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_6_4.png" width="2400" height="2400"/>
+ </imagelayer>
+ <objectgroup id="2" name="POI"/>
+</map>

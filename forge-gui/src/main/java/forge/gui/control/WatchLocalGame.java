@@ -3,19 +3,20 @@
  */
 package forge.gui.control;
 
-import java.util.List;
-
 import forge.LobbyPlayer;
 import forge.game.Game;
 import forge.game.card.CardView;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
+import forge.game.spellability.StackItemView;
 import forge.gamemodes.match.input.Input;
 import forge.gamemodes.match.input.InputPlaybackControl;
 import forge.gui.interfaces.IGuiGame;
 import forge.interfaces.IDevModeCheats;
 import forge.player.PlayerControllerHuman;
 import forge.util.ITriggerEvent;
+
+import java.util.List;
 
 public class WatchLocalGame extends PlayerControllerHuman {
     public WatchLocalGame(final Game game0, final LobbyPlayer lp, final IGuiGame gui) {
@@ -59,18 +60,6 @@ public class WatchLocalGame extends PlayerControllerHuman {
     }
 
     @Override
-    public void confirm() {
-    }
-
-    @Override
-    public void passPriority() {
-    }
-
-    @Override
-    public void passPriorityUntilEndOfTurn() {
-    }
-
-    @Override
     public void useMana(final byte mana) {
     }
 
@@ -88,6 +77,10 @@ public class WatchLocalGame extends PlayerControllerHuman {
 
     @Override
     public void selectAbility(final SpellAbilityView sa) {
+    }
+
+    @Override
+    public void selectStackItem(final StackItemView item) {
     }
 
     @Override

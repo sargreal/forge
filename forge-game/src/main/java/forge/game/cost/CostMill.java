@@ -17,8 +17,6 @@
  */
 package forge.game.cost;
 
-import java.util.Map;
-
 import forge.game.Game;
 import forge.game.ability.AbilityKey;
 import forge.game.card.CardZoneTable;
@@ -26,6 +24,8 @@ import forge.game.player.Player;
 import forge.game.player.PlayerCollection;
 import forge.game.spellability.SpellAbility;
 import forge.game.zone.ZoneType;
+
+import java.util.Map;
 
 /**
  * This is for the "Mill" Cost. Putting cards from the top of your library into
@@ -64,7 +64,7 @@ public class CostMill extends CostPart {
      */
     @Override
     public final boolean canPay(final SpellAbility ability, final Player payer, final boolean effect) {
-        return getAbilityAmount(ability) < payer.getZone(ZoneType.Library).size();
+        return getAbilityAmount(ability) <= payer.getZone(ZoneType.Library).size();
     }
 
     /*

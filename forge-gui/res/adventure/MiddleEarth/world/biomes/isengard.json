@@ -1,0 +1,42 @@
+{
+	"startPointX": 0.395,
+	"startPointY": 0.465,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "isengard",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Black",
+	"terrain": [
+		{
+			"spriteName": "Black_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Black_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.02,
+	"height": 0.03,
+	"color": "3a3a40",
+	"spriteNames": [
+		"WasteRock",
+		"Stone",
+		"Gravel",
+		"Stump",
+		"DarkGras"
+	],
+	"enemies": [
+		"Uruk-hai",
+		"Uruk Flayer",
+		"Crebain",
+		"Warg Rider",
+		"Spiked Uruk Ravager",
+		"Uruk-hai Berserker",
+		"Uruk-hai Captain"
+	],
+	"pointsOfInterest": ["ME Wolf-Gate Camp", "ME Isengard"]
+}

@@ -18,11 +18,14 @@ import forge.toolbox.FLabel;
 import forge.toolbox.FScrollPane;
 import forge.util.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
     public static boolean COMPACT_TABS = FModel.getPreferences().getPrefBoolean(FPref.UI_COMPACT_TABS);
 
     protected final TabHeader<T> tabHeader;
-    protected final TabPage<T>[] tabPages;
+    protected final List<TabPage<T>> tabPages;
     private TabPage<T> selectedPage;
 
     @SuppressWarnings("unchecked")
@@ -71,8 +74,20 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
             tabPage.parentScreen = (T)this;
             add(tabPage);
             tabPage.setVisible(false);
+            tabPage.onAdd();
         }
-        setSelectedPage(tabPages[0]);
+        setSelectedPage(tabPages.get(0));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addTabPage(TabPage<T> tabPage) {
+        tabHeader.addTab(tabPage);
+        tabPage.index = tabPages.size();
+        tabPage.parentScreen = (T) this;
+        add(tabPage);
+        tabPage.setVisible(false);
+        tabPage.onAdd();
+        this.revalidate();
     }
 
     public TabPage<T> getSelectedPage() {
@@ -83,6 +98,7 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
 
         if (selectedPage != null) {
             selectedPage.setVisible(false);
+            selectedPage.onDeactivate();
         }
         selectedPage = tabPage0;
         if (selectedPage != null) {
@@ -135,7 +151,7 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
         private static final float BACK_BUTTON_WIDTH = Math.round(HEIGHT / 2);
         private static final FSkinColor SEPARATOR_COLOR = getBackColor().stepColor(-40);
 
-        private final TabPage<T>[] tabPages;
+        private final List<TabPage<T>> tabPages = new ArrayList<>();
         public final FLabel btnBack;
         private boolean isScrollable;
         private FDisplayObject finalVisibleTab;
@@ -184,8 +200,7 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
             }
         });
 
-        public TabHeader(TabPage<T>[] tabPages0, boolean showBackButton) {
-            tabPages = tabPages0;
+        public TabHeader(TabPage<T>[] tabPages, boolean showBackButton) {
             if (showBackButton) {
                 btnBack = add(new FLabel.Builder().icon(new BackIcon(BACK_BUTTON_WIDTH, BACK_BUTTON_WIDTH)).pressedColor(getBtnPressedColor()).align(Align.center).command(e -> Forge.back()).build());
             }
@@ -194,11 +209,11 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
             }
 
             for (TabPage<T> tabPage : tabPages) {
-                scroller.add(tabPage.tab);
+                this.tabPages.add(tabPage);
+                this.scroller.add(tabPage.tab);
             }
         }
-        public TabHeader(TabPage<T>[] tabPages0, FEventHandler backButton) {
-            tabPages = tabPages0;
+        public TabHeader(TabPage<T>[] tabPages, FEventHandler backButton) {
             if(backButton==null) {
                 btnBack = add(new FLabel.Builder().icon(new BackIcon(BACK_BUTTON_WIDTH, BACK_BUTTON_WIDTH)).pressedColor(getBtnPressedColor()).align(Align.center).command(e -> Forge.back()).build());
             }
@@ -208,21 +223,29 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
             }
 
             for (TabPage<T> tabPage : tabPages) {
-                scroller.add(tabPage.tab);
+                this.tabPages.add(tabPage);
+                this.scroller.add(tabPage.tab);
             }
         }
+
+        public void addTab(TabPage<T> tabPage) {
+            this.tabPages.add(tabPage);
+            this.scroller.add(tabPage.tab);
+            this.scroller.revalidate();
+        }
+
         protected boolean showBackButtonInLandscapeMode() {
             return btnBack != null;
         }
 
         @Override
         public float getPreferredHeight() {
-            return tabPages[0].parentScreen.showCompactTabs() ? COMPACT_HEIGHT : HEIGHT;
+            return tabPages.get(0).parentScreen.showCompactTabs() ? COMPACT_HEIGHT : HEIGHT;
         }
 
         @Override
         public void drawBackground(Graphics g) {
-            g.fillRect(getBackColor(), 0, 0, getWidth(), getHeight());
+            g.fillRect(Forge.isMobileAdventureMode ? FSkinColor.get(Colors.ADV_CLR_THEME).alphaColor(0.7f) : getBackColor(), 0, 0, getWidth(), getHeight());
         }
 
         @Override
@@ -262,7 +285,7 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
                     }
                 }
                 else {
-                    btnBack.setIconScaleAuto(tabPages[0].parentScreen.showCompactTabs());
+                    btnBack.setIconScaleAuto(tabPages.get(0).parentScreen.showCompactTabs());
                     btnBack.setSize(BACK_BUTTON_WIDTH, height);
                     x += BACK_BUTTON_WIDTH;
                 }
@@ -309,6 +332,9 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
         public void hideTab() {
             tab.setVisible(false);
         }
+        public boolean isTabVisible() {
+            return tab.isVisible();
+        }
 
         public String getCaption() {
             return caption;
@@ -318,20 +344,33 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
             return icon;
         }
 
-        protected void onActivate() {
-        }
+        /**
+         * Called when this tab is added to its TabPageScreen.
+         * Can perform initialization using parentScreen here.
+         */
+        protected void onAdd() {}
+
+        /**
+         * Called when this tab is switched to, or its parent screen becomes visible.
+         */
+        protected void onActivate() {}
+
+        /**
+         * Called when a different tab is selected and this one becomes inactive.
+         */
+        protected void onDeactivate() {}
 
         @Override
         public boolean fling(float velocityX, float velocityY) {
             //switch to next/previous tab page when flung left or right
             if (Math.abs(velocityX) > Math.abs(velocityY)) {
                 if (velocityX < 0) {
-                    if (index < parentScreen.tabPages.length - 1) {
-                        parentScreen.setSelectedPage(parentScreen.tabPages[index + 1]);
+                    if (index < parentScreen.tabPages.size() - 1) {
+                        parentScreen.setSelectedPage(parentScreen.tabPages.get(index + 1));
                     }
                 }
                 else if (index > 0) {
-                    parentScreen.setSelectedPage(parentScreen.tabPages[index - 1]);
+                    parentScreen.setSelectedPage(parentScreen.tabPages.get(index - 1));
                 }
                 return true;
             }
@@ -352,16 +391,16 @@ public class TabPageScreen<T extends TabPageScreen<T>> extends FScreen {
 
                 if (!b0 && parentScreen.getSelectedPage() == TabPage.this) {
                     //select next page if this page is hidden
-                    for (int i = index + 1; i < parentScreen.tabPages.length; i++) {
-                        if (parentScreen.tabPages[i].tab.isVisible()) {
-                            parentScreen.setSelectedPage(parentScreen.tabPages[i]);
+                    for (int i = index + 1; i < parentScreen.tabPages.size(); i++) {
+                        if (parentScreen.tabPages.get(i).tab.isVisible()) {
+                            parentScreen.setSelectedPage(parentScreen.tabPages.get(i));
                             return;
                         }
                     }
                     //select previous page if selecting next page is not possible
                     for (int i = index - 1; i >= 0; i--) {
-                        if (parentScreen.tabPages[i].tab.isVisible()) {
-                            parentScreen.setSelectedPage(parentScreen.tabPages[i]);
+                        if (parentScreen.tabPages.get(i).tab.isVisible()) {
+                            parentScreen.setSelectedPage(parentScreen.tabPages.get(i));
                             return;
                         }
                     }

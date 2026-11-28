@@ -1,0 +1,1399 @@
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.ObjectMap;
+import forge.GuiMobile;
+import forge.adventure.data.*;
+import forge.adventure.util.CardUtil;
+import forge.adventure.util.Config;
+import forge.adventure.util.Paths;
+import forge.card.CardDb;
+import forge.card.CardEdition;
+import forge.card.CardRarity;
+import forge.deck.Deck;
+import forge.deck.DeckSection;
+import forge.gui.GuiBase;
+import forge.item.PaperCard;
+import forge.model.FModel;
+
+import java.util.*;
+
+/**
+ * Headless consistency check for an adventure plane (default: MiddleEarth).
+ *
+ * Run via tools/middleearth/check.sh (needs the mobile-dev fat jar, see game.sh build).
+ * Runs with cwd = forge-gui so that Config resolves ./res/adventure/<plane>.
+ *
+ * Checks:
+ *  1. Every plane data file parses into Forge's data classes (unknown fields = error).
+ *  2. Every enemy / POI referenced by a biome exists.
+ *  3. Card pool: starter decks and enemy decks are measured against the plane's
+ *     allowedEditions. A card with no printing in an allowed edition is "off-pool".
+ *     Starter decks are loaded as Config.starterDeck does (Standard-mode jumpstart decks once per
+ *     starterEditions entry); generated .json starters are sampled several times and also checked
+ *     against minDeckSize.
+ *  4. Card resolution: CardUtil.getFullCardPool / ensureAllowedEdition only yield allowed printings.
+ *  5. Reprint editions (allowed editions whose entries carry ${"artSet","artNum"}, e.g. MEAR):
+ *     every entry has a card script, its art source printing exists, and it isn't already in
+ *     another allowed edition. Also lists tokens that no allowed edition prints (no token art).
+ *     Flavor names (${"flavorName"}) are unique, are no real card name, and the printing still resolves by
+ *     real name, flavor name and image key; [tokens] art sources (${"artSet","artNum"}) exist.
+ *
+ * Exit code: 1 if there are ERRORs (parse failures, missing references, wrong printings),
+ * 0 otherwise. Off-pool cards are reported as WARN (content work, see docs/MiddleEarth/PLAN.md).
+ */
+public class PlaneCheck {
+    static int errors = 0, warnings = 0;
+    static boolean verbose = false;
+    // --all-enemies: also check enemies no biome uses yet whose decks are plane-local (decks/enemy/...), e.g. a new fragment.
+    static boolean allEnemies = false;
+
+    static void error(String m) { errors++; System.out.println("ERROR " + m); }
+    static void warn(String m) { warnings++; System.out.println("WARN  " + m); }
+    static void info(String m) { System.out.println("      " + m); }
+
+    public static void main(String[] args) throws Exception {
+        for (String a : args) if (a.equals("-v")) verbose = true;
+        for (String a : args) if (a.equals("--all-enemies")) allEnemies = true;
+        GuiBase.setInterface(new GuiMobile("./"));
+        FModel.initialize(null, null);
+
+        Config cfg = Config.instance();
+        ConfigData cd = cfg.getConfigData();
+        System.out.println("== Plane: " + cfg.getPlane() + " (" + cfg.getPlanePath(cfg.getPlane()) + ")");
+        Set<String> allowed = cd.allowedEditions == null ? Set.of() : new LinkedHashSet<>(Arrays.asList(cd.allowedEditions));
+        System.out.println("   allowedEditions: " + allowed);
+        for (String e : allowed)
+            if (FModel.getMagicDb().getEditions().get(e) == null) error("allowedEditions: unknown edition code " + e);
+
+        Json json = new Json();
+        // ---------- 1. parse ----------
+        System.out.println("== Parsing data files");
+        strictParse(json, "config.json", ConfigData.class, false);
+        WorldData world = strictParse(json, "world/world.json", WorldData.class, false);
+        Array<EnemyData> enemies = strictParse(json, Paths.ENEMIES, EnemyData.class, true);
+        Array<PointOfInterestData> pois = strictParse(json, Paths.POINTS_OF_INTEREST, PointOfInterestData.class, true);
+        strictParse(json, Paths.SHOPS, ShopData.class, true);
+        strictParse(json, Paths.ITEMS, ItemData.class, true);
+        strictParse(json, Paths.QUESTS, AdventureQuestData.class, true);
+        List<BiomeData> biomes = new ArrayList<>();
+        if (world != null && world.biomesNames != null)
+            for (String b : world.biomesNames) {
+                BiomeData bd = strictParse(json, b, BiomeData.class, false);
+                if (bd != null) biomes.add(bd);
+            }
+
+        // ---------- 2. references ----------
+        System.out.println("== Biome references");
+        Map<String, EnemyData> enemyByName = new HashMap<>();
+        // BiomeData.getEnemyList() matches on getName() (nameOverride if set, else name)
+        if (enemies != null) for (EnemyData e : enemies) enemyByName.put(e.getName(), e);
+        Set<String> poiNames = new HashSet<>();
+        if (pois != null) for (PointOfInterestData p : pois) poiNames.add(p.name);
+        // The game silently skips unknown names, so these are content gaps rather than crashes.
+        Set<String> usedEnemies = new TreeSet<>();
+        Set<String> seenBiomes = new HashSet<>();
+        for (BiomeData b : biomes) {
+            if (!seenBiomes.add(b.name)) { error("biome " + b.name + " is listed more than once in world.json"); continue; }
+            if (b.enemies != null) for (String e : b.enemies) {
+                if (!enemyByName.containsKey(e)) warn("biome " + b.name + ": unknown enemy '" + e + "' (ignored by the game)");
+                else usedEnemies.add(e);
+            }
+            if (b.pointsOfInterest != null) for (String p : b.pointsOfInterest)
+                if (!poiNames.contains(p)) warn("biome " + b.name + ": unknown point of interest '" + p + "' (not placed)");
+        }
+        info(biomes.size() + " biomes, " + usedEnemies.size() + " distinct enemies used");
+        if (world != null && world.biomeMap != null && world.worldMap == null) checkBiomeMap(world, biomes);
+        if (world != null && world.worldMap != null) checkWorldMap(world, biomes, pois);
+        if (allEnemies) {
+            int extra = 0;
+            for (EnemyData e : enemyByName.values())
+                if (e.deck != null && e.deck.length > 0 && Arrays.stream(e.deck).allMatch(d -> d.startsWith("decks/enemy/"))
+                        && usedEnemies.add(e.getName())) extra++;
+            info("--all-enemies: " + extra + " more enemies with plane-local decks checked");
+        }
+
+        // ---------- 2b. enemies referenced by POI maps, arenas and quests ----------
+        System.out.println("== POI map / arena / quest enemy references");
+        Set<String> mapEnemies = checkMapEnemyReferences(pois, enemies);
+        checkQuestEnemyTags(json, enemies);
+        checkStoryData(json, cd, biomes, enemyByName, pois);
+
+        if (allowed.isEmpty()) {
+            warn("no allowedEditions configured - skipping card pool checks");
+            finish();
+            return;
+        }
+
+        // ---------- 3. card pool ----------
+        System.out.println("== Starter decks vs allowedEditions");
+        // Standard mode passes the chosen starter edition to CardUtil.getDeck (jumpstart packs of that
+        // edition, see Config.starterDeck); the other modes load the deck without one.
+        List<CardEdition> starterEds = new ArrayList<>();
+        if (cd.starterEditions != null) for (String code : cd.starterEditions) {
+            CardEdition ed = FModel.getMagicDb().getEditions().get(code);
+            if (ed == null) error("starterEditions: unknown edition code " + code);
+            else starterEds.add(ed);
+        }
+        if (starterEds.isEmpty()) starterEds.add(null); // the game then falls back to JMP/J22/... packs
+        Set<String> standardPaths = new TreeSet<>(), starterPaths = new TreeSet<>();
+        if (cd.difficulties != null) for (DifficultyData d : cd.difficulties) {
+            standardPaths.addAll(new ObjectMapValues(d.starterDecks).values);
+            for (ObjectMapValues m : List.of(new ObjectMapValues(d.constructedStarterDecks), new ObjectMapValues(d.pileDecks), new ObjectMapValues(d.commanderDecks)))
+                starterPaths.addAll(m.values);
+        }
+        if (cd.starterDecksByEdition != null)
+            for (com.badlogic.gdx.utils.ObjectMap<String, String> m : cd.starterDecksByEdition.values())
+                starterPaths.addAll(new ObjectMapValues(m).values);
+        for (String p : standardPaths)
+            for (CardEdition ed : starterEds)
+                reportStarter("starter " + p + " [" + (ed == null ? "no starter edition" : ed.getCode()) + "]", p, ed, allowed, cd.minDeckSize);
+        for (String p : starterPaths)
+            reportStarter("starter " + p, p, null, allowed, cd.minDeckSize);
+
+        System.out.println("== Enemy decks (enemies used by the plane's biomes)");
+        int offPoolEnemies = 0;
+        for (String name : usedEnemies) {
+            EnemyData e = enemyByName.get(name);
+            if (e.deck == null) continue;
+            for (String p : e.deck) {
+                if (p.endsWith(".json") && p.contains("generated")) continue; // generated decks are built from the pool
+                if (reportDeck("enemy " + name + " <" + p + ">", loadDeck(p), allowed) > 0) offPoolEnemies++;
+            }
+        }
+        info(offPoolEnemies + " enemy decks contain off-pool cards");
+
+        System.out.println("== Enemy decks (enemies referenced by POI maps and arenas, not used by biomes)");
+        int offPoolMap = 0;
+        for (String name : mapEnemies) {
+            EnemyData e = enemyByRawName(enemies, name);
+            if (e == null || e.deck == null || usedEnemies.contains(e.getName())) continue;
+            for (String p : e.deck) {
+                if (p.endsWith(".json")) continue; // generated from the pool
+                if (reportDeck("map enemy " + name + " <" + p + ">", loadDeck(p), allowed) > 0) offPoolMap++;
+            }
+        }
+        info(offPoolMap + " map-referenced enemy decks contain off-pool cards");
+
+        // Decks that live in the plane itself are hand-made for it: off-pool cards there are errors.
+        System.out.println("== Plane-local enemy decks (must be fully in-pool)");
+        int planeDecks = 0;
+        Set<String> seenPlaneDecks = new HashSet<>();
+        if (enemies != null) for (EnemyData e : enemies) {
+            if (e.deck == null) continue;
+            for (String p : e.deck) {
+                FileHandle h = Config.instance().getFile(p);
+                if (h == null || !h.exists() || h.path().contains("/common/") || p.endsWith(".json") || !seenPlaneDecks.add(p)) continue;
+                planeDecks++;
+                int before = warnings;
+                int off = reportDeck("plane deck " + p + " (" + e.name + ")", loadDeck(p), allowed);
+                if (off > 0) { warnings = before; error("plane deck " + p + " has " + off + " off-pool card(s)"); }
+            }
+        }
+        info(planeDecks + " plane-local enemy decks checked");
+
+        // ---------- 4. resolution ----------
+        System.out.println("== Card resolution respects allowedEditions");
+        Collection<PaperCard> pool = CardUtil.getFullCardPool(false);
+        long bad = pool.stream().filter(c -> !allowed.contains(c.getEdition())).count();
+        if (bad > 0) error("getFullCardPool(false) returned " + bad + " cards from non-allowed editions");
+        info("unique card pool size: " + pool.size());
+        Map<String, Long> perEdition = new TreeMap<>();
+        for (PaperCard c : CardUtil.getFullCardPool(true)) perEdition.merge(c.getEdition(), 1L, Long::sum);
+        info("printings per edition: " + perEdition);
+        // reprints in LTC must resolve to the LTC printing, not the original set (issue #1)
+        int checked = 0;
+        for (PaperCard c : pool) {
+            for (PaperCard p : FModel.getMagicDb().getCommonCards().getAllCards(c.getName())) {
+                if (allowed.contains(p.getEdition())) continue;
+                if (!p.getRules().getName().equals(c.getRules().getName())) continue; // face-name collision, different card
+                PaperCard r = CardUtil.ensureAllowedEdition(p);
+                checked++;
+                if (!allowed.contains(r.getEdition()))
+                    error("ensureAllowedEdition(" + p + ") -> " + r.getEdition());
+                break;
+            }
+        }
+        info("checked " + checked + " reprints for printing replacement");
+
+        // ---------- 5. reprint editions ----------
+        System.out.println("== Reprint editions (art sources)");
+        checkReprintEditions(allowed);
+
+        // ---------- 6. shops, items, heroes ----------
+        checkShopsItemsHeroes(json, cd, pois, enemyByName, usedEnemies);
+        finish();
+    }
+
+    /** world.json "biomeMap" (fixed layout, World.loadFixedBiomeMap): image exists, size, every colour maps to exactly one biome. */
+    static void checkBiomeMap(WorldData world, List<BiomeData> biomes) {
+        FileHandle f = Config.instance().getFile(world.biomeMap);
+        if (f == null || !f.exists()) { error("biomeMap " + world.biomeMap + " not found"); return; }
+        java.awt.image.BufferedImage img;
+        try { img = javax.imageio.ImageIO.read(f.file()); } catch (Exception e) { error("biomeMap " + world.biomeMap + ": " + e); return; }
+        if (img.getWidth() != world.width || img.getHeight() != world.height)
+            warn("biomeMap is " + img.getWidth() + "x" + img.getHeight() + ", world is " + world.width + "x" + world.height + " (sampled nearest-neighbour)");
+        Map<Integer, String> byColor = new HashMap<>();
+        for (BiomeData b : biomes) {
+            int c = Integer.parseInt(b.color, 16);
+            String other = byColor.putIfAbsent(c, b.name);
+            if (other != null) error("biomeMap: biomes " + other + " and " + b.name + " share colour " + b.color + " (only the first is used)");
+        }
+        Map<Integer, Integer> counts = new TreeMap<>();
+        for (int x = 0; x < img.getWidth(); x++)
+            for (int y = 0; y < img.getHeight(); y++) counts.merge(img.getRGB(x, y) & 0xffffff, 1, Integer::sum);
+        Set<String> used = new HashSet<>();
+        for (Map.Entry<Integer, Integer> e : counts.entrySet()) {
+            String b = byColor.get(e.getKey());
+            if (b == null) error(String.format("biomeMap: colour %06x (%d px) matches no biome (the game uses the first biome)", e.getKey(), e.getValue()));
+            else used.add(b);
+        }
+        for (BiomeData b : biomes)
+            if (!used.contains(b.name)) warn("biomeMap: biome " + b.name + " has no pixels (never painted, its POIs are dropped)");
+        info("biomeMap " + world.biomeMap + ": " + img.getWidth() + "x" + img.getHeight() + ", " + counts.size() + " colours, " + used.size() + "/" + biomes.size() + " biomes painted");
+    }
+
+    /**
+     * world.json "worldMap" (Tiled world, World.loadWorldMap / WorldMapTmx): a single .tmx or a Tiled .world of chunk maps.
+     * Per map: file and tileset exist, every tileset tile names an existing biome, every gid of the Biomes layer maps to a
+     * biome, every POI object references an existing POI entry. Overall: exactly one start object, one seed, and every POI
+     * that the biomes list is present. For a .world also: the chunks tile the world exactly (no gaps or overlaps, same
+     * size as world.json) and every object lies inside its chunk (checked by the engine reader, WorldMapTmx.problems).
+     * Phase 2d-1 layers: Roads (layer size = map size, cells use the road tile), Clutter (every object names a known
+     * map sprite, lies in its chunk), Reference (crop image exists; warning only, the crops live in docs/).
+     */
+    static void checkWorldMap(WorldData world, List<BiomeData> biomes, Array<PointOfInterestData> pois) {
+        if (world.biomeMap != null) info("worldMap set: biomeMap " + world.biomeMap + " is ignored by the game");
+        FileHandle f = Config.instance().getFile(world.worldMap);
+        if (f == null || !f.exists()) { error("worldMap " + world.worldMap + " not found"); return; }
+        Set<String> biomeNames = new HashSet<>();
+        for (BiomeData b : biomes) biomeNames.add(b.name);
+        Set<String> poiNames = new HashSet<>();
+        if (pois != null) for (PointOfInterestData p : pois) poiNames.add(p.name);
+        Set<String> painted = new HashSet<>();
+        Map<String, Integer> placed = new TreeMap<>();
+        List<String> seeds = new ArrayList<>();
+        int[] starts = {0};
+        boolean isWorld = forge.adventure.world.WorldMapTmx.WORLD_EXTENSION.equalsIgnoreCase(f.extension());
+        String layout;
+        if (isWorld) {
+            com.badlogic.gdx.utils.JsonValue maps;
+            try { maps = new com.badlogic.gdx.utils.JsonReader().parse(f).get("maps"); } catch (Exception e) { error("worldMap " + world.worldMap + ": " + e); return; }
+            if (maps == null || maps.size == 0) { error("worldMap " + world.worldMap + ": no \"maps\" (world \"patterns\" are not supported)"); return; }
+            for (com.badlogic.gdx.utils.JsonValue m = maps.child; m != null; m = m.next) {
+                String name = m.getString("fileName", "?");
+                FileHandle chunk = f.parent().child(name);
+                if (!chunk.exists()) { error("worldMap: chunk " + name + " not found"); continue; }
+                int[] size = checkWorldMapFile(world, chunk, name, biomeNames, poiNames, painted, placed, seeds, starts);
+                if (size != null && (m.getInt("width", -1) != size[0] * world.tileSize || m.getInt("height", -1) != size[1] * world.tileSize))
+                    warn("worldMap: " + name + " is " + size[0] * world.tileSize + "x" + size[1] * world.tileSize + " px, the .world says "
+                            + m.getInt("width", -1) + "x" + m.getInt("height", -1) + " (Tiled fixes this on the next save)");
+            }
+            forge.adventure.world.WorldMapTmx read;
+            try { read = forge.adventure.world.WorldMapTmx.read(f, biomes, world.width, world.height); } catch (Exception e) { error("worldMap: " + e); return; }
+            for (String p : read.problems) error("worldMap: " + p);
+            if (read.mapWidth != world.width || read.mapHeight != world.height)
+                error("worldMap: the chunks cover " + read.mapWidth + "x" + read.mapHeight + " tiles, world is " + world.width + "x" + world.height);
+            checkWorldMapLayers(world, read);
+            reportBiomeBoxes(world, biomes, read);
+            int sizeOf0 = read.chunks.isEmpty() ? 0 : read.chunks.get(0).width;
+            layout = read.chunks.size() + " chunks of " + sizeOf0 + " tiles, " + read.mapWidth + "x" + read.mapHeight;
+            FileHandle overview = f.parent().child(forge.adventure.world.WorldMapTmx.OVERVIEW_NAME + ".tmx");
+            if (!overview.exists()) warn("worldMap: no overview.tmx next to the .world (run exportWorldTmx)");
+            else checkOverviewReference(overview);
+        } else {
+            int[] size = checkWorldMapFile(world, f, world.worldMap, biomeNames, poiNames, painted, placed, seeds, starts);
+            if (size == null) return;
+            if (size[0] != world.width || size[1] != world.height) warn("worldMap is " + size[0] + "x" + size[1] + ", world is " + world.width + "x" + world.height + " (sampled nearest-neighbour)");
+            layout = size[0] + "x" + size[1];
+        }
+        for (BiomeData b : biomes) if (!painted.contains(b.name)) warn("worldMap: biome " + b.name + " is not painted");
+        String seed = seeds.isEmpty() ? null : seeds.get(0);
+        if (seed == null) warn("worldMap: no map property 'seed' (every new game generates different decorations and roads)");
+        else if (new HashSet<>(seeds).size() > 1 || (isWorld && seeds.size() > 1)) error("worldMap: 'seed' is set on several maps " + seeds + " (set it once, on chunk_0_0)");
+        for (String s : seeds) try { Long.parseLong(s.trim()); } catch (NumberFormatException e) { error("worldMap: seed '" + s + "' is not a long"); }
+        if (starts[0] != 1) error("worldMap: " + starts[0] + " start objects (need exactly one, type 'start')");
+        Map<String, Integer> expected = new TreeMap<>();
+        if (pois != null)
+            for (BiomeData b : biomes) if (b.pointsOfInterest != null)
+                for (String n : new LinkedHashSet<>(Arrays.asList(b.pointsOfInterest)))
+                    for (PointOfInterestData p : pois) if (p.name.equals(n)) { expected.merge(n, p.count, Integer::sum); break; }
+        for (Map.Entry<String, Integer> e : expected.entrySet()) {
+            int have = placed.getOrDefault(e.getKey(), 0);
+            if (have == 0 && e.getValue() > 0) error("worldMap: POI '" + e.getKey() + "' is listed by a biome but has no object");
+            else if (have < e.getValue()) warn("worldMap: POI '" + e.getKey() + "' has " + have + " objects, biomes list " + e.getValue());
+        }
+        info("worldMap " + world.worldMap + ": " + layout + ", seed " + seed + ", " + painted.size() + "/" + biomes.size() + " biomes painted, "
+                + placed.values().stream().mapToInt(Integer::intValue).sum() + " POI objects (" + placed.size() + " distinct), " + starts[0] + " start");
+        info("worldMap layers: Roads in " + layerMaps[0] + " maps (" + roadTiles + " road tiles), Clutter in " + layerMaps[1] + " maps ("
+                + clutterObjects + " objects), Reference in " + layerMaps[2] + " maps" + (missingCrops > 0 ? " (" + missingCrops + " crop images not found)" : "")
+                + "; maps without a Roads/Clutter layer get generated roads/clutter");
+    }
+
+    // Phase 2d-1 layer statistics (over all maps of the world)
+    static int[] layerMaps = new int[3];
+    static int roadTiles, clutterObjects, missingCrops;
+
+    /** Phase 2d-1: checks on the assembled layers (engine reader): clutter on road tiles and outside the world. */
+    /**
+     * The game anchors each biome's structures on the bounding box of its painted tiles (World.applyPaintedBiomeBoxes),
+     * not on the biome JSON box. Lists the biomes whose JSON box differs (all with -v; fix with
+     * tools/middleearth/worldmap/sync_biome_boxes.py), and warns about biomes with structures whose box is huge.
+     */
+    static void reportBiomeBoxes(WorldData world, List<BiomeData> biomes, forge.adventure.world.WorldMapTmx read) {
+        int[][] boxes = forge.adventure.world.WorldMapTmx.biomeBoxes(read.biomes, biomes.size());
+        List<String> differ = new ArrayList<>();
+        for (int i = 0; i < biomes.size(); i++) {
+            BiomeData b = biomes.get(i);
+            if (b.width == 1.0 && b.height == 1.0 || boxes[i] == null) continue;
+            int[] json = forge.adventure.world.WorldMapTmx.boxOf(b.startPointX, b.startPointY, b.width, b.height, world.width, world.height);
+            int[] box = boxes[i];
+            int w = box[2] - box[0] + 1, h = box[3] - box[1] + 1;
+            if (b.structures != null && b.structures.length > 0 && (long) w * h > 400L * 400L)
+                warn("worldMap: biome " + b.name + " spans a " + w + "x" + h + " tile box (its structures are generated over all of it; stray tiles?)");
+            if (!Arrays.equals(json, box))
+                differ.add(b.name + ": JSON " + json[0] + "," + json[1] + " " + (json[2] - json[0] + 1) + "x" + (json[3] - json[1] + 1)
+                        + ", painted " + box[0] + "," + box[1] + " " + w + "x" + h);
+        }
+        info("worldMap biome boxes: structures use the painted bounding boxes; " + differ.size() + " biome JSON boxes differ"
+                + (differ.isEmpty() ? "" : " (fallback only; sync with tools/middleearth/worldmap/sync_biome_boxes.py" + (verbose ? ")" : ", -v lists them)")));
+        if (verbose) for (String d : differ) info("  " + d);
+    }
+
+    static void checkWorldMapLayers(WorldData world, forge.adventure.world.WorldMapTmx read) {
+        if (read.clutterDefined == null) return;
+        int onRoad = 0, outside = 0;
+        for (forge.adventure.world.WorldMapTmx.Clutter c : read.clutter) {
+            if (c.x < -forge.adventure.world.WorldMapTmx.CLUTTER_TOLERANCE || c.x > world.width * world.tileSize
+                    || c.y < 0 || c.y > world.height * world.tileSize + forge.adventure.world.WorldMapTmx.CLUTTER_TOLERANCE) { outside++; continue; }
+            // the tile the generator would have placed it from: column floor(x), row of the nearest tile border in y (y-up)
+            double rowUp = Math.round((world.height * world.tileSize - c.y) / world.tileSize);
+            int[] t = forge.adventure.world.WorldMapTmx.tileOf(c.x, (world.height - 1 - rowUp) * world.tileSize, world.tileSize, world.width, world.height);
+            if (read.roads != null && read.roadsDefined[t[0]][t[1]] && read.roads[t[0]][t[1]]) onRoad++;
+        }
+        if (outside > 0) error("worldMap: " + outside + " Clutter objects lie outside the world (the game drops them)");
+        if (onRoad > 0) info("worldMap: " + onRoad + " Clutter objects stand on road tiles (the generator never puts clutter on roads)");
+    }
+
+    /** The overview's Reference image layer: its image file should exist (it is optional). */
+    static void checkOverviewReference(FileHandle overview) {
+        try {
+            for (com.badlogic.gdx.utils.XmlReader.Element layer : new com.badlogic.gdx.utils.XmlReader().parse(overview).getChildrenByName("imagelayer")) {
+                com.badlogic.gdx.utils.XmlReader.Element image = layer.getChildByName("image");
+                if (image != null && !image.getAttribute("source", "").isEmpty() && !overview.parent().child(image.getAttribute("source")).exists())
+                    warn("worldMap: overview image layer " + layer.getAttribute("name", "?") + ": " + image.getAttribute("source") + " not found");
+            }
+        } catch (Exception e) { warn("worldMap: overview.tmx: " + e); }
+    }
+
+    /** Checks one map file of the world (tilesets, Biomes layer, POI objects); returns its size in tiles, or null if unusable. */
+    static int[] checkWorldMapFile(WorldData world, FileHandle f, String label, Set<String> biomeNames, Set<String> poiNames, Set<String> painted,
+                                   Map<String, Integer> placed, List<String> seeds, int[] starts) {
+        com.badlogic.gdx.utils.XmlReader.Element map;
+        try { map = new com.badlogic.gdx.utils.XmlReader().parse(f); } catch (Exception e) { error("worldMap " + label + ": " + e); return null; }
+        int w = map.getIntAttribute("width", 0), h = map.getIntAttribute("height", 0);
+        if (map.getIntAttribute("tilewidth", 0) != world.tileSize) warn("worldMap " + label + ": tilewidth " + map.getIntAttribute("tilewidth", 0) + " != tileSize " + world.tileSize + " (POI coordinates are world pixels)");
+        String seed = forge.adventure.world.WorldMapTmx.properties(map).get("seed");
+        if (seed != null) seeds.add(seed.trim());
+        Map<Integer, String> gidToBiome = new HashMap<>();
+        Map<Integer, String> gidToSprite = new HashMap<>();
+        Set<Integer> roadGids = new HashSet<>();
+        for (com.badlogic.gdx.utils.XmlReader.Element ts : map.getChildrenByName("tileset")) {
+            int first = ts.getIntAttribute("firstgid", 1);
+            com.badlogic.gdx.utils.XmlReader.Element tileset = ts;
+            String source = ts.getAttribute("source", null);
+            if (source != null) {
+                FileHandle tsx = f.parent().child(source);
+                if (!tsx.exists()) { error("worldMap " + label + ": tileset " + source + " not found"); continue; }
+                tileset = new com.badlogic.gdx.utils.XmlReader().parse(tsx);
+                com.badlogic.gdx.utils.XmlReader.Element image = tileset.getChildByName("image");
+                if (image != null && !tsx.parent().child(image.getAttribute("source")).exists()) error("worldMap: tileset image " + image.getAttribute("source") + " not found");
+            }
+            for (com.badlogic.gdx.utils.XmlReader.Element tile : tileset.getChildrenByName("tile")) {
+                Map<String, String> tileProps = forge.adventure.world.WorldMapTmx.properties(tile);
+                if (tileProps.containsKey("sprite")) gidToSprite.put(first + tile.getIntAttribute("id"), tileProps.get("sprite"));
+                if ("true".equals(tileProps.get("road"))) roadGids.add(first + tile.getIntAttribute("id"));
+                com.badlogic.gdx.utils.XmlReader.Element tileImage = tile.getChildByName("image");
+                if (tileImage != null && source != null && !f.parent().child(source).parent().child(tileImage.getAttribute("source", "")).exists())
+                    error("worldMap " + label + ": tileset " + source + " tile " + tile.getAttribute("id") + ": image " + tileImage.getAttribute("source", "") + " not found");
+                String biome = tileProps.get("biome");
+                if (biome == null) continue;
+                if (!biomeNames.contains(biome)) error("worldMap " + label + ": tileset tile " + tile.getAttribute("id") + " names unknown biome '" + biome + "'");
+                gidToBiome.put(first + tile.getIntAttribute("id"), biome);
+            }
+        }
+        int[] gids = null;
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("layer"))
+            if (forge.adventure.world.WorldMapTmx.BIOME_LAYER.equals(layer.getAttribute("name", "")))
+                try { gids = forge.adventure.world.WorldMapTmx.decodeLayer(layer, w * h); } catch (Exception e) { error("worldMap " + label + ": Biomes layer: " + e.getMessage()); return null; }
+        if (gids == null) { error("worldMap " + label + ": no tile layer '" + forge.adventure.world.WorldMapTmx.BIOME_LAYER + "'"); return null; }
+        Map<Integer, Integer> gidCounts = new TreeMap<>();
+        for (int g : gids) gidCounts.merge(g & 0x0FFFFFFF, 1, Integer::sum);
+        for (Map.Entry<Integer, Integer> e : gidCounts.entrySet()) {
+            String b = gidToBiome.get(e.getKey());
+            if (b == null) error("worldMap " + label + ": gid " + e.getKey() + " (" + e.getValue() + " tiles) maps to no biome (the game uses the first biome)");
+            else painted.add(b);
+        }
+        // Phase 2d-1 layers
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("layer")) {
+            if (!forge.adventure.world.WorldMapTmx.ROADS_LAYER.equals(layer.getAttribute("name", ""))) continue;
+            layerMaps[0]++;
+            if (layer.getIntAttribute("width", w) != w || layer.getIntAttribute("height", h) != h)
+                error("worldMap " + label + ": Roads layer is " + layer.getIntAttribute("width", w) + "x" + layer.getIntAttribute("height", h) + ", the map " + w + "x" + h);
+            int[] roads;
+            try { roads = forge.adventure.world.WorldMapTmx.decodeLayer(layer, w * h); } catch (Exception e) { error("worldMap " + label + ": Roads layer: " + e.getMessage()); continue; }
+            Set<Integer> other = new TreeSet<>();
+            for (int g : roads) {
+                g &= 0x0FFFFFFF;
+                if (g == 0) continue;
+                roadTiles++;
+                if (!roadGids.contains(g)) other.add(g);
+            }
+            if (!other.isEmpty()) warn("worldMap " + label + ": Roads layer uses gids " + other + " that are not the road tile (they count as road)");
+        }
+        Set<String> spriteNames = new HashSet<>();
+        if (world.GetBiomeSprites() != null && world.GetBiomeSprites().sprites != null)
+            for (BiomeSpriteData sd : world.GetBiomeSprites().sprites) spriteNames.add(sd.name);
+        for (com.badlogic.gdx.utils.XmlReader.Element group : map.getChildrenByName("objectgroup")) {
+            if (!forge.adventure.world.WorldMapTmx.CLUTTER_LAYER.equals(group.getAttribute("name", ""))) continue;
+            layerMaps[1]++;
+            Map<String, Integer> unknown = new TreeMap<>();
+            for (com.badlogic.gdx.utils.XmlReader.Element o : group.getChildrenByName("object")) {
+                clutterObjects++;
+                String sprite = forge.adventure.world.WorldMapTmx.properties(o).get("sprite");
+                if (sprite == null) sprite = gidToSprite.get((int) (Long.parseLong(o.getAttribute("gid", "0")) & 0x0FFFFFFFL));
+                if (sprite == null) unknown.merge("(no sprite: object " + o.getAttribute("id", "?") + ")", 1, Integer::sum);
+                else if (!spriteNames.contains(sprite)) unknown.merge(sprite, 1, Integer::sum);
+            }
+            if (!unknown.isEmpty()) error("worldMap " + label + ": Clutter objects with unknown sprites (skipped by the game): " + unknown);
+        }
+        for (com.badlogic.gdx.utils.XmlReader.Element layer : map.getChildrenByName("imagelayer")) {
+            if (!forge.adventure.world.WorldMapTmx.REFERENCE_LAYER.equals(layer.getAttribute("name", ""))) continue;
+            layerMaps[2]++;
+            com.badlogic.gdx.utils.XmlReader.Element image = layer.getChildByName("image");
+            if (image != null && !image.getAttribute("source", "").isEmpty() && !f.parent().child(image.getAttribute("source")).exists()) missingCrops++;
+        }
+        for (com.badlogic.gdx.utils.XmlReader.Element group : map.getChildrenByName("objectgroup")) {
+            if (!forge.adventure.world.WorldMapTmx.POI_LAYER.equals(group.getAttribute("name", ""))) continue;
+            for (com.badlogic.gdx.utils.XmlReader.Element o : group.getChildrenByName("object")) {
+                if (forge.adventure.world.WorldMapTmx.START_TYPE.equals(o.getAttribute("type", o.getAttribute("class", "")))) { starts[0]++; continue; }
+                String n = o.getAttribute("name", "");
+                if (!poiNames.contains(n)) error("worldMap " + label + ": POI object " + o.getAttribute("id", "?") + " '" + n + "' has no entry in points_of_interest.json (skipped by the game)");
+                else placed.merge(n, 1, Integer::sum);
+            }
+        }
+        return new int[]{w, h};
+    }
+
+    /** WorldData.getEnemy: exact match on name first, then on getName() (nameOverride). */
+    static EnemyData enemyByRawName(Array<EnemyData> enemies, String n) {
+        if (enemies == null) return null;
+        for (EnemyData e : enemies) if (n.equals(e.name)) return e;
+        for (EnemyData e : enemies) if (n.equals(e.getName())) return e;
+        return null;
+    }
+
+    /**
+     * Walks every POI map (.tmx) and the maps reachable from it through "teleport" properties, and checks
+     * that every "enemy" object property and every arena "enemyPool" entry names an existing enemy
+     * (MapStage / ArenaScene look them up with WorldData.getEnemy). A missing map enemy is an ERROR, except
+     * when only surrounding whitespace differs from an existing name (upstream map typos such as "Goblin "):
+     * the game then picks a random biome enemy, so that is a WARN. Arena pools only need one valid name.
+     * @return the referenced names that exist
+     */
+    static Set<String> checkMapEnemyReferences(Array<PointOfInterestData> pois, Array<EnemyData> enemies) {
+        Set<String> found = new TreeSet<>();
+        if (pois == null) return found;
+        Map<String, Set<String>> missing = new TreeMap<>();
+        Set<String> visited = new HashSet<>();
+        int maps = 0, refs = 0;
+        for (PointOfInterestData p : pois) {
+            Deque<String> todo = new ArrayDeque<>();
+            todo.add(p.map);
+            while (!todo.isEmpty()) {
+                String path = todo.poll();
+                if (path == null || path.isEmpty()) continue;
+                FileHandle h = Config.instance().getFile(path);
+                if (h == null || !h.exists()) { error("POI " + p.name + ": map not found: " + path); continue; }
+                String key;
+                try { key = h.file().getCanonicalPath(); } catch (Exception ex) { key = h.path(); }
+                if (!visited.add(key)) continue;
+                maps++;
+                org.w3c.dom.Document doc;
+                try {
+                    doc = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(h.file());
+                } catch (Exception ex) { error("map " + path + ": cannot parse: " + ex.getMessage()); continue; }
+                org.w3c.dom.NodeList props = doc.getElementsByTagName("property");
+                for (int i = 0; i < props.getLength(); i++) {
+                    org.w3c.dom.Element pr = (org.w3c.dom.Element) props.item(i);
+                    String name = pr.getAttribute("name");
+                    String value = pr.hasAttribute("value") ? pr.getAttribute("value") : pr.getTextContent();
+                    if (value == null || value.isEmpty()) continue;
+                    String where = h.name() + " (" + p.name + ")";
+                    switch (name) {
+                        case "spawnCondition" -> {
+                            try {
+                                for (String prob : FlagCondition.validate("spawnCondition", FlagCondition.parse(value)))
+                                    error(where + ": " + prob);
+                            } catch (IllegalArgumentException ex) { error(where + ": " + ex.getMessage() + " (ignored by the game)"); }
+                        }
+                        case "dialog", "defeatDialog" -> {
+                            try {
+                                Json dj = new Json();
+                                DialogData[] dd = value.trim().startsWith("[") ? dj.fromJson(DialogData[].class, value) : new DialogData[]{dj.fromJson(DialogData.class, value)};
+                                for (DialogData d : dd) checkDialogConditions(d, where + " " + name);
+                            } catch (Exception ignored) { } // dialog syntax is not this check's business
+                        }
+                        case "enemy" -> {
+                            refs++;
+                            if (enemyByRawName(enemies, value) != null) found.add(value);
+                            else missing.computeIfAbsent(value, k -> new TreeSet<>()).add(where);
+                        }
+                        case "arena" -> {
+                            ArenaData a;
+                            try { a = new Json().fromJson(ArenaData.class, value); }
+                            catch (Exception ex) { error("arena in " + where + ": cannot parse: " + ex.getMessage()); continue; }
+                            int ok = 0;
+                            if (a.enemyPool != null) for (String n : a.enemyPool) {
+                                refs++;
+                                if (enemyByRawName(enemies, n) != null) { ok++; found.add(n); }
+                                else warn("arena in " + where + ": unknown enemy '" + n + "' (skipped by the arena)");
+                            }
+                            if (ok == 0) error("arena in " + where + ": no valid enemy in enemyPool");
+                        }
+                        case "teleport" -> todo.add(value);
+                        default -> { }
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, Set<String>> m : missing.entrySet()) {
+            String n = m.getKey();
+            if (!n.trim().equals(n) && enemyByRawName(enemies, n.trim()) != null)
+                warn("map enemy '" + n + "' not found (whitespace typo of '" + n.trim() + "'; the game uses a random biome enemy) in " + m.getValue());
+            else
+                error("map enemy '" + n + "' does not exist in enemies.json, referenced in " + m.getValue());
+        }
+        info(maps + " maps, " + refs + " enemy references, " + found.size() + " distinct enemies found");
+        return found;
+    }
+
+    /** Every quest stage that targets enemies by tag must match at least one enemy. */
+    @SuppressWarnings("unchecked")
+    static void checkQuestEnemyTags(Json json, Array<EnemyData> enemies) {
+        Array<AdventureQuestData> quests;
+        try { quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS)); }
+        catch (Exception ex) { return; } // parse errors are reported in section 1
+        if (quests == null || enemies == null) return;
+        int stages = 0;
+        for (AdventureQuestData q : quests) {
+            if (q.stages == null) continue;
+            for (AdventureQuestStage s : q.stages) {
+                if (s.objective == null || (s.enemyTags.isEmpty() && s.enemyExcludeTags.isEmpty())) continue;
+                stages++;
+                boolean any = false;
+                for (EnemyData e : enemies) {
+                    List<String> t = Arrays.asList(e.questTags);
+                    if (t.containsAll(s.enemyTags) && Collections.disjoint(t, s.enemyExcludeTags)) { any = true; break; }
+                }
+                if (!any) error("quest " + q.getID() + " stage '" + s.name + "': no enemy has tags " + s.enemyTags + " without " + s.enemyExcludeTags);
+            }
+        }
+        info(stages + " quest stages target enemies by tag, all matched");
+    }
+
+    // =====================================================================================
+    // 6. Shops, items and heroes
+    // =====================================================================================
+
+    /** Card rewards whose pool is smaller than this are reported (the shop repeats cards a lot). */
+    static final int MIN_SHOP_POOL = 6;
+    /** Item names the engine looks up by name (EventScene challenge coins, GameHUD key display). */
+    static final List<String> ENGINE_ITEMS = List.of("Challenge Coin", "Silver Challenge Coin", "Bronze Challenge Coin",
+            "Red Key", "Green Key", "Blue Key", "Black Key", "White Key", "Strange Key");
+
+    /** What the POI maps of the plane reference: shop names (from shop / Rotating objects) and item names. */
+    static class MapRefs {
+        final Map<String, Set<String>> shops = new TreeMap<>();   // shop name -> maps
+        final Map<String, Set<String>> items = new TreeMap<>();   // item name -> maps
+        final Set<String> maps = new TreeSet<>();
+    }
+
+    static void checkShopsItemsHeroes(Json json, ConfigData cd, Array<PointOfInterestData> pois,
+                                      Map<String, EnemyData> enemyByName, Set<String> usedEnemies) {
+        System.out.println("== Shops (names requested by the plane's town and dungeon maps)");
+        MapRefs refs = scanPoiMaps(pois);
+        info(refs.maps.size() + " maps reachable from the plane's POIs, " + refs.shops.size() + " distinct shop names requested");
+
+        json.setIgnoreUnknownFields(true);
+        Array<ShopData> shops = json.fromJson(Array.class, ShopData.class, Config.instance().getFile(Paths.SHOPS));
+        Array<ItemData> items = json.fromJson(Array.class, ItemData.class, Config.instance().getFile(Paths.ITEMS));
+        Map<String, ItemData> itemByName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (ItemData i : items) {
+            if (itemByName.put(i.name, i) != null) error("items: '" + i.name + "' is defined more than once");
+        }
+        Map<String, ShopData> shopByName = new HashMap<>();
+        for (ShopData s : shops) {
+            if (shopByName.put(s.name, s) != null) error("shops: '" + s.name + "' is defined more than once");
+        }
+        for (Map.Entry<String, Set<String>> e : refs.shops.entrySet())
+            if (!shopByName.containsKey(e.getKey()))
+                error("shop '" + e.getKey() + "' requested by " + e.getValue() + " is not in " + Paths.SHOPS + " (the building stays empty)");
+
+        Set<String> signs = atlasRegions("maps/tileset/buildings.atlas");
+        Collection<PaperCard> pool = cardPool(cd);
+        int cardShops = 0, totalPool = 0;
+        for (ShopData s : shops) {
+            if (!signs.isEmpty()) {
+                if (s.sprite != null && !signs.contains(s.sprite)) error("shop " + s.name + ": sign sprite '" + s.sprite + "' not in buildings.atlas");
+                if (s.overlaySprite != null && !s.overlaySprite.isEmpty() && !signs.contains(s.overlaySprite))
+                    error("shop " + s.name + ": overlay sprite '" + s.overlaySprite + "' not in buildings.atlas");
+            }
+            if (s.rewards == null || s.rewards.isEmpty()) { error("shop " + s.name + ": no rewards"); continue; }
+            Set<PaperCard> shopPool = new HashSet<>();
+            boolean hasCards = false;
+            StringBuilder parts = new StringBuilder();
+            for (RewardData r : s.rewards) {
+                String type = r.type == null || r.type.isEmpty() ? "card" : r.type;
+                switch (type) {
+                    case "card", "randomCard", "Union" -> {
+                        hasCards = true;
+                        List<PaperCard> p = rewardPool(r, pool, "shop " + s.name);
+                        shopPool.addAll(p);
+                        parts.append(' ').append(r.count).append('x').append(p.size());
+                        if (p.isEmpty()) error("shop " + s.name + " (" + s.description + "): a card reward matches no card in the pool");
+                        else if (r.cardName == null && p.size() < Math.min(MIN_SHOP_POOL, r.count) )
+                            warn("shop " + s.name + ": a reward draws " + r.count + " cards from only " + p.size());
+                    }
+                    case "item" -> {
+                        List<String> names = new ArrayList<>();
+                        if (r.itemName != null) names.add(r.itemName);
+                        if (r.itemNames != null) names.addAll(Arrays.asList(r.itemNames));
+                        for (String n : names) if (!itemByName.containsKey(n)) error("shop " + s.name + ": unknown item '" + n + "'");
+                    }
+                    case "cardPackShop" -> {
+                        if (r.colors != null && r.colors.length > 0)
+                            warn("shop " + s.name + ": colour booster packs ignore allowedEditions (cards from any set)");
+                        else if (r.editions == null || r.editions.length == 0)
+                            warn("shop " + s.name + ": booster packs without editions pick any set");
+                        else for (String ed : r.editions) {
+                            java.io.PrintStream out = System.out;
+                            try {
+                                System.setOut(new java.io.PrintStream(java.io.OutputStream.nullOutputStream())); // booster sheet parsing is chatty
+                                if (forge.adventure.util.AdventureOverrides.instance().getBoosterTemplate(ed) == null)
+                                    error("shop " + s.name + ": edition " + ed + " has no booster template");
+                            } catch (Exception ex) {
+                                error("shop " + s.name + ": booster for " + ed + " fails: " + ex);
+                            } finally {
+                                System.setOut(out);
+                            }
+                        }
+                    }
+                    case "landSketchbookShop" -> {
+                        if (items.select(i -> i.name.contains("Landscape Sketchbook") && !i.questItem).iterator().hasNext() == false)
+                            error("shop " + s.name + ": landSketchbookShop but the plane has no Landscape Sketchbook items");
+                    }
+                    case "life", "gold", "shards", "mana" -> { }
+                    default -> warn("shop " + s.name + ": reward type '" + type + "' not checked");
+                }
+            }
+            if (hasCards) {
+                cardShops++;
+                totalPool += shopPool.size();
+                if (verbose) info(String.format("%-22s %-36s pool %4d  (%s )", s.name, s.description, shopPool.size(), parts.toString().trim()));
+            }
+        }
+        info(shops.size + " shops, " + cardShops + " sell cards, average pool " + (cardShops == 0 ? 0 : totalPool / cardShops) + " cards per shop (-v lists them)");
+
+        System.out.println("== Items");
+        Map<String, Set<String>> wanted = new TreeMap<>();
+        for (String n : ENGINE_ITEMS) wanted.computeIfAbsent(n, k -> new TreeSet<>()).add("engine");
+        if (cd.difficulties != null) for (DifficultyData d : cd.difficulties)
+            if (d.startItems != null) for (String n : d.startItems) wanted.computeIfAbsent(n, k -> new TreeSet<>()).add("config startItems (" + d.name + ")");
+        for (Map.Entry<String, Set<String>> e : refs.items.entrySet()) wanted.computeIfAbsent(e.getKey(), k -> new TreeSet<>()).addAll(e.getValue());
+        for (String n : textItemRefs(Config.instance().getFile(Paths.QUESTS))) wanted.computeIfAbsent(n, k -> new TreeSet<>()).add("quests.json");
+        for (String en : usedEnemies) {
+            EnemyData e = enemyByName.get(en);
+            if (e.equipment != null) for (String n : e.equipment) wanted.computeIfAbsent(n, k -> new TreeSet<>()).add("enemy " + en + " equipment");
+            if (e.rewards != null) for (RewardData r : e.rewards) {
+                if (!"item".equals(r.type)) continue;
+                if (r.itemName != null) wanted.computeIfAbsent(r.itemName, k -> new TreeSet<>()).add("enemy " + en + " reward");
+                if (r.itemNames != null) for (String n : r.itemNames) wanted.computeIfAbsent(n, k -> new TreeSet<>()).add("enemy " + en + " reward");
+            }
+        }
+        for (Map.Entry<String, Set<String>> e : wanted.entrySet())
+            if (!itemByName.containsKey(e.getKey())) error("item '" + e.getKey() + "' used by " + e.getValue() + " is not in " + Paths.ITEMS);
+        info(wanted.size() + " item names referenced (engine, config, maps, quests, enemies), all checked");
+
+        Set<String> icons = atlasRegions("sprites/items.atlas");
+        int effects = 0;
+        for (ItemData i : items) {
+            if (!icons.isEmpty() && i.iconName != null && !icons.contains(i.iconName))
+                error("item " + i.name + ": icon '" + i.iconName + "' not in sprites/items.atlas");
+            effects += checkEffectCards("item " + i.name, i.effect);
+            if (i.commandOnUse != null && i.commandOnUse.startsWith("teleport to poi")) {
+                String poi = i.commandOnUse.substring("teleport to poi".length()).trim().replace("\"", "");
+                boolean found = false;
+                for (PointOfInterestData p : pois) if (p.name.equals(poi)) { found = true; break; }
+                if (!found) error("item " + i.name + ": teleports to unknown POI '" + poi + "'");
+            }
+        }
+        info(items.size + " items, " + effects + " effect cards resolved");
+
+        System.out.println("== Heroes");
+        com.badlogic.gdx.utils.JsonValue heroes = new com.badlogic.gdx.utils.JsonReader().parse(Config.instance().getFile(Paths.HEROES));
+        String avatarAtlas = heroes.getString("avatar", null);
+        Set<String> avatars = avatarAtlas == null ? Set.of() : atlasRegions(avatarAtlas);
+        int nHeroes = 0;
+        for (com.badlogic.gdx.utils.JsonValue h = heroes.get("heroes").child; h != null; h = h.next) {
+            nHeroes++;
+            String name = h.getString("name", "?");
+            for (String k : new String[]{"male", "female"}) {
+                String a = h.getString(k, null);
+                if (a == null || atlasRegions(a).isEmpty()) error("hero " + name + ": " + k + " sprite atlas '" + a + "' missing or empty");
+                else if (!atlasRegions(a).contains("Walk") && !atlasRegions(a).contains("WalkRight")) error("hero " + name + ": " + k + " atlas '" + a + "' has no Walk animation");
+            }
+            for (String k : new String[]{"maleAvatar", "femaleAvatar"}) {
+                String a = h.getString(k, null);
+                if (a == null || !avatars.contains(a)) error("hero " + name + ": " + k + " '" + a + "' not in " + avatarAtlas);
+            }
+        }
+        info(nHeroes + " hero races");
+    }
+
+    /** The cards the game draws shop and reward cards from (RewardData.initializeAllCards, minus player-state filters). */
+    static Collection<PaperCard> cardPool(ConfigData cd) {
+        Set<String> restricted = new HashSet<>(Arrays.asList(cd.restrictedCards == null ? new String[0] : cd.restrictedCards));
+        List<PaperCard> out = new ArrayList<>();
+        for (PaperCard c : CardUtil.getFullCardPool(false)) {
+            if (restricted.contains(c.getName())) continue;
+            if (c.getRules().isCustom() && c.getImageKey(false).startsWith(forge.ImageKeys.ADVENTURECARD_PREFIX)) continue;
+            if (c.getName().startsWith("A-")) continue; // alchemy rebalanced, excluded by default settings
+            out.add(c);
+        }
+        return out;
+    }
+
+    static List<PaperCard> rewardPool(RewardData r, Collection<PaperCard> pool, String label) {
+        if ("Union".equals(r.type)) {
+            Set<PaperCard> u = new LinkedHashSet<>();
+            if (r.cardUnion != null) for (RewardData x : r.cardUnion) u.addAll(rewardPool(x, pool, label));
+            return new ArrayList<>(u);
+        }
+        if (r.cardName != null && !r.cardName.isEmpty()) {
+            PaperCard pc = null;
+            if (r.editions != null && r.editions.length > 0) {
+                for (String ed : r.editions) {
+                    pc = CardUtil.getCardByNameAndEdition(r.cardName, ed);
+                    if (pc == null || !pc.getEdition().equals(ed)) error(label + ": card '" + r.cardName + "' has no printing in " + ed);
+                }
+            } else pc = FModel.getMagicDb().getCommonCards().getCard(r.cardName);
+            return pc == null ? List.of() : List.of(pc);
+        }
+        return CardUtil.getPredicateResult(pool, r);
+    }
+
+    /** Checks that every card an item effect puts into play exists (card or token script). */
+    static int checkEffectCards(String label, EffectData e) {
+        if (e == null) return 0;
+        int n = 0;
+        for (String[] arr : new String[][]{e.startBattleWithCard, e.startBattleWithCardInCommandZone}) {
+            if (arr == null) continue;
+            for (String name : arr) {
+                n++;
+                boolean ok = FModel.getMagicDb().getCommonCards().getCard(name) != null;
+                if (!ok) {
+                    try { ok = FModel.getMagicDb().getAllTokens().getToken(name) != null; } catch (Exception ignored) { }
+                }
+                if (!ok) ok = customCardNames().contains(name); // adventure custom cards load with the game UI only
+                if (!ok) warn(label + ": effect card '" + name + "' not found (it is skipped in battle)");
+            }
+        }
+        return n + checkEffectCards(label + " (opponent)", e.opponent);
+    }
+
+    static Set<String> customNames;
+
+    /** Names of the adventure custom cards (common/custom_cards and the plane's custom_cards). */
+    static Set<String> customCardNames() {
+        if (customNames != null) return customNames;
+        customNames = new HashSet<>();
+        for (String dir : new String[]{Config.instance().getCommonFilePath(Paths.CUSTOM_CARDS), Config.instance().getFilePath(Paths.CUSTOM_CARDS)}) {
+            java.io.File[] fs = new java.io.File(dir).listFiles();
+            if (fs == null) continue;
+            for (java.io.File f : fs) {
+                try {
+                    for (String l : java.nio.file.Files.readAllLines(f.toPath()))
+                        if (l.startsWith("Name:")) customNames.add(l.substring(5).trim());
+                } catch (Exception ignored) { }
+            }
+        }
+        return customNames;
+    }
+
+    /** Region names of a libGDX atlas text file (resolved through Config, so plane first, then common). */
+    static Set<String> atlasRegions(String path) {
+        Set<String> out = new HashSet<>();
+        FileHandle h = Config.instance().getFile(path);
+        if (h == null || !h.exists()) return out;
+        boolean header = true;
+        for (String line : h.readString("UTF-8").split("\\R")) {
+            if (line.isBlank()) { header = true; continue; }
+            if (line.startsWith(" ") || line.startsWith("\t") || line.contains(":")) continue;
+            if (header && line.trim().endsWith(".png")) { header = false; continue; }
+            out.add(line.trim());
+        }
+        return out;
+    }
+
+    static final java.util.regex.Pattern ITEM_REF = java.util.regex.Pattern.compile(
+            "\"(?:addItem|removeItem|item)\"\\s*:\\s*\"([^\"]+)\"");
+    static final java.util.regex.Pattern INNER_OBJECT = java.util.regex.Pattern.compile("\\{[^{}]*\\}");
+    static final java.util.regex.Pattern ITEM_TYPE = java.util.regex.Pattern.compile("\"type\"\\s*:\\s*\"item\"", java.util.regex.Pattern.CASE_INSENSITIVE);
+    static final java.util.regex.Pattern ITEM_NAME = java.util.regex.Pattern.compile("\"itemName\"\\s*:\\s*\"([^\"]+)\"");
+    static final java.util.regex.Pattern ITEM_NAMES = java.util.regex.Pattern.compile("\"itemNames\"\\s*:\\s*\\[([^\\]]*)\\]");
+
+    static Set<String> textItemRefs(FileHandle h) {
+        return h == null || !h.exists() ? Set.of() : itemRefsInText(h.readString("UTF-8"));
+    }
+
+    /**
+     * Item names in JSON text (rewards, dialogs, quests): dialog addItem / removeItem / condition "item",
+     * and itemName / itemNames of innermost {...} objects whose type is "item" (a card reward with a
+     * stray itemName is not an item reference).
+     */
+    static Set<String> itemRefsInText(String v) {
+        Set<String> out = new TreeSet<>();
+        if (v == null || v.indexOf('{') < 0) return out;
+        java.util.regex.Matcher m = ITEM_REF.matcher(v);
+        while (m.find()) out.add(m.group(1));
+        java.util.regex.Matcher ob = INNER_OBJECT.matcher(v);
+        while (ob.find()) {
+            String obj = ob.group();
+            if (!ITEM_TYPE.matcher(obj).find()) continue;
+            java.util.regex.Matcher n1 = ITEM_NAME.matcher(obj);
+            while (n1.find()) out.add(n1.group(1));
+            java.util.regex.Matcher n2 = ITEM_NAMES.matcher(obj);
+            while (n2.find()) {
+                java.util.regex.Matcher q = java.util.regex.Pattern.compile("\"([^\"]+)\"").matcher(n2.group(1));
+                while (q.find()) out.add(q.group(1));
+            }
+        }
+        return out;
+    }
+
+    /** Walks the .tmx maps of all POIs (and the maps their entries/portals teleport to). */
+    static MapRefs scanPoiMaps(Array<PointOfInterestData> pois) {
+        MapRefs refs = new MapRefs();
+        Deque<String> queue = new ArrayDeque<>();
+        if (pois != null) for (PointOfInterestData p : pois) if (p.map != null) queue.add(p.map);
+        Map<String, Map<String, String>> templates = new HashMap<>();
+        while (!queue.isEmpty()) {
+            String path = queue.poll();
+            FileHandle h = Config.instance().getFile(path);
+            if (h == null || !h.exists()) { error("map '" + path + "' not found"); continue; }
+            String key = h.file().toPath().normalize().toString();
+            if (!refs.maps.add(key)) continue;
+            String mapName = h.name();
+            org.w3c.dom.Document doc;
+            try {
+                doc = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(h.file());
+            } catch (Exception ex) { error("map " + path + ": " + ex); continue; }
+            org.w3c.dom.NodeList objs = doc.getElementsByTagName("object");
+            for (int i = 0; i < objs.getLength(); i++) {
+                org.w3c.dom.Element o = (org.w3c.dom.Element) objs.item(i);
+                Map<String, String> props = new HashMap<>();
+                String tpl = o.getAttribute("template");
+                if (!tpl.isEmpty()) {
+                    java.io.File tf = new java.io.File(h.file().getParentFile(), tpl);
+                    props.putAll(templates.computeIfAbsent(tf.toPath().normalize().toString(), k -> templateProps(tf)));
+                }
+                if (!o.getAttribute("type").isEmpty()) props.put("type", o.getAttribute("type"));
+                props.putAll(elementProps(o));
+                String type = props.getOrDefault("type", "");
+                if (type.equals("shop") || type.equals("Rotating")) {
+                    for (String k : new String[]{"commonShopList", "uncommonShopList", "rareShopList", "mythicShopList", "shopList", "rotation"})
+                        for (String n : props.getOrDefault(k, "").replaceAll("\\s", "").split(","))
+                            if (!n.isEmpty()) refs.shops.computeIfAbsent(n, x -> new TreeSet<>()).add(mapName);
+                }
+                String tel = props.get("teleport");
+                if (tel != null && !tel.isEmpty()) queue.add(tel);
+                // Item names inside any JSON-valued property (reward, dialog, arena, enemy rewards...)
+                for (String v : props.values())
+                    for (String n : itemRefsInText(v)) refs.items.computeIfAbsent(n, x -> new TreeSet<>()).add(mapName);
+            }
+        }
+        return refs;
+    }
+
+    static Map<String, String> templateProps(java.io.File f) {
+        try {
+            org.w3c.dom.Document d = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f);
+            org.w3c.dom.Element o = (org.w3c.dom.Element) d.getElementsByTagName("object").item(0);
+            Map<String, String> p = new HashMap<>();
+            if (!o.getAttribute("type").isEmpty()) p.put("type", o.getAttribute("type"));
+            p.putAll(elementProps(o));
+            return p;
+        } catch (Exception ex) {
+            error("template " + f + ": " + ex);
+            return Map.of();
+        }
+    }
+
+    /** The &lt;properties&gt; directly under an object element. */
+    static Map<String, String> elementProps(org.w3c.dom.Element o) {
+        Map<String, String> p = new HashMap<>();
+        for (org.w3c.dom.Node c = o.getFirstChild(); c != null; c = c.getNextSibling()) {
+            if (!(c instanceof org.w3c.dom.Element pe) || !pe.getTagName().equals("properties")) continue;
+            for (org.w3c.dom.Node q = pe.getFirstChild(); q != null; q = q.getNextSibling()) {
+                if (!(q instanceof org.w3c.dom.Element prop) || !prop.getTagName().equals("property")) continue;
+                String v = prop.hasAttribute("value") ? prop.getAttribute("value") : prop.getTextContent();
+                p.put(prop.getAttribute("name"), v);
+            }
+        }
+        return p;
+    }
+
+    /** Editions in the pool whose entries name an art source: the fork's custom reprint set(s). */
+    static void checkReprintEditions(Set<String> allowed) {
+        CardDb db = FModel.getMagicDb().getCommonCards();
+        for (String code : allowed) {
+            CardEdition ed = FModel.getMagicDb().getEditions().get(code);
+            if (ed == null) continue;
+            List<CardEdition.EditionEntry> entries = ed.getAllCardsInSet();
+            if (entries.stream().noneMatch(e -> e.extraParams() != null && e.extraParams().containsKey("artset")))
+                continue;
+            Map<CardRarity, Integer> rarities = new TreeMap<>();
+            Set<String> names = new HashSet<>();
+            Set<String> noTokenArt = new TreeSet<>();
+            int artOk = 0;
+            for (CardEdition.EditionEntry e : entries) {
+                String label = code + " #" + e.collectorNumber() + " " + e.name();
+                rarities.merge(e.rarity(), 1, Integer::sum);
+                if (!names.add(e.name())) error(label + ": listed more than once");
+                PaperCard pc = db.getCard(e.name(), code, e.collectorNumber());
+                if (pc == null || !pc.getEdition().equals(code)) {
+                    error(label + ": not in the card DB (no card script?)");
+                    continue;
+                }
+                for (PaperCard p : db.getAllCards(e.name()))
+                    if (!p.getEdition().equals(code) && allowed.contains(p.getEdition())) {
+                        warn(label + ": already in allowed edition " + p.getEdition());
+                        break;
+                    }
+                Map<String, String> xp = e.extraParams();
+                String set = xp == null ? null : xp.get("artset");
+                String num = xp == null ? null : xp.get("artnum");
+                if (set == null || num == null) {
+                    warn(label + ": no art source (artSet/artNum)");
+                } else {
+                    PaperCard src = db.getCard(e.name(), set, num);
+                    if (src == null || !src.getEdition().equalsIgnoreCase(set) || !src.getCollectorNumber().equalsIgnoreCase(num)) {
+                        error(label + ": art source " + set + " " + num + " is not a printing of this card");
+                    } else {
+                        artOk++;
+                        if (e.artistName() != null && !e.artistName().equals(src.getArtist()))
+                            warn(label + ": artist '" + e.artistName() + "' differs from art source '" + src.getArtist() + "'");
+                        if (verbose) info(label + " -> art " + set + " " + num);
+                    }
+                }
+                for (String t : pc.getRules().getTokens())
+                    if (FModel.getMagicDb().getAllTokens().getTokenFromEditions(t, x -> allowed.contains(x.getCode()), null) == null)
+                        noTokenArt.add(t);
+            }
+            info(code + ": " + entries.size() + " cards " + rarities + ", " + artOk + " art sources resolved");
+            checkFlavorNames(ed, entries);
+            checkTokenArtSources(ed);
+            if (!noTokenArt.isEmpty())
+                warn(code + ": tokens without a printing in the allowed editions (generic image): " + noTokenArt);
+            else
+                info(code + ": 0 tokens without art (every token its cards make has a printing in the allowed editions)");
+        }
+    }
+
+    /**
+     * WP2b: flavor names (${"flavorName": ...}) are unique, don't collide with a real card name or another
+     * edition's flavor name, and the printing still resolves by its real name, by its flavor name and by its
+     * image key, with the art source intact.
+     */
+    static void checkFlavorNames(CardEdition ed, List<CardEdition.EditionEntry> entries) {
+        CardDb db = FModel.getMagicDb().getCommonCards();
+        String code = ed.getCode();
+        Set<String> realNames = new HashSet<>();
+        for (PaperCard u : db.getUniqueCards()) for (forge.card.ICardFace f : u.getRules().getAllFaces()) if (f != null) realNames.add(f.getName().toLowerCase());
+        Map<String, String> otherFlavors = new HashMap<>();
+        for (CardEdition other : FModel.getMagicDb().getEditions()) {
+            if (other == ed) continue;
+            for (CardEdition.EditionEntry e : other.getAllCardsInSet())
+                if (e.getFlavorName() != null)
+                    for (String part : e.getFlavorName().split("\\s*//\\s*")) otherFlavors.put(part.toLowerCase(), other.getCode() + " " + e.name());
+        }
+        Map<String, String> seen = new HashMap<>();
+        int ok = 0, n = 0;
+        for (CardEdition.EditionEntry e : entries) {
+            String fl = e.getFlavorName();
+            if (fl == null) continue;
+            n++;
+            String label = code + " #" + e.collectorNumber() + " " + e.name() + " \"" + fl + "\"";
+            boolean good = true;
+            for (String part : fl.split("\\s*//\\s*")) {
+                String k = part.toLowerCase();
+                if (seen.containsKey(k)) { error(label + ": flavor name also used by " + seen.get(k)); good = false; }
+                seen.put(k, e.name());
+                if (realNames.contains(k)) { error(label + ": flavor name is the name of a real card"); good = false; }
+                if (otherFlavors.containsKey(k)) { error(label + ": flavor name already used by " + otherFlavors.get(k)); good = false; }
+            }
+            PaperCard byReal = db.getCard(e.name(), code, e.collectorNumber());
+            if (byReal == null || !byReal.getName().equals(e.name()) || !byReal.hasFlavorName()) {
+                error(label + ": real-name lookup " + e.name() + "|" + code + " gives " + byReal); continue;
+            }
+            String front = fl.split("\\s*//\\s*")[0];
+            // CardFace.assignMissingFieldsToVariant rewrites the oracle text: real name -> flavor name, then the real
+            // name's "nickname" (first word) -> the flavor's first word. A flavor name containing that word gets mangled.
+            String realNick = forge.util.Lang.getInstance().getNickName(e.name().split(" // ")[0]);
+            if (!realNick.equals(forge.util.Lang.getInstance().getNickName(front)) && java.util.regex.Pattern.compile("\\b" + java.util.regex.Pattern.quote(realNick) + "\\b").matcher(front).find()) {
+                error(label + ": flavor name contains '" + realNick + "', which the oracle-text rewrite would replace"); good = false;
+            }
+            if (!byReal.getDisplayName().equals(front)) { error(label + ": display name is '" + byReal.getDisplayName() + "'"); good = false; }
+            PaperCard byFlavor = db.getCard(front);
+            if (byFlavor == null || !byFlavor.equals(byReal)) { error(label + ": flavor-name lookup gives " + byFlavor); good = false; }
+            PaperCard byKey = forge.util.ImageUtil.getPaperCardFromImageKey(byReal.getImageKey(false));
+            if (byKey == null || !byKey.equals(byReal)) { error(label + ": image key " + byReal.getImageKey(false) + " gives " + byKey); good = false; }
+            if (e.hasArtSource() && forge.util.ImageFetcher.getArtSourcePrinting(byReal) == byReal) { error(label + ": art source lost"); good = false; }
+            if (verbose) info(label + " -> file " + byReal.getCardImageKey());
+            if (good) ok++;
+        }
+        info(code + ": " + n + " flavor names, " + ok + " unique and resolving (real name, flavor name, image key, art source)");
+    }
+
+    /** WP2b: [tokens] entries with ${"artSet","artNum"} must point at the same token script in that set. */
+    static void checkTokenArtSources(CardEdition ed) {
+        int n = 0, ok = 0;
+        for (Map.Entry<String, CardEdition.EditionEntry> en : ed.getTokens().entries()) {
+            CardEdition.EditionEntry t = en.getValue();
+            n++;
+            String label = ed.getCode() + " token #" + t.collectorNumber() + " " + en.getKey();
+            if (!FModel.getMagicDb().getAllTokens().containsRule(en.getKey())) { error(label + ": no token script"); continue; }
+            if (!t.hasArtSource()) { warn(label + ": no art source (artSet/artNum)"); continue; }
+            org.apache.commons.lang3.tuple.Pair<CardEdition, String> src = forge.util.ImageFetcher.getTokenArtSource(ed, en.getKey(), t.collectorNumber());
+            if (src.getLeft() == ed) { error(label + ": art source " + t.getArtSourceSet() + " " + t.getArtSourceNumber() + " does not print this token"); continue; }
+            ok++;
+            if (verbose) info(label + " -> art " + src.getLeft().getCode() + " token " + src.getRight() + " (" + src.getLeft().getTokensCode() + "/" + src.getRight() + ")");
+        }
+        if (n > 0) info(ed.getCode() + ": " + n + " tokens, " + ok + " token art sources resolved");
+    }
+
+    static void finish() {
+        System.out.println("== Result: " + errors + " error(s), " + warnings + " warning(s)");
+        System.exit(errors > 0 ? 1 : 0);
+    }
+
+    /** Collects the values of a libGDX ObjectMap<String,String> (may be null). */
+    static class ObjectMapValues {
+        final List<String> values = new ArrayList<>();
+        ObjectMapValues(com.badlogic.gdx.utils.ObjectMap<String, String> m) {
+            if (m != null) for (String v : m.values()) values.add(v);
+        }
+    }
+
+    static Deck loadDeck(String path) {
+        try {
+            return CardUtil.getDeck(path, false, false, "", false, false);
+        } catch (Exception ex) {
+            error("cannot load deck " + path + ": " + ex);
+            return null;
+        }
+    }
+
+    /** Generated (.json) starters are random: how many samples to draw per starter deck. */
+    static final int STARTER_SAMPLES = 8;
+
+    /**
+     * Checks a starter deck the way Config.starterDeck loads it. Generated (.json) decks (jumpstart packs,
+     * card piles) are sampled STARTER_SAMPLES times; every sample must be in the pool and at least
+     * minDeckSize cards.
+     */
+    static void reportStarter(String label, String path, CardEdition starterEdition, Set<String> allowed, int minDeckSize) {
+        boolean generated = path.endsWith(".json");
+        int samples = generated ? STARTER_SAMPLES : 1;
+        Map<String, Integer> off = new TreeMap<>();
+        int offCount = 0, minSize = Integer.MAX_VALUE, maxSize = 0;
+        for (int s = 0; s < samples; s++) {
+            Deck deck;
+            java.io.PrintStream out = System.out;
+            try {
+                if (generated) System.setOut(new java.io.PrintStream(java.io.OutputStream.nullOutputStream())); // booster sheet parsing is chatty
+                deck = CardUtil.getDeck(path, false, false, "", false, false, starterEdition, true);
+            } catch (Exception ex) {
+                System.setOut(out);
+                error(label + ": cannot load deck: " + ex);
+                return;
+            } finally {
+                System.setOut(out);
+            }
+            if (deck == null) { error(label + ": deck is null"); return; }
+            int size = deck.getMain().countAll();
+            minSize = Math.min(minSize, size);
+            maxSize = Math.max(maxSize, size);
+            Map<String, Integer> o = offPool(deck, allowed);
+            for (Map.Entry<String, Integer> e : o.entrySet()) off.merge(e.getKey(), e.getValue(), Integer::sum);
+            offCount += o.values().stream().mapToInt(Integer::intValue).sum();
+        }
+        String what = (generated ? samples + " samples, " : "") + (minSize == maxSize ? minSize : minSize + "-" + maxSize) + " cards";
+        if (offCount > 0)
+            warn(label + ": " + offCount + " off-pool card copies (" + what + ")" + (verbose ? " " + off : ""));
+        else if (verbose) info(label + ": OK (" + what + ")");
+        if (minDeckSize > 0 && minSize < minDeckSize)
+            warn(label + ": " + minSize + " cards, below minDeckSize " + minDeckSize);
+    }
+
+    /** Off-pool card names (no printing in an allowed edition, basics excepted) with their copy counts. */
+    static Map<String, Integer> offPool(Deck deck, Set<String> allowed) {
+        Map<String, Integer> off = new TreeMap<>();
+        for (DeckSection s : new DeckSection[]{DeckSection.Main, DeckSection.Sideboard, DeckSection.Commander}) {
+            if (!deck.has(s)) continue;
+            for (Map.Entry<PaperCard, Integer> en : deck.get(s)) {
+                PaperCard c = en.getKey();
+                if (c.getRules().getType().isBasicLand()) continue;
+                boolean inPool = false;
+                for (PaperCard p : FModel.getMagicDb().getCommonCards().getAllCards(c.getName()))
+                    if (allowed.contains(p.getEdition())) { inPool = true; break; }
+                if (!inPool) off.merge(c.getName(), en.getValue(), Integer::sum);
+            }
+        }
+        return off;
+    }
+
+    /** @return number of off-pool card copies */
+    static int reportDeck(String label, Deck deck, Set<String> allowed) {
+        if (deck == null) return 0;
+        Map<String, Integer> off = new TreeMap<>();
+        int total = 0;
+        for (DeckSection s : new DeckSection[]{DeckSection.Main, DeckSection.Sideboard, DeckSection.Commander}) {
+            if (!deck.has(s)) continue;
+            for (Map.Entry<PaperCard, Integer> en : deck.get(s)) {
+                PaperCard c = en.getKey();
+                total += en.getValue();
+                if (c.getRules().getType().isBasicLand()) continue;
+                boolean inPool = false;
+                for (PaperCard p : FModel.getMagicDb().getCommonCards().getAllCards(c.getName()))
+                    if (allowed.contains(p.getEdition())) { inPool = true; break; }
+                if (!inPool) off.merge(c.getName(), en.getValue(), Integer::sum);
+            }
+        }
+        int offCount = off.values().stream().mapToInt(Integer::intValue).sum();
+        if (offCount > 0) {
+            warn(label + ": " + offCount + "/" + total + " cards off-pool"
+                    + (verbose ? " " + off : ""));
+        } else if (verbose) info(label + ": OK (" + total + " cards)");
+        return offCount;
+    }
+
+    /**
+     * Parse a plane file the way the game does (Config.getFile falls back to common/),
+     * but fail on unknown fields so typos in the JSON are caught.
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T strictParse(Json json, String path, Class<?> type, boolean isArray) {
+        FileHandle h = Config.instance().getFile(path);
+        if (h == null || !h.exists()) { error(path + ": not found"); return null; }
+        String src = h.path().contains("/common/") ? "common" : "plane";
+        try {
+            json.setIgnoreUnknownFields(false);
+            Object o = isArray ? json.fromJson(Array.class, type, h) : json.fromJson(type, h);
+            int n = isArray ? ((Array<?>) o).size : 1;
+            info(String.format("%-36s %-6s %s", path, src, isArray ? n + " entries" : "ok"));
+            return (T) o;
+        } catch (Exception ex) {
+            Throwable t = ex;
+            while (t.getCause() != null) t = t.getCause();
+            error(path + " (" + src + "): " + t.getMessage());
+            return null;
+        }
+    }
+
+    // ---------- story engine (fork): flag conditions, enemyOverrides, reward/POI conditions, origins ----------
+    static void flagProblems(String where, FlagCondition c) {
+        if (c == null) return;
+        List<String> out = new ArrayList<>();
+        c.validate(where, out);
+        for (String p : out) error(p);
+    }
+
+    static void checkDialogConditions(DialogData d, String where) {
+        if (d == null) return;
+        if (d.condition != null) for (DialogData.ConditionData c : d.condition)
+            if (c != null) flagProblems(where + " condition.flag", c.flag);
+        if (d.action != null) for (DialogData.ActionData a : d.action) if (a != null) checkDialogAction(a, where);
+        if (d.options != null) for (DialogData o : d.options) checkDialogConditions(o, where);
+    }
+
+    /** Fork run 2 dialog actions: addQuestFlag/addCharacterFlag/addMapFlag, runCommand, endGame. */
+    static void checkDialogAction(DialogData.ActionData a, String where) {
+        String[] names = {"addQuestFlag", "addCharacterFlag", "addMapFlag"};
+        DialogData.ActionData.FlagAdd[] adds = {a.addQuestFlag, a.addCharacterFlag, a.addMapFlag};
+        for (int i = 0; i < adds.length; i++) {
+            DialogData.ActionData.FlagAdd f = adds[i];
+            if (f == null) continue;
+            String w = where + " action " + names[i];
+            if (f.key == null || f.key.isEmpty()) error(w + ": missing 'key'");
+            if (f.min > f.max) error(w + ": min " + f.min + " > max " + f.max);
+            if (f.min < Byte.MIN_VALUE || f.max > Byte.MAX_VALUE) warn(w + ": min/max outside -128..127 (the flag range caps them)");
+            if (f.val == 0) warn(w + ": val 0 does nothing");
+        }
+        if (a.endGame != null) {
+            if ((a.endGame.title == null || a.endGame.title.isEmpty()) && (a.endGame.text == null || a.endGame.text.isEmpty()))
+                error(where + " action endGame: needs a title or text");
+            if (a.endGame.image != null && !a.endGame.image.isEmpty() && !Config.instance().getFile(a.endGame.image).exists())
+                error(where + " action endGame: image '" + a.endGame.image + "' not found");
+        }
+        if (a.runCommand != null && !a.runCommand.trim().isEmpty() && !forge.adventure.stage.ConsoleCommandInterpreter.isDataCommand(a.runCommand)) {
+            String m = where + " action runCommand '" + a.runCommand + "': not on the allowlist (ConsoleCommandInterpreter.DATA_COMMANDS), the game refuses it";
+            if (where.startsWith("enemy Test ")) info(m + " (test fixture)"); else error(m);
+        }
+    }
+
+    static void checkRewardConditions(RewardData[] rewards, String where) {
+        if (rewards == null) return;
+        for (RewardData r : rewards) if (r != null) {
+            flagProblems(where + " reward condition", r.condition);
+            checkRewardConditions(r.cardUnion, where);
+            checkRewardConditions(r.rotation, where);
+        }
+    }
+
+    static void checkStoryData(Json json, ConfigData cd, List<BiomeData> biomes, Map<String, EnemyData> enemyByName, Array<PointOfInterestData> pois) {
+        System.out.println("== Story data (flag conditions, enemyOverrides, origins)");
+        int conds = 0;
+        for (BiomeData b : biomes) {
+            if (b.enemyOverrides == null) continue;
+            for (int i = 0; i < b.enemyOverrides.length; i++) {
+                BiomeData.EnemyOverride o = b.enemyOverrides[i];
+                String w = "biome " + b.name + " enemyOverrides[" + i + "]";
+                if (o == null) { error(w + ": empty"); continue; }
+                conds++;
+                if (o.condition == null) warn(w + ": no condition (always applies)");
+                flagProblems(w + ".condition", o.condition);
+                String mode = o.mode == null ? "replace" : o.mode.toLowerCase(Locale.ROOT);
+                if (!Set.of("replace", "add", "remove").contains(mode)) error(w + ": unknown mode '" + o.mode + "' (replace, add, remove)");
+                if (o.enemies == null || o.enemies.length == 0) { if (!mode.equals("remove")) warn(w + ": no enemies"); }
+                else for (String e : o.enemies)
+                    if (!enemyByName.containsKey(e)) error(w + ": unknown enemy '" + e + "'");
+            }
+        }
+        Set<String> poiNames = new HashSet<>();
+        if (pois != null) for (PointOfInterestData p : pois) {
+            poiNames.add(p.name);
+            if (p.questFlagsToDeactivate != null) for (DialogData.ActionData.QuestFlag f : p.questFlagsToDeactivate)
+                if (f == null || f.key == null || f.key.isEmpty()) error("POI " + p.name + ": questFlagsToDeactivate entry without key");
+            if (p.condition != null) { conds++; flagProblems("POI " + p.name + " condition", p.condition); }
+            if (!p.active) warn("POI " + p.name + ": active = false (never shown)");
+        }
+        Array<ShopData> shops = json.fromJson(Array.class, ShopData.class, Config.instance().getFile(Paths.SHOPS));
+        if (shops != null) for (ShopData sh : shops) if (sh.rewards != null) checkRewardConditions(sh.rewards.toArray(RewardData.class), "shop " + sh.name);
+        for (EnemyData e : enemyByName.values()) {
+            checkRewardConditions(e.rewards, "enemy " + e.getName());
+            if (e.onDefeat == null) continue; // Fork run 2: non-fatal loss
+            String w = "enemy " + e.getName() + " onDefeat";
+            boolean acts = e.onDefeat.action != null && e.onDefeat.action.length > 0;
+            if (!e.onDefeat.noPenalty && !acts && e.onDefeat.dialog == null) warn(w + ": does nothing");
+            if (acts) for (DialogData.ActionData a : e.onDefeat.action) if (a != null) checkDialogAction(a, w);
+            if (e.onDefeat.dialog != null) {
+                checkDialogConditions(e.onDefeat.dialog, w + ".dialog");
+                if (e.onDefeat.dialog.options == null || e.onDefeat.dialog.options.length == 0)
+                    warn(w + ".dialog: a dialog without options is not shown (only its actions run)");
+            }
+        }
+        Array<AdventureQuestData> quests = json.fromJson(Array.class, AdventureQuestData.class, Config.instance().getFile(Paths.QUESTS));
+        Set<String> questIds = new HashSet<>();
+        if (quests != null) for (AdventureQuestData q : quests) {
+            questIds.add(String.valueOf(q.getID()));
+            String w = "quest " + q.getID();
+            checkDialogConditions(q.offerDialog, w); checkDialogConditions(q.prologue, w); checkDialogConditions(q.epilogue, w);
+            checkDialogConditions(q.failureDialog, w); checkDialogConditions(q.declinedDialog, w);
+            if (q.condition != null) { // Fork run 2: side-quest pool condition
+                conds++;
+                flagProblems(w + " condition", q.condition);
+                if (q.storyQuest) warn(w + ": condition only filters the side-quest pool; story quests ignore it");
+            }
+            if (q.stages != null) for (AdventureQuestStage st : q.stages) {
+                checkDialogConditions(st.prologue, w); checkDialogConditions(st.epilogue, w); checkDialogConditions(st.failureDialog, w);
+                if (st.condition == null) continue;
+                conds++;
+                flagProblems(w + " stage " + st.id + " condition", st.condition);
+                String obj = String.valueOf(st.objective);
+                if (!Set.of("QuestFlag", "CharacterFlag", "MapFlag").contains(obj))
+                    warn(w + " stage " + st.id + ": condition is only used by QuestFlag/CharacterFlag/MapFlag stages, not " + obj);
+            }
+        }
+        if (cd.origins != null) {
+            com.badlogic.gdx.utils.JsonValue heroes = new com.badlogic.gdx.utils.JsonReader().parse(Config.instance().getFile(Paths.HEROES));
+            Set<String> races = new HashSet<>();
+            for (com.badlogic.gdx.utils.JsonValue h = heroes.get("heroes").child; h != null; h = h.next) races.add(h.getString("name", "?"));
+            Set<String> colorIds = cd.colorIds == null ? Set.of() : new HashSet<>(Arrays.asList(cd.colorIds));
+            Set<String> listed = new HashSet<>();
+            for (BiomeData b : biomes) if (b.pointsOfInterest != null) listed.addAll(Arrays.asList(b.pointsOfInterest));
+            Set<String> names = new HashSet<>();
+            boolean catchAll = false;
+            for (int i = 0; i < cd.origins.length; i++) {
+                OriginData o = cd.origins[i];
+                String w = "origin " + (o == null || o.name == null ? "#" + i : "'" + o.name + "'");
+                if (o == null) { error(w + ": empty"); continue; }
+                if (o.name == null || o.name.isEmpty()) error(w + ": no name");
+                else if (!names.add(o.name.toLowerCase(Locale.ROOT))) error(w + ": duplicate name");
+                if (o.races != null) for (String r : o.races) if (!races.contains(r)) error(w + ": unknown race '" + r + "' (heroes.json)");
+                if (o.colors != null) for (String c : o.colors) if (!colorIds.contains(c)) error(w + ": unknown colour id '" + c + "' (config colorIds)");
+                for (String poi : new String[]{o.startPOI, o.respawnPOI}) {
+                    if (poi == null || poi.isEmpty()) continue;
+                    if (!poiNames.contains(poi)) error(w + ": unknown POI '" + poi + "'");
+                    else if (!listed.contains(poi)) warn(w + ": POI '" + poi + "' is listed by no biome (not placed)");
+                }
+                if (o.startPosition != null && o.startPosition.length != 2) error(w + ": startPosition must be [x, y] (tiles)");
+                if (o.introQuest != null && !o.introQuest.isEmpty() && !questIds.contains(o.introQuest.trim()))
+                    error(w + ": unknown introQuest " + o.introQuest);
+                for (ObjectMap<String, Integer> m : Arrays.asList(o.characterFlags, o.questFlags))
+                    if (m != null) for (ObjectMap.Entry<String, Integer> e : m)
+                        if (e.value == null || e.value < Byte.MIN_VALUE || e.value > Byte.MAX_VALUE) error(w + ": flag " + e.key + " = " + e.value + " is outside -128..127");
+                if (!o.hidden && (o.races == null || o.races.length == 0) && (o.colors == null || o.colors.length == 0)) catchAll = true;
+            }
+            if (!catchAll) warn("origins: no visible origin without races/colors; unmatched characters get the upstream start (Spawn, quest 28)");
+            info(cd.origins.length + " origins");
+        }
+        // Fork run 2: locked items, item dialogs
+        Array<ItemData> items = json.fromJson(Array.class, ItemData.class, Config.instance().getFile(Paths.ITEMS));
+        if (items != null) for (ItemData it : items) {
+            String w = "item " + it.name;
+            checkDialogConditions(it.dialogOnUse, w + " dialogOnUse");
+            if (it.lockCondition != null) {
+                conds++;
+                flagProblems(w + " lockCondition", it.lockCondition);
+                if (!it.locked) warn(w + ": lockCondition without locked: true does nothing");
+            }
+            if (it.locked && (it.equipmentSlot == null || it.equipmentSlot.isEmpty()))
+                warn(w + ": locked but no equipmentSlot (only dropping is blocked)");
+        }
+        // Fork run 2: config.json statusFlags (HUD) and flagEffects (duel effects by flag)
+        if (cd.statusFlags != null) for (int i = 0; i < cd.statusFlags.length; i++) {
+            ConfigData.StatusFlag f = cd.statusFlags[i];
+            String w = "config statusFlags[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.flag == null || f.flag.isEmpty()) error(w + ": missing 'flag'");
+            if (FlagCondition.normalizeScope(f.scope) == null) error(w + ": unknown scope '" + f.scope + "' (quest, character, map)");
+            if (f.max < 0 || f.max > Byte.MAX_VALUE) warn(w + ": max " + f.max + " is outside 0..127 (flags are bytes)");
+            if (f.showWhen != null) { conds++; flagProblems(w + ".showWhen", f.showWhen); }
+            if (f.icon != null && !f.icon.isEmpty() && f.icon.contains("]")) error(w + ": icon must be a plain skin icon name");
+        }
+        if (cd.flagEffects != null) for (int i = 0; i < cd.flagEffects.length; i++) {
+            ConfigData.FlagEffect f = cd.flagEffects[i];
+            String w = "config flagEffects[" + i + "]";
+            if (f == null) { error(w + ": empty"); continue; }
+            if (f.effect == null) error(w + ": missing 'effect'");
+            else checkEffectCards(w, f.effect);
+            if (f.condition == null) warn(w + ": no condition (always applies)");
+            else { conds++; flagProblems(w + ".condition", f.condition); }
+        }
+        if (cd.statusFlags != null || cd.flagEffects != null)
+            info((cd.statusFlags == null ? 0 : cd.statusFlags.length) + " statusFlags, " + (cd.flagEffects == null ? 0 : cd.flagEffects.length) + " flagEffects");
+        info(conds + " flag conditions on biomes, POIs and quest stages checked");
+    }
+}

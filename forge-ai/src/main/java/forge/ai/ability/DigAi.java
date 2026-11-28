@@ -1,17 +1,8 @@
 package forge.ai.ability;
 
-import java.util.Map;
-
 import com.google.common.collect.Iterables;
-
-import forge.ai.AiAttackController;
-import forge.ai.ComputerUtil;
-import forge.ai.ComputerUtilAbility;
-import forge.ai.ComputerUtilCard;
-import forge.ai.ComputerUtilCombat;
-import forge.ai.ComputerUtilCost;
-import forge.ai.SpecialCardAi;
-import forge.ai.SpellAbilityAi;
+import forge.ai.*;
+import forge.ai.simulation.DeckPlan;
 import forge.game.Game;
 import forge.game.GameEntity;
 import forge.game.ability.AbilityUtils;
@@ -28,26 +19,23 @@ import forge.game.spellability.SpellAbility;
 import forge.game.zone.ZoneType;
 import forge.util.TextUtil;
 
+import java.util.Map;
 
 public class DigAi extends SpellAbilityAi {
     /* (non-Javadoc)
      * @see forge.card.abilityfactory.SpellAiLogic#canPlayAI(forge.game.player.Player, java.util.Map, forge.card.spellability.SpellAbility)
      */
     @Override
-    protected boolean canPlayAI(Player ai, SpellAbility sa) {
+    protected AiAbilityDecision checkApiLogic(Player ai, SpellAbility sa) {
         final Game game = ai.getGame();
         Player opp = AiAttackController.choosePreferredDefenderPlayer(ai);
         final Card host = sa.getHostCard();
         Player libraryOwner = ai;
 
-        if (!willPayCosts(ai, sa, sa.getPayCosts(), host)) {
-            return false;
-        }
-
         if (sa.usesTargeting()) {
             sa.resetTargets();
             if (!sa.canTarget(opp)) {
-                return false;
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
             sa.getTargets().add(opp);
             libraryOwner = opp;
@@ -55,79 +43,65 @@ public class DigAi extends SpellAbilityAi {
 
         // return false if nothing to dig into
         if (libraryOwner.getCardsIn(ZoneType.Library).isEmpty()) {
-            return false;
-        }
-
-        if ("Never".equals(sa.getParam("AILogic"))) {
-            return false;
-        } else if ("AtOppEOT".equals(sa.getParam("AILogic"))) {
-            if (!(game.getPhaseHandler().getNextTurn() == ai && game.getPhaseHandler().is(PhaseType.END_OF_TURN))) {
-                return false;
-            }
+            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 
         // don't deck yourself
         if (sa.hasParam("DestinationZone2") && !"Library".equals(sa.getParam("DestinationZone2"))) {
             int numToDig = AbilityUtils.calculateAmount(host, sa.getParam("DigNum"), sa);
             if (libraryOwner == ai && ai.getCardsIn(ZoneType.Library).size() <= numToDig + 2) {
-                return false;
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
         }
 
         // Don't use draw abilities before main 2 if possible
         if (game.getPhaseHandler().getPhase().isBefore(PhaseType.MAIN2) && !sa.hasParam("ActivationPhases")
                 && !sa.hasParam("DestinationZone") && !ComputerUtil.castSpellInMain1(ai, sa)) {
-            return false;
+            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 
         final String num = sa.getParam("DigNum");
         final boolean payXLogic = sa.hasParam("AILogic") && sa.getParam("AILogic").startsWith("PayX");
-        if (num != null && (num.equals("X") && sa.getSVar(num).equals("Count$xPaid")) || payXLogic) {
-            // By default, set PayX here to maximum value.
-            SpellAbility root = sa.getRootAbility();
-            if (root.getXManaCostPaid() == null) {
-                int manaToSave = 0;
+        if (("X".equals(num) && sa.getSVar(num).equals("Count$xPaid")) || payXLogic) {
+            int manaToSave = 0;
+            // Special logic that asks the AI to conserve a certain amount of mana when paying X
+            if (sa.hasParam("AILogic") && sa.getParam("AILogic").startsWith("PayXButSaveMana")) {
+                manaToSave = Integer.parseInt(TextUtil.split(sa.getParam("AILogic"), '.')[1]);
+            }
 
-                // Special logic that asks the AI to conserve a certain amount of mana when paying X
-                if (sa.hasParam("AILogic") && sa.getParam("AILogic").startsWith("PayXButSaveMana")) {
-                    manaToSave = Integer.parseInt(TextUtil.split(sa.getParam("AILogic"), '.')[1]);
-                }
-
-                int numCards = ComputerUtilCost.getMaxXValue(sa, ai, sa.isTrigger()) - manaToSave;
-                if (numCards <= 0) {
-                    return false;
-                }
-                root.setXManaCostPaid(numCards);
+            int numCards = ComputerUtilCost.setMaxXValue(sa, ai, sa.isTrigger()) - manaToSave;
+            if (numCards <= 0) {
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
         }
 
         if (playReusable(ai, sa)) {
-            return true;
+            return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
         }
 
-        if ((!game.getPhaseHandler().getNextTurn().equals(ai)
+        if ((!game.getPhaseHandler().isPlayerNextTurn(ai)
                 || game.getPhaseHandler().getPhase().isBefore(PhaseType.END_OF_TURN))
             && !sa.hasParam("PlayerTurn") && !isSorcerySpeed(sa, ai)
             && (ai.getCardsIn(ZoneType.Hand).size() > 1 || game.getPhaseHandler().getPhase().isBefore(PhaseType.DRAW))
             && !ComputerUtil.activateForCost(sa, ai)) {
-        	return false;
+        	return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 
         if ("MadSarkhanDigDmg".equals(sa.getParam("AILogic"))) {
             return SpecialCardAi.SarkhanTheMad.considerDig(ai, sa);
         }
-        
-        return !ComputerUtil.preventRunAwayActivations(sa);
+
+        return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
     }
 
     @Override
-    public boolean chkAIDrawback(SpellAbility sa, Player aiPlayer) {
+    public AiAbilityDecision chkDrawback(Player aiPlayer, SpellAbility sa) {
         // TODO: improve this check in ways that may be specific to a subability
-        return canPlayAI(aiPlayer, sa);
+        return canPlay(aiPlayer, sa);
     }
 
     @Override
-    protected boolean doTriggerAINoCost(Player ai, SpellAbility sa, boolean mandatory) {
+    protected AiAbilityDecision doTriggerNoCost(Player ai, SpellAbility sa, boolean mandatory) {
         final SpellAbility root = sa.getRootAbility();
         PlayerCollection targetableOpps = ai.getOpponents().filter(PlayerPredicates.isTargetableBy(sa));
         Player opp = targetableOpps.min(PlayerPredicates.compareByLife());
@@ -143,19 +117,24 @@ public class DigAi extends SpellAbilityAi {
         // Triggers that ask to pay {X} (e.g. Depala, Pilot Exemplar).
         if (sa.hasParam("AILogic") && sa.getParam("AILogic").startsWith("PayXButSaveMana")) {
             int manaToSave = Integer.parseInt(TextUtil.split(sa.getParam("AILogic"), '.')[1]);
-            int numCards = ComputerUtilCost.getMaxXValue(sa, ai, true) - manaToSave;
+            int numCards = ComputerUtilCost.setMaxXValue(sa, ai, true) - manaToSave;
             if (numCards <= 0) {
-                return mandatory;
+                if (mandatory) {
+                    return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
+                }
+                return new AiAbilityDecision(100, AiPlayDecision.CantPlayAi);
             }
             root.setXManaCostPaid(numCards);
         }
 
-        return true;
+        return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
     }
     
     @Override
     public Card chooseSingleCard(Player ai, SpellAbility sa, Iterable<Card> valid, boolean isOptional, Player relatedPlayer, Map<String, Object> params) {
-        if ("DigForCreature".equals(sa.getParam("AILogic"))) {
+        String logic = sa.getParamOrDefault("AILogic", "");
+
+        if ("DigForCreature".equals(logic)) {
             Card bestChoice = ComputerUtilCard.getBestCreatureAI(valid);
             if (bestChoice == null) {
                 // no creatures, but maybe there's a morphable card that can be played as a creature?
@@ -167,7 +146,7 @@ public class DigAi extends SpellAbilityAi {
 
             // still nothing, so return the worst card since it'll be unplayable from exile (e.g. Vivien, Champion of the Wilds)
             return bestChoice != null ? bestChoice : ComputerUtilCard.getWorstAI(valid);
-        } else if ("EmulateScry".equals(sa.getParam("AILogic"))) {
+        } else if ("EmulateScry".equals(logic)) {
             for (Card choice : valid) {
                 if (ComputerUtil.scryWillMoveCardToBottomOfLibrary(ai, choice)) {
                     return choice;
@@ -176,11 +155,26 @@ public class DigAi extends SpellAbilityAi {
             return null;
         }
 
-        if (sa.getActivatingPlayer().isOpponentOf(ai) && relatedPlayer.isOpponentOf(ai)) {
-            return ComputerUtilCard.getWorstPermanentAI(valid, false, true, false, false);
-        } else {
-            return ComputerUtilCard.getBestAI(valid);
+        // For an ordinary self-dig that puts a card from the AI's library into its hand, prefer a missing
+        // combo/commander/ramp piece when the deck plan has a concrete opinion. Keep special AILogic paths
+        // (e.g. DigForCreature and EmulateScry) and other zones/players on their existing choices.
+        if (logic.isEmpty()
+                && sa.getActivatingPlayer() == ai
+                && relatedPlayer == ai
+                && "Library".equalsIgnoreCase(sa.getParamOrDefault("SourceZone", "Library"))
+                && "Hand".equalsIgnoreCase(sa.getParamOrDefault("DestinationZone", "Hand"))
+                && ai.getController() instanceof PlayerControllerAi) {
+            final DeckPlan plan = ((PlayerControllerAi) ai.getController()).getAi().deckPlan(ai);
+            final Card planned = plan.tutorPick(ai, valid);
+            if (planned != null) {
+                return planned;
+            }
         }
+
+        if (sa.getActivatingPlayer().isOpponentOf(ai) && relatedPlayer.isOpponentOf(ai) && !"ChooseBestForOpponent".equals(logic)) {
+            return ComputerUtilCard.getWorstPermanentAI(valid, false, true, false, false);
+        }
+        return ComputerUtilCard.getBestAI(valid);
     }
 
     /* (non-Javadoc)
@@ -211,15 +205,12 @@ public class DigAi extends SpellAbilityAi {
     public boolean confirmAction(Player player, SpellAbility sa, PlayerActionConfirmMode mode, String message, Map<String, Object> params) {
         Card topc = player.getZone(ZoneType.Library).get(0);
 
-        // AI actions for individual cards (until this AI can be generalized)
-        if (sa.getHostCard() != null) {
-            if (ComputerUtilAbility.getAbilitySourceName(sa).equals("Explorer's Scope")) {
-                // for Explorer's Scope, always put a land on the battlefield tapped
-                // (TODO: might not always be a good idea, e.g. when a land ETBing can have detrimental effects)
-                return true;
-            } else if ("AlwaysConfirm".equals(sa.getParam("AILogic"))) {
-                return true;
-            }
+        if (ComputerUtilAbility.getAbilitySourceName(sa).equals("Explorer's Scope")) {
+            // for Explorer's Scope, always put a land on the battlefield tapped
+            // (TODO: might not always be a good idea, e.g. when a land ETBing can have detrimental effects)
+            return true;
+        } else if ("AlwaysConfirm".equals(sa.getParam("AILogic"))) {
+            return true;
         }
 
         // looks like perfect code for Delver of Secrets, but what about other cards? 

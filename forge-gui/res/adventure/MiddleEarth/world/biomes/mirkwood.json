@@ -1,90 +1,62 @@
 {
-"startPointX": 0.61,
-"startPointY": 0.315,
-	"noiseWeight": 0.5,
-	"distWeight": 1,
+"startPointX": 0.554167,
+"startPointY": 0.345000,
+"noiseWeight": 0.5,
+"distWeight": 1.0,
 "name": "mirkwood",
 "tilesetAtlas": "world/tilesets/terrain.atlas",
-"tilesetName": "Green",
+"tilesetName": "Black",
 "terrain": [
 	{
-		"spriteName": "Green_1",
-		"max": 0.2,
-		"resolution": 224
+		"spriteName": "Black_1",
+		"max": 0.25,
+		"resolution": 10
 	},
 	{
-		"spriteName": "Green_2",
-		"min": 0.8,
+		"spriteName": "Black_2",
+		"min": 0.5,
 		"max": 1,
-		"resolution": 10
+		"resolution": 8
 	}
 ],
-"width": 0.143,
-"height": 0.23,
-"color": "59a650",
+"width": 0.141667,
+"height": 0.149167,
+"color": "1f2a14",
 "spriteNames": [
-	"Stump",
+	"WoodTree",
+	"SwampTree2",
+	"DarkWood",
+	"Shroom",
+	"Shroom2",
 	"Moss",
-	"Stone",
-	"Flower",
-	"Wood"
+	"Skull"
 ],
-"enemies": [
-	"Adept Green Wizard",
-	"Ape",
-	"Apprentice Green Wizard",
-	"Badger",
-	"Bear",
-	"Beastmaster",
-	"Centaur",
-	"Centaur Warrior",
-	"Challenger 20",
-	"Challenger 21",
-	"Challenger 22",
-	"Copper Host Infector",
-	"Eldraine Faerie",
-	"Elephant",
-	"Elf",
-	"Elf warrior",
-	"Elk",
-	"Faerie",
-	"Falcon",
-	"Fox",
-	"Frog",
-	"Giant Panda",
-	"Giant Spider",
-	"Goblin Fanatic",
-	"Gorgon",
-	"Gorgon 2",
-	"Green Beast",
-	"Green Sliver",
-	"High Elf",
-	"Hydra",
-	"Ibis",
-	"Kavu",
-	"Ladybug",
-	"Master Green Wizard",
-	"Owl",
-	"Plant",
-	"Porcupine",
-	"Raccoon",
-	"Rhino",
-	"Satyr",
-	"Snake",
-	"Spider",
-	"Squirrel",
-	"Tiger",
-	"Triceratops",
-	"Treefolk",
-	"Treefolk Guardian",
-	"Viper",
-	"Werewolf",
-	"Wild-Magic Sorcerer",
-	"Wurm"
-],
-"pointsOfInterest": [
-	"Forest Town Generic"
-],
+"enemies": ["Mirkwood Spiders", "Great Spider of Mirkwood", "Woodland Realm Guard", "Wild Wolves", "Warg Pack", "Brood of Shelob"],
+"pointsOfInterest": ["ME Spider Nest", "ME Spider Cave", "ME Thranduils Halls"],
 "structures": [
+	{
+		"N": 2,
+		"x": 0.5,
+		"y": 0.5,
+		"structureAtlasPath": "world/structures/structures.atlas",
+		"sourcePath": "world/structures/models/swamp_forest.png",
+		"maskPath": "world/structures/masks/circle.png",
+		"height": 0.75,
+		"width": 0.75,
+		"symmetry": 8,
+		"periodicOutput": false,
+		"mappingInfo": [
+			{
+				"name": "swamp_forest",
+				"color": "007000",
+				"collision": true
+			},
+			{
+				"name": "swamp_water",
+				"color": "005050",
+				"collision": true
+			}
+		]
+	}
 ]
 }

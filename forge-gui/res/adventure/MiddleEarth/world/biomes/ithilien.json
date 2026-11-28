@@ -1,0 +1,41 @@
+{
+	"startPointX": 0.6,
+	"startPointY": 0.64,
+	"noiseWeight": 0.5,
+	"distWeight": 1.0,
+	"name": "ithilien",
+	"tilesetAtlas": "world/tilesets/terrain.atlas",
+	"tilesetName": "Green",
+	"terrain": [
+		{
+			"spriteName": "Green_1",
+			"max": 0.3,
+			"resolution": 10
+		},
+		{
+			"spriteName": "Green_2",
+			"min": 0.7,
+			"max": 1,
+			"resolution": 10
+		}
+	],
+	"width": 0.05,
+	"height": 0.08,
+	"color": "3aa070",
+	"spriteNames": [
+		"Flower",
+		"PlainsTree",
+		"Bush",
+		"DarkGras",
+		"Stone"
+	],
+	"enemies": [
+		"Ranger of Ithilien",
+		"Haradrim Warrior",
+		"Mordor Orc",
+		"Wild Wolves",
+		"Haradrim Assassin",
+		"Mûmak of Harad"
+	],
+	"pointsOfInterest": ["ME Henneth Annun", "ME Ithilien Haradrim"]
+}

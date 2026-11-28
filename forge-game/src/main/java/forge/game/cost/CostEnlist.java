@@ -17,8 +17,6 @@
  */
 package forge.game.cost;
 
-import java.util.Map;
-
 import forge.game.ability.AbilityKey;
 import forge.game.card.Card;
 import forge.game.card.CardCollection;
@@ -26,6 +24,8 @@ import forge.game.card.CardLists;
 import forge.game.player.Player;
 import forge.game.spellability.SpellAbility;
 import forge.game.trigger.TriggerType;
+
+import java.util.Map;
 
 /**
  * The Class CostExert.
@@ -74,7 +74,7 @@ public class CostEnlist extends CostPartWithTrigger {
 
     @Override
     protected Card doPayment(Player payer, SpellAbility ability, Card targetCard, final boolean effect) {
-        if (targetCard.tap(true, ability, payer)) {
+        if (targetCard.tap(ability, payer)) {
             ability.getHostCard().setEnlistedThisCombat(true);
             final Map<AbilityKey, Object> runParams = AbilityKey.newMap();
             runParams.put(AbilityKey.Cards, new CardCollection(targetCard));
