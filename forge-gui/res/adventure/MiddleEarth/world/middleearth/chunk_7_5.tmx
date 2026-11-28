@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="150" height="150" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
  <tileset firstgid="1" source="biomes.tsx"/>
- <tileset firstgid="43" source="roads.tsx"/>
- <tileset firstgid="44" source="clutter.tsx"/>
+ <tileset firstgid="57" source="roads.tsx"/>
+ <tileset firstgid="58" source="clutter.tsx"/>
  <layer id="1" name="Biomes" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eNrt3DGOwlAQREFnSJP5GL7/BYlILIEAu+HPdwUvXqmngF1k7bosy/plN+lJK1fiSlyJK67ElbgSV1yJK3ElrrgSV+JKXHElrsSVuOJKXIkrccWVuBJX4oopcSWuxBVX4kpciSvbyfdX4kqXd8WWUq7YUsoVX0q6YkspV3wp6YotrrhSJ1dsccWVOrliiyu2xJW4YosrrsSVuLI3V1yJK/meQVxxJa7ElbhiSlzJ81fiiit5vl1ciSumxJW4EldMyf/9EFfiiiclXdlRZ7qyn850ZTdxpQ6ubCau5HNQ/h60m7gSV+JK8nu7RnVlL3GlUV1tu+ylI662F9lM77R9me2UcMWWUq4e1S67KuGKM6VN8cXVUTd86Z+u+Lquq/pxbjG/qxogt5nLVQ2WG3m/YkudXPHV21U1yd16uKpmudv4VdPcjiu2uGJLXLHFFVtcsSWu2OKKLa64Eld8ccUXV2yJK764YosrtsTV/3x98nNmfj2UDt/M+y1XZ93LZzlXXgtcaQ5bbsIWV+piyy344kpdfNmeLa7UxZe92eJKXXzZmC+u1MWWXVVciStd2JY9lbBlSyVs2VEJWzbULM/8iyupuBJXmtiWvZTwZSclbNlICWN2UcKXPcSVuNKVbdlCXKmLLTuIK0mSzu0OIKj8Gg==
+   eJzt2DGOGlEQRVEyS85mGZa8//U5mgTZeAb68bqqT3BC0K9fV42aj9vt9vGkH6z2+wXPNqWra9AVZ2pLVyTa0hWJxnSFrjgDXXHfwTua0tV+X2ng6KZ0tdd3399e/byu9nq1hSPpap7750y7IV2dX7sHXe3TbkFXO7Vb0NVO7RZ0tVO7BV3t1WzhyLPq6pz+t/Nn2ji6q0ffqavrOaqpR9+pKxJ0RYKmSNAVCboiQVck6IoEXZGgKxL8f0WCrkh4pStt8S+vdqUt/uaIrvTFvSO70hafju5KXyS70ta16YppXWnrunTFxK60dU3v6Epb16MrJnelrWvRFbpiCl2hK6bQFZO7as+JrphPV+iKKTSFrphCU+iKKTSFrphCU+iKKXTFlK7aM9GnKRJ0RYKeSNAUCXoiQU8k6IoETZGgKxL8DpLgXZAEXZGgKxJ0RYKmSNATCboi4VFHv+60z8ocX+lJW3zXo4b0xbOe7UpbPPJKV59+3mnPRF+iK52Rbkpf13RkN/qi2ZW+9mv0pLH9ztCUzvY5Y1P6mu+szyttzTahK33NM6Enfc0zqSddzdFuRFs7tfvQ1k7tNrS1U7sLbe3UbkJbO7V70NZO7Ra0tVO7A23t1G5AVzu1G9DXTu3d62un9s61tVN73/raqb1nbe3U3rG2dmrvt+1d93nU3bd70dX7djbprLo6977a5zx7W+27YWdf7TthZ1vt+2BnW+27YGdb7XtgZ1/t+dnZV3tudrbVnpmdfbVnZWdb7TnZ2Vd7Pnb21Z6LPl2RoisSdEWKrkjRFSm6IkVXJOmKBF2RpCsSdEWKrkjSFSm6Ik1XJOmKBF2RoCtSdEWCrkjRFQm6AuDq/gACrkp/
   </data>
  </layer>
  <layer id="3" name="Roads" width="150" height="150">
   <data encoding="base64" compression="zlib">
-   eNrtwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
+   eJztwQENAAAAwqD3T20PBxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCnAV+fAAE=
   </data>
  </layer>
- <objectgroup id="4" name="Clutter">
- </objectgroup>
+ <objectgroup id="4" name="Clutter"/>
  <imagelayer id="5" name="Reference" opacity="0.5">
   <image source="../../../../../../docs/MiddleEarth/reference/chunks/chunk_7_5.png" width="2400" height="2400"/>
  </imagelayer>
- <objectgroup id="2" name="POI">
- </objectgroup>
+ <objectgroup id="2" name="POI"/>
 </map>
